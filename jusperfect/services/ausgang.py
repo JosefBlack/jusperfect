@@ -25,11 +25,14 @@ nicht erst beim Anbieter, und nicht als unbemerkt mitgesendete Struktur.
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import Iterator
 from dataclasses import dataclass
 
 from jusperfect.config import Einstellungen
-from jusperfect.domain.models import Kosten
+from jusperfect.domain.models import (
+    AUSGANG_ABGEBROCHEN, AUSGANG_FEHLGESCHLAGEN, Kosten,
+)
 from jusperfect.providers.base import LLMProvider, ProviderAntwort, ProviderFehler
 from jusperfect.security.identitaet import Identitaet
 from jusperfect.security.protokoll import ereignis, kurzkennung, protokoll
@@ -71,9 +74,14 @@ class Ausgang:
         self._pruefen(system, material, aufgabe)
         self._kosten.pruefen()
         modell = modell_id or self._e.modell_fuer(kontext.funktion)
-        antwort = self._provider.fragen(system, material, aufgabe,
-                                        max_tokens=self._e.max_ausgabe_tokens, modell_id=modell)
-        return self._abschluss(kontext, material, aufgabe, antwort)
+        versuch = self._versuch_anlegen(kontext, material, aufgabe, modell)
+        try:
+            antwort = self._provider.fragen(system, material, aufgabe,
+                                            max_tokens=self._e.max_ausgabe_tokens, modell_id=modell)
+        except BaseException:
+            self._ausgang_vermerken(kontext, versuch, modell, AUSGANG_FEHLGESCHLAGEN)
+            raise
+        return self._abschluss(kontext, material, aufgabe, antwort, versuch)
 
     def fragen_stream(self, kontext: Ausgangskontext, system: str, material: str, aufgabe: str,
                       *, modell_id: str | None = None) -> Iterator[str | Durchgang]:
@@ -86,16 +94,27 @@ class Ausgang:
         self._pruefen(system, material, aufgabe)
         self._kosten.pruefen()
         modell = modell_id or self._e.modell_fuer(kontext.funktion)
+        versuch = self._versuch_anlegen(kontext, material, aufgabe, modell)
         antwort: ProviderAntwort | None = None
-        for stueck in self._provider.fragen_stream(system, material, aufgabe,
-                                                   max_tokens=self._e.max_ausgabe_tokens, modell_id=modell):
-            if isinstance(stueck, str):
-                yield stueck
-            else:
-                antwort = stueck
+        try:
+            for stueck in self._provider.fragen_stream(system, material, aufgabe,
+                                                       max_tokens=self._e.max_ausgabe_tokens, modell_id=modell):
+                if isinstance(stueck, str):
+                    yield stueck
+                else:
+                    antwort = stueck
+        except GeneratorExit:
+            # Der Aufrufer hat den Strom geschlossen - das Fenster ist zu, die
+            # Leitung abgerissen. Das Material war trotzdem draussen.
+            self._ausgang_vermerken(kontext, versuch, modell, AUSGANG_ABGEBROCHEN)
+            raise
+        except BaseException:
+            self._ausgang_vermerken(kontext, versuch, modell, AUSGANG_FEHLGESCHLAGEN)
+            raise
         if antwort is None:
+            self._ausgang_vermerken(kontext, versuch, modell, AUSGANG_ABGEBROCHEN)
             raise ProviderFehler("Der Anbieter lieferte keine Antwort.")
-        yield self._abschluss(kontext, material, aufgabe, antwort)
+        yield self._abschluss(kontext, material, aufgabe, antwort, versuch)
 
     @staticmethod
     def _pruefen(system: str, material: str, aufgabe: str) -> None:
@@ -104,13 +123,51 @@ class Ausgang:
             if not isinstance(wert, str):
                 raise TypeError(f"{name} muss Text sein, nicht {type(wert).__name__}.")
 
+    def _versuch_anlegen(self, kontext: Ausgangskontext, material: str, aufgabe: str,
+                         modell: str) -> str:
+        """Die Zeile, die entsteht, **bevor** das Material hinausgeht.
+
+        Befund F10 der Zweitprüfung vom 05.10.2026: Der Nachweis entstand erst
+        nach einer erfolgreichen Antwort. Wirft der Anbieter, nachdem er das
+        Material längst empfangen hat, blieb das Nachweisfenster leer – und
+        „keine Zeile" liest sich wie „nichts hinausgegangen".
+
+        Scheitert das Schreiben des Nachweises selbst, geht der Aufruf trotzdem
+        hinaus: Ein Aktenvorgang soll nicht an der Buchführung scheitern. Das
+        ist eine bewusste Abwägung und keine Nachlässigkeit – deshalb steht sie
+        hier und wird im Protokoll vermerkt.
+        """
+        versuch = uuid.uuid4().hex
+        try:
+            self._kosten.versuch_vermerken(
+                kontext.identitaet, kontext.akte_id, kontext.funktion, modell,
+                versuch_id=versuch, sitzung_id=kontext.sitzung_id,
+                material_kennung=kurzkennung(material), aufgabe_kennung=kurzkennung(aufgabe),
+                passagen=kontext.passagen)
+        except Exception:
+            ereignis(_log, "nachweis_nicht_angelegt", sitzung=kontext.sitzung_id,
+                     funktion=kontext.funktion, versuch=versuch)
+        return versuch
+
+    def _ausgang_vermerken(self, kontext: Ausgangskontext, versuch: str, modell: str,
+                           ausgang: str) -> None:
+        try:
+            self._kosten.ausgang_vermerken(
+                kontext.identitaet, kontext.akte_id, kontext.funktion, modell,
+                versuch_id=versuch, ausgang=ausgang, sitzung_id=kontext.sitzung_id)
+        except Exception:
+            # Der Versuchseintrag steht bereits; ohne diese Zeile liest er sich
+            # als "unbekannt", und das ist die richtige Auskunft.
+            ereignis(_log, "nachweis_ausgang_nicht_vermerkt", sitzung=kontext.sitzung_id,
+                     funktion=kontext.funktion, versuch=versuch, ausgang=ausgang)
+
     def _abschluss(self, kontext: Ausgangskontext, material: str, aufgabe: str,
-                   antwort: ProviderAntwort) -> Durchgang:
+                   antwort: ProviderAntwort, versuch: str = "") -> Durchgang:
         kosten = self._kosten.verbuchen(
             kontext.identitaet, kontext.akte_id, kontext.funktion, antwort,
             sitzung_id=kontext.sitzung_id, material_kennung=kurzkennung(material),
             aufgabe_kennung=kurzkennung(aufgabe), passagen=kontext.passagen,
-            antwort_zeichen=len(antwort.text),
+            antwort_zeichen=len(antwort.text), versuch_id=versuch,
         )
         ereignis(_log, "ki_aufruf", sitzung=kontext.sitzung_id, funktion=kontext.funktion,
                  detail=kontext.detail or None, modell=antwort.modell, material=kurzkennung(material),

@@ -205,6 +205,42 @@ def akte_aus_json(d: Mapping[str, Any]) -> Akte:
     )
 
 
+def _identitaet_pruefen(angefragt: str, daten: Mapping[str, Any]) -> None:
+    """Die zurückgegebene Akte muss die angefragte sein.
+
+    Befund F08 der Zweitprüfung vom 05.10.2026. Der Client fragte
+    ``EIGENE-AKTE`` ab; die Antwort trug ausdrücklich ``identifier:
+    FREMDE-AKTE`` samt deren ``fileFolderId``. Geprüft wurde nichts: Die
+    Ordnerdatei wurde geladen, und ``dokument_aus_json`` trug dabei die
+    **angefragte** eigene Akte ein. Fremder Inhalt stand damit unter der
+    richtigen Aktennummer, und jede spätere Prüfung sah eine in sich
+    stimmige Liste.
+
+    Das ist nicht derselbe Fall wie der Korrespondenzordner vom 02.10.2026 –
+    dort lag unser eigener Fehler, weil zwei Nummernkreise verwechselt
+    wurden. Hier geht es um die Antwort selbst.
+
+    **Was diese Prüfung nicht kann:** Ein Server, der eine falsche
+    Zugehörigkeit durchweg stimmig ausgibt, lässt sich damit nicht entlarven.
+    Sie fängt die Antwort, die sich selbst widerspricht – und das ist der Fall,
+    der sich am Client überhaupt erkennen lässt.
+
+    Fehlt die Kennung ganz, bricht sie ebenfalls ab. Eine Aktenantwort ohne
+    Kennung ist nach der Beschreibung des Herstellers (API 1.0.2) keine; ihr
+    stillschweigend zu glauben hieße, die Prüfung auf Zuruf abzuschalten.
+    """
+    zurueck = str(_erstes(daten, "identifier", "id", "aktenId", "akte_id", standard="")).strip()
+    if zurueck and zurueck.casefold() == str(angefragt).strip().casefold():
+        return
+    # Die fremde Kennung geht NICHT in die Meldung: Sie gehoert zu einer
+    # anderen Akte, und eine fremde Aktenkennung ist Mandantengeheimnis.
+    raise JurNodesFehler(
+        "jur|nodes hat auf die Anfrage nach dieser Akte eine andere Akte "
+        "geantwortet" + ("" if zurueck else " – die Antwort trug überhaupt keine "
+                         "Aktenkennung") + ". Der Vorgang wurde abgebrochen; es "
+        "wurde nichts geladen. Bitte die Kanzleiverwaltung verständigen.")
+
+
 def dokument_aus_json(akte_id: str, d: Mapping[str, Any]) -> Dokument:
     """Ein Dokument aus einem ``file``-Eintrag von ``/file-system/folder/content``.
 
@@ -547,6 +583,7 @@ class HttpJurNodesAdapter:
                           **{self._endpunkte.kennungparameter: akte_id}).json()
         if not isinstance(daten, Mapping):
             raise JurNodesFehler("Unerwartetes Antwortformat von jur|nodes.")
+        _identitaet_pruefen(akte_id, daten)
         self._kurz_merken(("akte", akte_id), daten)
         return daten
 
@@ -567,6 +604,30 @@ class HttpJurNodesAdapter:
             **{self._endpunkte.ordnerparameter: ordner_id})
         self._kurz_merken(("ordner", str(ordner_id)), eintraege)
         return eintraege
+
+    def _fremde_dateien_aussondern(self, ordner_id: Any,
+                                   eintraege: list[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
+        """Eine Datei muss in dem Ordner liegen, dessen Inhalt gefragt war.
+
+        Die zweite Hälfte von Befund F08. Die Akte selbst wird jetzt gegen die
+        angefragte Kennung geprüft; für die einzelne Datei gibt es kein Feld,
+        das die Akte nennt – der Hersteller führt an ``File`` nur
+        ``folderId`` (API 1.0.2). Genau das lässt sich aber prüfen: Wer den
+        Inhalt von Ordner 42 abfragt, bekommt Dateien aus Ordner 42.
+
+        Mehr ist am Client nicht zu holen, und das steht hier, damit niemand
+        die Prüfung für mehr hält, als sie ist.
+        """
+        behalten: list[Mapping[str, Any]] = []
+        for eintrag in eintraege:
+            datei = eintrag.get("file") if isinstance(eintrag, Mapping) else None
+            fremd = (isinstance(datei, Mapping) and datei.get("folderId") is not None
+                     and str(datei.get("folderId")) != str(ordner_id))
+            if fremd:
+                self.letzte_dateien_aussortiert += 1
+                continue
+            behalten.append(eintrag)
+        return behalten
 
     def _kurz_holen(self, schluessel: tuple[str, str]) -> Any:
         """Was noch frisch genug ist - sonst None."""
@@ -606,6 +667,9 @@ class HttpJurNodesAdapter:
     #: Wie viele Unterordner beim letzten Lesen uebersprungen werden mussten
     #: - weil der Schluessel sie nicht lesen darf oder es sie nicht gibt.
     letzte_ordner_uebersprungen: int = 0
+    #: Dateien, die der Server in einem anderen Ordner verortet, als
+    #: abgefragt wurde. Siehe _fremde_dateien_aussondern (Befund F08).
+    letzte_dateien_aussortiert: int = 0
 
     def _ordner_durchgehen(self, wurzel: Any) -> list[Mapping[str, Any]]:
         """Alle Eintraege einer Akte - auch die in Unterordnern.
@@ -620,6 +684,7 @@ class HttpJurNodesAdapter:
         """
         gesehen: set[str] = set()
         self.letzte_ordner_uebersprungen = 0
+        self.letzte_dateien_aussortiert = 0
         alle: list[Mapping[str, Any]] = []
         offen: list[tuple[Any, int]] = [(wurzel, 0)]
         while offen and len(gesehen) < self.ORDNER_HOECHSTZAHL:
@@ -638,7 +703,7 @@ class HttpJurNodesAdapter:
                     raise
                 self.letzte_ordner_uebersprungen += 1
                 continue
-            alle.extend(eintraege)
+            alle.extend(self._fremde_dateien_aussondern(ordner_id, eintraege))
             if tiefe >= self.ORDNER_TIEFE:
                 continue
             for eintrag in eintraege:

@@ -9,13 +9,20 @@ Die Kanzlei hat das Projekt von einer zweiten KI prüfen lassen. Grundlage war
 bestanden alle — und haben die Lücken trotzdem nicht gezeigt. Das ist der
 eigentliche Befund.
 
-**Stand 05.10.2026: zehn Befunde behoben** (F01, F02 vollständig, F03, F04, F05,
-F06, F07, F09), zwei in den Unterlagen berichtigt (F11, F12). Dreizehn der
-siebzehn Gegenproben sind damit rot — bei ihnen heißt das: geschlossen.
+**Stand 05.10.2026: alle dreizehn Befunde abgearbeitet.** Elf sind in der Technik
+behoben (F01 bis F10, dabei F02 vollständig, sowie F13), zwei in den Unterlagen
+berichtigt (F11, F12). **Sechzehn der siebzehn Gegenproben sind rot** — bei ihnen
+heißt das: geschlossen.
 
-**Offen bleiben drei:** F08 (fremde `/record`-Antwort), F10 (Nachweis vor der
-Übermittlung), F13 (Profilkennungen in der Anwendung) — dazu F11 und F12, deren
-Technik bzw. Nachweis noch aussteht.
+**Was bleibt, liegt nicht mehr an der Technik:**
+
+* **F11** — Dateinamen und Aktenzeichen gehen über das Material zum Modell. Die
+  Unterlagen sagen es jetzt richtig; ob dieser Umfang gewollt ist, entscheidet
+  die Kanzlei (`[KANZLEI 18]`). Gegenprobe 9 bleibt deshalb grün.
+* **F12** — der Nachweis der AI-services-Opt-out-Richtlinie für dieses Konto
+  (`[KANZLEI 19]`).
+* **F13** — die Anwendung weist ein globales Profil jetzt ab. Dass die
+  Zugriffsrichtlinie am Programmbenutzer hängt, bleibt am Konto nachzuweisen.
 
 | Datei | Was darin steht |
 |---|---|
@@ -60,12 +67,12 @@ Fassung hier bleibt unverändert als Beleg stehen.
 | **F05** | der Stream zeigt Rohtext vor der Belegprüfung | ~~offen~~ **behoben 05.10.2026** |
 | **F06** | der bestätigte Prüfsummenstand umfasst den Betreff nicht | ~~offen~~ **behoben 05.10.2026** |
 | **F07** | Entwürfe bleiben nach Aktenrechteentzug lesbar und freigebbar | ~~offen~~ **behoben 05.10.2026** |
-| **F08** | eine fremde `/record`-Antwort wird nicht gegen die angefragte Akte geprüft | offen |
+| **F08** | eine fremde `/record`-Antwort wird nicht gegen die angefragte Akte geprüft | ~~offen~~ **behoben 05.10.2026** |
 | **F09** | Datums- und Sprachvarianten umgehen die Fristensperre | ~~offen~~ **behoben 05.10.2026** |
-| **F10** | ein fehlgeschlagener Modellaufruf hinterlässt keinen Nachweis | offen |
+| **F10** | ein fehlgeschlagener Modellaufruf hinterlässt keinen Nachweis | ~~offen~~ **behoben 05.10.2026** |
 | **F11** | Dateinamen und Aktenzeichen gehen über das Material doch zum Modell | **Unterlagen berichtigt**, Technik offen |
 | **F12** | die Nicht-Speicherung bei Textract ist nicht nachgewiesen | **Unterlagen berichtigt**, Nachweis offen |
-| **F13** | eine EU-Aufrufregion verhindert kein global konfiguriertes Profil | offen |
+| **F13** | eine EU-Aufrufregion verhindert kein global konfiguriertes Profil | ~~offen~~ **behoben 05.10.2026** |
 
 Die laufende Arbeitsliste steht in `MORGEN.md`.
 

@@ -373,6 +373,48 @@ Sitzung jetzt mit nach; nachgesehen und bestätigt.
 `tests/test_vergessen_vollstaendig.py`, Gegenproben 4, 5, 6 und 15 rot.
 **1736 Prüfungen grün.**
 
+**F08, F10 und F13 — behoben am 05.10.2026. Damit sind alle dreizehn Befunde
+abgearbeitet.** Ein gemeinsamer Satz verbindet auch diese drei: *Eine Zusage,
+die nur von der Gegenstelle getragen wird, hält das Programm nicht selbst.*
+
+| Befund | Was durchkam | Was jetzt gilt |
+|---|---|---|
+| **F08** | die Antwort auf `EIGENE-AKTE` trug ausdrücklich eine fremde Kennung samt deren Ordner; geprüft wurde nichts | die zurückgegebene Kennung muss die angefragte sein, sonst bricht der Vorgang ab — und eine Datei muss in dem Ordner liegen, dessen Inhalt gefragt war |
+| **F10** | der Nachweis entstand erst **nach** einer erfolgreichen Antwort; schlug der Aufruf fehl, blieb das Fenster leer | die Zeile entsteht, **bevor** das Material hinausgeht; der Ausgang wird danach angehängt |
+| **F13** | Frankfurt plus `global.anthropic.…` kam durch die Einstellungsprüfung | jede Modellkennung wird geprüft: ein Profil, das außerhalb der EU verteilt, wird abgewiesen |
+
+**Zu F08, und das gehört gesagt:** Ein Server, der eine falsche Zugehörigkeit
+durchweg stimmig ausgibt, lässt sich damit nicht entlarven. Gefangen wird die
+Antwort, die sich **selbst widerspricht** — und das ist der Fall, der sich am
+Client überhaupt erkennen lässt. Die fremde Aktenkennung geht dabei nicht in
+die Fehlermeldung: Sie gehört zu einer anderen Akte.
+
+**Zu F10, zwei Entscheidungen:**
+
+* **Zwei Zeilen in der Ablage, eine beim Lesen.** Angehängt, nicht
+  überschrieben — ein Nachweis, den man ändern kann, ist ein schwächerer
+  Nachweis. Steht nur die Versuchszeile da, heißt das `unbekannt` und nicht
+  `nichts`.
+* **Scheitert das Schreiben des Nachweises selbst, geht der Aufruf trotzdem
+  hinaus.** Ein Aktenvorgang soll nicht an der Buchführung scheitern. Das ist
+  eine Abwägung und keine Nachlässigkeit; sie steht im Code und wird
+  protokolliert.
+* **Die Wortwahl in der Oberfläche ist zurückhaltend:** „ohne Antwort", nicht
+  „übertragen, abgelehnt". Die Zeile entsteht vor der Übergabe; scheitert der
+  Aufruf, lässt sich nicht mehr sagen, ob er die Leitung noch erreicht hat.
+  „Übertragen" wäre zu viel behauptet, „nichts passiert" zu wenig. Was der
+  Eintrag bedeutet, steht jetzt im Kopf des Fensters.
+
+**Zu F13:** Ein Inferenzprofil ist kein Modellname, sondern eine Verteilregel.
+Die Aufrufregion ist der Ort, an dem die Anfrage **ankommt**, nicht der, an dem
+gerechnet wird. Geprüft wird jede der sieben Modelleinstellungen, nicht nur die
+eine — wer ein eigenes Modell je Aufgabe einträgt, kam sonst daran vorbei.
+
+22 neue Prüfungen in `tests/test_herkunft_und_nachweis.py`, Gegenproben 7, 8
+und 11 rot. **1758 Prüfungen grün.** Im Browser nachgesehen: Der
+Verarbeitungsnachweis zeigt den Regelfall wie bisher und den Fehlerfall mit
+einer bernsteinfarbenen Marke daneben.
+
 ### Was in den Unterlagen berichtigt ist
 
 | Befund | Was falsch war |
@@ -410,9 +452,11 @@ kann.
    geschriebenen Felder, Aktenrechte bei jedem Entwurfszugriff neu prüfen.~~
    **Erledigt am 05.10.2026** — Gegenproben 4, 5, 6 und 15 rot. Siehe oben.
    **Als nächstes sind damit F08, F10 und F13 an der Reihe.**
-5. **F08, F10, F11, F13** — zurückgegebene Aktenidentität prüfen, Nachweis
-   **vor** der Übermittlung anlegen, Metadaten im Material klären, erlaubte
-   Profilkennungen auch in der Anwendung begrenzen.
+5. ~~**F08, F10, F11, F13** — zurückgegebene Aktenidentität prüfen, Nachweis
+   **vor** der Übermittlung anlegen, erlaubte Profilkennungen auch in der
+   Anwendung begrenzen.~~ **Erledigt am 05.10.2026** — Gegenproben 7, 8 und 11
+   rot. **F11 bleibt**: Die Unterlagen sind berichtigt, ob der Metadatenumfang
+   gewollt ist, entscheidet die Kanzlei (`[KANZLEI 18]`).
 6. **F12** — der Opt-out-Nachweis. Kanzlei, nicht Entwicklung.
 
 Erst danach die E-Akte in den Betrieb. Sie ist eine Erweiterung; die obigen

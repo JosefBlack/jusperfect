@@ -144,6 +144,55 @@ def _woerter(wert: str | None, standard: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(teil.strip() for teil in wert.split(",") if teil.strip())
 
 
+#: Vorsaetze von Inferenzprofilen, die AUSSERHALB der EU verteilen.
+#:
+#: Ein Inferenzprofil ist kein Modellname, sondern eine Verteilregel: Es sagt,
+#: in welche Regionen AWS den Aufruf schicken darf. "global." heisst
+#: ausdruecklich "weltweit". Die Aufrufregion sagt daruber nichts - sie ist der
+#: Ort, an dem die Anfrage ankommt, nicht der, an dem gerechnet wird.
+#:
+#: Befund F13 der Zweitpruefung vom 05.10.2026: Frankfurt plus
+#: "global.anthropic.claude-opus-4-6-v1" kam durch die Einstellungspruefung.
+#: Die mitgelieferte Zugriffsrichtlinie haette den Aufruf abgewiesen - aber
+#: eine Zusage, die nur von der Kontoeinstellung getragen wird, haelt das
+#: Programm nicht selbst.
+FREMDE_PROFILE = ("global.", "us.", "us-gov.", "apac.", "ap.", "ca.", "sa.", "jp.", "au.")
+
+
+def profil_befund(kennung: str) -> str:
+    """Warum diese Modellkennung die EU verlassen würde – „" wenn nicht.
+
+    Drei Formen kommen vor:
+
+    * ``eu.anthropic.…`` – ein EU-Inferenzprofil. In Ordnung.
+    * ``global.…``/``us.…`` – ein Profil, das anderswohin verteilt. Nicht.
+    * eine vollständige ARN – dann entscheidet die Region **in der ARN**,
+      nicht die Aufrufregion.
+
+    Eine Kennung ohne Vorsatz (``anthropic.…``) bekommt in Europa von
+    ``_modellkennung`` das ``eu.`` vorangestellt und erreicht diese Prüfung gar
+    nicht mehr ohne; steht sie dennoch so da, ist sie ein Modell in genau der
+    Aufrufregion und damit ebenfalls in Ordnung.
+    """
+    kennung = kennung.strip()
+    if not kennung:
+        return ""
+    klein = kennung.lower()
+    if klein.startswith("arn:"):
+        teile = kennung.split(":")
+        region = teile[3] if len(teile) > 4 else ""
+        if region and region not in EU_EWR_REGIONEN:
+            wo = _SCHEIN_EU_REGIONEN.get(region)
+            return (f"die ARN zeigt auf {region!r}"
+                    + (f" – das liegt in {wo}" if wo else " – das ist keine EU-/EWR-Region"))
+        return ""
+    for vorsatz in FREMDE_PROFILE:
+        if klein.startswith(vorsatz):
+            return (f"{vorsatz!r} ist ein Inferenzprofil, das außerhalb der EU "
+                    f"verteilt – die Aufrufregion ändert daran nichts")
+    return ""
+
+
 def _modellkennung(kennung: str, region: str) -> str:
     """Setzt in europaeischen Regionen den Profilvorsatz, wo er noetig ist.
 
@@ -480,6 +529,18 @@ class Einstellungen:
                 f"{grund} Zulässig sind: {', '.join(EU_EWR_REGIONEN)}. "
                 "Die Liste steht in jusperfect/config.py::EU_EWR_REGIONEN; eine "
                 "neue EU-Region von AWS ist dort einzutragen.")
+        # Die Region allein genuegt nicht: Ein ausdruecklich eingetragenes
+        # globales Profil verteilt weltweit, gleich aus welcher Region es
+        # aufgerufen wird (Befund F13, siehe profil_befund).
+        if self.anbieter == "bedrock":
+            for funktion, (name, wert) in self._modellquellen().items():
+                befund = profil_befund(wert)
+                if befund:
+                    raise KonfigurationsFehler(
+                        f"{name} steht auf {wert.strip()!r}: {befund}. "
+                        f"Zulässig sind Kennungen mit dem Vorsatz 'eu.' oder eine ARN "
+                        f"in einer EU-/EWR-Region. Die Liste der erlaubten Regionen "
+                        f"steht in jusperfect/config.py::EU_EWR_REGIONEN.")
         if self.sitzung_ttl_sekunden <= 0 or self.monatsbudget_eur <= 0:
             raise KonfigurationsFehler("Lebensdauer und Monatsbudget müssen positiv sein.")
         # Platzhalter statt Werte: derselbe Fehler wie beim Schutzgelaender,
@@ -606,6 +667,24 @@ class Einstellungen:
             "gedaechtnis": self.modell_gedaechtnis or self.modell_id_klein,
         }
         return (je_funktion.get(funktion) or "").strip() or self.modell_id
+
+    def _modellquellen(self) -> dict[str, tuple[str, str]]:
+        """Jede gesetzte Modellkennung mit der Einstellung, aus der sie stammt.
+
+        Gebraucht für die Profilprüfung: Sie muss **jede** Kennung ansehen,
+        nicht nur die eine. Wer ein zweites Modell je Aufgabe einträgt – genau
+        der Fall, für den es die Felder gibt –, käme sonst an ihr vorbei.
+        """
+        quellen = {
+            "modell_id": ("JUSPERFECT_MODELL_ID", self.modell_id),
+            "modell_id_klein": ("JUSPERFECT_MODELL_ID_KLEIN", self.modell_id_klein),
+            "frage": ("JUSPERFECT_MODELL_FRAGE", self.modell_frage),
+            "analyse": ("JUSPERFECT_MODELL_ANALYSE", self.modell_analyse),
+            "triage": ("JUSPERFECT_MODELL_TRIAGE", self.modell_triage),
+            "entwurf": ("JUSPERFECT_MODELL_ENTWURF", self.modell_entwurf),
+            "gedaechtnis": ("JUSPERFECT_MODELL_GEDAECHTNIS", self.modell_gedaechtnis),
+        }
+        return {f: (name, wert) for f, (name, wert) in quellen.items() if wert.strip()}
 
     def modelle_uebersicht(self) -> dict[str, str]:
         """Welches Modell je Funktion tatsächlich genutzt wird – für den Überblick."""

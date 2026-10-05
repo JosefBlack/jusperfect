@@ -394,6 +394,14 @@ class Sitzung(BaseModel):
     erstellt_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+#: Wie ein Modellaufruf ausgegangen ist. Siehe ``Nutzungseintrag.ausgang``.
+AUSGANG_VERSUCHT = "versucht"            # das Material ist hinausgegangen
+AUSGANG_BEANTWORTET = "beantwortet"      # eine Antwort kam zurück
+AUSGANG_FEHLGESCHLAGEN = "fehlgeschlagen"   # der Anbieter hat abgelehnt oder versagt
+AUSGANG_ABGEBROCHEN = "abgebrochen"      # der Strom endete vor der Antwort
+AUSGANG_UNBEKANNT = "unbekannt"          # hinausgegangen, Ausgang nicht vermerkt
+
+
 class Nutzungseintrag(BaseModel):
     """Wer hat wann welche Funktion auf welcher Akte genutzt – ohne Inhalte.
 
@@ -423,6 +431,18 @@ class Nutzungseintrag(BaseModel):
     aufgabe_kennung: str = ""    # kurzkennung() der Frage/Anweisung
     passagen: int = 0            # wie viele Passagen mitgingen
     antwort_zeichen: int = 0     # Länge der Antwort, nicht ihr Text
+    # Welcher Versuch – und wie er ausging.
+    #
+    # Befund F10 der Zweitprüfung vom 05.10.2026: Der Nachweis entstand erst
+    # NACH einer erfolgreichen Antwort. Ging der Aufruf schief, nachdem das
+    # Material längst übertragen war, blieb das Nachweisfenster leer – und
+    # „keine Zeile" las sich wie „nichts hinausgegangen".
+    #
+    # Seitdem gibt es je Aufruf zwei Zeilen mit derselben ``versuch_id``: eine
+    # beim Hinausgehen und eine beim Ausgang. Angehängt, nicht überschrieben –
+    # ein Nachweis, den man ändern kann, ist ein schwächerer Nachweis.
+    versuch_id: str = ""
+    ausgang: str = AUSGANG_BEANTWORTET
 
 
 # ── Posteingangs-Triage ─────────────────────────────────────────────────────

@@ -2591,6 +2591,19 @@ function tabelle(ueberschriften, zeilen, zellenFn) {
 
 const FUNKTION_NAME = { frage: "Frage", analyse: "Analyse", triage: "Eingangsprüfung", entwurf: "Entwurf" };
 
+// Was aus einem Aufruf geworden ist, in Worten. Siehe services/ausgang.py.
+//
+// Bewusst zurueckhaltend formuliert: Die Zeile entsteht, BEVOR das Material
+// uebergeben wird. Scheitert der Aufruf, laesst sich an dieser Stelle nicht
+// mehr sagen, ob er die Leitung noch erreicht hat. "Uebertragen" zu schreiben
+// waere also zu viel behauptet - und "nichts passiert" zu wenig. Was der
+// Eintrag bedeutet, steht im Kopf des Fensters.
+const AUSGANG_NAME = {
+  fehlgeschlagen: "ohne Antwort",
+  abgebrochen: "abgebrochen",
+  unbekannt: "Ausgang offen",
+};
+
 async function nachweisZeigen() {
   const daten = await api("GET", "/api/nachweis?limit=25");
   mitschriftZeigen();
@@ -2605,7 +2618,16 @@ async function nachweisZeigen() {
     const kopf = document.createElement("div"); kopf.className = "nachweis-kopf";
     const wann = new Date(e.zeitpunkt).toLocaleString("de-DE");
     kopf.append(feld(FUNKTION_NAME[e.funktion] || e.funktion, "nw-funktion"),
-                feld(e.akte_id, "nw-akte"), feld(wann, "nw-zeit"));
+                feld(e.akte_id, "nw-akte"));
+    // Der Ausgang steht nur da, wenn er NICHT "beantwortet" ist.
+    //
+    // Seit dem 05.10.2026 entsteht die Nachweiszeile, bevor das Material
+    // hinausgeht (Befund F10). Damit kann hier stehen, dass etwas uebertragen
+    // wurde und keine Antwort kam - vorher fehlte die Zeile ganz, und das las
+    // sich wie "nichts hinausgegangen". Beim Regelfall waere das Wort nur
+    // Laerm; beim Fehlerfall ist es die Auskunft.
+    if (e.ausgang && e.ausgang !== "beantwortet") kopf.append(feld(AUSGANG_NAME[e.ausgang] || e.ausgang, "nw-ausgang"));
+    kopf.append(feld(wann, "nw-zeit"));
     const rumpf = document.createElement("div"); rumpf.className = "nachweis-rumpf";
     rumpf.append(
       feld(`Modell ${e.modell}`, "nw-detail"),

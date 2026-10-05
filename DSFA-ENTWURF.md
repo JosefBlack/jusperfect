@@ -271,7 +271,7 @@ aber auf mehrere. Dasselbe gilt für das Geländerprofil `eu.guardrail.v1:0`.
 
 | Grenze | Wirkung |
 |---|---|
-| Region in den Einstellungen | nur die **namentlich aufgeführten** EU- und EWR-Regionen zulässig; alles andere bricht beim Start ab |
+| Region in den Einstellungen | nur die **namentlich aufgeführten** EU- und EWR-Regionen zulässig; alles andere bricht beim Start ab Seit dem 05.10.2026 gilt dasselbe für die **Modellkennung**: Ein Inferenzprofil mit dem Vorsatz `global.` oder `us.` verteilt außerhalb der EU, gleich aus welcher Region es aufgerufen wird, und wird abgewiesen (Befund F13 der Zweitprüfung). |
 | Zugriffsrichtlinie | ausdrückliches **Verbot** jedes Bedrock-Aufrufs außerhalb `eu-*` — ein Verbot wiegt in AWS schwerer als jede Erlaubnis |
 | Durch das Geländer geht | nur Frage und Antwort, nicht der Akteninhalt |
 

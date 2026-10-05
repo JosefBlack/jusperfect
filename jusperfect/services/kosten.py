@@ -14,7 +14,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from jusperfect.domain.models import Kosten, Nutzungseintrag
+from jusperfect.domain.models import (
+    AUSGANG_BEANTWORTET, AUSGANG_UNBEKANNT, AUSGANG_VERSUCHT, Kosten,
+    Nutzungseintrag,
+)
 from jusperfect.providers.base import Nutzung, ProviderAntwort
 from jusperfect.security.identitaet import Identitaet
 from jusperfect.speicher.base import SitzungsSpeicher
@@ -124,9 +127,41 @@ class Kostenwaechter:
                 f"({verbraucht:.2f} EUR). Weitere KI-Aufrufe sind bis zur Freigabe gesperrt."
             )
 
+    def versuch_vermerken(self, identitaet: Identitaet, akte_id: str, funktion: str, modell: str, *,
+                          versuch_id: str, sitzung_id: str = "", material_kennung: str = "",
+                          aufgabe_kennung: str = "", passagen: int = 0) -> None:
+        """Die Zeile, die **vor** der Übermittlung entsteht.
+
+        Befund F10 der Zweitprüfung vom 05.10.2026: Der Nachweis entstand
+        erst nach einer erfolgreichen Antwort. Schlug der Aufruf fehl, nachdem
+        das Material längst übertragen war, blieb das Nachweisfenster leer –
+        und „keine Zeile" liest sich wie „nichts hinausgegangen". Kosten und
+        Übermittlung sind im Fehlerfall eben nicht beide null.
+
+        Ohne Betrag und ohne Tokenzahlen: Beides steht erst mit der Antwort
+        fest, und eine geratene Null in der Monatssumme wäre schlechter als
+        gar keine Zahl.
+        """
+        self._speicher.nutzung_verbuchen(Nutzungseintrag(
+            zeitpunkt=datetime.now(timezone.utc), nutzer_id=identitaet.nutzer_id, akte_id=akte_id,
+            funktion=funktion, modell=modell, eingabe_tokens=0, ausgabe_tokens=0, betrag_eur=0.0,
+            sitzung_id=sitzung_id, material_kennung=material_kennung,
+            aufgabe_kennung=aufgabe_kennung, passagen=passagen,
+            versuch_id=versuch_id, ausgang=AUSGANG_VERSUCHT,
+        ))
+
+    def ausgang_vermerken(self, identitaet: Identitaet, akte_id: str, funktion: str, modell: str, *,
+                          versuch_id: str, ausgang: str, sitzung_id: str = "") -> None:
+        """Wie der Versuch ausgegangen ist, wenn keine Antwort kam."""
+        self._speicher.nutzung_verbuchen(Nutzungseintrag(
+            zeitpunkt=datetime.now(timezone.utc), nutzer_id=identitaet.nutzer_id, akte_id=akte_id,
+            funktion=funktion, modell=modell, eingabe_tokens=0, ausgabe_tokens=0, betrag_eur=0.0,
+            sitzung_id=sitzung_id, versuch_id=versuch_id, ausgang=ausgang,
+        ))
+
     def verbuchen(self, identitaet: Identitaet, akte_id: str, funktion: str, antwort: ProviderAntwort, *,
                   sitzung_id: str = "", material_kennung: str = "", aufgabe_kennung: str = "",
-                  passagen: int = 0, antwort_zeichen: int = 0) -> Kosten:
+                  passagen: int = 0, antwort_zeichen: int = 0, versuch_id: str = "") -> Kosten:
         """Bucht die Kosten und schreibt zugleich den Verarbeitungsnachweis.
 
         Die Nachweis-Felder sind ohne Inhalte (Kurzkennungen und Umfänge). Sie
@@ -142,6 +177,7 @@ class Kostenwaechter:
             eingabe_tokens=eingabe, ausgabe_tokens=antwort.nutzung.ausgabe_tokens, betrag_eur=betrag,
             sitzung_id=sitzung_id, material_kennung=material_kennung, aufgabe_kennung=aufgabe_kennung,
             passagen=passagen, antwort_zeichen=antwort_zeichen,
+            versuch_id=versuch_id, ausgang=AUSGANG_BEANTWORTET,
         ))
         return Kosten(eingabe_tokens=eingabe, ausgabe_tokens=antwort.nutzung.ausgabe_tokens, betrag_eur=betrag)
 
@@ -153,13 +189,64 @@ class Kostenwaechter:
         vollständiger Export für die Datenschutzbeauftragte ist ein eigener,
         verwalteter Weg und keine offene Schnittstelle.
         """
-        eintraege = self._speicher.nachweis_lesen(limit * 4 if nutzer_id else limit)
-        gefiltert = [e for e in eintraege if not nutzer_id or e.nutzer_id == nutzer_id][:limit]
-        return [{
+        eintraege = self._speicher.nachweis_lesen(limit * 4)
+        gefiltert = [e for e in eintraege if not nutzer_id or e.nutzer_id == nutzer_id]
+        return [self._zeile(e) for e in self._versuche_zusammenlegen(gefiltert)[:limit]]
+
+    @staticmethod
+    def _versuche_zusammenlegen(eintraege: list[Nutzungseintrag]) -> list[Nutzungseintrag]:
+        """Je Aufruf eine Zeile – aus den zwei, die in der Ablage stehen.
+
+        In der Ablage stehen beide: die Zeile beim Hinausgehen und die beim
+        Ausgang. Das ist Absicht und bleibt so – ein Nachweis, den man ändern
+        kann, ist ein schwächerer Nachweis (Befund F10).
+
+        Zum Lesen gehören sie zusammen. Die Ausgangszeile gewinnt; was nur die
+        Versuchszeile weiß – Kurzkennung des Materials, Zahl der Passagen –,
+        wird aus ihr ergänzt. Steht **nur** die Versuchszeile da, ist etwas
+        hinausgegangen, ohne dass ein Ausgang vermerkt wurde: Das heißt
+        ``unbekannt`` und nicht ``nichts``.
+
+        Die Reihenfolge ist neueste zuerst und bleibt es: Jede Gruppe steht an
+        der Stelle ihrer jüngsten Zeile.
+        """
+        versuche: dict[str, Nutzungseintrag] = {}
+        ergebnis: list[Nutzungseintrag] = []
+        platz: dict[str, int] = {}
+        for e in eintraege:
+            if not e.versuch_id:
+                ergebnis.append(e)
+                continue
+            if e.versuch_id not in platz:
+                platz[e.versuch_id] = len(ergebnis)
+                ergebnis.append(e)
+                versuche[e.versuch_id] = e
+                continue
+            vorhanden = versuche[e.versuch_id]
+            if vorhanden.ausgang == AUSGANG_VERSUCHT and e.ausgang != AUSGANG_VERSUCHT:
+                zusammen = e
+            elif e.ausgang == AUSGANG_VERSUCHT:
+                zusammen = vorhanden.model_copy(update={
+                    "material_kennung": vorhanden.material_kennung or e.material_kennung,
+                    "aufgabe_kennung": vorhanden.aufgabe_kennung or e.aufgabe_kennung,
+                    "passagen": vorhanden.passagen or e.passagen,
+                })
+            else:
+                continue
+            versuche[e.versuch_id] = zusammen
+            ergebnis[platz[e.versuch_id]] = zusammen
+        return [e.model_copy(update={"ausgang": AUSGANG_UNBEKANNT})
+                if e.versuch_id and e.ausgang == AUSGANG_VERSUCHT else e
+                for e in ergebnis]
+
+    @staticmethod
+    def _zeile(e: Nutzungseintrag) -> dict:
+        return {
             "zeitpunkt": e.zeitpunkt.isoformat(timespec="seconds"),
             "funktion": e.funktion, "akte_id": e.akte_id, "sitzung_id": e.sitzung_id,
             "modell": e.modell, "material_kennung": e.material_kennung, "aufgabe_kennung": e.aufgabe_kennung,
             "passagen": e.passagen, "antwort_zeichen": e.antwort_zeichen,
             "eingabe_tokens": e.eingabe_tokens, "ausgabe_tokens": e.ausgabe_tokens,
             "betrag_eur": round(e.betrag_eur, 4),
-        } for e in gefiltert]
+            "ausgang": e.ausgang,
+        }

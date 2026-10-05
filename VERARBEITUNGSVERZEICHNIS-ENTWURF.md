@@ -211,7 +211,7 @@ Gesetzestexten erfolgt über einen Link im Browser des Bearbeiters; dabei geht
 
 | Grenze | Wirkung |
 |---|---|
-| Region | Nur die **namentlich aufgeführten** EU- und EWR-Regionen sind in den Einstellungen zulässig; alles andere bricht beim Start ab (`config.py::EU_EWR_REGIONEN`) |
+| Region | Nur die **namentlich aufgeführten** EU- und EWR-Regionen sind in den Einstellungen zulässig; alles andere bricht beim Start ab (`config.py::EU_EWR_REGIONEN`) Seit dem 05.10.2026 gilt dasselbe für die **Modellkennung**: Ein Inferenzprofil mit dem Vorsatz `global.` oder `us.` verteilt außerhalb der EU, gleich aus welcher Region es aufgerufen wird, und wird abgewiesen (Befund F13 der Zweitprüfung). |
 | Modellaufruf | Über das europäische Inferenzprofil (`eu.`-Vorsatz), das die Verarbeitung in europäischen Regionen hält |
 | Zugriffsrichtlinie | Ein ausdrückliches **Verbot** jedes Bedrock-Aufrufs außerhalb `eu-*` — ein Verbot wiegt in AWS schwerer als jede Erlaubnis |
 
