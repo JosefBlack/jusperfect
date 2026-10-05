@@ -29,7 +29,47 @@ class Grenze(unittest.TestCase):
         self.assertNotIn(self.sid, alles)
         self.assertNotIn("01_unfallschilderung_mandant.txt", alles)
         self.assertNotIn("D-001", alles, "jur|nodes-Dokumentkennungen bleiben intern; die KI sieht nur Passagenkennungen.")
-        self.assertIn("Unfallschilderung Mandant", aufruf["material"], "Der Dokumenttitel ist Teil des Belegs.")
+
+    def test_anbieter_sieht_weder_dokumenttitel_noch_aktenzeichen(self):
+        """Befund F11 der Zweitprüfung vom 05.10.2026, entschieden am selben Tag.
+
+        Hier stand bis dahin das Gegenteil: *„Der Dokumenttitel ist Teil des
+        Belegs."* Das war ein Irrtum über den Weg. Der Titel **in der
+        Belegkarte** kommt aus der Passage, die das Programm selbst baut; er
+        ging nie durch das Modell und muss deshalb auch nicht hin.
+
+        Gegen den echten Server ist der Titel der **Dateiname** – die
+        Beschreibung des Herstellers (API 1.0.2) kennt für eine Datei kein
+        Titelfeld. Was jemand in einen Dateinamen schreibt, ging damit hinaus.
+        """
+        self.c.post(f"/api/sitzungen/{self.sid}/frage", json={"frage": "Geschwindigkeit?"})
+        material = self.p.aufrufe[0]["material"]
+        self.assertNotIn("Unfallschilderung Mandant", material)
+        self.assertNotIn("042/26 VU", material, "Das Aktenzeichen braucht nur der Entwurf.")
+        # Was bleibt: die Nummer des Auszugs und, wo erkennbar, seine Art.
+        self.assertIn("Dokument 1", material)
+
+    def test_das_kurzrubrum_und_die_beteiligten_bleiben_und_warum(self):
+        """Sie gehen **absichtlich** hinaus, und das soll so dastehen.
+
+        Das Modell braucht die Rollen: Ohne sie hat es im September die
+        gegnerische Kanzlei als Rechtsschutzversicherung geführt. Dieselben
+        Namen stehen im Dokumenttext ohnehin. Anonym ist die Übermittlung
+        damit nicht – so steht es in der DSFA, Abschnitt 3.2.
+        """
+        self.c.post(f"/api/sitzungen/{self.sid}/frage", json={"frage": "Geschwindigkeit?"})
+        material = self.p.aufrufe[0]["material"]
+        self.assertIn("Beteiligte laut Aktenstammdaten", material)
+        self.assertIn("## Akte:", material)
+
+    def test_der_entwurf_bekommt_das_aktenzeichen(self):
+        """Ein Anschreiben trägt „Unser Zeichen". Der eine Aufruf, der es braucht."""
+        self.c.post(f"/api/sitzungen/{self.sid}/entwuerfe",
+                    json={"art": "mandant", "anweisung": "Sachstand"})
+        material = self.p.aufrufe[-1]["material"]
+        self.assertIn("042/26 VU", material)
+        # Der Dateiname aber auch dort nicht.
+        self.assertNotIn("Unfallschilderung Mandant", material)
 
     def test_dokumente_sind_material_nicht_anweisung(self):
         self.c.post(f"/api/sitzungen/{self.sid}/frage", json={"frage": "x"})

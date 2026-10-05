@@ -9,20 +9,21 @@ Die Kanzlei hat das Projekt von einer zweiten KI prüfen lassen. Grundlage war
 bestanden alle — und haben die Lücken trotzdem nicht gezeigt. Das ist der
 eigentliche Befund.
 
-**Stand 05.10.2026: alle dreizehn Befunde abgearbeitet.** Elf sind in der Technik
-behoben (F01 bis F10, dabei F02 vollständig, sowie F13), zwei in den Unterlagen
-berichtigt (F11, F12). **Sechzehn der siebzehn Gegenproben sind rot** — bei ihnen
-heißt das: geschlossen.
+**Stand 05.10.2026: alle dreizehn Befunde abgearbeitet, zwölf davon in der
+Technik behoben** (F01 bis F11 und F13). **Alle siebzehn Gegenproben sind rot**
+— bei ihnen heißt das: geschlossen.
 
-**Was bleibt, liegt nicht mehr an der Technik:**
+**Was bleibt, liegt nicht mehr am Programm:**
 
-* **F11** — Dateinamen und Aktenzeichen gehen über das Material zum Modell. Die
-  Unterlagen sagen es jetzt richtig; ob dieser Umfang gewollt ist, entscheidet
-  die Kanzlei (`[KANZLEI 18]`). Gegenprobe 9 bleibt deshalb grün.
 * **F12** — der Nachweis der AI-services-Opt-out-Richtlinie für dieses Konto
-  (`[KANZLEI 19]`).
-* **F13** — die Anwendung weist ein globales Profil jetzt ab. Dass die
-  Zugriffsrichtlinie am Programmbenutzer hängt, bleibt am Konto nachzuweisen.
+  (`[KANZLEI 19]`). Kanzlei, nicht Entwicklung.
+* **F13, zweite Hälfte** — die Anwendung weist ein globales Profil jetzt ab.
+  Dass die Zugriffsrichtlinie am Programmbenutzer hängt, bleibt am Konto
+  nachzuweisen.
+* **F11** ist entschieden und gebaut (`F11-VORSCHLAG.md`, `[KANZLEI 18]`). Was
+  bleibt, ist keine Lücke, sondern eine Feststellung: Im **Text** der Passagen
+  stehen weiterhin Namen, Beträge und Daten. Das ist der Gegenstand der
+  Auswertung und in DSFA 3.2 bewertet.
 
 | Datei | Was darin steht |
 |---|---|
@@ -70,7 +71,7 @@ Fassung hier bleibt unverändert als Beleg stehen.
 | **F08** | eine fremde `/record`-Antwort wird nicht gegen die angefragte Akte geprüft | ~~offen~~ **behoben 05.10.2026** |
 | **F09** | Datums- und Sprachvarianten umgehen die Fristensperre | ~~offen~~ **behoben 05.10.2026** |
 | **F10** | ein fehlgeschlagener Modellaufruf hinterlässt keinen Nachweis | ~~offen~~ **behoben 05.10.2026** |
-| **F11** | Dateinamen und Aktenzeichen gehen über das Material doch zum Modell | **Unterlagen berichtigt**, Technik offen |
+| **F11** | Dateinamen und Aktenzeichen gehen über das Material doch zum Modell | ~~offen~~ **behoben 05.10.2026** |
 | **F12** | die Nicht-Speicherung bei Textract ist nicht nachgewiesen | **Unterlagen berichtigt**, Nachweis offen |
 | **F13** | eine EU-Aufrufregion verhindert kein global konfiguriertes Profil | ~~offen~~ **behoben 05.10.2026** |
 

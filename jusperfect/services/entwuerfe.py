@@ -105,7 +105,10 @@ class Entwurfsdienst:
         if referenzen:
             auswahl = auswahl + list(referenzen)
         auswahl, gekuerzt = budget_anwenden(auswahl, self._e.max_passagen_zeichen)
-        material = prompts.material_bauen(sitzung.akte, beteiligte, fristen, auswahl)
+        # Der eine Aufruf, der das Aktenzeichen braucht: Ein Anschreiben traegt
+        # "Unser Zeichen". Ueberall sonst bleibt es drinnen (Befund F11).
+        material = prompts.material_bauen(sitzung.akte, beteiligte, fristen, auswahl,
+                                          mit_aktenzeichen=True)
         aufgabe = prompts.aufgabe_entwurf(art, anweisung, empfaenger, muster)
         kontext = Ausgangskontext(identitaet, sitzung.id, sitzung.akte_id, "entwurf",
                                   passagen=len(auswahl), detail=art.value)

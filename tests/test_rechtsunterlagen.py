@@ -74,6 +74,11 @@ class TestDieOffenenStellenSindGezaehlt:
         Geprüft wird nicht die Zahl, sondern ihre Übereinstimmung — sonst
         hätte jede neue offene Stelle diesen Test zum Fehler gemacht statt
         die fehlende Marke.
+
+        **Gezählt werden alle Stellen, auch die entschiedenen.** Nr. 18 ist am
+        05.10.2026 entschieden worden und bleibt durchgestrichen stehen: Eine
+        Stelle, die verschwindet, sieht aus, als hätte es sie nie gegeben, und
+        die Nummern der übrigen verschöben sich.
         """
         worte = {17: "siebzehn", 18: "achtzehn", 19: "neunzehn", 20: "zwanzig",
                  21: "einundzwanzig", 22: "zweiundzwanzig"}
@@ -81,7 +86,14 @@ class TestDieOffenenStellenSindGezaehlt:
         assert stellen == list(range(1, len(stellen) + 1)), stellen
         text = DSFA.read_text(encoding="utf-8")
         assert f"**{worte[len(stellen)]}**" in text, len(stellen)
-        assert f"Die {worte[len(stellen)]} offenen Stellen" in text
+        assert f"Die {worte[len(stellen)]} Stellen für die Kanzlei" in text
+
+    def test_eine_entschiedene_stelle_bleibt_stehen_und_sagt_wann(self) -> None:
+        """Regel der Kanzlei: durchgestrichen, mit Datum und Grund – nie
+        gelöscht."""
+        text = DSFA.read_text(encoding="utf-8")
+        assert "~~**[KANZLEI 18]**" in text
+        assert "Entschieden am 05.10.2026" in text
 
     def test_die_hinweise_nennen_neun_und_haben_neun(self) -> None:
         assert _offene_stellen(HINWEISE) == list(range(1, 10))
@@ -90,8 +102,10 @@ class TestDieOffenenStellenSindGezaehlt:
     def test_die_dsfa_fuehrt_jede_stelle_in_ihrer_schlussliste(self) -> None:
         """Eine Stelle, die nur im Text steht, wird beim Abarbeiten übersehen."""
         text = DSFA.read_text(encoding="utf-8")
-        tabelle = re.split(r"## 8\. Die \w+ offenen Stellen", text)[1]
-        gelistet = sorted({int(n) for n in re.findall(r"^\| (\d+) \|", tabelle, re.M)})
+        tabelle = re.split(r"## 8\. Die \w+ Stellen für die Kanzlei", text)[1]
+        # Auch die durchgestrichene Nummer zaehlt: Nr. 18 ist entschieden und
+        # bleibt in der Liste stehen (Regel der Kanzlei).
+        gelistet = sorted({int(n) for n in re.findall(r"^\| ~?~?(\d+)~?~? \|", tabelle, re.M)})
         assert gelistet == _offene_stellen(DSFA), (gelistet, _offene_stellen(DSFA))
 
 

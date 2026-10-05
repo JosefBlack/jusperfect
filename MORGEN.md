@@ -449,6 +449,43 @@ Das Modell braucht die Rollen, der Dokumenttext enthält dieselben Namen
 ohnehin, und ein Material ohne Rollen hat im September die gegnerische Kanzlei
 zur Rechtsschutzversicherung gemacht.
 
+### F11 — entschieden und gebaut, 05.10.2026
+
+Die Kanzlei hat den Vorschlag angenommen. Gebaut ist er noch am selben Tag.
+
+| Vorher | Jetzt |
+|---|---|
+| `### Passage D2-S1-P1 (Dokument: "Kündigung Reinhold-Özdemir 04.05.pdf", Seite 1)` | `### Passage D2-S1-P1 (Dokument 2 – Kündigung, Seite 1)` |
+| `## Akte 115/26 AR: Reinhold-Özdemir ./. Nordwerk …` | `## Akte: Reinhold-Özdemir ./. Nordwerk …` — das Aktenzeichen nur noch beim Entwurf |
+
+**Drei Fälle, an denen sich der Bau messen lässt:**
+
+| Dateiname | Was hinausgeht |
+|---|---|
+| `Kündigung Reinhold-Özdemir 04.05.pdf` | `Dokument 9 – Kündigung` — der Name bleibt drinnen |
+| `Vergleich-Entwurf-NICHT-VERSENDEN.docx` | `Dokument 7` — nichts davon geht hinaus |
+| `scan0042.pdf` | `Dokument 8` |
+
+**Ein Fehler beim ersten Anlauf, und er war lehrreich.** „Kündigungsschreiben"
+wurde zu „Dokument 2 – **Schreiben**". Beide Wörter stehen in der Liste und
+sind neun Zeichen lang; nach Länge sortiert gewann das falsche. Die hintere
+Hälfte eines deutschen Kompositums ist die allgemeinere — „Schreiben" sagt
+weniger als „Kündigung". Gewählt wird jetzt das Wort, das am weitesten **vorne**
+steht, und bei gleichem Anfang das längste.
+
+**Was dabei herauskam und vorher niemand wusste:** Die Belege kosten die
+Ersetzung nichts. Im Browser nachgesehen — die Belegkarte nennt weiter
+„D1-S1-P1 · Aktenvermerk Erstgespräch, Seite 1", die linke Spalte den vollen
+Titel, der Zeitstrahl die Dokumentnamen. Sie kommen alle aus dem Programm und
+gingen nie durch das Modell.
+
+17 neue Prüfungen in `tests/test_metadaten_im_material.py`. **Gegenprobe 9 ist
+rot — damit sind alle siebzehn Gegenproben rot.** 1779 Prüfungen grün.
+
+`SICHERHEIT.md` trägt weiterhin die zu weite Aussage „nie Dateinamen". Sie ist
+jetzt *fast* richtig und bleibt trotzdem falsch: Die Art des Schriftstücks geht
+mit. **Die Datei ist geschützt und wartet auf eine ausdrückliche Anweisung.**
+
 ### Was in den Unterlagen berichtigt ist
 
 | Befund | Was falsch war |

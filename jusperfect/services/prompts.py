@@ -43,9 +43,77 @@ SYSTEM = (
 )
 
 
-def material_bauen(akte: Akte, beteiligte: list[Beteiligter], fristen: list[Frist], passagen: list[Passage]) -> str:
+#: Die Arten von Schriftstuecken, die im Material genannt werden duerfen.
+#:
+#: Grundlage ist dieselbe Liste, aus der der Zeitstrahl seine Regel baut -
+#: nicht eine zweite daneben, die mit der Zeit auseinanderlaeuft. Dazu die
+#: Arten, die in einer Kanzleiakte sonst noch vorkommen.
+_DOKUMENTARTEN = tuple(
+    set(SCHRIFTSTUECKARTEN) | {einzahl for einzahl, _ in LAUFENDE_AUFZEICHNUNGSARTEN}
+    | {"Aktenvermerk", "Vermerk", "Notiz", "Gesprächsnotiz", "Protokoll",
+       "Anhörung", "Stellungnahme", "Schreiben", "Urteil", "Bescheid",
+       "Attest", "Befund", "Zeugenaussage", "Vollmacht", "Kostenvoranschlag",
+       "Police", "Mietvertrag", "Arbeitsvertrag", "Urlaubsplan", "Mitteilung"})
+
+
+def dokumentbezeichnung(passage: Passage) -> str:
+    """Wie ein Dokument im Material heißt – Nummer und, wenn erkennbar, Art.
+
+    **Befund F11 der Zweitprüfung vom 05.10.2026, entschieden am selben Tag.**
+    Hier stand der Dokumenttitel. Gegen den echten Server ist das der
+    **Dateiname**: Die Beschreibung des Herstellers (API 1.0.2) kennt für eine
+    Datei kein Titelfeld, nur ``fileName``. Was jemand in einen Dateinamen
+    schreibt, ging damit hinaus – auch das, was im Dokument selbst nicht
+    steht.
+
+    Gemessen an vier Testakten trug der Titel bei 13 von 21 Dokumenten Wörter,
+    die im Text fehlten – und das war fast immer die **Art** des
+    Schriftstücks, nicht eine Person. Genau die geht weiter hinaus, denn ein
+    Kündigungsschreiben wiegt anders als eine Telefonnotiz.
+
+    **Hinaus geht das Wort aus der Liste, nicht das aus dem Dateinamen.** Das
+    ist der ganze Punkt: Erkennt die Liste nichts, heißt das Dokument nur
+    „Dokument 2". Eine lückenhafte Liste führt damit zu weniger Auskunft, nie
+    zu mehr – das Gegenteil der Fristenwortlisten, die am Vormittag desselben
+    Tages genau deshalb aufgegeben wurden.
+
+    Die Oberfläche ist davon nicht berührt: Der Titel in der Belegkarte und
+    über der Passage kommt aus der Passage selbst und ging nie durch das
+    Modell.
+    """
+    nummer = passage.kennung.split("-", 1)[0].lstrip("Dd") or "?"
+    titel = (passage.dokument_titel or "").lower()
+    # Zuerst die Art, die am weitesten VORNE steht, dann die laengste.
+    #
+    # "Kuendigungsschreiben" traegt zwei Woerter der Liste. Die hintere Haelfte
+    # eines deutschen Kompositums ist die allgemeinere - "Schreiben" sagt
+    # weniger als "Kuendigung". Nach Laenge allein stand hier erst
+    # "Schreiben", weil beide gleich lang sind.
+    treffer = [(titel.index(a.lower()), -len(a), a) for a in _DOKUMENTARTEN
+               if a.lower() in titel]
+    if treffer:
+        return f"Dokument {nummer} – {min(treffer)[2]}"
+    return f"Dokument {nummer}"
+
+
+def material_bauen(akte: Akte, beteiligte: list[Beteiligter], fristen: list[Frist],
+                   passagen: list[Passage], mit_aktenzeichen: bool = False) -> str:
+    """Das Material für einen Modellaufruf.
+
+    ``mit_aktenzeichen`` setzt das Aktenzeichen in die erste Zeile. Es steht
+    normalerweise **nicht** dort (Befund F11): Keine Regel des Auftragstextes
+    nimmt darauf Bezug, und für Frage, Analyse und Eingangsprüfung wird es
+    nicht gebraucht – das Programm weiß selbst, in welcher Akte es arbeitet.
+
+    Eine Ausnahme gibt es, und sie ist der Grund für den Schalter: Ein
+    **Entwurf** ist ein Brief und trägt „Unser Zeichen". Kennt das Modell das
+    Aktenzeichen nicht, lässt es die Zeile weg oder erfindet sie – und
+    Erfundenes hielte die Belegpflicht ohnehin zurück. Sieben von acht
+    Aufrufarten kommen ohne aus; die achte schreibt einen Brief.
+    """
     zeilen = [
-        f"## Akte {akte.aktenzeichen}: {akte.bezeichnung}",
+        f"## Akte {akte.aktenzeichen}: {akte.bezeichnung}" if mit_aktenzeichen
+        else f"## Akte: {akte.bezeichnung}",
         f"Rechtsgebiet: {akte.rechtsgebiet or 'nicht angegeben'}",
     ]
     if beteiligte:
@@ -67,7 +135,7 @@ def material_bauen(akte: Akte, beteiligte: list[Beteiligter], fristen: list[Fris
         # am 28.09.2026 haben genau daran dieselben fuenf Tage vermisst.
         datiert = (f', datiert {p.dokument_datum.strftime("%d.%m.%Y")}'
                    if p.dokument_datum else "")
-        zeilen.append(f'### Passage {p.kennung} (Dokument: "{p.dokument_titel}"{datiert}, '
+        zeilen.append(f'### Passage {p.kennung} ({dokumentbezeichnung(p)}{datiert}, '
                       f'Seite {p.seite})')
         zeilen.append(p.text.strip())
         zeilen.append("")
@@ -89,8 +157,9 @@ def material_gedaechtnis(akte: Akte, beteiligte: list[Beteiligter], fristen: lis
     Die Kennungen zeigen weiter auf die Originalpassagen, nicht auf diesen
     Text. Das muss dastehen, sonst erfindet das Modell neue.
     """
+    # Ohne Aktenzeichen, wie ueberall ausser beim Entwurf (Befund F11).
     zeilen = [
-        f"## Akte {akte.aktenzeichen}: {akte.bezeichnung}",
+        f"## Akte: {akte.bezeichnung}",
         f"Rechtsgebiet: {akte.rechtsgebiet or 'nicht angegeben'}",
     ]
     if beteiligte:

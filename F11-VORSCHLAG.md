@@ -1,6 +1,13 @@
 # Was das Modell über die Akte erfährt, bevor es den ersten Satz liest
 
-**Vorschlag zu Befund F11 der Zweitprüfung · 05.10.2026 · zu entscheiden von der Kanzlei**
+**Vorschlag zu Befund F11 der Zweitprüfung · 05.10.2026**
+
+> **Entschieden und gebaut am 05.10.2026.** Die Kanzlei hat Weg B gewählt und
+> das Aktenzeichen auf den Entwurf beschränkt. Umgesetzt in
+> `services/prompts.py::dokumentbezeichnung` und `material_bauen`, geprüft in
+> `tests/test_metadaten_im_material.py`, eingetragen in `DSFA-ENTWURF.md`
+> (`[KANZLEI 18]`) und in `VERARBEITUNGSVERZEICHNIS-ENTWURF.md`. Dieser Text
+> bleibt als Grundlage der Entscheidung stehen.
 
 Dieser Text ist die Entscheidungsgrundlage für die offene Stelle `[KANZLEI 18]`
 in `DSFA-ENTWURF.md`. Er beschreibt, was heute hinausgeht, was davon wirklich

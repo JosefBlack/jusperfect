@@ -194,6 +194,23 @@ dem Rechner der Kanzlei; bei AWS wird es **verarbeitet, nicht gespeichert** —
 kein Ablageort, keine Löschfrist, nichts hier zu nennen außer der Verarbeitung
 selbst. Einzelheiten in `DSFA-ANGABEN.md`.
 
+**Was an das Sprachmodell geht — und was nicht (Stand 05.10.2026).**
+
+| Geht mit | Geht **nicht** mit |
+|---|---|
+| der Text der angehakten Passagen | der **Dateiname** des Dokuments |
+| die **Art** des Schriftstücks, als Wort aus einer Liste im Programm (`Dokument 2 – Kündigung`) | der Dokumenttitel im Wortlaut |
+| Kurzrubrum, Rechtsgebiet, Beteiligte mit Rolle | die **Aktenkennung** — außer beim Entwurf, der „Unser Zeichen" trägt |
+| die Fristen aus dem Fristenkalender | Nutzer- und Sitzungskennungen |
+
+Bis zum 05.10.2026 gingen Dateiname und Aktenzeichen mit; die Unterlagen
+behaupteten das Gegenteil (Befund F11 der Zweitprüfung). Beides ist am selben
+Tag geändert worden, die Entscheidung steht in `DSFA-ENTWURF.md`
+(`[KANZLEI 18]`), die Grundlage in `F11-VORSCHLAG.md`.
+
+**Anonym ist die Übermittlung dadurch nicht.** Im Text der Passagen stehen
+weiterhin Namen, Beträge und Daten — das ist der Gegenstand der Auswertung.
+
 **Kein weiterer Anbieter.** Das Programm ruft genau einen Modellanbieter auf,
 und zwar über eine einzige geprüfte Stelle im Programm (`services/ausgang.py`).
 Andere Anbieter sind vorbereitet, aber nicht angebunden — jeder wäre ein neuer

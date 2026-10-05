@@ -16,7 +16,9 @@ Maßnahmen* dagegen im Programm stehen — jede mit Fundstelle.
 verbleibende Risiko tragbar ist und ob die Aufsichtsbehörde nach Art. 36
 einzuschalten ist, kann nur ein Jurist entscheiden, der das Mandatsgeschäft
 kennt. Diese Stellen sind mit **[KANZLEI n]** gekennzeichnet; es sind
-**neunzehn**, und sie stehen am Ende noch einmal in einer Liste.
+**neunzehn**, und sie stehen am Ende noch einmal in einer Liste. Eine davon ist
+entschieden: **Nr. 18** am 05.10.2026. Sie bleibt stehen und durchgestrichen —
+eine Stelle, die verschwindet, sieht aus, als hätte es sie nie gegeben.
 
 **Die Zahlen und Befunde stehen woanders.** Jede technische Angabe hier ist aus
 `DSFA-ANGABEN.md` übernommen, wo sie mit Datum und Fundstelle steht. Bei
@@ -85,11 +87,30 @@ Aufgabe (`providers/bedrock.py`).
 > Metadatenobjekte übergeben werden, verhindert nicht, dass dieselben Angaben
 > als Text mitgehen.
 >
-> **[KANZLEI 18]** — zu entscheiden: ob dieser Umfang gewollt ist (das
-> Aktenzeichen hilft dem Modell bei der Einordnung, der Dokumenttitel bei der
-> Fundstelle) oder ob beides durch neutrale Bezeichnungen zu ersetzen ist. Eine
-> Ersetzung anonymisiert den Dokument**text** nicht; darin stehen weiterhin
-> Namen.
+> ~~**[KANZLEI 18]** — zu entscheiden: ob dieser Umfang gewollt ist oder ob
+> beides durch neutrale Bezeichnungen zu ersetzen ist.~~
+>
+> **Entschieden am 05.10.2026** (Grundlage: `F11-VORSCHLAG.md`, dort die
+> Messung an vier Testakten). Seitdem gilt:
+>
+> * **Der Dateiname geht nicht mehr hinaus.** Aus dem Titel wird nur noch die
+>   **Art** des Schriftstücks genannt — und auch die als Wort aus einer Liste
+>   im Programm, nie als Text aus dem Dateinamen: `Dokument 2 – Kündigung`.
+>   Erkennt die Liste nichts, heißt es nur `Dokument 2`. Die Richtung des
+>   Irrtums stimmt damit: weniger Auskunft, nie mehr.
+> * **Das Aktenzeichen geht nur noch beim Entwurf mit.** Ein Anschreiben trägt
+>   „Unser Zeichen"; Frage, Analyse und Eingangsprüfung brauchen es nicht.
+> * **Beteiligte und Kurzrubrum bleiben.** Sie gehen absichtlich hinaus: Das
+>   Modell braucht die Rollen — ohne sie hat es im September die gegnerische
+>   Kanzlei als Rechtsschutzversicherung geführt —, und dieselben Namen stehen
+>   im Dokumenttext ohnehin.
+>
+> **Anonym ist die Übermittlung dadurch nicht.** Im Dokumenttext stehen
+> weiterhin Namen, Beträge und Daten; das ist der Zweck der Auswertung und in
+> Abschnitt 3.2 bewertet.
+>
+> Die Oberfläche ist unberührt: Der Dokumenttitel in der Belegkarte und über
+> der Passage kommt aus dem Programm und ging nie durch das Modell.
 >
 > `SICHERHEIT.md` enthält dieselbe zu weite Aussage („nie Dateinamen"). Die
 > Datei ist geschützt und wird nur auf ausdrückliche Anweisung geändert.
@@ -417,7 +438,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 
 ---
 
-## 8. Die neunzehn offenen Stellen auf einen Blick
+## 8. Die neunzehn Stellen für die Kanzlei auf einen Blick
 
 | Nr. | Was zu entscheiden ist | Abschnitt |
 |---|---|---|
@@ -438,7 +459,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 14 | Was den Betroffenen über die Übermittlung gesagt wird | R8 |
 | 15 | Schulung und KI-Kompetenz nach Art. 4 KI-VO | 6 |
 | 17 | Verbleibendes Risiko, Art. 36, Beteiligung des DSB, Überprüfungsfrist | 7 |
-| 18 | Sollen Aktenzeichen und Dokumenttitel an das Modell gehen? | 2.1 |
+| ~~18~~ | ~~Sollen Aktenzeichen und Dokumenttitel an das Modell gehen?~~ **Entschieden am 05.10.2026: Dateiname nein, Art des Schriftstücks ja, Aktenzeichen nur beim Entwurf** | 2.1 |
 | 19 | Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen | R6 |
 
 ---
