@@ -4,10 +4,13 @@
 > Es ist die Anleitung, die in der Kanzlei benutzt wird. Sie soll sich nicht
 > unter der Hand verschieben, weil im Programm etwas umgebaut wurde.
 
-> **Diese Fassung ist zum Ausprobieren, nicht für echte Mandantenakten.**
-> Was dafür noch fehlt, steht am Ende unter „Was noch nicht freigegeben ist".
-> Zum Ausprobieren liegen erfundene Testakten bei – nehmen Sie für den ersten
-> Durchgang die.
+> **Stand: 05.10.2026.** Das Programm arbeitet seit dem 23.09.2026 über die
+> Schnittstelle mit den **echten Akten** der Kanzlei. Was vor einer Benutzung
+> **über die beiden Anwälte hinaus** noch fehlt, steht am Ende unter „Was noch
+> nicht freigegeben ist" — vor allem die Datenschutz-Folgenabschätzung.
+>
+> Zum Kennenlernen liegen vier erfundene Testakten bei. Nehmen Sie für den
+> ersten Durchgang die.
 
 ---
 
@@ -262,7 +265,7 @@ benutzt wird.
 
 ### Womit anfangen
 
-Es liegen drei erfundene Akten bei. Für den ersten Durchgang empfehle ich
+Es liegen vier erfundene Akten bei. Für den ersten Durchgang empfehle ich
 **115/26 AR** (Kündigungsschutz): Sie hat acht Dokumente und ist absichtlich so
 gebaut, dass es etwas zu finden gibt — widersprüchliche Daten, ein Zeuge, der
 sich nicht festlegt, eine Betriebsratsanhörung nach der Kündigung.
@@ -276,48 +279,284 @@ Gute erste Fragen an diese Akte:
 - *Wann wurde der Betriebsrat angehört?*
 - *Welche Beweismittel liegen vor?*
 
-### Eine Akte öffnen
+---
+
+### Der Weg durch eine Akte — die Kurzfassung
+
+1. **Suchen**, Akte anklicken.
+2. Im Fenster „Dokumente der Akte" ankreuzen, was mitgehen soll — oder **alle
+   anhaken**. Dann **Arbeitsfläche öffnen**.
+3. Warten, bis die Dokumente gelesen sind. Der Balken sagt, wie weit.
+4. Fragen stellen. **Die Belege lesen**, nicht nur die Antwort.
+5. Wenn es sich lohnt: **Akte einlesen** (Aktengedächtnis) und **Analyse**.
+6. Entwurf, Freigabe — oder einfach schließen. Das Gedächtnis bleibt.
+
+Die nächsten Abschnitte gehen diese sechs Schritte der Reihe nach durch.
+
+---
+
+### 1. Eine Akte öffnen
 
 Aktenzeichen oder Bezeichnung eingeben, **Suchen**, Akte anklicken.
 
-Es öffnet sich der **Zwei-Fenster-Explorer**: links die Akte aus jur|nodes,
-rechts Ihre Arbeitsakte. Ziehen Sie die Dokumente hinüber, die zur Frage
-gehören – oder nehmen Sie „alle →". Dann **Übernehmen**.
+Es öffnet sich das Fenster **„Dokumente der Akte"**: eine Liste mit Häkchen.
+**Angehakt heißt: liegt in der Arbeitsakte und geht bei Fragen mit.**
 
-> **Weniger ist oft besser.** Was Sie hinüberziehen, geht an das Modell und
-> wird bezahlt. Für eine Frage zur Unfallschilderung braucht es nicht die
-> gesamte Korrespondenz.
+| Knopf | Was er tut |
+|---|---|
+| **alle anhaken** | hakt alles an, was gerade sichtbar ist |
+| **Haken entfernen** | nimmt bei allen Sichtbaren den Haken weg |
+| die Felder oben (*Gegner 6*, *Mandant 2* …) | hakt eine ganze Kategorie an oder ab |
+| das Suchfeld | filtert nach Titel, Datum oder Kategorie — `gegner 2026-05` findet die gegnerischen Schriftsätze aus dem Mai |
 
-Die Auswahl lässt sich jederzeit ändern – auch mitten in der Arbeit, über
-**Dokumente**.
+Unten steht, wie viel Sie angehakt haben und ob es für einen Aufruf reicht.
 
-### Eine Frage stellen
+> **Weniger ist oft besser.** Was Sie anhaken, geht an das Modell und wird
+> bezahlt. Für eine Frage zur Unfallschilderung braucht es nicht die gesamte
+> Korrespondenz.
+
+Die Auswahl lässt sich jederzeit ändern — auch mitten in der Arbeit, über
+**‹ Dokumente**.
+
+#### Was nicht von selbst angehakt wird
+
+Trägt der **Titel** eines dieser Wörter, kommt das Dokument **ohne Haken** in
+die Liste:
+
+> Rechnung · Kostennote · Gebühren · Vorschuss · Honorar · RSV ·
+> Rechtsschutz · Deckungszusage · Deckungsanfrage
+
+Es steht weiter da, nur blasser, und daneben steht der Grund: *nicht
+vorgewählt: Rechnung*. Wer es doch braucht, hakt es an. **alle anhaken** lässt
+es aus und sagt das in einer Meldung; **ein zweiter Klick holt es dazu.**
+
+Zwei Grenzen, die Sie kennen sollten:
+
+- **Geprüft wird der Titel, nicht der Inhalt.** Eine Rechnung, die „Schreiben
+  vom 14.03." heißt, geht durch. Eine Hilfe, keine Gewähr.
+- **Es verschwindet nichts.** Das Dokument bleibt sichtbar; nur der Haken
+  fehlt.
+
+Eigene Wortliste: in `START-JURNODES.bat`, Abschnitt *„Was nicht von selbst
+angehakt wird"*. Dort steht auch, warum in diese Zeile keine Umlaute gehören.
+
+---
+
+### 2. Das Lesen der Dokumente
+
+Nach **Arbeitsfläche öffnen** werden die Dokumente geholt und in lesbare
+Abschnitte zerlegt. Bei fünfzig Dokumenten dauert das.
+
+Ein Balken zeigt, wie weit es ist — in Fünferschritten, mit der Zahl daneben.
+Solange er läuft, sind die Wege gesperrt, die mitten in das Lesen hineinführen
+würden; das Programm sagt das auch. **Anhalten** geht jederzeit, und was
+gelesen ist, bleibt gelesen.
+
+#### Gescannte Blätter
+
+Rückscheine, Einschreiben, Vollmachten: Darin steht kein Text, sondern ein Bild
+vom Text. Das Programm erkennt das und schickt die Seite an die Texterkennung
+von AWS (Textract, Frankfurt — derselbe Auftragsverarbeiter wie für die Texte).
+
+- Die Seiten werden **auf Ihrem Rechner** zu Bildern gemacht. Es wird nichts
+  bei AWS abgelegt.
+- Kosten: rund **1,50 € je 1000 Seiten** — für eine Akte Bruchteile eines Cents.
+- Ob es überhaupt arbeitet, sagt **`TEXTERKENNUNG-PRUEFEN.bat`** in zwanzig
+  Sekunden, ohne Akte und ohne Modellaufruf.
+
+Findet die Erkennung nichts, sagt das Programm das — und sagt auch, woran es
+liegt, einschließlich einer fehlenden AWS-Berechtigung.
+
+---
+
+### 3. Eine Frage stellen
 
 Frage eintippen, Eingabetaste. Die Antwort erscheint **während sie entsteht**.
 
 Danach steht rechts die Spalte **Belege**. Jede Kennung wie `D2-S1-P3` heißt:
 zweites Dokument, erste Seite, dritter Abschnitt. Ein Klick zeigt die
-Originalstelle.
+Originalstelle; die tragende Stelle ist darin hervorgehoben.
 
 > **Lesen Sie die Belege, nicht nur die Antwort.** Das ist der eigentliche
-> Nutzen: Sie sehen sofort, worauf sich eine Aussage stützt – und ob die Stelle
+> Nutzen: Sie sehen sofort, worauf sich eine Aussage stützt — und ob die Stelle
 > das wirklich hergibt.
+
+Steht unter einem Beleg *„Die Stelle ließ sich im Absatz nicht zuordnen — oben
+steht sein Anfang. Bitte nachlesen."*, dann zeigt die Karte den ganzen Absatz
+statt des Satzes. Das ist kein Fehler, sondern der Hinweis, dass hier Ihr Auge
+gebraucht wird.
 
 Steht „kein belastbarer Beleg", hat das Programm zu Ihrer Frage nichts
 Belegbares gefunden. Das ist eine ehrliche Antwort, kein Fehler.
+
+---
+
+### 4. Das Aktengedächtnis
+
+Ohne Gedächtnis fängt jede Akte bei jedem Öffnen von vorn an — und wird jedes
+Mal neu bezahlt. Mit Gedächtnis kostet das zweite Öffnen einer gelesenen Akte
+**rund 5 Cent statt 28 Cent.**
+
+#### Was darin liegt
+
+| | |
+|---|---|
+| Dokumentauszüge | der Text, bei Scans der erkannte Text |
+| Lebenssachverhalt | ein belegter Fließtext über die ganze Akte |
+| Zeitstrahl | die Chronologie, fortgeschrieben statt neu gebaut |
+| Frühere Fragen und Antworten | die letzten 100 |
+| Die letzte Aktenanalyse | mit Datum (siehe Abschnitt 5) |
+
+#### Wo es liegt
+
+**In der Kanzlei: im eigenen AWS-Konto, Frankfurt, verschlüsselt** — nicht in
+jur|nodes. In die jur|nodes-Akte geht nur ein **Vermerk**, und nur, wenn Sie
+ihn freigeben. Wo es im Einzelfall liegt, steht unten im Gedächtnisfenster und
+im Selbsttest; eingestellt wird es mit `JUSPERFECT_GEDAECHTNIS` in der
+Startdatei.
+
+#### Die Knöpfe
+
+Rechts **Gedächtnis ›**, dann:
+
+| Knopf | Was er tut | Kostet |
+|---|---|---|
+| **Akte einlesen** | liest die ganze Akte Portion für Portion ein und bildet daraus Lebenssachverhalt und Zeitstrahl | mehrere Modellaufrufe — es wird vorher gefragt |
+| **Auswahl** | öffnet das Fenster: links die Akte, rechts was im Gedächtnis liegt | nichts |
+| **Anhalten** | bricht das Einlesen ab; Gelesenes bleibt | — |
+
+Vor dem Einlesen sagt das Programm, wie viele Dokumente noch fehlen, wie viele
+Zeichen das sind und mit wie vielen Aufrufen zu rechnen ist. **Erst dann wird
+gerechnet.**
+
+#### Was im Gedächtnis steht, nachlesen
+
+Im Fenster **Auswahl** unten: **„Was das Programm sich gemerkt hat"**. Dort
+stehen Lebenssachverhalt, Zeitstrahl und die früheren Fragen — **im Wortlaut,
+mit den Fundstellen**, so wie sie gespeichert sind. Ein dauerhafter Speicher,
+den niemand einsehen kann, wäre eine Zusage ohne Nachweis.
+
+#### Einzelnes wieder herausnehmen
+
+Neben jedem Eintrag steht **„vergessen"**:
+
+- **Rechts in der Spalte „Im Gedächtnis"** — nimmt ein **Dokument** heraus.
+  Die Rückfrage zählt vorher ab, was mit herausfällt: der Auszug, die
+  gespeicherten Fragen und Zeitstrahleinträge, die ihn zitieren (die fallen
+  **ganz**), und die Sätze des Lebenssachverhalts, die nur auf ihm beruhen.
+- **In der Liste „Frühere Fragen und Antworten"** — nimmt **eine Frage samt
+  Antwort** heraus. Dokumente, Lebenssachverhalt und Zeitstrahl bleiben stehen.
+
+> **Es gibt kein Rückgängig.** Zurücklegen ist möglich, kostet aber ein neues
+> Einlesen — bei einem Scan mit Texterkennung — und holt die gelöschten
+> Antworten und Zeitstrahleinträge nicht wieder. Lesen Sie die Rückfrage.
+
+Die Akte in jur|nodes bleibt dabei unberührt. Entfernt wird nur, was sich
+jusperfect gemerkt hat.
+
+Alles auf einmal wegwerfen geht nur bei den **erfundenen** Testakten, mit
+`GEDAECHTNIS-LEEREN.bat`.
+
+---
+
+### 5. Die Aktenanalyse
+
+**Analyse** geht einmal über die ganze Arbeitsakte und liefert sechs Listen:
+Chronologie, Beteiligte, Forderungen, Beweismittel, offene Punkte,
+Widersprüche. **Jede Zeile trägt ihren Beleg.**
+
+Passt die Akte nicht in einen Aufruf, rechnet das Programm über den
+**Lebenssachverhalt** aus dem Gedächtnis — der ist aus allen Dokumenten
+entstanden und ein Bruchteil so lang. Erst dadurch findet sich ein Widerspruch,
+der zwischen Dokument 8 und Dokument 44 liegt. Der erste Hinweis der Analyse
+sagt, worauf sie beruht. Ist die Akte nur **teilweise** eingelesen, verweigert
+das Programm: Eine Analyse über zwei Drittel sähe aus wie eine über die ganze
+Akte.
+
+#### Sie bleibt stehen
+
+Die Analyse liegt im Aktengedächtnis. Beim nächsten Öffnen der Akte steht sie
+wieder da, überschrieben mit **„Aktenanalyse · Stand vom 05.10.26"**. Das
+kostet nichts — es wird nichts neu gerechnet.
+
+#### Das Programm merkt, wenn sie veraltet ist
+
+Kommen später Dokumente in die Akte, steht **über** dem Ergebnis ein gelber
+Hinweis:
+
+> Seit dieser Analyse ist ein Dokument in die Akte gekommen; es ist darin nicht
+> enthalten: Schriftsatz der Gegenseite vom 02.10.  [neu rechnen]
+
+Die Dokumente werden **beim Namen genannt**, damit Sie selbst beurteilen
+können, ob es sich lohnt. Das Programm vergleicht dafür die heutige
+Dokumentliste der Akte mit der von damals — das kostet keinen Modellaufruf und
+geschieht bei jedem Öffnen.
+
+Ein bewusst nicht vorgewähltes Dokument — eine Rechnung etwa, die schon damals
+in der Akte lag — gilt dabei **nicht** als neu. Sonst stünde der Hinweis bei
+jedem Öffnen da und wäre nach einer Woche nichts mehr wert.
+
+#### Der Knopf fragt nach
+
+Liegt schon eine Analyse vor, fragt **Analyse** vorher: mit dem Datum, mit dem,
+was seitdem dazugekommen ist, und mit dem Hinweis, dass neu rechnen einen
+Modellaufruf über die ganze Akte kostet. Beim ersten Mal fragt er nicht — da
+gibt es nichts zu verlieren.
+
+---
+
+### 6. Der Zeitstrahl
+
+Rechts **Chronologie ›**. Er ist **ohne Modellaufruf gefüllt**: Dokumentdaten
+und Fristen stehen in den Stammdaten aus jur|nodes. Eine Analyse reichert ihn
+an; was sie gefunden hat, bleibt im Gedächtnis stehen.
+
+**aktualisieren** trägt nach, was seit dem letzten Lauf dazugekommen ist — nur
+über die neuen Abschnitte und nur nach Ereignissen. **Ist nichts Neues da,
+kostet der Knopfdruck nichts.**
+
+---
+
+### 7. Zwei Bildschirme: Fenster abtrennen
+
+Neben **Chronologie**, **Aktengedächtnis** und **Belege** steht oben rechts das
+Zeichen **⧉**. Ein Klick stellt das Fenster auf einen eigenen Browser-Tab, den
+Sie auf den zweiten Bildschirm ziehen können.
+
+- Beide Fenster bleiben im Gleichschritt. Was im Hauptfenster geschieht, steht
+  sofort auch nebenan.
+- **Schließen verliert nichts.** Das abgetrennte Fenster zeigt nur an; der
+  Stand liegt im Hauptfenster. Jederzeit wieder aufmachbar über dasselbe
+  Zeichen.
+- Der Abgleich läuft **innerhalb des Browsers**, nicht über das Netz.
+
+---
+
+### 8. Versehentliches Schließen
+
+Schließen Sie den Tab des **Hauptfensters**, während etwas läuft oder etwas
+Ungesichertes dasteht, fragt der Browser nach. Den Wortlaut bestimmt der
+Browser, nicht das Programm.
+
+Im **abgetrennten** Fenster fragt nichts — dort geht nichts verloren.
+
+---
 
 ### Die weiteren Knöpfe
 
 | Knopf | Wofür |
 |---|---|
-| **Analyse** | Chronologie, Beteiligte, Forderungen, Beweismittel, offene Punkte, Widersprüche – jede Zeile mit Beleg |
 | **Eingangsprüfung** | Ein neues Schreiben einordnen: Art, Absender, Kernaussage, mögliche Fristauslöser. **Berechnet keine Fristen.** |
-| **Entwurf** | Schreiben an Mandant, Gegner, Versicherung, RSV, Mahnung, Aktenvermerk – auch nach eigenen Kanzleimustern |
-| **Prüfliste** | Beweisprüfung nach Rechtsgebiet, ohne KI-Aufruf |
+| **Entwurf** | Schreiben an Mandant, Gegner, Versicherung, RSV, Mahnung, Aktenvermerk — auch nach eigenen Kanzleimustern |
+| **Prüfliste** | Beweisprüfung nach Rechtsgebiet, ohne Modellaufruf |
 | **Referenzen** | Urteile und Gesetze neben die Akte stellen; sie werden mitzitiert (Kennung `R…`) |
+| **Posteingang** | Ein Schreiben prüfen, bevor es in die Akte geht |
 | **Recherche bei Haufe** | Öffnet den Haufe-Copilot im Browser mit Ihrer Anmeldung. jusperfect fasst keine Haufe-Zugangsdaten an. |
-| **Nachweis** | Was ist wann an welches Modell gegangen – Umfang und Prüfsumme, **kein Aktentext** |
-| **Abschluss** | Akte in jur|nodes archiviert? Arbeitsstand sichern, dann löschen (siehe unten) |
+| **Gesetz nachschlagen** | Normtext neben die Akte stellen |
+| **Nachweis** | Was ist wann an welches Modell gegangen — Umfang und Prüfsumme, **kein Aktentext** |
+| **Aufbewahrung** | Übersicht über alle Arbeitsbereiche: Zustände, keine Akteninhalte |
+| **Akte abschließen** | Akte in jur|nodes archiviert? Arbeitsstand sichern, dann löschen (siehe unten) |
+| **Selbsttest** | siehe oben |
 
 ### Eigene Aufträge – Ihre Muster statt fremder Formulierungen
 
@@ -411,6 +650,37 @@ Ist die Akte in jur|nodes archiviert, bietet **Abschluss** an:
 
 ---
 
+## Was wie lange gespeichert bleibt
+
+Die Frage, die bei einem KI-Programm zuerst zu stellen ist. Hier die Antwort in
+einer Tabelle.
+
+| Was | Wo | Wie lange |
+|---|---|---|
+| **Dokumentauszüge** (bei Scans der erkannte Text) | Aktengedächtnis — AWS-Konto der Kanzlei, Frankfurt, verschlüsselt | dauerhaft, bis zum Abschluss der Akte |
+| **Lebenssachverhalt** | ebenda | dauerhaft |
+| **Zeitstrahl** | ebenda | dauerhaft, höchstens 500 Einträge |
+| **Fragen und Antworten** | ebenda | die letzten 100 |
+| **Die letzte Aktenanalyse** | ebenda | dauerhaft, bis sie neu gerechnet wird |
+| **Der Gesprächsverlauf im Fenster** | Arbeitsspeicher des Programms | **weg, sobald das schwarze Serverfenster zugeht** |
+| **Entwürfe** | ebenda | ebenso |
+| **Der Nachweis** (wer, wann, welches Modell, wie viel) | Arbeitsspeicher, beim AWS-Betrieb im AWS-Konto | — ohne Aktentext |
+| **In jur|nodes** | die Akte selbst | **nur ein Vermerk, und nur nach Ihrer Freigabe** |
+
+Drei Sätze dazu, die sich zu merken lohnen:
+
+1. **Was dauerhaft bleibt, ist das Aktengedächtnis — sonst nichts.** Darauf
+   baut das zweite Öffnen auf.
+2. **Was nur in der Sitzung lebt, ist weg, wenn das Programm zugeht.** Ein
+   Entwurf, den Sie brauchen, gehört vorher herauskopiert oder freigegeben.
+3. **In die Akte in jur|nodes schreibt das Programm nur, wenn Sie es sagen.**
+
+Gelöscht wird das Gedächtnis **nur** über den Abschluss der Akte (siehe dort) —
+oder von Hand, einzeln, über **vergessen**. Eine Bearbeitungspause löscht nie
+etwas, auch nach neun Monaten nicht.
+
+---
+
 ## Wenn etwas klemmt
 
 **„Python wurde nicht gefunden"** – Bei der Installation fehlte das Häkchen
@@ -421,7 +691,26 @@ Ist die Akte in jur|nodes archiviert, bietet **Abschluss** an:
 **„Bitte Nutzerkennung eingeben"** – Oben rechts `ra-weber` eintragen.
 
 **„Keine Akte gefunden oder keine Berechtigung"** – Im Probelauf gibt es nur die
-beiden Testakten. Suchfeld leeren und **Suchen** drücken.
+vier erfundenen Testakten. Suchfeld leeren und **Suchen** drücken.
+
+**„jusperfect läuft schon" / „Errno 10048"** – Das Programm läuft bereits, nur
+ohne sichtbares Fenster. Es startet kein zweites Mal, weil sonst zwei
+Programme auf dieselbe Ablage schrieben. Abhilfe: Im Browser
+<http://127.0.0.1:8765> aufrufen — oder, wenn kein Fenster mehr zu sehen ist,
+den Task-Manager öffnen (Strg+Umschalt+Esc), unter „Details" den Eintrag
+`python.exe` beenden und neu starten.
+
+**„Das AWS-Aktengedächtnis ist nicht erreichbar"** – Der Satz dahinter sagt,
+woran es liegt: kein Netz, der Eimer fehlt, die Berechtigung fehlt oder er
+liegt in einer anderen Region. Das Programm arbeitet dann **ohne** Gedächtnis
+weiter; die Akte wird beim nächsten Mal eben neu eingelesen. Es wartet dabei
+nicht mehr minutenlang: nach fünf Sekunden ohne Verbindung gibt es auf.
+
+**„Es fehlt: bedrock:…"** – In der AWS-Zugriffsrichtlinie fehlt genau diese
+Berechtigung. Der Name steht in der Meldung; einzutragen ist er in
+`infra/iam-nur-claude.json` (siehe `infra/IAM.md`). Der Wortlaut von AWS selbst
+geht dabei nie hinaus — eine Abweisung von AWS kann ein Stück der Anfrage
+enthalten, und die Anfrage ist Aktentext.
 
 **Die Antwort ist kürzer als erwartet** – Das ist Absicht: Unbelegte Sätze
 fallen heraus. Ziehen Sie mehr Dokumente in die Arbeitsakte oder fragen Sie
@@ -477,20 +766,37 @@ ein Nein.
 
 ## Was noch nicht freigegeben ist
 
-Für echte Mandantenakten fehlen:
+Bevor das Programm **über die beiden Anwälte hinaus** benutzt wird, fehlen:
 
-- **Die Ordnerprüfung auf dem Kanzleilaufwerk.** Solange sie nicht gelaufen ist,
-  beruht das Erkennen archivierter Akten auf einer Annahme.
-  Am PC: `python -m jusperfect.ordnerpruefung "J:\Akten"` – verändert nichts.
 - **Datenschutz-Folgenabschätzung, Datenschutzhinweise, Mandatsbedingungen.**
-  Die fachliche Grundlage steht im Löschkonzept in `SICHERHEIT.md`.
-- **Die Gewissheit, dass AWS nichts mitschreibt.** Das prüft das Programm seit
-  Neuestem bei jedem Start selbst: Schreibt AWS die Modellaufrufe mit, startet
-  es nicht. Lässt sich die Frage nicht beantworten, läuft es mit den erfundenen
-  Akten weiter und startet mit echten nicht. Wo es steht: Knopf **Nachweis**,
-  erste Zeile.
+  Die fachliche Grundlage steht im Löschkonzept in `SICHERHEIT.md`, die
+  technischen Angaben gesammelt in `DSFA-ANGABEN.md` — jeder Wert mit Datum und
+  Fundstelle, einschließlich dessen, was **nicht** gesichert ist.
+- **Die Auskunft von AWS, in welche Regionen das Schutzgeländer verteilt.** Ein
+  Zwischenstand steht in `DSFA-ANGABEN.md`, ausdrücklich als ungesichert
+  gekennzeichnet; er nennt auch Zürich, also außerhalb von EU und EWR. Das ist
+  beim AWS-Support zu erfragen.
+- **Die Ordnerprüfung auf dem Kanzleilaufwerk.** Nur für den Ordnerweg nötig.
+  Solange sie nicht gelaufen ist, beruht das Erkennen archivierter Akten auf
+  einer Annahme. Am PC: `python -m jusperfect.ordnerpruefung "J:\Akten"` –
+  verändert nichts.
 
-Bis dahin gilt: **erfundene Testakten, keine echten Mandantendaten.**
+**Zwei Dinge, die inzwischen stehen** und hier früher als offen standen:
+
+- **AWS schreibt nichts mit.** Das prüft das Programm bei jedem Start selbst:
+  Ist in Bedrock die Modellaufrufprotokollierung an, startet es nicht. Lässt
+  sich die Frage nicht beantworten, startet es mit echten Akten ebenfalls
+  nicht. Wo es steht: Knopf **Nachweis**, erste Zeile.
+- **Das Schutzgeländer.** Mit echten Akten ist ein Bedrock-Guardrail zwingend;
+  es ist eingerichtet und wird bei jedem Aufruf vorgeschaltet.
+
+> **Eine offene Frage beim Hersteller von jur|nodes.** Am 05.10.2026 hat sich
+> gezeigt, dass das Feld, mit dem die Schnittstelle den Korrespondenzordner
+> einer Akte benennt, offenbar nicht auf die Korrespondenz **dieser** Akte
+> zeigt: In drei geprüften Akten enthielt dieser Zweig durchweg fremde
+> Schriftstücke. **Das Programm liest den Korrespondenzordner seitdem nicht
+> mehr mit.** Bis zur Antwort des Herstellers fehlt damit die Korrespondenz;
+> das ist die sichere Richtung. Einzelheiten in `MORGEN.md`.
 
 ---
 
