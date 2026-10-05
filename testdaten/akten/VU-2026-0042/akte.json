@@ -1,0 +1,25 @@
+{
+  "akte": {
+    "id": "VU-2026-0042",
+    "aktenzeichen": "042/26 VU",
+    "bezeichnung": "Testmann ./. Musterhaft-Versicherung – Verkehrsunfall B 27",
+    "rechtsgebiet": "Verkehrsrecht",
+    "sachbearbeiter": "RA Dr. Weber",
+    "status": "offen"
+  },
+  "dokumente": [
+    {"id": "D-001", "titel": "Unfallschilderung Mandant", "dateiname": "01_unfallschilderung_mandant.txt", "datum": "2026-03-16", "kategorie": "Mandant"},
+    {"id": "D-002", "titel": "Polizeiliche Unfallmitteilung", "dateiname": "02_polizei_unfallmitteilung.txt", "datum": "2026-03-14", "kategorie": "Behörde"},
+    {"id": "D-003", "titel": "Kostenvoranschlag Autohaus Brenner", "dateiname": "03_kostenvoranschlag.txt", "datum": "2026-03-20", "kategorie": "Sachverständige"},
+    {"id": "D-004", "titel": "Schreiben Musterhaft-Versicherung", "dateiname": "04_schreiben_versicherung.txt", "datum": "2026-04-08", "kategorie": "Gegner"}
+  ],
+  "beteiligte": [
+    {"id": "B-1", "name": "Thomas Testmann", "rolle": "Mandant", "kontakt": "t.testmann@example.org"},
+    {"id": "B-2", "name": "Sabine Beispiel", "rolle": "Unfallgegnerin"},
+    {"id": "B-3", "name": "Musterhaft-Versicherung AG", "rolle": "Haftpflichtversicherung Gegner", "organisation": "Musterhaft-Versicherung AG"},
+    {"id": "B-4", "name": "ProRecht Rechtsschutz", "rolle": "Rechtsschutzversicherung Mandant"}
+  ],
+  "fristen": [
+    {"id": "F-1", "bezeichnung": "Wiedervorlage: Antwort Versicherung auf Anspruchsschreiben", "datum": "2026-04-30", "status": "offen"}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "akte": {
+    "id": "MV-2026-0007",
+    "aktenzeichen": "007/26 MV",
+    "bezeichnung": "Beispiel GbR ./. Mieter Schulz – Mietrückstand",
+    "rechtsgebiet": "Mietrecht",
+    "sachbearbeiter": "RAin Kaminski",
+    "status": "offen"
+  },
+  "dokumente": [
+    {"id": "D-101", "titel": "Mahnung Vermieter", "dateiname": "01_mahnung.txt", "datum": "2026-02-02", "kategorie": "Mandant"}
+  ],
+  "beteiligte": [
+    {"id": "B-11", "name": "Beispiel GbR", "rolle": "Mandant"},
+    {"id": "B-12", "name": "Peter Schulz", "rolle": "Gegner"}
+  ],
+  "fristen": []
+}

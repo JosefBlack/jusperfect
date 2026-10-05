@@ -1,0 +1,51 @@
+# Die Prüfung von jusperfect: Tests, Browser-JavaScript und die SAM-Vorlage.
+#
+# Sie läuft für jeden Push und jeden Pull Request. Anders als im früheren
+# gemeinsamen Repository gibt es keine Pfadfilter mehr: Hier gehört alles
+# zu jusperfect.
+
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python 3.12 einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Abhängigkeiten installieren
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]" "moto[s3,dynamodb]" cfn-lint
+
+      # Mit pytest, nicht mit unittest. unittest sammelt die freien
+      # pytest-Testfunktionen nicht ein - mehr als hundert Prüfungen der
+      # Oberfläche liefen hier nie mit. Örtlich wird ebenfalls pytest benutzt;
+      # beide Wege sollen dasselbe messen.
+      - name: Alle Python-Tests ausführen
+        run: python -m pytest -q
+
+      - name: Browser-JavaScript prüfen
+        run: node --check jusperfect/static/app.js
+
+      - name: AWS-SAM-Vorlage prüfen
+        run: cfn-lint infra/template.yaml

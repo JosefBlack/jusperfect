@@ -1,0 +1,18 @@
+# Kopie als infra/samconfig.toml anlegen (nicht eingecheckt) und Werte eintragen.
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "jusperfect-pilot"
+region = "eu-central-1"
+resolve_s3 = true
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+parameter_overrides = [
+  "Stufe=pilot",
+  "AlarmEmail=it@kanzlei.example",
+  "ModellId=anthropic.claude-opus-5",
+  "GuardrailId=",
+  "JurNodesUrl=",
+  "MonatsbudgetEur=125",
+  "BudgetUsd=140",
+]

@@ -1,0 +1,31 @@
+{
+  "akte": {
+    "id": "SC-2026-0031",
+    "aktenzeichen": "031/26 SC",
+    "bezeichnung": "Krämer ./. Vellinghausen – Eigenbedarfskündigung (Scans)",
+    "rechtsgebiet": "Mietrecht",
+    "sachbearbeiter": "RAin Kaminski",
+    "status": "offen"
+  },
+  "dokumente": [
+    {"id": "D-401", "titel": "Mietvertrag (Scan)", "dateiname": "01_mietvertrag_scan.txt", "datum": "2019-08-20", "kategorie": "Mandant"},
+    {"id": "D-402", "titel": "Kündigung wegen Eigenbedarfs (Scan)", "dateiname": "02_kuendigung_eigenbedarf_scan.txt", "datum": "2026-03-15", "kategorie": "Gegner"},
+    {"id": "D-403", "titel": "Widerspruch der Mieterin", "dateiname": "03_widerspruch_mieterin.txt", "datum": "2026-04-02", "kategorie": "Mandant"},
+    {"id": "D-404", "titel": "Schreiben der Gegenanwälte (Fax)", "dateiname": "04_schreiben_gegenanwalt_scan.txt", "datum": "2026-04-28", "kategorie": "Gegner"},
+    {"id": "D-405", "titel": "Erklärung Zeuge Ostwald (Scan)", "dateiname": "05_zeugenerklaerung_ostwald_scan.txt", "datum": "2026-04-20", "kategorie": "Mandant"},
+    {"id": "D-406", "titel": "Aktenvermerk Erstgespräch", "dateiname": "06_aktenvermerk.txt", "datum": "2026-04-22", "kategorie": "Mandant"},
+    {"id": "D-407", "titel": "Mahnung Mietrückstand (Scan)", "dateiname": "07_mahnung_mietrueckstand_scan.txt", "datum": "2026-03-05", "kategorie": "Gegner"},
+    {"id": "D-408", "titel": "Fax-Deckblatt (Scan)", "dateiname": "08_fax_deckblatt_scan.txt", "datum": "2026-04-28", "kategorie": "Gegner"}
+  ],
+  "beteiligte": [
+    {"id": "B-31", "name": "Ilse Krämer", "rolle": "Mandantin, Mieterin"},
+    {"id": "B-32", "name": "Gerold Vellinghausen", "rolle": "Gegner, Vermieter"},
+    {"id": "B-33", "name": "Jonas Vellinghausen", "rolle": "Sohn des Vermieters"},
+    {"id": "B-34", "name": "Bernd Ostwald", "rolle": "Zeuge der Mandantin"},
+    {"id": "B-35", "name": "Sabine Krämer", "rolle": "Tochter der Mandantin"},
+    {"id": "B-36", "name": "Rechtsanwälte Bredow & Uhlenkamp", "rolle": "Gegenanwälte"}
+  ],
+  "fristen": [
+    {"id": "F-31", "bezeichnung": "Widerspruchsfrist § 574b Abs. 2 BGB (zwei Monate vor Beendigung)", "datum": "2026-07-31", "erledigt": false}
+  ]
+}

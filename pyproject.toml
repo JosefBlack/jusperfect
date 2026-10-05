@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jusperfect"
+version = "2.0.0.dev"
+description = "jusperfect – kontrollierte KI-Schicht über jur|nodes mit AWS Bedrock"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "pydantic>=2.7,<3",
+  "httpx>=0.27,<1",
+  # Bedrock Converse API, Guardrails. Ohne AWS-Zugang wird das Paket nie
+  # aufgerufen; der Demo-Anbieter arbeitet vollständig offline.
+  "boto3>=1.35,<2",
+  "pypdf>=4,<7",
+  # Eine gescannte Seite wird auf dem Rechner der Kanzlei zum Bild gemacht,
+  # bevor sie an die Texterkennung geht: Textract nimmt ueber das Feld Bytes
+  # nur PNG und JPEG an, PDF ausschliesslich ueber einen Ablageort in S3.
+  # Oertlich umwandeln heisst, dass kein Akteninhalt bei AWS liegen bleibt -
+  # er wird verarbeitet, nicht gespeichert. PDFium ist dieselbe Maschine, mit
+  # der Chrome PDFs anzeigt; beide Pakete sind fertige Wheels ohne
+  # Systembibliothek.
+  "pypdfium2>=4,<6",
+  "pillow>=10,<13",
+  "python-docx>=1.1,<2",
+  # Outlook-Nachrichten (.msg). In einer Akte liegen oft mehr E-Mails als
+  # Schriftsaetze; das Format ist ein eigener Dateibaum und ohne Paket nicht
+  # zu lesen. Reines Python, keine Systembibliothek.
+  "extract-msg>=0.48,<1",
+  # AES-256-GCM für den temporären Textspeicher.
+  "cryptography>=42,<49",
+]
+
+[project.optional-dependencies]
+aws = [
+  # ASGI-Adapter für AWS Lambda hinter API Gateway.
+  "mangum>=0.17,<1",
+]
+dev = [
+  "reportlab>=4,<5",
+  # Ohne diese Zeile lief die automatische Pruefung bei GitHub mit unittest
+  # und ohne pytest: Neun Testdateien liessen sich nicht einmal einlesen, und
+  # die freien pytest-Testfunktionen sammelte unittest gar nicht erst ein. Sie
+  # mass 678 Tests, wo oertlich 826 laufen - und meldete dabei rot, was in
+  # Wahrheit gruen war.
+  "pytest>=8,<9",
+]
+
+[tool.setuptools.packages.find]
+include = ["jusperfect*"]
+
+[tool.setuptools.package-data]
+jusperfect = ["static/*", "packs/*.json"]

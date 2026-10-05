@@ -1,0 +1,29 @@
+{
+  "_hinweis": [
+    "Abweichende Pfade der jur|nodes-Schnittstelle.",
+    "",
+    "Diese Datei wird nur gebraucht, wenn der Server der Kanzlei einen Pfad",
+    "anders fuehrt als die Beschreibung des Herstellers. Was hier steht,",
+    "ueberschreibt die Vorgabe im Programm; alles Uebrige bleibt.",
+    "",
+    "So wird sie benutzt: Diese Datei umbenennen in",
+    "  jurnodes-endpunkte.json",
+    "und in START-JURNODES.bat die Zeile ergaenzen:",
+    "  set JUSPERFECT_JURNODES_ENDPUNKTE=jurnodes-endpunkte.json",
+    "",
+    "Dann nur die Zeilen stehenlassen, die wirklich abweichen, und die",
+    "uebrigen loeschen - jede ueberfluessige Zeile ist eine Stelle, an der",
+    "spaeter ein Fehler entstehen kann.",
+    "",
+    "Die Vorgaben stehen in jusperfect/jurnodes/http_adapter.py, Klasse",
+    "Endpunkte. Was der Server wirklich annimmt, sagt JURNODES-PRUEFEN.bat."
+  ],
+  "akten_suche": "/record/search",
+  "akte": "/record",
+  "ordner_inhalt": "/file-system/folder/content",
+  "datei_download": "/file-system/file/download",
+  "beteiligte": "/relation/search",
+  "fristen": "/todo/search",
+  "vermerke": "/record/note",
+  "datei_hinzufuegen": "/file-system/add-file"
+}

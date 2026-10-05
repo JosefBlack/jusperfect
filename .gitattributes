@@ -1,0 +1,11 @@
+# Windows-Batchdateien immer mit CRLF auschecken, sonst stolpert cmd.exe.
+*.bat text eol=crlf
+
+# Der Programmstand wandert beim Auspacken in die Datei selbst: "git archive"
+# ersetzt $Format:...$ durch Nummer und Datum der Aenderung. Die Startdateien
+# zeigen das an.
+#
+# Warum: Am 16.09.2026 lief in der Kanzlei ein Ordner, in dem der Programmteil
+# neu und die Startdateien alt waren. Von aussen sah das aus wie ein Fehler im
+# Programm, und wir haben zweimal an der falschen Stelle gesucht.
+FASSUNG.txt export-subst

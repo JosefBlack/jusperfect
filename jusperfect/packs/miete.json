@@ -1,0 +1,20 @@
+{
+  "id": "miete",
+  "rechtsgebiet": "Mietrecht",
+  "titel": "Mietsache – Beweisprüfung",
+  "beschreibung": "Grundzüge einer mietrechtlichen Akte, deterministisch gegen den geladenen Aktentext geprüft.",
+  "anforderungen": [
+    {"id": "mietvertrag", "titel": "Mietvertrag / Mietverhältnis", "pflicht": true,
+     "stichworte": ["Mietvertrag", "Mietverhältnis", "Wohnung", "Vermieter", "Mieter", "Kaltmiete", "Warmmiete"],
+     "fehlt_hinweis": "Mietvertrag und Nachträge beiziehen."},
+    {"id": "rueckstand", "titel": "Zahlungsrückstand beziffert", "pflicht": true,
+     "stichworte": ["Rückstand", "Mietrückstand", "nicht eingegangen", "Zahlungsverzug", "offen", "EUR"],
+     "fehlt_hinweis": "Rückstand nach Monaten und Betrag aufstellen (Kontoauszüge)."},
+    {"id": "mahnung", "titel": "Mahnung / Fristsetzung", "pflicht": true,
+     "stichworte": ["Mahnung", "Frist", "auffordern", "überweisen", "bis zum"],
+     "fehlt_hinweis": "Mahnung mit Zahlungsfrist nachweisen."},
+    {"id": "kuendigung", "titel": "Kündigung angesprochen", "pflicht": false,
+     "stichworte": ["Kündigung", "fristlos", "ordentlich", "Räumung"],
+     "fehlt_hinweis": "Kündigungsvoraussetzungen (§§ 543, 573 BGB) prüfen."}
+  ]
+}

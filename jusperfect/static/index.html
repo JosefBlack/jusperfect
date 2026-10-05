@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jusperfect</title>
+<link rel="icon" href="/static/jusperfect.ico" sizes="any">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header class="kopf">
+  <div class="marke"><span class="jus">jus</span>perfect</div>
+  <div class="kopf-mitte" id="akte-leiste" hidden>
+    <button id="akte-wechseln" type="button" class="akte-wechseln"
+            title="Zurueck zur Aktenliste. Die Sitzung wird geschlossen und die temporaeren Texte werden geloescht.">← Akte wechseln</button>
+    <span id="akte-name" class="akte-name"></span>
+    <!-- Stand zwischen Analyse und Entwurf, also zwischen den Arbeitsknoepfen.
+         Es beendet aber die Arbeit; es gehoert neben den anderen Weg hinaus. -->
+    <button id="sitzung-schliessen" type="button" class="akte-wechseln"
+            title="Beendet die Arbeit an dieser Akte und löscht die temporären Texte. Das Aktengedächtnis bleibt.">Sitzung schließen</button>
+  </div>
+  <div class="kopf-rechts">
+    <span id="kosten" class="kosten" title="Verbrauch im laufenden Monat"></span>
+    <span id="status" class="status">verbinde …</span>
+    <!-- Die Nutzerkennung selbst steht auf der Anmeldeseite, nicht mehr hier in
+         der Ecke. Oben bleibt nur, wer angemeldet ist - und der Weg zurueck. -->
+    <input id="nutzer" type="hidden" value="">
+    <!-- Der Name IST der Weg zurueck - aber er muss auch danach aussehen.
+         Stand hier als blasser Text ohne Rahmen; aus der Kanzlei am
+         25.09.2026: "zu klein und nicht so intuitiv". Ein Knopf, den man
+         fuer eine Beschriftung haelt, ist kein Knopf.
+         Jetzt: Sinnbild einer Person, der Name, und daneben klein, was beim
+         Klicken geschieht. Die dauerhafte Beschriftung "Benutzer wechseln"
+         kommt trotzdem nicht zurueck - sie nahm Platz fuer etwas Seltenes. -->
+    <button id="nutzer-wechseln" type="button" class="nutzer-knopf" hidden
+            title="Anklicken, um den Benutzer zu wechseln">
+      <svg class="nutzer-bild" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <circle cx="8" cy="5" r="3"></circle>
+        <path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5"></path>
+      </svg>
+      <span id="nutzer-name" class="nutzer-name"></span>
+      <span class="nutzer-hinweis">wechseln</span>
+    </button>
+    <button id="anmeldung" type="button" class="anmeldung" hidden>Anmelden</button>
+  </div>
+</header>
+
+<!-- Anmeldung: die erste Seite. Wer arbeitet hier? -->
+<section id="anmelden" class="anmelden" hidden>
+  <div class="anmelde-karte">
+    <div class="anmelde-marke"><span class="jus">jus</span>perfect</div>
+    <p class="anmelde-zeile">Kontrollierte KI-Schicht über den Aktenbestand</p>
+
+    <div id="anmelden-lokal" hidden>
+      <h2>Wer arbeitet hier?</h2>
+      <ul id="nutzerliste" class="nutzerliste"></ul>
+      <label class="anmelde-eigen">Andere Kennung
+        <input id="nutzer-eigen" placeholder="z. B. ra-weber" autocomplete="off"></label>
+      <p class="anmelde-fuss">Örtlicher Betrieb auf diesem Rechner. Die Auswahl sagt,
+        unter welchem Namen gearbeitet wird und welche Akten sichtbar sind – sie ist
+        <b>kein Kennwort</b> und schützt nichts. Wer an diesem Rechner sitzt, kann jeden
+        Namen wählen.</p>
+    </div>
+
+    <div id="anmelden-aws" hidden>
+      <h2>Anmeldung</h2>
+      <p class="anmelde-fuss">Mit der Kanzlei-Anmeldung und zweitem Faktor. Der Zugang
+        liegt nur im Arbeitsspeicher dieses Fensters.</p>
+    </div>
+
+    <p id="anmelde-fehler" class="anmelde-fehler" hidden></p>
+  </div>
+</section>
+
+<!-- Aktenauswahl -->
+<section id="einstieg" class="einstieg" hidden>
+  <h1>Akte öffnen</h1>
+  <p class="unterzeile">Wählen Sie eine Akte aus jur|nodes. jusperfect verarbeitet den Text im gesicherten Bereich – kein Umweg über Platzhalter.</p>
+  <!-- Was beim Schliessen gesichert wurde. Steht hier und nicht nur als kurze
+       Einblendung unten rechts: Wer eine Akte zumacht, will schwarz auf weiss
+       lesen, dass nichts verlorengegangen ist - und zwar so lange, bis er die
+       naechste oeffnet. -->
+  <p id="schluss-hinweis" class="schluss-hinweis" hidden></p>
+  <div class="suchzeile">
+    <input id="suche" placeholder="Aktenzeichen oder Bezeichnung" autocomplete="off">
+    <button id="suchen" class="knopf">Suchen</button>
+  </div>
+  <ul id="aktenliste" class="aktenliste"></ul>
+
+  <!-- Zuletzt geoeffnet: der schnellste Weg zurueck in die Akte von gestern.
+       Steht nur in diesem Browser und enthaelt keinen Akteninhalt. -->
+  <section id="verlauf-block" class="verlauf-block" hidden>
+    <div class="verlauf-kopf">
+      <h2>Zuletzt geöffnet</h2>
+      <button type="button" id="verlauf-leeren" class="mini leise"
+              title="Die Liste in diesem Browser löschen">Liste leeren</button>
+    </div>
+    <ul id="verlauf" class="aktenliste"></ul>
+  </section>
+
+  <!-- Verwaltung: nicht die taegliche Arbeit, deshalb abgesetzt und leise. -->
+  <div class="verwaltungszeile">
+    <button id="posteingang-oeffnen" class="knopf leise" hidden title="Eingegangene Dokumente aus dem beobachteten Ordner">Posteingang</button>
+    <button id="nachweis-oeffnen" class="knopf leise"
+            title="Verarbeitungsnachweis: was ist wann an welches Modell gegangen">Nachweis</button>
+    <button id="aufsicht-oeffnen" class="knopf leise" hidden
+            title="Arbeitsbereiche, in denen die Aufbewahrung eine Entscheidung verlangt">Aufbewahrung<span id="aufsicht-marke" class="marke-zahl" hidden></span></button>
+    <button id="selbsttest-oeffnen" class="knopf leise"
+            title="Stehen die Absicherungen? Region, Mitschrift, Aktenzugang, Kostenbremse">Selbsttest<span id="selbsttest-marke" class="marke-zahl" hidden></span></button>
+  </div>
+</section>
+
+<!-- Cowork-Arbeitsfläche: Dokument | Cowork | Belege -->
+<!-- Woran zuletzt gearbeitet wurde. Aus der Kanzlei am 25.09.2026: "beim
+     Öffnen der Akte sehen, was man als Letztes gemacht hat, sodass man dann
+     wieder daran ansetzen kann."
+     Es stehen die eigenen Fragen im Wortlaut da, nicht eine vom Modell
+     geschriebene Zusammenfassung: Die kostete bei jedem Öffnen Geld und
+     koennte danebenliegen. An der eigenen Frage erkennt man sich ohnehin
+     besser wieder. Diese Leiste kostet nichts - alles liegt im Gedaechtnis.
+     Sie geht weg, sobald man sie schliesst oder eine Frage stellt. -->
+<section id="arbeitsstand" class="arbeitsstand" hidden>
+  <div class="arbeitsstand-text">
+    <p class="arbeitsstand-kopf">Zuletzt an dieser Akte<span id="arbeitsstand-wann"></span></p>
+    <ul id="arbeitsstand-fragen" class="arbeitsstand-fragen"></ul>
+    <p id="arbeitsstand-zahlen" class="arbeitsstand-zahlen"></p>
+  </div>
+  <button type="button" id="arbeitsstand-zu" class="arbeitsstand-zu"
+          title="Ausblenden" aria-label="Ausblenden">×</button>
+</section>
+
+<!-- Was beim Lesen der Dokumente nicht ging. Aus der Kanzlei am 25.09.2026:
+     "er uebernimmt beim Lesen der Dokumente nicht alle, nur 24 von 38."
+     Das Programm sagte es auch vorher - in vierzehn einzelnen Saetzen, von
+     denen einer drei Sekunden lang aufblitzte. Wer eine Meldung ueber EIN
+     Dokument liest, haelt es fuer einen Einzelfall und zaehlt nicht nach.
+     Diese Leiste bleibt stehen, bis man sie wegklickt. -->
+<section id="uebernahme" class="uebernahme" hidden>
+  <div class="uebernahme-text">
+    <p id="uebernahme-bilanz" class="uebernahme-bilanz"></p>
+    <!-- Siebzehn Zeilen mit demselben Satz sind keine Auskunft, sondern eine
+         Wand. Aus der Kanzlei am 25.09.2026: "blende sie nur ein". Die Bilanz
+         steht also als eine Zeile da, die Einzelheiten auf Klick. -->
+    <details id="uebernahme-mehr" class="uebernahme-mehr" hidden>
+      <summary id="uebernahme-mehr-titel">Einzelheiten</summary>
+      <ul id="uebernahme-liste" class="uebernahme-liste"></ul>
+    </details>
+  </div>
+  <button type="button" id="uebernahme-zu" class="arbeitsstand-zu"
+          title="Ausblenden" aria-label="Ausblenden">×</button>
+</section>
+
+<main id="flaeche" class="flaeche" hidden>
+  <section class="spalte dokument" id="spalte-dokument">
+    <div class="spalte-kopf">
+      <span>Dokument</span>
+      <select id="dok-filter" class="dok-filter" title="Dokument wählen"></select>
+      <!-- Der Knopf, mit dem die Arbeitsakte zusammengestellt wird, stand oben
+           in der Leiste - neben dem Knopf, der diese Spalte ein- und
+           ausblendet. Zwei Knoepfe mit dem Wort "Dokument" nebeneinander, die
+           Verschiedenes tun. Er steht jetzt hier, bei den Dokumenten. -->
+      <button type="button" data-aktion="dokumente" class="mini leise"
+              title="Welche Dokumente liegen in der Arbeitsakte?">Arbeitsakte</button>
+      <!-- Der Pfeil zeigt dorthin, wohin die Spalte verschwindet. Rechts am Rand
+           der Leiste steht er dort, wo das Auge ihn sucht. -->
+      <button type="button" class="fenster-zu" data-fenster-zu="dokument"
+              title="Dokumente ausblenden" aria-label="Dokumente ausblenden">‹</button>
+    </div>
+    <div id="dok-text" class="dok-text" tabindex="0"></div>
+  </section>
+
+  <section class="spalte cowork">
+    <!-- Ohne Ueberschrift: "Cowork" sagte niemandem etwas, und das Eingabefeld
+         unten erklaert die Spalte besser als jedes Wort darueber. -->
+    <div class="spalte-kopf">
+      <!-- Die Fensterknoepfe stehen auf der Seite, auf der ihr Fenster aufgeht.
+           Aus der Kanzlei: "die Auswahlbuttons waren in der Mitte und es
+           oeffneten sich rechts oder links Fenster". Sie standen alle vier in
+           einer Reihe in der Mitte - einer schaltete links, drei schalteten
+           rechts, und nichts sagte welcher. Jetzt zeigt die Stelle des Knopfes
+           dorthin, wo etwas geschieht, und der Pfeil sagt es noch einmal. -->
+      <div class="aktionen">
+        <span class="fenster-knoepfe links">
+          <button type="button" data-fenster="dokument" class="mini leise fensterknopf">‹ Dokumente</button>
+        </span>
+        <span class="arbeitsknoepfe">
+          <button data-aktion="analyse" class="mini">Analyse</button>
+          <button data-aktion="entwurf" class="mini">Entwurf</button>
+          <!-- Ein eigener Knopf, nicht im Mehr-Menue. Aus der Kanzlei am
+               25.09.2026: "Aktengedaechtnis soll eigener Button sein."
+               Davor war er ganz verschwunden, weil das Gedaechtnis
+               ausgeschaltet ist - und etwas, das spurlos verschwindet, sieht
+               aus wie ein Fehler. Er steht jetzt fest neben den beiden
+               Arbeitsknoepfen; ist das Gedaechtnis aus, sagt der Klick, wie
+               es wieder angeht. -->
+          <button data-aktion="gedaechtnis" class="mini">Aktengedächtnis</button>
+          <div class="mehr">
+            <button id="mehr-knopf" type="button" class="mini leise" aria-expanded="false">Mehr ▾</button>
+            <div id="mehr-menue" class="mehr-menue" hidden>
+              <button data-aktion="triage" class="mehr-eintrag">Eingangsprüfung</button>
+              <button data-aktion="pack" class="mehr-eintrag">Prüfliste</button>
+              <button data-aktion="referenzen" class="mehr-eintrag" hidden>Referenzen</button>
+              <button data-aktion="haufe" class="mehr-eintrag" hidden>Recherche bei Haufe</button>
+              <!-- Derselbe Weg wie Haufe: ein Sprung in den Browser, nichts im
+                   Programmordner. Aus der Kanzlei am 25.09.2026: "ich finde
+                   unter mehr gar nicht die Gesetzestexte" - der Sprung stand
+                   bis dahin nur IN einer Antwort, neben einem Paragrafen.
+                   Nachschlagen will man aber auch ohne Antwort. -->
+              <!-- IMMER SICHTBAR, wie Eingangspruefung und Pruefliste. Er stand
+                   zuerst auf "hidden" und wurde aus dem Status eingeblendet,
+                   wie der Haufe-Knopf, der eine hinterlegte Adresse braucht.
+                   Zweimal aus der Kanzlei am 25.09.2026: "ich sehe ihn immer
+                   noch nicht." Die Adresse der amtlichen Seite steht fest im
+                   Programm; es gibt nichts einzublenden. -->
+              <button data-aktion="gesetze" class="mehr-eintrag">Gesetz nachschlagen</button>
+              <button data-aktion="abschluss" class="mehr-eintrag" hidden>Akte abschließen</button>
+            </div>
+          </div>
+        </span>
+        <span class="fenster-knoepfe rechts">
+          <button type="button" data-fenster="chronologie" class="mini leise fensterknopf">Chronologie ›</button>
+          <button type="button" data-fenster="gedaechtnis" class="mini leise fensterknopf" hidden>Gedächtnis ›</button>
+          <button type="button" data-fenster="belege" class="mini leise fensterknopf">Belege ›</button>
+        </span>
+      </div>
+    </div>
+    <div id="thread" class="thread"></div>
+    <div class="eingabe">
+      <form id="frage-form" class="frage-form">
+        <textarea id="frage" rows="2" placeholder="Frage an die Akte …"></textarea>
+        <button id="senden" class="knopf" type="submit">Fragen</button>
+      </form>
+      <p id="schaetzung" class="schaetzung" hidden></p>
+    </div>
+  </section>
+
+  <aside class="spalte rechts" id="spalte-rechts">
+    <section class="fenster chronologie" id="fenster-chronologie">
+      <div class="spalte-kopf">
+        <span class="kopf-links">
+          <button type="button" class="fenster-zu" data-fenster-zu="chronologie"
+                  title="Chronologie ausblenden" aria-label="Chronologie ausblenden">‹</button>
+          <button type="button" class="fenster-los" data-fenster-los="chronologie"
+                  title="Chronologie in einem eigenen Fenster öffnen – für den zweiten Bildschirm"
+                  aria-label="Chronologie in einem eigenen Fenster öffnen">⧉</button>
+          <span>Chronologie</span>
+        </span>
+        <span class="kopf-rechts">
+          <span id="chrono-stand" class="beleg-stand"></span>
+          <button type="button" id="chrono-aktualisieren" class="mini leise"
+                  title="Neue Dokumente in den Zeitstrahl nachtragen">aktualisieren</button>
+        </span></div>
+      <div id="chronologie" class="chrono-liste"></div>
+    </section>
+    <section class="fenster gedaechtnis" id="gedaechtnis-fenster" hidden>
+      <div class="spalte-kopf">
+        <span class="kopf-links">
+          <button type="button" class="fenster-zu" data-fenster-zu="gedaechtnis"
+                  title="Aktengedächtnis ausblenden" aria-label="Aktengedächtnis ausblenden">‹</button>
+          <button type="button" class="fenster-los" data-fenster-los="gedaechtnis"
+                  title="Aktengedächtnis in einem eigenen Fenster öffnen – für den zweiten Bildschirm"
+                  aria-label="Aktengedächtnis in einem eigenen Fenster öffnen">⧉</button>
+          <span>Aktengedächtnis</span>
+        </span>
+        <span class="kopf-rechts">
+          <span id="ged-stand" class="beleg-stand"></span>
+          <button type="button" id="ged-einlesen" class="mini"
+                  title="Die ganze Akte Portion für Portion ins Gedächtnis lesen – auch wenn sie für einen Aufruf zu groß ist">Akte einlesen</button>
+          <button type="button" id="ged-oeffnen" class="mini leise"
+                  title="Was liegt im Gedächtnis, was fehlt noch?">Auswahl</button>
+        </span></div>
+      <div id="ged-uebersicht" class="ged-uebersicht"></div>
+      <!-- Sieben Modellaufrufe dauern. Ohne Anzeige sitzt der Bearbeiter vor
+           einem Fenster, das nichts sagt - und weiss nicht, ob es noch laeuft. -->
+      <div id="ged-fortschritt" class="ged-fortschritt" hidden>
+        <div class="fortschritt-balken"><div id="ged-balken" class="fortschritt-fuell"></div></div>
+        <p id="ged-fortschritt-text" class="ged-satz"></p>
+        <p id="ged-fortschritt-dauer" class="ged-satz leise"></p>
+        <button type="button" id="ged-abbrechen" class="mini leise">Anhalten</button>
+      </div>
+    </section>
+    <section class="fenster belege" id="fenster-belege">
+      <div class="spalte-kopf">
+        <span class="kopf-links">
+          <button type="button" class="fenster-zu" data-fenster-zu="belege"
+                  title="Belege ausblenden" aria-label="Belege ausblenden">‹</button>
+          <button type="button" class="fenster-los" data-fenster-los="belege"
+                  title="Belege in einem eigenen Fenster öffnen – für den zweiten Bildschirm"
+                  aria-label="Belege in einem eigenen Fenster öffnen">⧉</button>
+          <span>Belege</span>
+        </span>
+        <span class="kopf-rechts">
+          <span id="beleg-stand" class="beleg-stand"></span>
+        </span></div>
+      <div id="belege" class="belege-liste"></div>
+    </section>
+  </aside>
+</main>
+
+<dialog id="entwurf-dialog" class="entwurf-dialog">
+  <form method="dialog" class="entwurf-form">
+    <h2>Entwurf vorbereiten</h2>
+    <label>Art
+      <select id="entwurf-art">
+        <option value="mandant">Schreiben an den Mandanten</option>
+        <option value="gegner">Schreiben an die Gegenseite</option>
+        <option value="versicherung">Schreiben an die Versicherung</option>
+        <option value="rsv">Schreiben an die Rechtsschutzversicherung</option>
+        <option value="mahnung">Mahnung</option>
+        <option value="aktenvermerk">Aktenvermerk</option>
+      </select>
+    </label>
+    <label id="entwurf-auftrag-feld" hidden>Eigener Auftrag
+      <select id="entwurf-auftrag"><option value="">— keiner —</option></select>
+    </label>
+    <label>Empfänger (optional) <input id="entwurf-empfaenger" autocomplete="off"></label>
+    <label>Anweisung <textarea id="entwurf-anweisung" rows="3" placeholder="Was soll das Schreiben leisten?"></textarea></label>
+    <div class="dialog-knoepfe">
+      <button value="abbrechen" class="knopf leise">Abbrechen</button>
+      <button id="entwurf-start" value="start" class="knopf">Entwurf erstellen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Aus einer einmaligen Anweisung einen wiederverwendbaren Auftrag machen.
+     Der Vorschlag kommt von der KI, angelegt wird er erst durch einen
+     Menschen - deshalb steht der Text hier zum Lesen und Ändern. -->
+<dialog id="vorschlag-dialog" class="entwurf-dialog">
+  <form method="dialog" class="entwurf-form">
+    <h2>Als eigenen Auftrag vormerken</h2>
+    <p class="vorschlag-warnung">Noch ist nichts angelegt. Bitte lesen Sie den Text
+      und streichen Sie alles, was nur zu dieser Akte gehört – Namen, Beträge,
+      Daten, Aktenzeichen. Der Auftrag steht danach bei jeder Akte zur Auswahl.</p>
+    <label>Dateiname <input id="vorschlag-name" autocomplete="off"></label>
+    <label>Anweisung <textarea id="vorschlag-text" rows="8"></textarea></label>
+    <p id="vorschlag-hinweis" class="vorschlag-hinweis" hidden></p>
+    <div class="dialog-knoepfe">
+      <button value="abbrechen" class="knopf leise">Abbrechen</button>
+      <button id="vorschlag-anlegen" value="anlegen" class="knopf">Auftrag anlegen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="nachweis-dialog" class="nachweis-dialog">
+  <form method="dialog" class="nachweis-form">
+    <h2>Verarbeitungsnachweis</h2>
+    <p class="nachweis-hinweis">Was wann an welches Modell ging – Kurzkennung und Umfang, kein Aktentext.</p>
+    <!-- Behält AWS eine eigene Abschrift? Die Frage gehört an dieselbe Stelle
+         wie die Frage, was hinausgegangen ist. Ohne Bedrock steht hier nichts. -->
+    <p id="nachweis-mitschrift" class="nachweis-mitschrift" hidden></p>
+    <div id="nachweis-liste" class="nachweis-liste"></div>
+    <div class="dialog-knoepfe">
+      <button value="schliessen" class="knopf leise">Schließen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Das Startbild: Stehen die Absicherungen? Aus der Kanzlei: „ein Testlauf
+     beim Start des Programms mit Hinweis auf den Testablauf, was gerade gemacht
+     wird." Es kostet nichts und ruft kein Modell auf - das tut erst der Knopf
+     ganz unten, und der sagt vorher, dass er kostet. -->
+<dialog id="selbsttest-dialog" class="nachweis-dialog selbsttest-dialog">
+  <form method="dialog" class="nachweis-form selbsttest-form">
+    <h2>Selbsttest</h2>
+    <p class="nachweis-hinweis">Was das Programm gerade prüft – es kostet nichts
+      und schickt keinen Aktentext hinaus.</p>
+
+    <!-- Der Wagen faehrt die Strecke ab, waehrend die Punkte nacheinander
+         erscheinen. Er zeigt nichts an, was nicht auch in der Liste stuende -
+         er zeigt es nur als Ablauf, und darum ging es: "ein Hinweis auf den
+         Testablauf, was gerade gemacht wird". Wer die Bewegung nicht mag oder
+         nicht vertraegt, bekommt alles auf einmal (prefers-reduced-motion). -->
+    <div class="st-bahn" aria-hidden="true">
+      <div class="st-strecke"><span id="st-wagen" class="st-wagen">🏎️</span></div>
+      <span id="st-ziel" class="st-ziel">🏁</span>
+    </div>
+    <p id="selbsttest-ergebnis" class="st-ergebnis" hidden aria-live="polite"></p>
+    <!-- Acht Punkte und dazu die Modelle werden laenger als ein kleiner
+         Bildschirm. Was rollt, steht hier drin; Ueberschrift und Knoepfe
+         bleiben davor und dahinter stehen. -->
+    <div class="selbsttest-rollen">
+      <div id="selbsttest-liste" class="selbsttest-liste"></div>
+
+      <h3 class="selbsttest-ueberschrift">Eingebundene Modelle</h3>
+      <p class="nachweis-hinweis">Welches Modell welche Arbeit tut. Ob es wirklich
+        antwortet, steht erst nach einem Testlauf fest – der kostet einen
+        Bruchteil eines Cents je Modell. Ist ein Schutzgeländer hinterlegt,
+        schickt der Testlauf zusätzlich fünf erfundene Sätze aus verschiedenen
+        Rechtsgebieten hindurch: Ein Filter, der eine Körperverletzungssache
+        anhält, fällt sonst erst vor einer echten Akte auf.</p>
+      <div id="selbsttest-modelle" class="selbsttest-liste"></div>
+    </div>
+
+    <div class="dialog-knoepfe">
+      <button type="button" id="selbsttest-anprobieren" class="knopf leise">Modell-Testlauf</button>
+      <button value="schliessen" class="knopf">Schließen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="explorer-dialog" class="explorer-dialog">
+  <form method="dialog" class="explorer-form">
+    <h2 id="explorer-titel">Dokumente der Akte</h2>
+    <!-- Eine Liste mit Haekchen statt zweier Spalten mit Ziehen. Aus der
+         Kanzlei: "Ich finde so etwas wie Haekchen intuitiver." Angehakt heisst
+         "in der Arbeitsakte" - dieselbe Bedeutung wie vorher die rechte Spalte,
+         nur ohne den Umweg ueber Maus oder Pfeil. -->
+    <p class="nachweis-hinweis">Angehakt heißt: liegt in der Arbeitsakte und geht bei Fragen mit.</p>
+    <input type="search" id="explorer-suche" class="explorer-suche" autocomplete="off"
+           placeholder="Dokumente filtern – Titel, Datum oder Kategorie (z. B. Gegner, 2026-05)">
+    <div class="explorer-leiste">
+      <button type="button" id="alle-rein" class="mini leise" title="Alle sichtbaren anhaken">alle anhaken</button>
+      <button type="button" id="alle-raus" class="mini leise" title="Haken bei allen sichtbaren entfernen">Haken entfernen</button>
+      <span id="explorer-arten" class="explorer-arten"></span>
+      <span id="quelle-zahl" class="zahl" title="sichtbar von insgesamt"></span>
+      <span id="arbeit-zahl" class="zahl" hidden></span>
+    </div>
+    <ul id="quelle-liste" class="explorer-liste"></ul>
+    <p id="explorer-umfang" class="explorer-umfang"></p>
+    <div class="dialog-knoepfe">
+      <button value="abbrechen" class="knopf leise">Abbrechen</button>
+      <button id="explorer-uebernehmen" value="uebernehmen" class="knopf">Übernehmen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="ged-dialog" class="explorer-dialog">
+  <form method="dialog" class="explorer-form">
+    <h2>Aktengedächtnis ergänzen</h2>
+    <p class="nachweis-hinweis">Links die Akte aus jur|nodes, rechts was im Gedächtnis liegt.
+      Was rechts fehlt, ist links hervorgehoben. Rechts nimmt „vergessen" ein einzelnes
+      Dokument wieder heraus – die Akte in jur|nodes bleibt unberührt.</p>
+    <input type="search" id="ged-suche" class="explorer-suche" autocomplete="off"
+           placeholder="Dokumente filtern – Titel, Datum oder Kategorie">
+    <div class="explorer">
+      <section class="explorer-spalte">
+        <div class="explorer-kopf">jur|nodes · Akte <span id="ged-quelle-zahl" class="zahl"></span>
+          <button type="button" id="ged-alle-fehlenden" class="mini leise"
+                  title="Alle fehlenden auswählen">alle fehlenden</button></div>
+        <ul id="ged-quelle-liste" class="explorer-liste"></ul>
+      </section>
+      <section class="explorer-spalte">
+        <div class="explorer-kopf">Im Gedächtnis <span id="ged-drin-zahl" class="zahl"></span></div>
+        <ul id="ged-drin-liste" class="explorer-liste"></ul>
+      </section>
+    </div>
+    <!-- Die beiden Spalten oben sagen, WELCHE Dokumente im Gedächtnis liegen.
+         Was das Programm daraus gemacht hat, stand bisher nirgends zu sehen -
+         man musste es glauben. Hier steht es. -->
+    <details class="ged-inhalt" id="ged-inhalt">
+      <summary class="ged-inhalt-kopf">Was das Programm sich gemerkt hat</summary>
+      <div id="ged-inhalt-leer" class="chrono-leer" hidden></div>
+      <div id="ged-inhalt-teile" class="ged-inhalt-teile">
+        <details class="ged-block" id="ged-block-sachverhalt" open>
+          <summary>Lebenssachverhalt <span id="ged-sv-zahl" class="zahl"></span></summary>
+          <div id="ged-sv-text" class="ged-block-text"></div>
+        </details>
+        <details class="ged-block" id="ged-block-chronologie">
+          <summary>Chronologie <span id="ged-chrono-zahl" class="zahl"></span></summary>
+          <ul id="ged-chrono-liste" class="ged-block-liste"></ul>
+        </details>
+        <details class="ged-block" id="ged-block-fragen">
+          <summary>Frühere Fragen und Antworten <span id="ged-fragen-zahl" class="zahl"></span></summary>
+          <ul id="ged-fragen-liste" class="ged-block-liste"></ul>
+        </details>
+      </div>
+    </details>
+    <p id="ged-umfang" class="ged-umfang"></p>
+    <div class="dialog-knoepfe">
+      <button value="abbrechen" class="knopf leise">Schließen</button>
+      <button id="ged-uebernehmen" value="uebernehmen" class="knopf">Ausgewählte aufnehmen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="referenzen-dialog" class="nachweis-dialog">
+  <form method="dialog" class="nachweis-form">
+    <h2>Referenzen im Kontext</h2>
+    <p class="nachweis-hinweis">Urteile und Gesetze neben die Akte stellen; sie werden mitzitiert (<code>R…</code>).</p>
+    <div id="referenzen-liste" class="nachweis-liste"></div>
+    <div class="dialog-knoepfe">
+      <button value="abbrechen" class="knopf leise">Abbrechen</button>
+      <button id="referenzen-speichern" value="speichern" class="knopf">Übernehmen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="abschluss-dialog" class="nachweis-dialog">
+  <form method="dialog" class="nachweis-form">
+    <h2>Akte abschließen</h2>
+    <p class="nachweis-hinweis">Gelöscht wird nach dem Aktenstatus in jur|nodes, nicht nach der Zeit.
+      Eine Bearbeitungspause löst nie eine Löschung aus. Erst wird der belegte Arbeitsstand als Vermerk
+      nach jur|nodes zurückgeschrieben, danach werden Gedächtnis, Sitzungen, Dokumentauszüge und
+      Entwürfe dieser Akte gelöscht.</p>
+    <div id="abschluss-stand" class="abschluss-stand"></div>
+    <div id="abschluss-vorschau-block" hidden>
+      <p class="nachweis-hinweis">Genau dieser Text geht nach jur|nodes:</p>
+      <textarea id="abschluss-vorschau" class="abschluss-vorschau" readonly rows="12"></textarea>
+      <label class="abschluss-bestaetigung">
+        <input type="checkbox" id="abschluss-bestaetigt">
+        Ich habe den Text geprüft und gebe ihn frei. Danach wird der Arbeitsbereich dieser Akte gelöscht.
+      </label>
+    </div>
+    <div class="dialog-knoepfe">
+      <button value="schliessen" class="knopf leise">Schließen</button>
+      <button type="button" id="abschluss-vormerken" class="knopf" hidden>Abschluss vormerken</button>
+      <button type="button" id="abschluss-ausfuehren" class="knopf gefahr" hidden disabled>Exportieren und löschen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="aufsicht-dialog" class="nachweis-dialog">
+  <form method="dialog" class="nachweis-form">
+    <h2>Aufbewahrung</h2>
+    <p class="nachweis-hinweis">jusperfect löscht einen Arbeitsbereich nur, wenn jur|nodes die Akte
+      als abgeschlossen meldet – nie nach Zeitablauf. Hier stehen die Fälle, in denen es
+      <b>nicht selbst entscheiden darf</b>. Ohne diese Liste blieben sie unbemerkt liegen.</p>
+    <div id="aufsicht-liste" class="nachweis-liste"></div>
+    <div class="dialog-knoepfe">
+      <button value="schliessen" class="knopf leise">Schließen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="posteingang-dialog" class="nachweis-dialog">
+  <form method="dialog" class="nachweis-form">
+    <div class="posteingang-kopf">
+      <h2>Posteingang</h2>
+      <button id="posteingang-pruefen" type="button" class="mini">Prüfen</button>
+    </div>
+    <p class="nachweis-hinweis">Vorbereitet, nicht bearbeitet – geprüft wird von Ihnen.</p>
+    <p id="posteingang-stand" class="posteingang-stand"></p>
+    <div id="posteingang-liste" class="nachweis-liste"></div>
+    <div class="dialog-knoepfe">
+      <button value="schliessen" class="knopf leise">Schließen</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="rueckgaengig" class="rueckgaengig" hidden>
+  <span id="rueckgaengig-text"></span>
+  <button id="rueckgaengig-tun" class="mini">Rückgängig</button>
+  <button id="rueckgaengig-zu" class="mini leise" aria-label="Hinweis ausblenden" title="Ausblenden">✕</button>
+</div>
+<!-- Der Lesefortschritt. Aus der Kanzlei am 02.10.2026: "55 Dokumente werden
+     gelesen ... Dauert sehr lange. Es waere schoen, wenn hier ein witziger
+     Ladebalken erzeugt werden koennte."
+
+     Gebaut sind beide Teile, und der Balken ist der wichtigere: Er zeigt echte
+     Zahlen, weil die Oberflaeche die Dokumente jetzt in Portionen liest statt
+     in einem Zug. Ein Balken, der nur laeuft, waere eine Behauptung - und
+     dieses Projekt hat am selben Tag zweimal gelernt, was eine Anzeige wert
+     ist, die nicht misst. Der Spruch darunter vertreibt die Zeit und sagt
+     nebenbei, WARUM es dauert. -->
+<div id="lesefortschritt" class="lesefortschritt" hidden role="status" aria-live="polite">
+  <div class="fortschritt-balken"><div id="lese-balken" class="fortschritt-fuell"></div></div>
+  <p id="lese-text" class="lese-text"></p>
+  <p id="lese-dauer" class="lese-dauer"></p>
+  <p id="lese-spruch" class="lese-spruch"></p>
+  <button type="button" id="lese-anhalten" class="mini leise">Anhalten</button>
+</div>
+<!-- Nur im Nebenfenster sichtbar: Solange das Hauptfenster keine Akte
+     offen hat, gibt es hier nichts zu spiegeln. Ein leeres Fenster ohne
+     Erklaerung sieht aus wie ein Fehler. -->
+<p id="neben-leer" class="neben-leer" hidden>
+  Dieses Fenster zeigt, was im Hauptfenster geöffnet ist.<br>
+  Dort eine Akte öffnen – hier erscheint sie dann von selbst.
+</p>
+<div id="meldung" class="meldung" hidden></div>
+<script src="/static/konfiguration.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

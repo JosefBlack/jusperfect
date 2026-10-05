@@ -1,0 +1,76 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ClaudeAufrufen",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:eu-*::foundation-model/anthropic.claude-*",
+        "arn:aws:bedrock:*:AWS-KONTONUMMER:inference-profile/eu.anthropic.claude-*"
+      ]
+    },
+    {
+      "Sid": "TexterkennungFuerScans",
+      "Effect": "Allow",
+      "Action": "textract:DetectDocumentText",
+      "Resource": "*"
+    },
+    {
+      "Sid": "SchutzgelaenderAnwenden",
+      "Effect": "Allow",
+      "Action": "bedrock:ApplyGuardrail",
+      "Resource": "arn:aws:bedrock:eu-*:*:guardrail/*"
+    },
+    {
+      "Sid": "ModelleAnsehen",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:ListFoundationModels",
+        "bedrock:GetFoundationModel",
+        "aws-marketplace:ViewSubscriptions",
+        "bedrock:GetModelInvocationLoggingConfiguration"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "KeinAnderesModell",
+      "Effect": "Deny",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+      ],
+      "NotResource": [
+        "arn:aws:bedrock:eu-*::foundation-model/anthropic.claude-*",
+        "arn:aws:bedrock:*:AWS-KONTONUMMER:inference-profile/eu.anthropic.claude-*"
+      ]
+    },
+    {
+      "Sid": "NurEuropa",
+      "Effect": "Deny",
+      "Action": "bedrock:*",
+      "Resource": "*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:RequestedRegion": "eu-*"
+        }
+      }
+    },
+    {
+      "Sid": "KeineModellverwaltung",
+      "Effect": "Deny",
+      "Action": [
+        "bedrock:CreateModelCustomizationJob",
+        "bedrock:CreateModelInvocationJob",
+        "bedrock:PutModelInvocationLoggingConfiguration",
+        "bedrock:DeleteModelInvocationLoggingConfiguration",
+        "bedrock:DeleteGuardrail",
+        "bedrock:UpdateGuardrail"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

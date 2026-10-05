@@ -1,0 +1,48 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+.env
+.jusperfect-gedaechtnis/
+*.log
+.aws-sam/
+kostenstand.json
+
+# Die grosse Testakte wird erzeugt, nicht abgelegt: 880.000 Zeichen
+# Fuelltext bei fester Saat. Bauplan: werkzeug/grosse_testakte.py
+testdaten/grosse-akte/BA-*/
+
+# Die Beispielfaelle fuer die Ansicht "Aufbewahrung" werden erzeugt, nicht
+# abgelegt: Ihre Fristen liegen relativ zum Erzeugungstag und waeren in einer
+# Woche falsch. Bauplan: werkzeug/aufbewahrung_beispiele.py
+testdaten/aufbewahrung/
+
+# Der gefuehrte Durchgang legt sein Gedaechtnis neben den Testakten an und
+# baut es bei jedem Lauf neu. Bauplan: werkzeug/gedaechtnis_probe.py
+testdaten/gedaechtnis-probe/
+# Die gespeicherten Pruefboegen gehoeren zum Lauf, nicht zum Programm.
+pruefbogen/
+# Das aufgehobene Aktengedaechtnis des Pruefbogens. Es enthaelt den
+# Lebenssachverhalt der erfundenen Testakte - kein Mandantengut, aber auch
+# nichts, was in das Verzeichnis gehoert: Es entsteht bei jedem Lauf neu.
+pruefbogen-gedaechtnis/
+
+# Die Befunde der Pruefprogramme gehoeren zum Lauf, nicht zum Programm - und
+# sie duerfen auf keinen Fall in das Verzeichnis geraten. In ordnerpruefung.txt
+# stehen Aktenzeichen und Bezeichnungen aus dem echten Bestand der Kanzlei; in
+# zugangstest.txt steht, wie das AWS-Konto heisst. Beides ist im
+# Arbeitsverzeichnis am richtigen Platz und in der Versionsverwaltung am
+# falschen. Aufgefallen ist die Luecke am 23.09.2026, als ein Probelauf seinen
+# Befund im Arbeitsordner liegen liess.
+ordnerpruefung.txt
+jurnodestest.txt
+zugangstest.txt
+
+# Die Pakete fuer die Kanzlei werden gebaut, nicht abgelegt: Sie sind eine
+# Kopie des Programmstands, den der Commit daneben ohnehin festhaelt.
+jusperfect_*.zip
+jusperfect-*.zip

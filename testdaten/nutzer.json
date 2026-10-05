@@ -1,0 +1,7 @@
+{
+  "nutzer": [
+    {"id": "ra-weber", "name": "RA Dr. Weber (Testnutzer)", "akten": ["*"]},
+    {"id": "ra-kaminski", "name": "RAin Kaminski (Testnutzer)", "akten": ["*"]},
+    {"id": "refa-lorenz", "name": "ReFa Lorenz (Testnutzer)", "akten": ["VU-2026-0042"]}
+  ]
+}

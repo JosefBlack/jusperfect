@@ -1,0 +1,34 @@
+{
+  "_hinweis": [
+    "Wer in dieser Kanzlei mit jusperfect arbeitet.",
+    "",
+    "Diese Datei ersetzt die erfundenen Namen aus dem Probebetrieb, sobald mit",
+    "echten Akten gearbeitet wird. START-KANZLEI.bat und START-JURNODES.bat lesen sie.",
+    "",
+    "Eine Person hinzufuegen: die Zeile darueber kopieren, Komma am Ende der",
+    "vorherigen Zeile nicht vergessen, und id und name aendern.",
+    "  id    kurz, klein, ohne Leerzeichen - so meldet man sich an",
+    "  name  wie es auf dem Anmeldebild stehen soll",
+    "  akten [\"*\"] heisst: alle Akten. Sonst die Aktenzeichen einzeln,",
+    "        und eine leere Liste [] heisst: keine.",
+    "",
+    "Die Auswahl auf dem Anmeldebild ist KEIN Kennwort. Sie sagt, unter",
+    "welchem Namen gearbeitet wird und welche Akten sichtbar sind; wer an",
+    "diesem Rechner sitzt, kann jeden Namen waehlen. Der Schutz liegt darin,",
+    "wer an den Rechner kommt - nicht hier.",
+    "",
+    "Der Name steht in jedem Verarbeitungsnachweis. Deshalb gehoert dort die",
+    "Person hin, die tatsaechlich arbeitet, und kein Sammelname."
+  ],
+  "nutzer": [
+    {"id": "dortschy", "name": "RA Dortschy", "akten": ["*"]},
+    {"id": "thunert", "name": "RA Thunert", "akten": ["*"]},
+    {"id": "lehmann", "name": "Sabine Lehmann", "akten": ["*"]},
+    {"id": "pfeifer", "name": "Cosmo Pfeifer", "akten": ["*"]},
+    {"id": "kuhn", "name": "Julius Kuhn", "akten": ["*"]},
+    {"id": "m.thunert", "name": "Marie Thunert", "akten": ["*"]},
+    {"id": "derakhshan", "name": "Daniel Derakhshan", "akten": ["*"]},
+    {"id": "uckermark", "name": "Rene Uckermark", "akten": ["*"]},
+    {"id": "gast", "name": "Gastzugang", "akten": ["*"]}
+  ]
+}

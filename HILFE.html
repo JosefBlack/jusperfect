@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jusperfect – Hilfe</title>
+<meta name="description" content="Erklaert, was jusperfect tut, fuehrt durch die Einrichtung und sagt, was zu tun ist, wenn etwas klemmt.">
+<style>
+:root{
+  --papier:#fbfaf7; --karte:#ffffff; --linie:#e2ded4; --linie-stark:#cfc9ba;
+  --text:#1e1c18; --text-leise:#5d584e; --akzent:#7a5c2e; --akzent-hell:#f3ecdf;
+  --gut:#2d6a4f; --warn:#8a5a00; --schlecht:#9b2c2c; --code-bg:#f2efe8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --papier:#16150f; --karte:#1e1d16; --linie:#34322a; --linie-stark:#474437;
+    --text:#ece8dd; --text-leise:#a8a294; --akzent:#d8b878; --akzent-hell:#2a2519;
+    --gut:#7fc8a0; --warn:#e0b25c; --schlecht:#e08a8a; --code-bg:#252319;
+  }
+}
+:root[data-theme="dark"]{
+  --papier:#16150f; --karte:#1e1d16; --linie:#34322a; --linie-stark:#474437;
+  --text:#ece8dd; --text-leise:#a8a294; --akzent:#d8b878; --akzent-hell:#2a2519;
+  --gut:#7fc8a0; --warn:#e0b25c; --schlecht:#e08a8a; --code-bg:#252319;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:1.5rem}
+body{
+  margin:0; background:var(--papier); color:var(--text);
+  font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  font-size:17px; line-height:1.62; -webkit-text-size-adjust:100%;
+}
+.huelle{max-width:1140px; margin:0 auto; padding:0 16px}
+
+/* Kopf */
+header.kopf{border-bottom:1px solid var(--linie); background:var(--karte)}
+.kopf-innen{max-width:1140px;margin:0 auto;padding:28px 16px 22px;
+  display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between}
+h1{font-size:1.9rem;margin:0;letter-spacing:-.01em;font-weight:600}
+h1 .stift{color:var(--akzent)}
+.untertitel{margin:.35rem 0 0;color:var(--text-leise);max-width:46ch}
+.schalter{
+  font:inherit;font-size:.82rem;background:transparent;color:var(--text-leise);
+  border:1px solid var(--linie-stark);border-radius:999px;padding:.35em 1em;cursor:pointer;
+}
+.schalter:hover{color:var(--text);border-color:var(--akzent)}
+
+/* Aufbau */
+.aufbau{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;padding:32px 16px 80px}
+nav.seitlich{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto}
+nav.seitlich ol{list-style:none;margin:0;padding:0;font-size:.92rem}
+nav.seitlich a{
+  display:block;padding:.34em .7em;color:var(--text-leise);text-decoration:none;
+  border-left:2px solid var(--linie);border-radius:0 4px 4px 0;
+}
+nav.seitlich a:hover{color:var(--text);background:var(--akzent-hell);border-left-color:var(--akzent)}
+nav.seitlich a.hier{color:var(--text);border-left-color:var(--akzent);font-weight:600}
+
+main{min-width:0}
+section{margin:0 0 56px;scroll-margin-top:20px}
+h2{font-size:1.45rem;margin:0 0 .2em;font-weight:600;letter-spacing:-.01em}
+h2 .nr{color:var(--akzent);font-size:.78em;margin-right:.5em;font-variant-numeric:tabular-nums}
+.vorspann{color:var(--text-leise);margin:.1em 0 1.4em;max-width:62ch}
+h3{font-size:1.08rem;margin:2rem 0 .5rem;font-weight:600}
+p,li{max-width:70ch}
+a{color:var(--akzent)}
+
+.karte{background:var(--karte);border:1px solid var(--linie);border-radius:10px;padding:18px 22px;margin:14px 0}
+.karte h3{margin-top:0}
+.raster{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.raster .karte{margin:0}
+
+.merksatz{
+  border-left:3px solid var(--akzent);background:var(--akzent-hell);
+  padding:12px 18px;border-radius:0 8px 8px 0;margin:16px 0;
+}
+.merksatz p{margin:.3em 0}
+.merksatz strong{color:var(--text)}
+
+code,kbd{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.87em;
+  background:var(--code-bg);padding:.12em .4em;border-radius:4px;word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--linie);border-radius:8px;
+  padding:12px 14px;overflow-x:auto;font-size:.84rem;line-height:1.5}
+pre code{background:none;padding:0}
+
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.95rem}
+th,td{text-align:left;padding:.55em .7em;border-bottom:1px solid var(--linie);vertical-align:top}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-leise);font-weight:600}
+td:first-child{white-space:nowrap}
+@media (max-width:640px){td:first-child{white-space:normal}}
+
+/* Stufen der Einrichtung */
+.stufe{display:flex;gap:16px;padding:16px 0;border-top:1px solid var(--linie)}
+.stufe:first-of-type{border-top:0}
+.stufe .zahl{
+  flex:0 0 2.1rem;height:2.1rem;border-radius:50%;background:var(--akzent-hell);
+  color:var(--akzent);display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.95rem;border:1px solid var(--linie-stark)
+}
+.stufe .inhalt{min-width:0;flex:1}
+.stufe h3{margin:.15rem 0 .35rem}
+.stufe p{margin:.35em 0}
+.marke{display:inline-block;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;
+  padding:.18em .6em;border-radius:999px;border:1px solid var(--linie-stark);color:var(--text-leise);
+  margin-left:.5em;vertical-align:.15em}
+.marke.pflicht{color:var(--schlecht);border-color:var(--schlecht)}
+.marke.fertig{color:var(--gut);border-color:var(--gut)}
+
+/* Stoerungen */
+.suchfeld{
+  width:100%;max-width:520px;font:inherit;font-size:1rem;padding:.6em .9em;
+  border:1px solid var(--linie-stark);border-radius:8px;background:var(--karte);color:var(--text);
+}
+.suchfeld:focus{outline:2px solid var(--akzent);outline-offset:1px}
+.trefferzahl{color:var(--text-leise);font-size:.88rem;margin:.6em 0 1.2em}
+details.stoerung{border:1px solid var(--linie);border-radius:8px;background:var(--karte);margin:8px 0}
+details.stoerung summary{
+  cursor:pointer;padding:.7em 1em;font-weight:600;list-style:none;display:flex;gap:.6em;align-items:baseline
+}
+details.stoerung summary::-webkit-details-marker{display:none}
+details.stoerung summary::before{content:"›";color:var(--akzent);font-size:1.2em;line-height:1;transition:transform .15s}
+details.stoerung[open] summary::before{transform:rotate(90deg)}
+details.stoerung .koerper{padding:0 1em 1em 2.2em;border-top:1px solid var(--linie);margin-top:0;padding-top:.8em}
+details.stoerung .koerper p:first-child{margin-top:0}
+.wo{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-leise);font-weight:600;margin-bottom:.3em}
+.nichts{color:var(--text-leise);font-style:italic;padding:1em 0}
+
+footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-leise);font-size:.88rem}
+
+@media (max-width:860px){
+  .aufbau{grid-template-columns:1fr;gap:0;padding:20px 16px 60px}
+  nav.seitlich{position:static;max-height:none;margin-bottom:28px;
+    border:1px solid var(--linie);border-radius:10px;background:var(--karte);padding:10px}
+  nav.seitlich ol{columns:2;column-gap:10px}
+  nav.seitlich a{border-left:0;padding:.3em .4em}
+  nav.seitlich a.hier{border-left:0}
+}
+@media print{
+  nav.seitlich,.schalter,.suchfeld,.trefferzahl{display:none}
+  .aufbau{grid-template-columns:1fr}
+  body{background:#fff;color:#000;font-size:11pt}
+  details.stoerung{break-inside:avoid}
+  details.stoerung .koerper{display:block !important}
+  a{color:#000;text-decoration:none}
+}
+</style>
+</head>
+<body>
+
+<header class="kopf">
+  <div class="kopf-innen">
+    <div>
+      <h1>jus<span class="stift">perfect</span> – Hilfe</h1>
+      <p class="untertitel">Was das Programm tut, wie es eingerichtet wird und was zu tun ist,
+      wenn etwas klemmt.</p>
+    </div>
+    <button class="schalter" id="theme-schalter" type="button">Hell / Dunkel</button>
+  </div>
+</header>
+
+<div class="huelle aufbau">
+
+<nav class="seitlich" aria-label="Inhalt">
+  <ol>
+    <li><a href="#ueberblick">Der Grundgedanke</a></li>
+    <li><a href="#einrichten">Einrichten</a></li>
+    <li><a href="#starter">Welcher Starter</a></li>
+    <li><a href="#arbeiten">Mit einer Akte arbeiten</a></li>
+    <li><a href="#knoepfe">Die Knöpfe</a></li>
+    <li><a href="#kosten">Was es kostet</a></li>
+    <li><a href="#stoerungen">Wenn etwas klemmt</a></li>
+    <li><a href="#dateien">Die Dateien im Ordner</a></li>
+    <li><a href="#sicherheit">Sicherheit</a></li>
+    <li><a href="#nachlesen">Wo Sie was nachlesen</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ================= 1 ================= -->
+<section id="ueberblick">
+  <h2><span class="nr">1</span>Der Grundgedanke</h2>
+  <p class="vorspann">Drei Sätze, die alles Weitere erklären. Wer sie kennt, versteht auch,
+  warum das Programm an manchen Stellen absichtlich unbequem ist.</p>
+
+  <div class="raster">
+    <div class="karte">
+      <h3>jur|nodes bleibt die führende Akte</h3>
+      <p>jusperfect liest daraus, arbeitet mit einer Kopie und schreibt nur zurück, wenn
+      Sie es ausdrücklich freigeben. Die Akte in jur|nodes ändert sich nicht von selbst.</p>
+    </div>
+    <div class="karte">
+      <h3>Jede Aussage trägt eine Fundstelle</h3>
+      <p>Was das Programm behauptet, muss auf eine mitgeschickte Passage zeigen – sonst
+      fällt der Satz aus der Antwort. Lieber eine kürzere Antwort als eine erfundene.</p>
+    </div>
+    <div class="karte">
+      <h3>Nichts läuft automatisch</h3>
+      <p>Kein Schreiben, kein Versenden, keine Fristberechnung. Das Programm bereitet vor;
+      entschieden wird von Ihnen.</p>
+    </div>
+  </div>
+
+  <div class="merksatz">
+    <p><strong>Die wichtigste Gewohnheit:</strong> Lesen Sie die Belege, nicht nur die
+    Antwort. Das ist der eigentliche Nutzen – Sie sehen sofort, worauf sich eine Aussage
+    stützt und ob die Stelle das wirklich hergibt.</p>
+  </div>
+
+  <h3>Was das Programm ausdrücklich nicht tut</h3>
+  <ul>
+    <li>Es <strong>berechnet keine Fristen.</strong> Die Eingangsprüfung nennt mögliche
+    Fristauslöser – gerechnet wird in der Kanzlei.</li>
+    <li>Es <strong>versendet nichts.</strong> Entwürfe bleiben Entwürfe, bis Sie sie
+    freigeben.</li>
+    <li>Es <strong>löscht nichts wegen Untätigkeit.</strong> Auch nach neun Monaten nicht.
+    Maßgeblich ist allein der Aktenstatus in jur|nodes.</li>
+    <li>Es <strong>ersetzt keine Prüfung.</strong> Was es findet, ist ein Vorschlag mit
+    Quellenangabe, kein Ergebnis.</li>
+  </ul>
+</section>
+
+<!-- ================= 2 ================= -->
+<section id="einrichten">
+  <h2><span class="nr">2</span>Einrichten</h2>
+  <p class="vorspann">Sechs Stufen. Jede baut auf der vorigen auf; keine lässt sich
+  überspringen. Nach jeder Stufe gibt es eine Probe, die sagt, ob sie sitzt – genau dafür
+  sind die Prüf-Dateien da.</p>
+
+  <div class="stufe">
+    <div class="zahl">1</div>
+    <div class="inhalt">
+      <h3>Python</h3>
+      <p>Einmal je Rechner. Beim Installieren unbedingt das Häkchen
+      <strong>„Add python.exe to PATH"</strong> setzen – ohne das findet Windows das
+      Programm später nicht.</p>
+      <p><span class="wo">Probe</span> <code>START-DEMO.bat</code> doppelklicken. Öffnet
+      sich der Browser mit den erfundenen Testakten, steht diese Stufe.</p>
+    </div>
+  </div>
+
+  <div class="stufe">
+    <div class="zahl">2</div>
+    <div class="inhalt">
+      <h3>Der AWS-Zugang</h3>
+      <p>Damit ein echtes Modell antwortet. Ein eigenes AWS-Konto, Region Frankfurt, ein
+      Benutzer mit eingeschränkten Rechten, dessen Schlüssel auf dem Rechner hinterlegt
+      wird. Die Schritte stehen in <code>AWS-EINRICHTEN.md</code>, Schritt 1 bis 5.</p>
+      <p><span class="wo">Eintragen</span> <code>ZUGANG-EINTRAGEN.bat</code></p>
+      <p><span class="wo">Probe</span> <code>ZUGANG-PRUEFEN.bat</code></p>
+      <p><strong>Der Schlüssel gehört nie in eine Datei des Programmordners.</strong> Er
+      liegt im Windows-Benutzerprofil. Jeder Rechner bekommt seinen eigenen.</p>
+    </div>
+  </div>
+
+  <div class="stufe">
+    <div class="zahl">3</div>
+    <div class="inhalt">
+      <h3>Die Modellkennungen</h3>
+      <p>Eine Modellkennung wird <strong>nie</strong> aus dem Namen abgeschrieben, den die
+      AWS-Konsole anzeigt. Aus „Opus 4.6" wird nicht
+      <code>anthropic.claude-opus-4-6</code> – das ist falsch, und es hat uns schon einen
+      ganzen Messlauf gekostet.</p>
+      <p><span class="wo">Probe</span> <code>MODELLE-ANZEIGEN.bat</code> fragt Ihr Konto,
+      probiert jedes Modell mit einem einzigen Wort an und schreibt die Kennungen hin, die
+      wirklich antworten. Diese schreiben Sie Zeichen für Zeichen ab.</p>
+      <div class="merksatz"><p><strong>Fragen Sie das Konto, leiten Sie nichts her.</strong>
+      Fünf Modelle, drei verschiedene Bauarten der Kennung – ein Muster gibt es nicht.</p></div>
+    </div>
+  </div>
+
+  <div class="stufe">
+    <div class="zahl">4</div>
+    <div class="inhalt">
+      <h3>Das Schutzgeländer<span class="marke pflicht">Pflicht vor echten Akten</span></h3>
+      <p>Ein Guardrail ist der Filter, den AWS vor und hinter das Modell schaltet – die
+      letzte Stelle, an der eine entgleiste Frage oder Antwort noch aufgehalten wird. Mit
+      den erfundenen Testakten läuft das Programm ohne. Mit echten Akten
+      <strong>startet es nicht</strong>. Das ist keine Störung, sondern eine gewollte Sperre.</p>
+      <p>Einrichten: <code>AWS-EINRICHTEN.md</code>, Schritt 9. Danach die Kennung in der
+      Startdatei eintragen: <code>set JUSPERFECT_GUARDRAIL_ID=…</code></p>
+      <p><strong>Die PII-Filter bleiben aus.</strong> Bei einer Kanzlei gilt das Gegenteil
+      des Üblichen: Schaltet man sie ein, schwärzt das Geländer die Mandantennamen aus dem
+      eigenen Aktentext – und die Antwort wird unbrauchbar.</p>
+      <p><span class="wo">Probe</span> Im Programm der Knopf <strong>Selbsttest</strong>,
+      darin der <strong>Modell-Testlauf</strong>. Er schickt fünf erfundene Sätze aus
+      verschiedenen Rechtsgebieten durch das Geländer. Hält es eine
+      Körperverletzungssache an, fiele das sonst erst vor einer echten Akte auf.</p>
+    </div>
+  </div>
+
+  <div class="stufe">
+    <div class="zahl">5</div>
+    <div class="inhalt">
+      <h3>Der Zugang zu den Akten</h3>
+      <p>Es gibt zwei Wege, und sie schließen einander nicht aus:</p>
+      <table>
+        <tr><th>Weg</th><th>Was er braucht</th><th>Probe</th></tr>
+        <tr>
+          <td><strong>Schnittstelle</strong><br><span style="color:var(--text-leise)">empfohlen</span></td>
+          <td>Adresse, Benutzer und Schlüssel von jur|nodes, eingetragen mit
+          <code>JURNODES-ZUGANG.bat</code></td>
+          <td><code>JURNODES-PRUEFEN.bat</code></td>
+        </tr>
+        <tr>
+          <td><strong>Laufwerk</strong></td>
+          <td>Den Pfad zum Aktenordner im Netz</td>
+          <td><code>ORDNER-PRUEFEN.bat</code></td>
+        </tr>
+      </table>
+      <p>Beide Proben verändern nichts. Sie lesen nur und schreiben einen Befund – auf den
+      Bildschirm und zugleich in eine Datei im Programmordner.</p>
+      <div class="merksatz"><p><strong>Diese Befunddateien enthalten echte Aktenzeichen.</strong>
+      Sie bleiben in der Kanzlei und gehören nicht in eine E-Mail an Dritte.</p></div>
+    </div>
+  </div>
+
+  <div class="stufe">
+    <div class="zahl">6</div>
+    <div class="inhalt">
+      <h3>Die Benutzer</h3>
+      <p>Wer das Programm bedienen darf, steht in einer Liste neben dem Programm. Jeder
+      Mitarbeiter bekommt dort eine eigene Kennung; oben rechts im Browser wird sie
+      eingetragen.</p>
+      <p>Das ist eine <strong>Zuordnung, kein Schloss</strong>: Sie hält fest, wer welche
+      Akte geöffnet hat, und bestimmt, wer welche Akten sieht. Sie verlangt kein Kennwort.
+      Was das für den Datenschutz bedeutet, steht in <code>DSFA-ANGABEN.md</code> unter
+      „Wer Zugang hat – und woraus der Schutz besteht".</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section id="starter">
+  <h2><span class="nr">3</span>Welcher Starter ist der richtige</h2>
+  <p class="vorspann">Im Programmordner liegen vier Startdateien. Der Unterschied ist nicht
+  die Bedienung – die ist überall gleich –, sondern <em>wessen Akten</em> darin liegen und
+  <em>wer</em> antwortet.</p>
+
+  <table>
+    <tr><th>Datei</th><th>Akten</th><th>Antwortet</th><th>Kosten</th></tr>
+    <tr><td><code>START-DEMO.bat</code></td><td>erfunden</td><td>ein Ersatz auf diesem Rechner</td><td>keine</td></tr>
+    <tr><td><code>START-AWS.bat</code></td><td>erfunden</td><td>Claude bei AWS</td><td>Centbeträge</td></tr>
+    <tr><td><code>START-JURNODES.bat</code></td><td><strong>echt</strong>, über die Schnittstelle</td><td>Claude bei AWS</td><td>je Akte, siehe unten</td></tr>
+    <tr><td><code>START-KANZLEI.bat</code></td><td><strong>echt</strong>, über das Laufwerk</td><td>Claude bei AWS</td><td>je Akte, siehe unten</td></tr>
+  </table>
+
+  <p>Die beiden letzten verlangen das Schutzgeländer und verweigern ohne es den Start. In
+  jeder Startdatei stehen oben die Zeilen, die einzutragen sind; fehlt eine, sagt die Datei
+  in ganzen Sätzen, welche es ist, und startet nicht.</p>
+
+  <div class="merksatz">
+    <p><strong>Zum Üben nehmen Sie <code>START-DEMO.bat</code>.</strong> Es kostet nichts,
+    es geht kein Text nach draußen, und die erfundenen Akten sind absichtlich so gebaut,
+    dass es etwas zu finden gibt.</p>
+  </div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section id="arbeiten">
+  <h2><span class="nr">4</span>Mit einer Akte arbeiten</h2>
+  <p class="vorspann">Vier Handgriffe, immer dieselben.</p>
+
+  <div class="stufe">
+    <div class="zahl">1</div>
+    <div class="inhalt">
+      <h3>Öffnen</h3>
+      <p>Aktenzeichen oder Bezeichnung eingeben, <strong>Suchen</strong>, Akte anklicken.
+      Ein leeres Suchfeld und <strong>Suchen</strong> zeigt, was da ist.</p>
+    </div>
+  </div>
+  <div class="stufe">
+    <div class="zahl">2</div>
+    <div class="inhalt">
+      <h3>Dokumente auswählen</h3>
+      <p>Es öffnet sich der Zwei-Fenster-Explorer: links die Akte, rechts Ihre Arbeitsakte.
+      Ziehen Sie hinüber, was zur Frage gehört – oder nehmen Sie „alle →". Dann
+      <strong>Übernehmen</strong>.</p>
+      <p><strong>Weniger ist oft besser.</strong> Was Sie hinüberziehen, geht an das Modell
+      und wird bezahlt. Für eine Frage zur Unfallschilderung braucht es nicht die gesamte
+      Korrespondenz. Ändern lässt sich die Auswahl jederzeit über <strong>Dokumente</strong>.</p>
+    </div>
+  </div>
+  <div class="stufe">
+    <div class="zahl">3</div>
+    <div class="inhalt">
+      <h3>Fragen</h3>
+      <p>Frage eintippen, Eingabetaste. Die Antwort erscheint, während sie entsteht.</p>
+      <p>Steht dort <em>„kein belastbarer Beleg"</em>, hat das Programm zu Ihrer Frage
+      nichts Belegbares gefunden. Das ist eine ehrliche Antwort, kein Fehler.</p>
+    </div>
+  </div>
+  <div class="stufe">
+    <div class="zahl">4</div>
+    <div class="inhalt">
+      <h3>Belege prüfen</h3>
+      <p>Rechts steht die Spalte <strong>Belege</strong>. Eine Kennung wie
+      <code>D2-S1-P3</code> heißt: zweites Dokument, erste Seite, dritter Abschnitt. Ein
+      Klick zeigt die Originalstelle.</p>
+    </div>
+  </div>
+
+  <h3>Zurückschreiben und abschließen</h3>
+  <p>In die Akte zurück geht nur, was Sie über <strong>Entwurf → Freigabe</strong>
+  bestätigen. Sie sehen vorher genau den Text, der geschrieben wird.</p>
+  <p>Ist eine Akte in jur|nodes archiviert, bietet <strong>Abschluss</strong> an,
+  vorzumerken; erst dann beginnt die Übergangsfrist. Nach ihrem Ablauf wird der
+  Arbeitsstand <strong>im Wortlaut angezeigt</strong>, geht nach Ihrem Häkchen als Vermerk
+  in die Akte, und <em>erst danach</em> wird gelöscht. Sie erhalten einen Nachweis: wann,
+  durch wen, was.</p>
+</section>
+
+<!-- ================= 5 ================= -->
+<section id="knoepfe">
+  <h2><span class="nr">5</span>Die Knöpfe</h2>
+  <table>
+    <tr><th>Knopf</th><th>Wofür</th></tr>
+    <tr><td><strong>Analyse</strong></td><td>Chronologie, Beteiligte, Forderungen, Beweismittel, offene Punkte, Widersprüche – jede Zeile mit Beleg</td></tr>
+    <tr><td><strong>Eingangsprüfung</strong></td><td>Ein neues Schreiben einordnen: Art, Absender, Kernaussage, mögliche Fristauslöser. <strong>Berechnet keine Fristen.</strong></td></tr>
+    <tr><td><strong>Entwurf</strong></td><td>Schreiben an Mandant, Gegner, Versicherung, RSV, Mahnung, Aktenvermerk – auch nach eigenen Kanzleimustern</td></tr>
+    <tr><td><strong>Prüfliste</strong></td><td>Beweisprüfung nach Rechtsgebiet, ohne Modellaufruf und ohne Kosten</td></tr>
+    <tr><td><strong>Referenzen</strong></td><td>Urteile und Gesetze neben die Akte stellen; sie werden mitzitiert (Kennung <code>R…</code>)</td></tr>
+    <tr><td><strong>Recherche</strong></td><td>Öffnet den Haufe-Copilot im Browser mit Ihrer Anmeldung. jusperfect fasst keine Haufe-Zugangsdaten an.</td></tr>
+    <tr><td><strong>Nachweis</strong></td><td>Was ist wann an welches Modell gegangen – Umfang und Prüfsumme, <strong>kein Aktentext</strong></td></tr>
+    <tr><td><strong>Selbsttest</strong></td><td>Stehen die Absicherungen? Kostet nichts, schickt nichts hinaus</td></tr>
+    <tr><td><strong>Abschluss</strong></td><td>Arbeitsstand sichern, dann löschen – nur bei in jur|nodes archivierter Akte</td></tr>
+  </table>
+
+  <h3>Was der Selbsttest prüft</h3>
+  <p>Wer antwortet · in welcher Region · unter welchem Zugang · ob AWS die Aufrufe
+  mitschreibt · ob ein Schutzgeländer vorgeschaltet ist · ob der Aktenbestand erreichbar
+  ist · wo das Aktengedächtnis liegt · wie viel von der Monatsgrenze verbraucht ist.</p>
+  <p>Ein Haken heißt: geprüft und in Ordnung. Ein Ausrufezeichen heißt: kein Fehler, aber
+  eine offene Frage – die Zahl am Knopf sagt schon vor dem Öffnen, wie viele es sind. Ein
+  Strich heißt: trifft hier nicht zu.</p>
+</section>
+
+<!-- ================= 6 ================= -->
+<section id="kosten">
+  <h2><span class="nr">6</span>Was es kostet</h2>
+  <p class="vorspann">Bezahlt wird nach Textmenge, die an das Modell geht. Zwei Posten,
+  die sich sehr unterschiedlich verhalten.</p>
+
+  <div class="raster">
+    <div class="karte">
+      <h3>Das Einlesen</h3>
+      <p>Fällt <strong>einmal je Akte</strong> an, nicht je Frage. Das Programm liest die
+      ausgewählten Dokumente einmal durch und merkt sich das Ergebnis.</p>
+      <p>Gemessen an einer Akte mit 42 Dokumenten und rund 160.000 Zeichen:
+      <strong>rund 23 Cent.</strong></p>
+    </div>
+    <div class="karte">
+      <h3>Jede weitere Frage</h3>
+      <p>Arbeitet auf dem Gemerkten. Bei derselben Akte: <strong>rund 4 Cent</strong> je
+      Frage.</p>
+    </div>
+  </div>
+
+  <p>Das Programm zeigt beides vor dem ersten Aufruf an – Dokumentzahl, Zeichenzahl und
+  den geschätzten Betrag. Zusätzlich liegt bei AWS eine <strong>Monatsgrenze</strong>; ist
+  sie erreicht, hält das Programm an, statt weiterzukosten.</p>
+
+  <div class="merksatz">
+    <p><strong>Warum das starke Modell?</strong> Ein Messlauf über eine große Testakte hat
+    gezeigt: Das billigere Modell las die Akte nicht falsch – es ließ beim Zusammenfassen
+    <em>die Urkunden weg und behielt das Geschehen</em>. Für eine Kanzlei ist das die
+    falsche Auswahl, und sie fällt nicht auf: Was nicht da ist, sieht man nicht.</p>
+  </div>
+</section>
+
+<!-- ================= 7 ================= -->
+<section id="stoerungen">
+  <h2><span class="nr">7</span>Wenn etwas klemmt</h2>
+  <p class="vorspann">Suchen Sie nach einem Wort aus der Meldung, die auf dem Bildschirm
+  steht. Groß- und Kleinschreibung spielt keine Rolle.</p>
+
+  <input class="suchfeld" id="suche" type="search" placeholder="z. B. Python, Guardrail, 405, Budget, Akte gefunden"
+         aria-label="Störungen durchsuchen" autocomplete="off">
+  <p class="trefferzahl" id="trefferzahl"></p>
+
+  <div id="stoerungsliste">
+
+  <details class="stoerung"><summary>„Python wurde nicht gefunden"</summary>
+    <div class="koerper">
+      <p>Bei der Installation fehlte das Häkchen <strong>„Add python.exe to PATH"</strong>.
+      Python erneut installieren, diesmal ankreuzen. Alles andere kann so bleiben.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>Der Browser öffnet sich nicht</summary>
+    <div class="koerper">
+      <p>Rufen Sie von Hand <code>http://127.0.0.1:8765</code> auf.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Verbinde mit jusperfect" – und dann passiert lange nichts</summary>
+    <div class="koerper">
+      <p>Der erste Aufbau dauert einen Moment; das Bild bleibt so lange stehen.
+      <strong>Drücken Sie F5.</strong> Danach ist es weg und die Aktensuche steht da.</p>
+      <p>Bleibt es auch nach zwei F5 stehen, sehen Sie in das schwarze Fenster, aus dem das
+      Programm gestartet wurde – dort steht der eigentliche Grund.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Bitte Nutzerkennung eingeben"</summary>
+    <div class="koerper">
+      <p>Oben rechts Ihre Kennung eintragen – dieselbe, die in der Benutzerliste neben dem
+      Programm steht. Im Probelauf mit den erfundenen Akten ist es <code>ra-weber</code>.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Keine Akte gefunden oder keine Berechtigung"</summary>
+    <div class="koerper">
+      <p>Drei Ursachen, in dieser Reihenfolge zu prüfen:</p>
+      <ol>
+        <li><strong>Suchfeld leeren und Suchen drücken.</strong> Zeigt das etwas an, lag es
+        an der Schreibweise des Aktenzeichens.</li>
+        <li><strong>Selbsttest öffnen.</strong> Steht dort beim Aktenzugang kein Haken, ist
+        nicht die Akte das Problem, sondern der Zugang.</li>
+        <li><strong>Falscher Starter.</strong> Mit <code>START-DEMO.bat</code> oder
+        <code>START-AWS.bat</code> gibt es nur die erfundenen Akten.</li>
+      </ol>
+    </div></details>
+
+  <details class="stoerung"><summary>Die Antwort ist kürzer als erwartet</summary>
+    <div class="koerper">
+      <p>Das ist Absicht: Unbelegte Sätze fallen heraus. Ziehen Sie mehr Dokumente in die
+      Arbeitsakte – oder fragen Sie enger.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„AccessDeniedException"</summary>
+    <div class="koerper">
+      <p>Meist ist das Modell im AWS-Konto nicht freigeschaltet (Bedrock →
+      <em>Model access</em>). Seltener greift die Zugriffsrichtlinie.
+      <code>ZUGANG-PRUEFEN.bat</code> sagt, welcher der beiden Fälle vorliegt.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„ValidationException"</summary>
+    <div class="koerper">
+      <p>Die Modellkennung passt nicht zu dieser Region. In Europa ist meist ein
+      Inferenzprofil nötig, das mit <code>eu.</code> beginnt – diesen Vorsatz setzt das
+      Programm selbst, wenn er fehlt. Bleibt die Meldung, stimmt die Kennung nicht:
+      <code>MODELLE-ANZEIGEN.bat</code>.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Die Modellkennung kennt AWS nicht"</summary>
+    <div class="koerper">
+      <p>Es gibt diese Kennung so nicht – meist eine abgekürzte Schreibweise, aus dem
+      Namen der Konsole abgeschrieben. Abhilfe: <code>MODELLE-ANZEIGEN.bat</code> und
+      Zeichen für Zeichen abschreiben.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Das Modell ist diesem AWS-Konto nicht zugeteilt"</summary>
+    <div class="koerper">
+      <p>Die Kennung ist richtig, aber Ihr Konto darf dieses Modell nicht. Daran lässt sich
+      in der Startdatei nichts ändern – nehmen Sie ein anderes aus der Liste. AWS teilt mit
+      der Zeit mehr zu.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Es sind keine AWS-Zugangsdaten hinterlegt"</summary>
+    <div class="koerper">
+      <p><code>ZUGANG-EINTRAGEN.bat</code> ist nicht gelaufen – oder es lief in einem
+      <strong>anderen Windows-Benutzerkonto</strong>. Die Schlüssel hängen am angemeldeten
+      Windows-Benutzer, nicht am Rechner.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Budget erschöpft"</summary>
+    <div class="koerper">
+      <p>Kein Fehler: Die Kostenbremse hat gegriffen. Grenze anheben oder bis zum
+      Monatswechsel warten.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„AWS schreibt die Modellaufrufe mit"</summary>
+    <div class="koerper">
+      <p>Kein Fehler, sondern eine Sperre. Ist in Bedrock die
+      <em>Modellaufrufprotokollierung</em> eingeschaltet, schreibt AWS den vollständigen
+      Prompt mit – und der Prompt ist der Aktentext. Er läge damit ein zweites Mal neben
+      der Akte, an einer Stelle, die beim Aktenabschluss nicht mitgelöscht wird.</p>
+      <p><strong>Abhilfe:</strong> AWS-Konsole → Bedrock → Einstellungen →
+      Modellaufrufprotokollierung abschalten, dann neu starten.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Mit echten Akten ist ein Bedrock-Guardrail zwingend"</summary>
+    <div class="koerper">
+      <p>Kein Fehler, sondern eine Sperre – siehe Stufe 4 der Einrichtung. Einrichten nach
+      <code>AWS-EINRICHTEN.md</code>, Schritt 9, danach
+      <code>set JUSPERFECT_GUARDRAIL_ID=…</code> in der Startdatei.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Der Zugriffsrichtlinie fehlt bedrock:ApplyGuardrail"</summary>
+    <div class="koerper">
+      <p>Das Recht fehlt in der Zugriffsrichtlinie des AWS-Benutzers. Zu beachten: Bei
+      eingeschalteter Cross-Region-Inferenz braucht es <strong>zwei</strong> Ressourcen –
+      einmal <code>guardrail/*</code> und einmal <code>guardrail-profile/*</code>. Fehlt
+      die zweite, sieht die Richtlinie richtig aus und wird trotzdem abgewiesen.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Lässt sich nicht feststellen: Das Leserecht dafür fehlt"</summary>
+    <div class="koerper">
+      <p>Dieselbe Frage, nur unbeantwortet. In der Zugriffsrichtlinie fehlt
+      <code>bedrock:GetModelInvocationLoggingConfiguration</code>. Mit erfundenen Akten
+      läuft das Programm trotzdem und schreibt den offenen Punkt in den
+      <strong>Nachweis</strong>. Mit echten Akten startet es nicht – dort ist Ungewissheit
+      ein Nein.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Der Aktenbestand ist nicht erreichbar"</summary>
+    <div class="koerper">
+      <p>Lassen Sie die Probe des Weges laufen, den Sie benutzen –
+      <code>JURNODES-PRUEFEN.bat</code> für die Schnittstelle,
+      <code>ORDNER-PRUEFEN.bat</code> für das Laufwerk. Beide sagen in ganzen Sätzen,
+      woran es liegt, und verändern nichts.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Diesen Ordner gibt es nicht oder er ist nicht erreichbar"</summary>
+    <div class="koerper">
+      <p>Drei Ursachen kommen in Frage:</p>
+      <ol>
+        <li>Der Pfad ist falsch geschrieben – achten Sie auf ein
+        <strong>Leerzeichen vor dem Laufwerksbuchstaben</strong>, das beim Einfügen gern
+        mitkommt.</li>
+        <li>Das Netzlaufwerk ist in diesem Windows-Benutzerkonto nicht verbunden. Prüfen
+        mit <code>net use</code> in der Eingabeaufforderung.</li>
+        <li>Der Ordner ist da, aber dieses Windows-Konto darf ihn nicht lesen.</li>
+      </ol>
+    </div></details>
+
+  <details class="stoerung"><summary>Eine Prüfung läuft, aber die Befunddatei bleibt leer</summary>
+    <div class="koerper">
+      <p>Fast immer ist die Datei noch <strong>in einem Editor geöffnet</strong>. Windows
+      lässt sie dann nicht neu beschreiben. Datei schließen, Probe erneut laufen lassen.</p>
+      <p>Die Proben schreiben ihren Befund auf den Bildschirm <em>und</em> in die Datei
+      zugleich – Sie brauchen die Ausgabe nicht selbst umzuleiten.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„405" oder „Aktengedächtnis wurde nicht gefunden"</summary>
+    <div class="koerper">
+      <p><strong>Bekannt und in Arbeit.</strong> Das Aktengedächtnis lässt sich derzeit
+      nicht in die Akte zurückschreiben; die Schnittstelle nimmt auf dem dafür
+      vorgesehenen Weg nichts entgegen.</p>
+      <p><strong>Was das im Alltag bedeutet:</strong> Das Programm arbeitet vollständig
+      weiter – nur wird jede Akte bei jeder Sitzung neu eingelesen. Das kostet die rund 23
+      Cent erneut. Es geht nichts verloren und nichts kaputt.</p>
+      <p>Für die Lösung wird der Befund von <code>JURNODES-PRUEFEN.bat</code> gebraucht:
+      Die Probe fragt den Server, was er auf diesem Weg annimmt, und schreibt seine Antwort
+      in den Befund.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>Ein zweiter Rechner wird abgewiesen</summary>
+    <div class="koerper">
+      <p>Jeder Rechner braucht <strong>eigene</strong> Schlüssel – bei AWS und bei
+      jur|nodes. Ein Schlüssel, der auf zwei Rechnern liegt, lässt sich im Nachhinein nicht
+      mehr einem Rechner zuordnen; genau das ist der Grund für die Trennung.</p>
+      <p>Auf dem neuen Rechner: <code>ZUGANG-EINTRAGEN.bat</code> und
+      <code>JURNODES-ZUGANG.bat</code>, dann die beiden Proben.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>Nach der Eingabe passiert nichts, kein Haken, keine Meldung</summary>
+    <div class="koerper">
+      <p>Prüfen Sie, ob das Fenster noch arbeitet – große Aktenbestände brauchen Minuten,
+      und in dieser Zeit steht die Ausgabe still. Die Proben melden inzwischen ihren
+      Fortschritt; erscheint gar nichts, ist die Fassung im Ordner älter als die,
+      auf die sich diese Seite bezieht.</p>
+      <p>Jede Probe nennt beim Start ihre eigene Fassung. Steht dort eine ältere als
+      erwartet, liegt eine zweite Kopie des Programms auf dem Rechner, und gestartet wurde
+      die falsche.</p>
+    </div></details>
+
+  </div>
+
+  <div class="merksatz" style="margin-top:28px">
+    <p><strong>Wenn nichts davon passt:</strong> <code>ZUGANG-PRUEFEN.bat</code> laufen
+    lassen und den Befund weitergeben. Darin steht <em>kein Aktentext</em> – die Datei
+    darf die Kanzlei verlassen. Die Befunde der beiden Aktenproben dürfen das nicht, sie
+    enthalten echte Aktenzeichen.</p>
+  </div>
+</section>
+
+<!-- ================= 8 ================= -->
+<section id="dateien">
+  <h2><span class="nr">8</span>Die Dateien im Programmordner</h2>
+  <p class="vorspann">Alles zum Doppelklicken. Keine davon verändert eine Akte.</p>
+
+  <h3>Starten</h3>
+  <table>
+    <tr><td><code>START-DEMO.bat</code></td><td>Erfundene Akten, ohne AWS, ohne Kosten</td></tr>
+    <tr><td><code>START-AWS.bat</code></td><td>Erfundene Akten, echtes Modell bei AWS</td></tr>
+    <tr><td><code>START-JURNODES.bat</code></td><td>Echte Akten über die Schnittstelle</td></tr>
+    <tr><td><code>START-KANZLEI.bat</code></td><td>Echte Akten über das Laufwerk</td></tr>
+    <tr><td><code>VERKNUEPFUNG.bat</code></td><td>Legt Verknüpfungen auf dem Schreibtisch an</td></tr>
+  </table>
+
+  <h3>Einrichten und prüfen</h3>
+  <table>
+    <tr><td><code>ZUGANG-EINTRAGEN.bat</code></td><td>AWS-Schlüssel hinterlegen</td></tr>
+    <tr><td><code>ZUGANG-PRUEFEN.bat</code></td><td>Antwortet AWS? Befund in <code>zugangstest.txt</code></td></tr>
+    <tr><td><code>MODELLE-ANZEIGEN.bat</code></td><td>Welche Modellkennungen antworten wirklich</td></tr>
+    <tr><td><code>JURNODES-ZUGANG.bat</code></td><td>Adresse, Benutzer und Schlüssel von jur|nodes hinterlegen</td></tr>
+    <tr><td><code>JURNODES-PRUEFEN.bat</code></td><td>Antwortet die Schnittstelle? Befund in <code>jurnodestest.txt</code></td></tr>
+    <tr><td><code>ORDNER-PRUEFEN.bat</code></td><td>Taugt der Aktenordner? Befund in <code>ordnerpruefung.txt</code></td></tr>
+  </table>
+
+  <h3>Ausprobieren und messen</h3>
+  <table>
+    <tr><td><code>FUNKTIONSPROBE.bat</code></td><td>Alle Funktionen einmal durchgehen – ohne Modell, ohne Kosten</td></tr>
+    <tr><td><code>GEDAECHTNIS-PROBE.bat</code></td><td>Geführter Durchgang durch das Aktengedächtnis, ohne Kosten</td></tr>
+    <tr><td><code>GEDAECHTNIS-LEEREN.bat</code></td><td>Gedächtnis der <em>erfundenen</em> Akten zurücksetzen</td></tr>
+    <tr><td><code>GROSSE-TESTAKTE.bat</code></td><td>Erzeugt eine erfundene Akte mit 50 Dokumenten</td></tr>
+    <tr><td><code>PRUEFBOGEN.bat</code></td><td>Messlauf über die große Testakte – kostet einige Euro</td></tr>
+    <tr><td><code>AUFBEWAHRUNG-BEISPIELE.bat</code></td><td>Beispielfälle für die Ansicht „Aufbewahrung"</td></tr>
+  </table>
+
+  <div class="merksatz">
+    <p><strong>Die drei Befunddateien</strong> – <code>zugangstest.txt</code>,
+    <code>jurnodestest.txt</code>, <code>ordnerpruefung.txt</code> – werden bei jedem Lauf
+    neu geschrieben. Die beiden letzten enthalten echte Aktenzeichen und bleiben in der
+    Kanzlei.</p>
+  </div>
+</section>
+
+<!-- ================= 9 ================= -->
+<section id="sicherheit">
+  <h2><span class="nr">9</span>Sicherheit – was gilt und was nicht</h2>
+  <p class="vorspann">Kurzfassung. Die vollständige Darstellung steht in
+  <code>SICHERHEIT.md</code>, die technischen Werte für die Datenschutz-Folgenabschätzung
+  in <code>DSFA-ANGABEN.md</code>.</p>
+
+  <div class="raster">
+    <div class="karte">
+      <h3>Was gesichert ist</h3>
+      <ul>
+        <li>Aktentext geht nur an Claude bei AWS, nur in der Region Frankfurt.</li>
+        <li>AWS darf die Aufrufe nicht mitschreiben – ist es eingeschaltet, startet das
+        Programm nicht.</li>
+        <li>Das Schutzgeländer sitzt vor und hinter jedem Aufruf.</li>
+        <li>Ein Ausgabeweg ist gesperrt, solange nicht bewiesen ist, dass er dicht ist –
+        Ungewissheit gilt als Nein.</li>
+        <li>Jeder Aufruf wird im <strong>Nachweis</strong> festgehalten: Umfang und
+        Prüfsumme, kein Aktentext.</li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>Was nicht gesichert ist</h3>
+      <ul>
+        <li>Die Benutzerkennung <strong>verlangt kein Kennwort</strong>. Sie ordnet zu,
+        sie sperrt nicht.</li>
+        <li>Wer den Rechner bedienen kann, kann das Programm bedienen. Der Schutz ist der
+        Zugang zum Windows-Konto.</li>
+        <li>Das Programm läuft nur auf dem eigenen Rechner und ist von außen nicht
+        erreichbar – solange niemand das ändert.</li>
+        <li>Die Schlüssel liegen im Windows-Benutzerprofil, nicht verschlüsselt. Wer das
+        Profil hat, hat die Schlüssel.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="merksatz">
+    <p><strong>Das ist keine Lücke, sondern eine Entscheidung</strong> – und sie gehört in
+    die Datenschutz-Folgenabschätzung, damit sie bewusst getroffen ist und nicht nur
+    unbemerkt gilt.</p>
+  </div>
+</section>
+
+<!-- ================= 10 ================= -->
+<section id="nachlesen">
+  <h2><span class="nr">10</span>Wo Sie was nachlesen</h2>
+  <table>
+    <tr><th>Datei</th><th>Inhalt</th></tr>
+    <tr><td><code>ANLEITUNG.md</code></td><td>Die ausführliche Anleitung für den Anwender</td></tr>
+    <tr><td><code>AWS-EINRICHTEN.md</code></td><td>AWS-Konto, Schutzgeländer, zweiter Rechner – Schritt für Schritt</td></tr>
+    <tr><td><code>SICHERHEIT.md</code></td><td>Sicherheitsmodell und Löschkonzept</td></tr>
+    <tr><td><code>DSFA-ANGABEN.md</code></td><td>Die technischen Werte für die Datenschutz-Folgenabschätzung</td></tr>
+    <tr><td><code>KONZEPT.md</code></td><td>Warum es so gebaut ist</td></tr>
+    <tr><td><code>README.md</code></td><td>Überblick, Betrieb, Aufbau</td></tr>
+    <tr><td><code>MORGEN.md</code></td><td>Was gerade offen ist</td></tr>
+  </table>
+  <p>Diese Seite fasst zusammen. Wo sie und eine der Dateien sich widersprechen, gilt die
+  Datei – sie wird bei jeder Änderung am Programm mitgeführt.</p>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <div class="huelle">
+    <p>jusperfect – Hilfeseite für die Kanzlei. Stand 24.09.2026.
+    Liegt im Programmordner und braucht keine Internetverbindung.</p>
+    <p>Diese Seite enthält <strong>keine Zugangsdaten, keine Aktenzeichen und keine
+    Mandantennamen.</strong></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // Hell / Dunkel. Faellt lautlos zurueck, wenn der Browser nichts speichern darf.
+  var schalter = document.getElementById("theme-schalter");
+  var wurzel = document.documentElement;
+  try {
+    var gemerkt = localStorage.getItem("jusperfect-hilfe-theme");
+    if (gemerkt === "dark" || gemerkt === "light") { wurzel.setAttribute("data-theme", gemerkt); }
+  } catch (e) {}
+  schalter.addEventListener("click", function(){
+    var dunkelJetzt = wurzel.getAttribute("data-theme") === "dark" ||
+      (!wurzel.hasAttribute("data-theme") &&
+       window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var neu = dunkelJetzt ? "light" : "dark";
+    wurzel.setAttribute("data-theme", neu);
+    try { localStorage.setItem("jusperfect-hilfe-theme", neu); } catch (e) {}
+  });
+
+  // Die Suche in den Stoerungen.
+  var feld = document.getElementById("suche");
+  var zahl = document.getElementById("trefferzahl");
+  var liste = document.getElementById("stoerungsliste");
+  var eintraege = Array.prototype.slice.call(liste.querySelectorAll("details.stoerung"));
+  var leermeldung = document.createElement("p");
+  leermeldung.className = "nichts";
+  leermeldung.hidden = true;
+  leermeldung.textContent = "Dazu steht hier nichts. Lassen Sie ZUGANG-PRUEFEN.bat laufen " +
+    "und geben Sie den Befund weiter - darin steht kein Aktentext.";
+  liste.appendChild(leermeldung);
+
+  eintraege.forEach(function(e){ e.dataset.text = e.textContent.toLowerCase(); });
+
+  function filtern(){
+    var begriff = feld.value.trim().toLowerCase();
+    var treffer = 0;
+    eintraege.forEach(function(e){
+      var passt = begriff === "" || e.dataset.text.indexOf(begriff) !== -1;
+      e.hidden = !passt;
+      if (passt) { treffer++; }
+      // Bei einer Suche das Gefundene gleich aufklappen, sonst wieder zu.
+      e.open = passt && begriff.length >= 2;
+    });
+    leermeldung.hidden = treffer !== 0;
+    if (begriff === "") {
+      zahl.textContent = eintraege.length + " Punkte. Tippen Sie, um zu suchen.";
+    } else if (treffer === 1) {
+      zahl.textContent = "1 Treffer.";
+    } else {
+      zahl.textContent = treffer + " Treffer.";
+    }
+  }
+  feld.addEventListener("input", filtern);
+  filtern();
+
+  // Die Marke im Inhaltsverzeichnis wandert mit.
+  var verweise = Array.prototype.slice.call(document.querySelectorAll("nav.seitlich a"));
+  var abschnitte = verweise.map(function(a){
+    return document.querySelector(a.getAttribute("href"));
+  }).filter(Boolean);
+
+  if ("IntersectionObserver" in window) {
+    var beobachter = new IntersectionObserver(function(){
+      var besterIndex = -1;
+      var besteHoehe = Infinity;
+      abschnitte.forEach(function(abschnitt, i){
+        var oben = abschnitt.getBoundingClientRect().top;
+        if (oben <= 120 && Math.abs(oben - 120) < besteHoehe) {
+          besteHoehe = Math.abs(oben - 120);
+          besterIndex = i;
+        }
+      });
+      verweise.forEach(function(a, i){ a.classList.toggle("hier", i === besterIndex); });
+    }, { rootMargin: "-100px 0px -60% 0px", threshold: [0, 1] });
+    abschnitte.forEach(function(a){ beobachter.observe(a); });
+  }
+})();
+</script>
+</body>
+</html>

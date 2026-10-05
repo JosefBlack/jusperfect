@@ -1,0 +1,435 @@
+"""Fachliche Datenmodelle.
+
+Zwei Gruppen: Was aus jur|nodes kommt (Akte, Dokument, Beteiligter, Frist)
+und was jusperfect daraus erzeugt (Antwort, Analyse, Entwurf). Alles, was
+jusperfect erzeugt, trägt Quellen – ohne Quelle keine Aussage.
+"""
+
+from __future__ import annotations
+
+from datetime import date, datetime, timezone
+from enum import Enum
+
+from pydantic import BaseModel, Field
+
+
+# ── Aus jur|nodes ───────────────────────────────────────────────────────────
+
+class Akte(BaseModel):
+    id: str
+    aktenzeichen: str
+    bezeichnung: str
+    rechtsgebiet: str = ""
+    sachbearbeiter: str = ""
+    status: str = "offen"
+
+
+class Dokument(BaseModel):
+    id: str
+    akte_id: str
+    titel: str
+    dateiname: str
+    mime_typ: str = "application/octet-stream"
+    datum: date | None = None
+    kategorie: str = ""
+    groesse_bytes: int | None = None
+
+
+class Beteiligter(BaseModel):
+    id: str
+    name: str
+    rolle: str                      # Mandant, Gegner, Versicherung, RSV, Zeuge …
+    organisation: str = ""
+    kontakt: str = ""
+
+
+class Frist(BaseModel):
+    id: str
+    bezeichnung: str
+    datum: date
+    status: str = "offen"
+
+
+# ── Verarbeitung ────────────────────────────────────────────────────────────
+
+class Seite(BaseModel):
+    nummer: int
+    text: str
+
+
+class Passage(BaseModel):
+    """Ein Textausschnitt mit eindeutiger Kennung, die die KI zitieren muss."""
+    kennung: str                    # z. B. D2-S3-P1
+    dokument_id: str
+    dokument_titel: str
+    seite: int
+    text: str
+    # Das Datum des Dokuments aus den Stammdaten - nicht aus seinem Text.
+    #
+    # Es steht hier, weil es dem Modell sonst nie zu Gesicht kommt. Am
+    # 28.09.2026 fehlten in fuenf Pruefbogenlaeufen mit drei Modellen dieselben
+    # fuenf Tage im Zeitstrahl. Der Grund war weder das Modell noch der Auftrag
+    # noch der Filter: Die fuenf Daten stehen in akte.json im Feld "datum" und
+    # in keinem Dokumenttext. Das Material nannte Titel und Seite, nie das
+    # Datum - das Modell sollte etwas aufschreiben, was es nicht sehen konnte.
+    #
+    # Optional, weil nicht jede Quelle ein Datum hat: Kanzleiwissen hat keines,
+    # und ein Dokument ohne Datum in jur|nodes gibt es auch.
+    dokument_datum: date | None = None
+
+
+class Quelle(BaseModel):
+    # Die genaue Stelle innerhalb der Passage, in Zeichen ab deren Anfang.
+    # Eine Fundstelle zeigt auf eine Passage von bis zu 1.500 Zeichen; wer sie
+    # nachliest, sucht darin noch einmal von Hand. treffer_start/treffer_ende
+    # nennen den Satz, der die Aussage traegt, marken die harten Angaben darin
+    # (Datum, Betrag, Eigenname). Alles drei ist optional: Findet sich keine
+    # hinreichend gute Stelle, bleibt es bei der ganzen Passage - eine falsch
+    # markierte Stelle waere schlimmer als eine unmarkierte.
+    kennung: str
+    dokument_id: str
+    dokument_titel: str
+    seite: int
+    zitat: str = ""
+    treffer_start: int | None = None
+    treffer_ende: int | None = None
+    marken: list[tuple[int, int]] = Field(default_factory=list)
+
+
+class Kosten(BaseModel):
+    eingabe_tokens: int = 0
+    ausgabe_tokens: int = 0
+    betrag_eur: float = 0.0
+
+
+# ── Ergebnisse von jusperfect ────────────────────────────────────────────────
+
+class Antwort(BaseModel):
+    text: str
+    quellen: list[Quelle] = Field(default_factory=list)
+    hinweise: list[str] = Field(default_factory=list)
+    modell: str = ""
+    kosten: Kosten = Field(default_factory=Kosten)
+
+
+# ── Dauerhaftes Aktengedächtnis ────────────────────────────────────────────
+
+class GedaechtnisDokument(BaseModel):
+    """Ein bereits extrahiertes Dokument im kanzleieigenen Fallgedächtnis."""
+    dokument_id: str
+    titel: str
+    # Die Nummer, die in jeder Fundstellenkennung steht (``D12-S1-P3``). Sie
+    # wird beim Aufnehmen einmal vergeben und danach nie wieder verändert -
+    # auch dann nicht, wenn ein davorliegendes Dokument entfällt. Früher ergab
+    # sie sich aus der Stellung in der Liste; dann zeigte nach jedem Entfernen
+    # jede gespeicherte Kennung dahinter auf das falsche Dokument, und alles
+    # Abgeleitete musste verworfen werden. Eine feste Nummer ist die
+    # Voraussetzung dafür, dass ein Gedächtnis über Jahre wachsen kann.
+    # 0 bedeutet: noch nicht vergeben (Gedächtnis aus Fassung 3).
+    nummer: int = 0
+    seiten: list[Seite] = Field(default_factory=list)
+    ocr: bool = False
+    # Das Datum des Dokuments aus den Stammdaten von jur|nodes.
+    #
+    # Es steht hier, weil das Einlesen NICHT ueber die Dokumente der Akte
+    # geht, sondern ueber die Auszuege im Gedaechtnis: ``_passagen`` baut sich
+    # aus jedem Auszug ein Dokument zusammen, und was hier fehlt, fehlt dort.
+    # Am 28.09.2026 war das Datum in Passage und Material schon vorgesehen -
+    # und kam trotzdem nicht an, weil es an dieser Stelle verlorenging.
+    #
+    # Ein Gedaechtnis aus einer aelteren Fassung hat hier None. Das ist
+    # hinnehmbar: Beim naechsten Einlesen eines Dokuments wird es gefuellt,
+    # und ohne Datum verhaelt sich alles wie vorher.
+    datum: date | None = None
+    hinzugefuegt_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @property
+    def zeichen(self) -> int:
+        return sum(len(seite.text) for seite in self.seiten)
+
+
+class GedaechtnisAntwort(BaseModel):
+    """Nur die bereits fail-closed geprüfte Fassung einer Frage und Antwort."""
+    frage: str
+    antwort: str
+    quellen: list[Quelle] = Field(default_factory=list)
+    modell: str = ""
+    zeitpunkt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ChronologieEintrag(BaseModel):
+    datum: str                      # ISO oder Text, wenn nur ungefähr bekannt
+    ereignis: str
+    quellen: list[Quelle] = Field(default_factory=list)
+
+
+class Aktengedaechtnis(BaseModel):
+    """Dauerhafte, aktenbezogene Arbeitskopie im eigenen Kanzlei-AWS-Konto."""
+    schema_version: int = 4
+    akte_id: str
+    aktenzeichen: str = ""
+    bezeichnung: str = ""
+    # Der Status aus jurnodes steuert die Aufbewahrung. Eine bloße
+    # Bearbeitungspause setzt niemals selbst eine Löschfrist in Gang.
+    aktenstatus: str = "offen"
+    retention_reason: str = "laufende_mandatsbearbeitung"
+    status_geprueft_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    abgeschlossen_am: datetime | None = None
+    loeschung_vorgesehen_am: datetime | None = None
+    dokumente: list[GedaechtnisDokument] = Field(default_factory=list)
+    # Der Zähler für die festen Dokumentnummern. Er wird nur hochgezählt, nie
+    # zurückgesetzt: Eine einmal vergebene Nummer gehört diesem Dokument, und
+    # eine Kennung, die auf ein entferntes Dokument zeigte, soll ins Leere
+    # zeigen und nicht auf ein anderes.
+    letzte_dokumentnummer: int = 0
+    lebenssachverhalt: str = ""
+    lebenssachverhalt_quellen: list[Quelle] = Field(default_factory=list)
+    verarbeitete_passagen: list[str] = Field(default_factory=list)
+    fragen_antworten: list[GedaechtnisAntwort] = Field(default_factory=list)
+    # Die Chronologie steht dauerhaft und wird fortgeschrieben, nicht bei jeder
+    # Analyse neu erzeugt. Ein Vorgang zieht sich über Wochen; die Antwort der
+    # Gegenseite soll zwei Zeilen ergänzen, nicht einen zweiten Aufruf über die
+    # ganze Akte kosten.
+    chronologie: list[ChronologieEintrag] = Field(default_factory=list)
+    # Eigene Marke neben verarbeitete_passagen: Lebenssachverhalt und
+    # Chronologie werden getrennt fortgeschrieben. Eine gemeinsame Marke
+    # hiesse, dass der eine Lauf dem anderen die Arbeit wegnimmt.
+    chronologie_passagen: list[str] = Field(default_factory=list)
+    aktualisiert_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class Chronologieergebnis(BaseModel):
+    """Was ein reiner Chronologielauf zurueckgibt - ohne die uebrigen Listen."""
+    chronologie: list[ChronologieEintrag] = Field(default_factory=list)
+    hinweise: list[str] = Field(default_factory=list)
+    modell: str = ""
+    kosten: Kosten = Field(default_factory=Kosten)
+
+
+class BeteiligtenEintrag(BaseModel):
+    bezeichnung: str
+    rolle: str
+    quellen: list[Quelle] = Field(default_factory=list)
+
+
+class Forderung(BaseModel):
+    gegenstand: str
+    betrag: str = ""
+    glaeubiger: str = ""
+    schuldner: str = ""
+    status: str = ""
+    quellen: list[Quelle] = Field(default_factory=list)
+
+
+class Beweismittel(BaseModel):
+    bezeichnung: str
+    art: str = ""                   # Urkunde, Zeuge, Sachverständiger, Augenschein
+    beweisthema: str = ""
+    quellen: list[Quelle] = Field(default_factory=list)
+
+
+class OffenerPunkt(BaseModel):
+    beschreibung: str
+    prioritaet: str = "mittel"      # hoch | mittel | niedrig
+    quellen: list[Quelle] = Field(default_factory=list)
+
+
+class Widerspruch(BaseModel):
+    beschreibung: str
+    quellen: list[Quelle] = Field(default_factory=list)
+
+
+class Aktenanalyse(BaseModel):
+    chronologie: list[ChronologieEintrag] = Field(default_factory=list)
+    beteiligte: list[BeteiligtenEintrag] = Field(default_factory=list)
+    forderungen: list[Forderung] = Field(default_factory=list)
+    beweismittel: list[Beweismittel] = Field(default_factory=list)
+    offene_punkte: list[OffenerPunkt] = Field(default_factory=list)
+    widersprueche: list[Widerspruch] = Field(default_factory=list)
+    hinweise: list[str] = Field(default_factory=list)
+    modell: str = ""
+    kosten: Kosten = Field(default_factory=Kosten)
+
+
+class EntwurfArt(str, Enum):
+    MANDANT = "mandant"
+    GEGNER = "gegner"
+    VERSICHERUNG = "versicherung"
+    RSV = "rsv"
+    MAHNUNG = "mahnung"
+    AKTENVERMERK = "aktenvermerk"
+
+
+ENTWURF_BEZEICHNUNG: dict[EntwurfArt, str] = {
+    EntwurfArt.MANDANT: "Schreiben an den Mandanten",
+    EntwurfArt.GEGNER: "Schreiben an die Gegenseite",
+    EntwurfArt.VERSICHERUNG: "Schreiben an die Versicherung",
+    EntwurfArt.RSV: "Schreiben an die Rechtsschutzversicherung",
+    EntwurfArt.MAHNUNG: "Mahnung",
+    EntwurfArt.AKTENVERMERK: "Aktenvermerk",
+}
+
+
+class EntwurfStatus(str, Enum):
+    ENTWURF = "entwurf"
+    FREIGEGEBEN = "freigegeben"
+    VERWORFEN = "verworfen"
+
+
+class Entwurf(BaseModel):
+    id: str
+    akte_id: str
+    art: EntwurfArt
+    betreff: str
+    text: str
+    quellen: list[Quelle] = Field(default_factory=list)
+    hinweise: list[str] = Field(default_factory=list)
+    status: EntwurfStatus = EntwurfStatus.ENTWURF
+    erstellt_von: str
+    erstellt_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    jurnodes_referenz: str | None = None
+    modell: str = ""
+    kosten: Kosten = Field(default_factory=Kosten)
+
+
+class Nutzer(BaseModel):
+    id: str
+    name: str
+    akten: list[str] = Field(default_factory=list)   # Akten-IDs oder "*"
+
+    def darf_akte(self, akte_id: str) -> bool:
+        return "*" in self.akten or akte_id in self.akten
+
+
+# ── Sitzung und Nutzung ─────────────────────────────────────────────────────
+
+class GeladenesDokument(BaseModel):
+    dokument_id: str
+    titel: str
+    seiten: int
+    zeichen: int
+    ocr: bool = False
+    # Die Nummer aus dem Aktengedaechtnis, wenn es eines gibt. Ohne sie zaehlte
+    # die Sitzung die Dokumente nach ihrer Reihenfolge durch - und wich damit
+    # vom Gedaechtnis ab, sobald dort eine Nummer entfallen ist. Die
+    # Fundstellen des Lebenssachverhalts zeigten dann in der Sitzung auf das
+    # falsche Dokument. 0 heisst: kein Gedaechtnis, es gilt die Reihenfolge.
+    nummer: int = 0
+
+
+class DialogEintrag(BaseModel):
+    """Eine geprüfte Frage-Antwort-Runde im flüchtigen Sitzungskontext."""
+
+    frage: str = Field(max_length=4000)
+    antwort: str = Field(max_length=8000)
+    quellen: list[str] = Field(default_factory=list, max_length=50)
+    zeitpunkt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class Sitzung(BaseModel):
+    """Eine Aktensitzung: ein Nutzer, eine Akte, einige geladene Dokumente.
+
+    Der Dokumenttext selbst liegt nicht hier, sondern im Sitzungsspeicher
+    (verschlüsselt, mit Ablauf). Die Sitzung kennt nur, was geladen ist.
+    """
+    id: str
+    nutzer_id: str
+    akte_id: str
+    akte: Akte
+    geladen: list[GeladenesDokument] = Field(default_factory=list)
+    # Namen der in den Kontext gezogenen Referenzen (veröffentlichtes Material).
+    referenzen: list[str] = Field(default_factory=list)
+    # Nur fail-closed geprüfte Antworten. Der Verlauf läuft mit der Sitzung ab.
+    dialog: list[DialogEintrag] = Field(default_factory=list)
+    hinweise: list[str] = Field(default_factory=list)
+    erstellt_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class Nutzungseintrag(BaseModel):
+    """Wer hat wann welche Funktion auf welcher Akte genutzt – ohne Inhalte.
+
+    Dieser Eintrag ist zugleich der Verarbeitungsnachweis: die Zeile, die
+    festhält, dass etwas in den gesicherten Bedrock-Bereich hinausgegangen
+    ist. Anders als bei Perfect Shield, dessen Protokoll den vollständigen –
+    weil anonymisierten – Text mitschreibt, steht hier bewusst **kein**
+    Aktentext. Das Material geht unverschlüsselt in den Bedrock-Bereich; es ein
+    zusätzlich im Verarbeitungsnachweis abzulegen, würde auch bei aktiviertem
+    Aktengedächtnis eine unnötige weitere Inhaltskopie schaffen. Statt des
+    Textes stehen hier seine
+    Kurzkennung (Prüfsumme und Länge) und sein Umfang – genug, um später zu
+    belegen, *welches* Material *wann* an *welches* Modell ging, ohne es zu
+    verdoppeln.
+    """
+    zeitpunkt: datetime
+    nutzer_id: str
+    akte_id: str
+    funktion: str
+    modell: str
+    eingabe_tokens: int
+    ausgabe_tokens: int
+    betrag_eur: float
+    # Nachweis-Felder (ohne Inhalte): Herkunft und Fingerabdruck des Materials.
+    sitzung_id: str = ""
+    material_kennung: str = ""   # kurzkennung(): sha256:12 + Länge des Materials
+    aufgabe_kennung: str = ""    # kurzkennung() der Frage/Anweisung
+    passagen: int = 0            # wie viele Passagen mitgingen
+    antwort_zeichen: int = 0     # Länge der Antwort, nicht ihr Text
+
+
+# ── Posteingangs-Triage ─────────────────────────────────────────────────────
+
+class Fristausloeser(BaseModel):
+    """Ein Hinweis auf eine Frist im Text – nie eine Berechnung."""
+    text: str
+    quellen: list[Quelle] = Field(default_factory=list)
+
+
+class Triage(BaseModel):
+    dokumentart: str = ""
+    absender: str = ""
+    kernaussage: str = ""
+    fristausloeser: list[Fristausloeser] = Field(default_factory=list)
+    empfohlene_schritte: list[str] = Field(default_factory=list)
+    quellen: list[Quelle] = Field(default_factory=list)
+    hinweise: list[str] = Field(default_factory=list)
+    modell: str = ""
+    kosten: Kosten = Field(default_factory=Kosten)
+
+
+# ── Workflow-Packs ──────────────────────────────────────────────────────────
+
+class PackAnforderung(BaseModel):
+    """Ein Beweis oder Punkt, den eine Akte dieser Art braucht."""
+    id: str
+    titel: str
+    pflicht: bool = True
+    stichworte: list[str] = Field(default_factory=list)
+    fehlt_hinweis: str = ""
+    min_treffer: int = 1
+
+
+class Workflowpack(BaseModel):
+    """Beweisprofil eines Rechtsgebiets – austauschbares JSON, kein Code."""
+    id: str
+    rechtsgebiet: str = ""
+    titel: str
+    beschreibung: str = ""
+    anforderungen: list[PackAnforderung] = Field(default_factory=list)
+
+
+class PackBefund(BaseModel):
+    anforderung_id: str
+    titel: str
+    pflicht: bool
+    status: str                      # "vorhanden" | "fehlt"
+    belege: list[Quelle] = Field(default_factory=list)
+    hinweis: str = ""
+
+
+class PackErgebnis(BaseModel):
+    pack_id: str
+    titel: str
+    befunde: list[PackBefund] = Field(default_factory=list)
+    vorhanden: int = 0
+    fehlt_pflicht: int = 0
+    offene_schritte: list[str] = Field(default_factory=list)

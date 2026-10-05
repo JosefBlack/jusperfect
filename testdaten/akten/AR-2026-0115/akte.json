@@ -1,0 +1,32 @@
+{
+  "akte": {
+    "id": "AR-2026-0115",
+    "aktenzeichen": "115/26 AR",
+    "bezeichnung": "Reinhold-Özdemir ./. Nordwerk Metallbau GmbH – Kündigungsschutz",
+    "rechtsgebiet": "Arbeitsrecht",
+    "sachbearbeiter": "RA Dr. Weber",
+    "status": "offen"
+  },
+  "dokumente": [
+    {"id": "D-201", "titel": "Aktenvermerk Erstgespräch", "dateiname": "01_erstgespraech_mandantin.txt", "datum": "2026-05-12", "kategorie": "Mandant"},
+    {"id": "D-202", "titel": "Kündigungsschreiben", "dateiname": "02_kuendigungsschreiben.txt", "datum": "2026-05-04", "kategorie": "Gegner"},
+    {"id": "D-203", "titel": "Anhörung des Betriebsrats", "dateiname": "03_anhoerung_betriebsrat.txt", "datum": "2026-05-06", "kategorie": "Gegner"},
+    {"id": "D-204", "titel": "Stellungnahme des Betriebsrats", "dateiname": "04_stellungnahme_betriebsrat.txt", "datum": "2026-05-11", "kategorie": "Gegner"},
+    {"id": "D-205", "titel": "Gesprächsnotiz Zeuge Salzwedel", "dateiname": "05_zeugenaussage_salzwedel.txt", "datum": "2026-04-29", "kategorie": "Gegner"},
+    {"id": "D-206", "titel": "Auszug Urlaubsplan 2026", "dateiname": "06_urlaubsplan_auszug.txt", "datum": "2026-03-15", "kategorie": "Gegner"},
+    {"id": "D-207", "titel": "Auszug Arbeitsvertrag", "dateiname": "07_arbeitsvertrag_auszug.txt", "datum": "2018-08-20", "kategorie": "Mandant"},
+    {"id": "D-208", "titel": "Schreiben der Gegenseite", "dateiname": "08_schreiben_gegenseite.txt", "datum": "2026-05-26", "kategorie": "Gegner"}
+  ],
+  "beteiligte": [
+    {"id": "B-21", "name": "Tanja Reinhold-Özdemir", "rolle": "Mandantin"},
+    {"id": "B-22", "name": "Nordwerk Metallbau GmbH", "rolle": "Arbeitgeberin, Gegnerin", "organisation": "Nordwerk Metallbau GmbH"},
+    {"id": "B-23", "name": "Rainer Kalkbrenner", "rolle": "Geschäftsführer der Gegnerin"},
+    {"id": "B-24", "name": "Ludwig Freytag", "rolle": "Betriebsratsvorsitzender"},
+    {"id": "B-25", "name": "Mirko Salzwedel", "rolle": "Zeuge der Gegenseite"},
+    {"id": "B-26", "name": "Deniz Özdemir", "rolle": "Zeugin der Mandantin"},
+    {"id": "B-27", "name": "Kanzlei Hallervorden & Partner", "rolle": "Gegenanwälte"}
+  ],
+  "fristen": [
+    {"id": "F-21", "bezeichnung": "Klagefrist § 4 KSchG (drei Wochen ab Zugang der Kündigung)", "datum": "2026-05-26", "erledigt": false}
+  ]
+}

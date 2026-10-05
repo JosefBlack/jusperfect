@@ -1,0 +1,993 @@
+:root {
+  --grund: #eef1f3; --flaeche: #ffffff; --flaeche-2: #f5f8f9; --tinte: #14201f; --gedaempft: #55666a;
+  --linie: #d4dcde; --linie-stark: #b6c2c4;
+  --akzent: #0d6e6b; --akzent-tief: #0a5250; --akzent-hell: #dcefee;
+  --gruen: #2c7a4b; --gruen-hell: #dcefe2; --amber: #8f6300; --amber-hell: #f4ead0; --rot: #a8322a; --rot-hell: #f5ded9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --grund: #0e1516; --flaeche: #16201f; --flaeche-2: #1b2725; --tinte: #e6ecea; --gedaempft: #97a6a5;
+    --linie: #253130; --linie-stark: #384744;
+    --akzent: #48c3bd; --akzent-tief: #6fd3ce; --akzent-hell: #102a29;
+    --gruen: #63c48b; --gruen-hell: #12291d; --amber: #d9ab53; --amber-hell: #2c2413; --rot: #e2857c; --rot-hell: #2e1917;
+  }
+}
+:root[data-theme="dark"] {
+  --grund: #0e1516; --flaeche: #16201f; --flaeche-2: #1b2725; --tinte: #e6ecea; --gedaempft: #97a6a5;
+  --linie: #253130; --linie-stark: #384744;
+  --akzent: #48c3bd; --akzent-tief: #6fd3ce; --akzent-hell: #102a29;
+  --gruen: #63c48b; --gruen-hell: #12291d; --amber: #d9ab53; --amber-hell: #2c2413; --rot: #e2857c; --rot-hell: #2e1917;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; display: flex; flex-direction: column; background: var(--grund); color: var(--tinte);
+  font: 15px/1.5 "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+button, input, textarea, select { font: inherit; color: inherit; }
+
+.kopf { display: flex; align-items: center; gap: 16px; padding: 8px 18px; background: var(--flaeche);
+  border-bottom: 1px solid var(--linie); flex: none; }
+.marke { font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+.marke .jus { color: var(--akzent); }
+.kopf-mitte { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--gedaempft); }
+/* Der Name schrumpft, der Knopf nicht - sonst frisst eine lange Bezeichnung
+   den einzigen Weg zurueck zur Aktenliste auf. */
+.akte-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.akte-name b { color: var(--tinte); font-weight: 600; }
+.akte-wechseln { flex: none; font: inherit; font-size: 12px; color: var(--gedaempft);
+  background: transparent; border: 1px solid var(--linie-stark); border-radius: 6px;
+  padding: 3px 9px; cursor: pointer; }
+.akte-wechseln:hover:not(:disabled) { color: var(--tinte); border-color: var(--gedaempft); }
+/* Waehrend gelesen wird, fuehrt kein Weg aus der Akte heraus.
+   Ein Knopf, der nicht geht, muss auch danach aussehen: Am 02.10.2026 waren
+   die beiden gesperrt und nicht zu unterscheiden - und ein Klick, auf den
+   nichts geschieht, sieht aus wie ein haengendes Programm. Der Mauszeiger
+   sagt es mit, und der Hinweistext am Knopf nennt den Grund. */
+.akte-wechseln:disabled { opacity: .45; cursor: not-allowed; border-style: dashed; }
+/* Das Schliessen loescht die temporaeren Texte. Es lag im Menue „Mehr"
+   und war damit fuer den Bearbeiter praktisch nicht vorhanden; jetzt steht
+   es in der Reihe, durch den Abstand von den Arbeitsknoepfen abgesetzt. */
+.aktionen .schliessen { margin-left: 10px; }
+.kopf-rechts { display: flex; align-items: center; gap: 14px; margin-left: auto; font-size: 13px;
+  min-width: 0; }
+/* Zweite Absicherung neben der verkuerzten Kennung in app.js: Wird es doch zu
+   eng - lange Aktenbezeichnung, kleiner Bildschirm -, weicht der Modellname
+   und nicht die Aktenleiste. Der vollstaendige Name steht im Tooltip. */
+.status { color: var(--gedaempft); min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+.kosten { color: var(--akzent); font-variant-numeric: tabular-nums; }
+.nutzerfeld input { margin-left: 6px; padding: 4px 8px; border: 1px solid var(--linie); border-radius: 6px; background: var(--flaeche-2); width: 130px; }
+
+/* Anmeldung: eine Karte in der Mitte, sonst nichts. Die Frage „wer arbeitet
+   hier?" ist die einzige auf dieser Seite - sie gehoert nicht in eine Ecke. */
+.anmelden { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px 20px; }
+.anmelde-karte { width: 100%; max-width: 420px; background: var(--flaeche); border: 1px solid var(--linie);
+  border-radius: 14px; padding: 28px 26px 22px; }
+.anmelde-marke { font-size: 26px; font-weight: 700; letter-spacing: -.01em; text-align: center; }
+.anmelde-marke .jus { color: var(--akzent); }
+.anmelde-zeile { text-align: center; color: var(--gedaempft); font-size: 13px; margin: 4px 0 22px; }
+.anmelde-karte h2 { font-size: 15px; margin: 0 0 10px; }
+.nutzerliste { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nutzerliste button { width: 100%; text-align: left; padding: 11px 13px; border: 1px solid var(--linie);
+  border-radius: 9px; background: var(--flaeche-2); cursor: pointer; }
+.nutzerliste button:hover { border-color: var(--akzent); background: var(--akzent-hell); }
+.nutzerliste .nname { font-weight: 600; display: block; }
+.nutzerliste .nkennung { color: var(--gedaempft); font-size: 12px; font-variant-numeric: tabular-nums; }
+.anmelde-eigen { display: block; color: var(--gedaempft); font-size: 12px; }
+.anmelde-eigen input { display: block; width: 100%; margin-top: 5px; padding: 9px 11px;
+  border: 1px solid var(--linie); border-radius: 8px; background: var(--flaeche); }
+.anmelde-fuss { color: var(--gedaempft); font-size: 12px; line-height: 1.45; margin: 16px 0 0;
+  padding-top: 14px; border-top: 1px solid var(--linie); }
+.anmelde-fuss b { color: var(--tinte); }
+.anmelde-fehler { color: var(--rot); background: var(--rot-hell); border-radius: 8px;
+  padding: 9px 11px; font-size: 13px; margin: 14px 0 0; }
+/* Ein Programm, das gerade startet, ist keine Stoerung. Der rote Kasten beim
+   ersten Aufruf hat in der Kanzlei fuer Aufregung gesorgt - dabei war nur der
+   Browser schneller als der Server. */
+.anmelde-fehler.wartet { color: var(--gedaempft); background: var(--flaeche-2); }
+.anmelden .knopf { width: 100%; }
+
+/* Zuletzt geoeffnet */
+.verlauf-block { margin-top: 30px; }
+.verlauf-kopf { display: flex; align-items: baseline; gap: 10px; }
+.verlauf-kopf h2 { margin: 0; font-size: 15px; color: var(--gedaempft); font-weight: 600; }
+.verlauf-kopf .mini { margin-left: auto; }
+.verlauf-block .aktenliste .wann { color: var(--gedaempft); font-size: 12px; }
+
+/* Verwaltung: abgesetzt, damit sie nicht wie taegliche Arbeit aussieht. */
+.verwaltungszeile { display: flex; gap: 8px; margin-top: 34px; padding-top: 14px;
+  border-top: 1px solid var(--linie); }
+.marke-zahl { display: inline-block; margin-left: 7px; min-width: 18px; padding: 0 5px;
+  border-radius: 9px; background: var(--amber-hell); color: var(--amber);
+  font-size: 12px; font-weight: 700; text-align: center; }
+
+.einstieg { max-width: 720px; margin: 40px auto; padding: 0 20px; flex: 1; }
+.einstieg h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -.01em; }
+.einstieg h2 { font-size: 17px; margin: 24px 0 8px; }
+.unterzeile { color: var(--gedaempft); margin: 0 0 18px; max-width: 60ch; }
+.suchzeile { display: flex; gap: 8px; margin: 8px 0; }
+.suchzeile input { flex: 1; padding: 9px 11px; border: 1px solid var(--linie); border-radius: 8px; background: var(--flaeche); }
+.knopf { padding: 9px 16px; border: 1px solid var(--akzent); background: var(--akzent); color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.knopf:hover { background: var(--akzent-tief); border-color: var(--akzent-tief); }
+.knopf:disabled { opacity: .55; cursor: wait; }
+.knopf.leise { background: transparent; color: var(--akzent); }
+.aktenliste, .dokumentliste { list-style: none; margin: 12px 0; padding: 0; }
+.aktenliste li { padding: 12px 14px; border: 1px solid var(--linie); border-radius: 8px; margin-bottom: 8px; cursor: pointer; background: var(--flaeche); }
+.aktenliste li:hover { border-color: var(--akzent); background: var(--akzent-hell); }
+.aktenliste .az { font-weight: 700; }
+.aktenliste .meta { color: var(--gedaempft); font-size: 13px; margin-top: 2px; }
+.dokumentliste li { display: flex; gap: 10px; align-items: baseline; padding: 8px 4px; border-bottom: 1px solid var(--linie); }
+.dokumentliste .meta { margin-left: auto; color: var(--gedaempft); font-size: 12px; white-space: nowrap; }
+.hinweis { color: var(--gedaempft); font-size: 13px; }
+
+/* Arbeitsfläche */
+/* Der Chat steht in der Mitte und bekommt den meisten Platz. Rechts zwei
+   gestapelte Fenster: oben die Chronologie, darunter die Belege. Jede Spalte
+   scrollt fuer sich, die Seite selbst nicht - so bleibt der Ueberblick. */
+.flaeche { flex: 1; min-height: 0; display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr) minmax(280px, 0.85fr);
+  gap: 1px; background: var(--linie); }
+@media (max-width: 1100px) { .flaeche { grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr); }
+  .spalte.dokument { display: none; } }
+@media (max-width: 760px) { .flaeche { grid-template-columns: 1fr; grid-auto-rows: minmax(220px, auto); overflow: auto; }
+  .spalte.dokument { display: flex; }
+  /* Gestapelt steht der Chat oben: Wer fragen will, soll nicht erst suchen. */
+  .spalte.cowork { order: -1; }
+}
+
+/* Fenster ein- und ausblenden.
+   Aus der Kanzlei: "Es waere ganz cool, wenn man einen Button oben hat, sodass
+   man dann erst sozusagen diese Felder oeffnet und dass man die wieder
+   ausblenden kann, wenn man sie nicht braucht."
+   Was ausgeblendet ist, gibt seinen Platz an die Mitte ab - dort wird
+   gearbeitet, und dort war bisher am wenigsten Platz. Die Regeln gelten erst ab
+   1101 Pixeln: Darunter entscheidet die Bildschirmbreite, nicht der Knopf. */
+.fenster-knoepfe { display: inline-flex; gap: 4px; }
+/* Die Trennlinie steht zur Mitte hin - zwischen Fensterknopf und Arbeit, nicht
+   zwischen den Fensterknoepfen und dem Rand. */
+.fenster-knoepfe.links { padding-right: 10px; border-right: 1px solid var(--linie); }
+.fenster-knoepfe.rechts { padding-left: 10px; border-left: 1px solid var(--linie); }
+/* Der Pfeil am Fenster selbst. Aus der Kanzlei: "Es waer noch cool, wenn da
+   auch noch ein Pfeil ist, wo man dann die Seiten schliessen koennte. Das ist
+   irgendwie intuitiver fuer mich."
+
+   Er zeigte anfangs dorthin, wohin das Fenster verschwindet - also links am
+   Dokument nach links, rechts an Chronologie, Gedaechtnis und Belegen nach
+   rechts. Sinnvoll gedacht, in der Kanzlei aber nicht so gelesen: "bei belegen
+   und gedaechtnis mache den pfeil nach links statt nach rechts." Wer links den
+   Pfeil "<" gelernt hat und darunter versteht "das Fenster geht zu", erwartet
+   rechts dasselbe Zeichen - nicht dessen Spiegelbild. Alle Pfeile zeigen jetzt
+   nach links und bedeuten dasselbe.
+
+   Leise bleibt er, solange man ihn nicht braucht: Er sitzt in einer Kopfzeile,
+   die man den ganzen Tag ansieht. */
+.fenster-zu { font: inherit; font-size: 15px; line-height: 1; color: var(--gedaempft);
+  background: transparent; border: 1px solid transparent; border-radius: 5px;
+  padding: 1px 6px; cursor: pointer; opacity: .55; }
+.spalte-kopf:hover .fenster-zu { opacity: 1; }
+.fenster-zu:hover { color: var(--tinte); border-color: var(--linie-stark); background: var(--flaeche-2); }
+.fenster-zu:focus-visible { opacity: 1; }
+/* Der Pfeil und der Arbeitsakte-Knopf sitzen am rechten Rand der Kopfzeile:
+   Aus der Kanzlei - "wenn der Pfeil nicht links ist, sondern rechts von der
+   Leiste, ist er einfach besser zu sehen." */
+.spalte.dokument .spalte-kopf { gap: 6px; flex-wrap: nowrap; }
+/* Die Dokumentwahl gibt nach, die Knoepfe nicht: Sonst rutschen sie in einer
+   schmalen Spalte in eine zweite Zeile und stehen dort verloren. */
+.spalte.dokument .spalte-kopf .dok-filter { margin-right: auto; min-width: 0; flex: 1 1 auto; }
+.spalte.dokument .spalte-kopf > button { flex: none; }
+
+.fensterknopf[aria-pressed="true"] { background: var(--akzent-hell); color: var(--akzent);
+  border-color: var(--akzent); }
+#spalte-dokument[hidden], #spalte-rechts[hidden], .fenster[hidden] { display: none !important; }
+
+@media (min-width: 1101px) {
+  .flaeche.ohne-links { grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr); }
+  .flaeche.ohne-rechts { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); }
+  .flaeche.ohne-links.ohne-rechts { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Der Benutzername ist selbst der Weg zurueck zur Auswahl. */
+/* Der Benutzerknopf. Er stand hier als blasser Text ohne Rahmen und wurde in
+   der Kanzlei fuer eine Beschriftung gehalten - "zu klein und nicht so
+   intuitiv" (25.09.2026). Ein Knopf muss von selbst aussagen, dass er einer
+   ist; ein Rahmen, der erst beim Daraufzeigen erscheint, kommt zu spaet.
+   Deshalb: Rahmen und Flaeche dauerhaft, groessere Schrift, mehr Luft. */
+.nutzer-knopf { font: inherit; font-size: 14px; color: var(--tinte);
+  background: var(--flaeche-2); border: 1px solid var(--linie-stark);
+  border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px; line-height: 1.2; }
+.nutzer-knopf:hover { border-color: var(--akzent); background: var(--grund); }
+.nutzer-knopf:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
+/* Das Sinnbild sagt "Person", bevor man den Namen gelesen hat. */
+.nutzer-bild { width: 15px; height: 15px; flex: none; fill: none;
+  stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.nutzer-name { font-weight: 600; }
+/* Was beim Klicken geschieht - klein, aber sichtbar. Ohne diesen Zusatz sieht
+   der Knopf aus wie die Anzeige, wer angemeldet ist. */
+.nutzer-hinweis { font-size: 11.5px; color: var(--gedaempft);
+  border-left: 1px solid var(--linie); padding-left: 7px; }
+.nutzer-knopf:hover .nutzer-hinweis { color: var(--tinte); }
+
+/* Rechte Spalte: zwei Fenster untereinander, jedes mit eigenem Kopf. */
+/* Drei Fenster untereinander - und das Aktengedaechtnis kann fehlen (ohne
+   aktiviertes Gedaechtnis gibt es nichts zu zeigen). Deshalb Flex statt fester
+   Rasterzeilen: Ein ausgeblendetes Fenster hinterlaesst so keine Luecke. */
+.spalte.rechts { display: flex; flex-direction: column; gap: 1px; background: var(--linie); }
+.spalte.rechts > .fenster { flex: 1 1 0; }
+.spalte.rechts > .fenster.belege { flex: 1.2 1 0; }
+/* Die Uebersicht ist kurz und fest: sechs Zeilen, die nicht mitwachsen sollen. */
+.spalte.rechts > .fenster.gedaechtnis { flex: 0 0 auto; }
+.fenster { background: var(--grund); display: flex; flex-direction: column; min-height: 0; }
+
+/* Chronologie: eine Zeitleiste, die ohne KI-Aufruf gefuellt ist. */
+.chrono-liste { flex: 1; overflow: auto; padding: 10px 12px; }
+.chrono-eintrag { padding: 3px 6px; border-left: 2px solid var(--linie); }
+.chrono-eintrag:hover { border-left-color: var(--akzent); background: var(--flaeche-2); cursor: pointer; }
+.chrono-datum { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--gedaempft); white-space: nowrap; }
+.chrono-was { font-size: 12.5px; }
+.chrono-eintrag.frist { border-left-color: var(--amber); }
+.chrono-eintrag.frist .chrono-was { color: var(--amber); font-weight: 600; }
+.chrono-eintrag.analyse { border-left-color: var(--akzent); }
+.chrono-leer { color: var(--gedaempft); font-size: 12.5px; padding: 8px 4px; }
+
+/* "Mehr"-Menue: selten Gebrauchtes aus der Leiste nehmen, ohne es zu verstecken. */
+.mehr { position: relative; }
+.mehr-menue { position: absolute; right: 0; top: calc(100% + 4px); z-index: 20; min-width: 190px;
+  background: var(--flaeche); border: 1px solid var(--linie-stark); border-radius: 8px; padding: 4px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18); display: flex; flex-direction: column; }
+.mehr-eintrag { text-align: left; padding: 7px 10px; border: 0; background: none; border-radius: 6px;
+  cursor: pointer; font: inherit; font-size: 13px; color: var(--tinte); }
+.mehr-eintrag:hover { background: var(--akzent-hell); color: var(--akzent-tief); }
+.spalte { background: var(--grund); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+/* Bezugsrahmen fuer die schwebende Eingabe. */
+.spalte.cowork { position: relative; }
+/* Der Kopf mit den Befehlen bleibt stehen, komme was wolle. Im gestapelten
+   Layout scrollt die Flaeche als Ganzes; ohne sticky wanderte der Balken mit
+   nach oben hinaus, und man musste zurueckscrollen, um etwas auszuloesen. */
+.spalte-kopf { flex: none; position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  flex-wrap: wrap; padding: 9px 14px; background: var(--flaeche); border-bottom: 1px solid var(--linie); font-size: 12px;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--gedaempft); font-weight: 700; }
+/* Drei Gruppen: was links aufgeht, die Arbeit, was rechts aufgeht. Die
+   Arbeitsknoepfe stehen in der Mitte, die Fensterknoepfe an den Raendern - und
+   damit auf der Seite, auf der ihr Fenster erscheint. */
+/* Die Leiste nimmt die ganze Breite der Spalte - sonst stehen die drei Gruppen
+   beieinander und die Zuordnung "links/rechts" geht gerade verloren. */
+/* Die Leiste nimmt die ganze Breite der Spalte, und die drei Gruppen bleiben
+   in EINER Zeile. Mit flex-wrap rutschte die mittlere Gruppe in eine zweite
+   Zeile, sobald es eng wurde - und dann standen "links" und "rechts"
+   nebeneinander, womit die ganze Zuordnung dahin war. Umbrechen darf innerhalb
+   einer Gruppe, nicht zwischen ihnen. */
+.aktionen { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center;
+  width: 100%; }
+/* Umbrechen darf INNERHALB einer Gruppe - dann rutscht "Mehr" unter "Analyse"
+   und "Belege" unter "Chronologie", und jede Gruppe bleibt auf ihrer Seite. */
+.arbeitsknoepfe { display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  justify-content: center; margin: 0 auto; min-width: 0; }
+.fenster-knoepfe { flex: 0 1 auto; flex-wrap: wrap; min-width: 0; }
+.fenster-knoepfe.rechts { justify-content: flex-end; }
+/* Der Pfeil gehoert zum Wort. Ohne diese Zeile stand "‹" allein ueber
+   "Dokumente", sobald die Spalte schmal wurde. */
+.fensterknopf, .arbeitsknoepfe .mini { white-space: nowrap; }
+.mini { padding: 4px 9px; border: 1px solid var(--linie); background: var(--flaeche-2); border-radius: 6px;
+  cursor: pointer; font-size: 12px; text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--akzent); }
+.mini:hover { border-color: var(--akzent); }
+.mini.leise { color: var(--gedaempft); }
+.dok-filter { border: 1px solid var(--linie); background: var(--flaeche-2); border-radius: 6px; padding: 3px 6px; font-size: 12px; max-width: 55%; }
+
+/* Dokumentspalte */
+.dok-text { flex: 1; overflow: auto; padding: 16px 18px; background: var(--flaeche); }
+.passage { margin: 0 0 12px; scroll-margin-top: 12px; border-radius: 6px; padding: 4px 6px; transition: background .25s; }
+.passage .kennung { display: inline-block; font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; color: var(--gedaempft);
+  background: var(--flaeche-2); border: 1px solid var(--linie); border-radius: 4px; padding: 0 5px; margin-bottom: 4px; }
+.passage .satz { white-space: pre-wrap; }
+/* Die markierte Fundstelle. Bernstein, nicht Tuerkis: dieselbe Farbe wie der
+   Punkt auf dem j im Programmsymbol - der Beleg. Vorher war die Markierung
+   ein zartes Tuerkis auf tuerkisem Grund und fiel in einem langen Dokument
+   nicht auf; aus der Kanzlei kam der Wunsch, der Klick moege den Abschnitt
+   "farblich markieren" - er tat es bereits, nur sah man es nicht. */
+.passage.markiert { background: var(--amber-hell); box-shadow: inset 4px 0 0 var(--amber); }
+/* Genau getroffen: Dann faerbt sich nicht der ganze Absatz, sondern der Satz,
+   der die Aussage traegt - und darin die harte Angabe. Der Absatz bekommt nur
+   den Strich am Rand, damit man sieht, wo man ist. */
+.passage.markiert.genau { background: transparent; }
+.passage .stelle { background: var(--amber-hell); border-radius: 4px; padding: 1px 2px;
+  box-shadow: 0 0 0 2px var(--amber-hell); }
+.passage .stelle mark { background: var(--amber); color: var(--flaeche); border-radius: 3px;
+  padding: 0 3px; font-weight: 600; }
+/* Eine Angabe im Antworttext, die sich nachschlagen laesst. */
+/* Auf der Belegkarte: Steht dort die getroffene Stelle und nicht nur der
+   Anfang der Passage, wird das sichtbar - sonst weiss niemand, ob er den
+   richtigen Satz liest oder den ersten. */
+.beleg-karte .zitat.genau { border-left: 2px solid var(--amber); padding-left: 7px; }
+/* Eine Fundstelle, deren Aussage sich im Absatz nicht wiederfinden liess.
+   Der gruene Balken links steht fuer "belegt"; hier ist er gestrichelt und
+   gedaempft, weil die Kennung stimmt, die Stelle aber nicht zuzuordnen war. */
+.beleg-karte.ungenau { border-left-style: dashed; border-left-color: var(--amber); }
+.beleg-hinweis { font-size: 11.5px; color: var(--amber); margin-top: 5px; line-height: 1.35; }
+.angabe { border-bottom: 1px dashed var(--akzent); cursor: pointer; }
+.angabe:hover { background: var(--akzent-hell); border-radius: 3px; }
+.passage.markiert .kennung { color: var(--amber); font-weight: 700; }
+.passage.markiert.puls { animation: fundstelle-puls .9s ease-out 1; }
+@keyframes fundstelle-puls {
+  0%   { box-shadow: inset 4px 0 0 var(--amber), 0 0 0 0 var(--amber); }
+  100% { box-shadow: inset 4px 0 0 var(--amber), 0 0 0 10px transparent; }
+}
+/* Und der Beleg, der angeklickt wurde, bleibt als der aktive erkennbar. */
+.beleg.aktiv { background: var(--amber-hell); color: var(--amber); outline: 1px solid var(--amber); }
+.dok-doktitel { font-weight: 700; margin: 14px 0 8px; font-size: 14px; }
+.dok-doktitel:first-child { margin-top: 0; }
+
+/* Cowork-Thread */
+/* Der Verlauf scrollt UNTER der Eingabe durch - wie bei Claude oder ChatGPT,
+   nicht wie bei WhatsApp, wo die Eingabe den Verlauf abschneidet. Das untere
+   Polster ist so bemessen, dass die letzte Karte frei ueber der Eingabe zu
+   stehen kommt und nicht halb dahinter verschwindet. */
+.thread { flex: 1; overflow: auto; padding: 14px 14px 116px; display: flex; flex-direction: column; gap: 12px; }
+.willkommen { color: var(--gedaempft); font-size: 14px; margin: auto 0; text-align: center; padding: 20px; }
+/* flex: none ist hier kein Feinschliff, sondern die Bedingung dafuer, dass der
+   Verlauf ueberhaupt scrollt. .thread ist eine Flexspalte; ohne diese Zeile
+   schrumpfen die Karten, sobald der Inhalt hoeher wird als das Fenster - und
+   weil sie "overflow: hidden" tragen, wird der Text stillschweigend
+   abgeschnitten statt scrollbar zu werden. Genau so verschwand die zweite
+   Zeile jeder Frage. */
+.karte-c { flex: none; border: 1px solid var(--linie); border-radius: 10px; background: var(--flaeche); overflow: hidden; }
+.karte-c .who { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; color: var(--gedaempft);
+  padding: 8px 12px 0; }
+.karte-c.user { background: var(--flaeche-2); }
+.karte-c.user .inhalt { padding: 4px 12px 10px; white-space: pre-wrap; }
+.karte-c .inhalt { padding: 2px 12px 10px; }
+.karte-c .inhalt p { margin: 6px 0; white-space: pre-wrap; }
+
+/* Textsatz der Modellantworten. Zurueckhaltend: Eine Antwort in der Akte ist
+   kein Aufsatz, sondern soll gelesen und geprueft werden. Ueberschriften
+   heben sich durch Gewicht ab, nicht durch Groesse - sonst zerfaellt die
+   Karte optisch in Kapitel. */
+.karte-c .inhalt .abschnitt { margin: 12px 0 4px; font-size: 13px; font-weight: 600;
+  letter-spacing: .02em; color: var(--tinte); }
+.karte-c .inhalt .abschnitt:first-child { margin-top: 2px; }
+.karte-c .inhalt .aufzaehlung { margin: 6px 0; padding-left: 20px; }
+.karte-c .inhalt .aufzaehlung li { margin: 3px 0; }
+.karte-c .inhalt code { background: var(--flaeche-2); border: 1px solid var(--linie);
+  border-radius: 3px; padding: 0 3px; font-family: Consolas, monospace; font-size: 12.5px; }
+.stromtext { margin: 6px 0; white-space: pre-wrap; color: var(--gedaempft); }
+.stromtext::after { content: "▍"; margin-left: 1px; color: var(--akzent); animation: blinken 1s steps(2, start) infinite; }
+@keyframes blinken { to { visibility: hidden; } }
+.karte-c .titelzeile { font-weight: 700; padding: 8px 12px 0; }
+.karte-c .fuss { display: flex; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border-top: 1px solid var(--linie);
+  font-size: 11px; color: var(--gedaempft); font-variant-numeric: tabular-nums; }
+.hinweise { padding: 6px 12px; }
+.hinweise .h { background: var(--amber-hell); color: var(--amber); border-radius: 6px; padding: 5px 8px; font-size: 12.5px; margin-top: 4px; }
+.beleg { display: inline; cursor: pointer; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px;
+  background: var(--gruen-hell); color: var(--gruen); border-radius: 3px; padding: 0 4px; white-space: nowrap; }
+.beleg.fehlt { background: var(--rot-hell); color: var(--rot); }
+.beleg:hover { outline: 1px solid currentColor; }
+table.mini-t { border-collapse: collapse; width: 100%; font-size: 13px; margin: 6px 0; }
+table.mini-t th, table.mini-t td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--linie); vertical-align: top; }
+table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
+
+/* Die Eingabe liegt ueber dem Verlauf, nicht darunter. Der Verlauf blendet
+   nach unten aus, statt an einer Kante abgeschnitten zu wirken - so ist zu
+   sehen, dass dort noch Text weitergeht. */
+.eingabe { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 12px;
+  background: linear-gradient(to bottom, transparent, var(--grund) 38%);
+  /* Der Verlauf darueber darf keine Klicks abfangen: Belege im Text sollen
+     anklickbar bleiben, auch wenn sie unter dem Ausblenden liegen. */
+  pointer-events: none; }
+.eingabe > * { pointer-events: auto; }
+.frage-form { display: flex; gap: 8px; padding: 8px; border: 1px solid var(--linie);
+  border-radius: 14px; background: var(--flaeche); box-shadow: 0 4px 20px rgba(0,0,0,.09); }
+.frage-form textarea { flex: 1; resize: none; padding: 9px 11px; border: 0; border-radius: 8px;
+  background: transparent; font: inherit; color: inherit; }
+.frage-form textarea:focus { outline: none; }
+/* Der Rahmen wandert auf den ganzen Block, wenn im Feld getippt wird. */
+.frage-form:focus-within { border-color: var(--akzent); }
+/* Dieser Abschnitt muss NACH der Grundregel stehen: Beide sprechen .eingabe
+   mit derselben Spezifitaet an, es gewinnt also die spaetere. Weiter oben
+   eingeordnet blieb er wirkungslos.
+   Gestapelt scrollt die Flaeche als Ganzes; dort klebt die Eingabe unten,
+   statt am Ende einer sehr langen Spalte zu haengen. */
+@media (max-width: 760px) {
+  .eingabe { position: sticky; padding-top: 10px;
+             background: linear-gradient(to bottom, transparent, var(--grund) 22%); }
+  .thread { padding-bottom: 14px; }
+}
+
+/* Belege */
+.belege-liste { flex: 1; overflow: auto; padding: 12px; }
+.beleg-stand { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.beleg-karte { border: 1px solid var(--linie); border-left: 3px solid var(--gruen); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; cursor: pointer; background: var(--flaeche); }
+.beleg-karte:hover { border-color: var(--akzent); }
+.beleg-karte .k { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--gruen); }
+.beleg-karte .titel { color: var(--gedaempft); font-size: 12px; }
+.beleg-karte .zitat { font-size: 12.5px; margin-top: 3px; white-space: pre-wrap; }
+.belege-leer { color: var(--gedaempft); font-size: 13px; padding: 8px; }
+
+.entwurf-dialog { border: 1px solid var(--linie-stark); border-radius: 12px; padding: 0; max-width: 560px; width: 92%;
+  background: var(--flaeche); color: var(--tinte); }
+.entwurf-dialog::backdrop { background: rgba(10,20,20,.45); }
+.entwurf-form { padding: 20px 22px; }
+.entwurf-form h2 { margin: 0 0 12px; }
+.entwurf-form label { display: block; margin: 10px 0; font-size: 13px; color: var(--gedaempft); }
+.entwurf-form select, .entwurf-form input, .entwurf-form textarea { display: block; width: 100%; margin-top: 4px; padding: 8px 10px;
+  border: 1px solid var(--linie); border-radius: 8px; background: var(--flaeche-2); color: var(--tinte); }
+.dialog-knoepfe { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+.nachweis-dialog { border: 1px solid var(--linie-stark); border-radius: 12px; padding: 0; max-width: 640px; width: 94%;
+  background: var(--flaeche); color: var(--tinte); }
+.nachweis-dialog::backdrop { background: rgba(10,20,20,.45); }
+.nachweis-form { padding: 20px 22px; }
+.nachweis-form h2 { margin: 0 0 6px; }
+.nachweis-hinweis { margin: 0 0 12px; font-size: 12.5px; color: var(--gedaempft); }
+.nachweis-liste { max-height: 60vh; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+.nachweis-leer { color: var(--gedaempft); font-size: 13px; }
+.nachweis-zeile { border: 1px solid var(--linie); border-radius: 8px; padding: 8px 10px; background: var(--flaeche-2); }
+.nachweis-kopf { display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.nachweis-kopf .nw-funktion { font-weight: 700; }
+.nachweis-kopf .nw-akte { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--akzent); }
+.nachweis-kopf .nw-zeit { margin-left: auto; font-size: 11.5px; color: var(--gedaempft); font-variant-numeric: tabular-nums; }
+.nachweis-rumpf { display: flex; gap: 8px 14px; flex-wrap: wrap; margin-top: 5px; font-size: 11.5px; color: var(--gedaempft); }
+.nachweis-rumpf .nw-detail { font-variant-numeric: tabular-nums; }
+
+.posteingang-kopf { display: flex; align-items: baseline; gap: 12px; }
+.posteingang-kopf h2 { margin: 0 0 6px; }
+.posteingang-stand { margin: 0 0 10px; font-size: 11.5px; color: var(--gedaempft); }
+.posteingang-knoepfe { display: flex; gap: 6px; margin-top: 6px; }
+.posteingang-fehler { border-left: 3px solid var(--warn, #b45309); }
+.posteingang-triage { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--linie); font-size: 13px; }
+.posteingang-triage p { margin: 3px 0; }
+
+.referenz-zeile { display: flex; align-items: center; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--linie); cursor: pointer; }
+.referenz-zeile input { flex: none; }
+
+/* Zwei-Fenster-Explorer */
+.explorer-dialog { border: 1px solid var(--linie-stark); border-radius: 12px; padding: 0; max-width: 780px; width: 96%;
+  background: var(--flaeche); color: var(--tinte); max-height: 92vh; }
+/* Der Dialog waechst mit seinem Inhalt - und schob, als der Inhalt des
+   Gedaechtnisses dazukam, die Knoepfe aus dem Bild. Jetzt traegt der Dialog
+   eine Hoehengrenze, die Listen rollen in sich, und die Knopfzeile bleibt
+   unten stehen. Wer schliessen will, findet den Knopf ohne zu suchen. */
+.explorer-dialog::backdrop { background: rgba(10,20,20,.45); }
+/* Der Dialog kann laenger werden, als der Bildschirm hoch ist - besonders seit
+   der Inhalt des Gedaechtnisses darin steht. Statt die einzelnen Bloecke
+   gegeneinander zu rechnen, rollt das ganze Formular, und die Knopfzeile
+   klebt unten. Wer schliessen will, findet den Knopf immer an derselben
+   Stelle, gleich wie viel darueber steht. */
+.explorer-form { padding: 20px 22px; max-height: 92vh; overflow: auto; }
+.explorer-form > .dialog-knoepfe { position: sticky; bottom: 0; z-index: 1;
+  background: var(--flaeche); padding: 10px 0 2px; margin-top: 8px;
+  border-top: 1px solid var(--linie); }
+/* Die Fusszeile klebt unmittelbar auf der Knopfzeile (deren Hoehe hier steht),
+   damit zwischen beiden kein Spalt bleibt, durch den der rollende Inhalt
+   blitzt. Beide zusammen sind der ruhige Boden des Dialogs. */
+.explorer-form > .ged-umfang { position: sticky; bottom: 56px; z-index: 1;
+  background: var(--flaeche); padding: 6px 0 4px; margin-bottom: 0; }
+.explorer-form > .ged-umfang + .dialog-knoepfe { margin-top: 0; }
+.explorer-form h2 { margin: 0 0 6px; }
+/* Suche im Explorer. Bei acht Dokumenten scrollt man; bei hundert nicht mehr.
+   Gefiltert werden beide Spalten zugleich, und "alle ->" nimmt dann nur die
+   sichtbaren - so legt man mit "Gegner" + "alle ->" die gegnerischen
+   Schriftsaetze in einem Zug in die Arbeitsakte. */
+.explorer-suche { width: 100%; box-sizing: border-box; margin: 10px 0 0; padding: 8px 12px; font: inherit; font-size: 13.5px;
+  color: var(--tinte); background: var(--flaeche); border: 1px solid var(--linie-stark); border-radius: 8px; }
+.explorer-suche:focus { outline: 2px solid var(--akzent); outline-offset: 1px; border-color: var(--akzent); }
+.explorer-kopf .zahl.gefiltert { color: var(--akzent); border-color: var(--akzent); }
+.explorer { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+.explorer-spalte { border: 1px solid var(--linie); border-radius: 10px; background: var(--flaeche-2); display: flex; flex-direction: column; min-height: 220px; }
+.explorer-kopf { font-size: 12px; font-weight: 700; color: var(--gedaempft); padding: 8px 10px; border-bottom: 1px solid var(--linie);
+  display: flex; align-items: center; gap: 8px; }
+.explorer-kopf .zahl { display: inline-block; min-width: 20px; text-align: center; background: var(--flaeche); border: 1px solid var(--linie);
+  border-radius: 10px; padding: 0 6px; font-variant-numeric: tabular-nums; color: var(--tinte); }
+.explorer-kopf .mini { margin-left: auto; }
+.explorer-kopf .mini + .zahl, .explorer-kopf .zahl + .mini { margin-left: 0; }
+.explorer-liste { list-style: none; margin: 0; padding: 6px; overflow: auto; max-height: 34vh; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.explorer-eintrag { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--linie); border-radius: 8px;
+  background: var(--flaeche); cursor: grab; }
+.explorer-eintrag:hover { border-color: var(--akzent); }
+.explorer-eintrag .explorer-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Eine Liste mit Haekchen statt zweier Spalten mit Ziehen. */
+.explorer-leiste { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0 6px; }
+.explorer-arten { display: inline-flex; gap: 5px; flex-wrap: wrap; }
+.explorer-arten .art { font: inherit; font-size: 12px; padding: 2px 9px; border-radius: 999px;
+  border: 1px solid var(--linie-stark); background: var(--flaeche); color: var(--gedaempft); cursor: pointer; }
+.explorer-arten .art:hover { border-color: var(--akzent); color: var(--akzent); }
+.explorer-arten .art.drin { background: var(--akzent-hell); border-color: var(--akzent); color: var(--akzent); font-weight: 600; }
+.explorer-leiste .zahl { margin-left: auto; }
+.explorer-wahl { display: flex; align-items: baseline; gap: 10px; width: 100%; cursor: pointer; padding: 2px 0; }
+.explorer-wahl input { flex: none; width: 16px; height: 16px; cursor: pointer; }
+.explorer-eintrag.drin { border-color: var(--akzent); background: var(--akzent-hell); }
+/* Was schon im Aktengedaechtnis liegt: sichtbar, aber zurueckgenommen -
+   damit niemand es ein zweites Mal aufnimmt. */
+.explorer-zeile.schon-drin, .explorer-eintrag.schon-drin { opacity: .55; }
+.explorer-zeile.schon-drin .explorer-titelzeile,
+.explorer-eintrag.schon-drin .explorer-name { color: var(--gedaempft); }
+.explorer-zeile.schon-drin input[disabled] { cursor: default; }
+.explorer-umfang { margin: 10px 0 0; color: var(--gedaempft); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.explorer-umfang.voll { color: var(--amber); font-weight: 600; }
+@media (max-width: 560px) { .explorer { grid-template-columns: 1fr; } }
+
+/* Wohin mit der Meldung? Unten in der Mitte lag sie ueber dem Eingabefeld fuer
+   die Frage - man tippte hinter einer Sprechblase. Oben in der Mitte lag sie
+   ueber der Knopfreihe. Beides sind Stellen, an denen gearbeitet wird. Die
+   untere rechte Ecke ist die einzige, an der nichts liegt: Die Belegspalte ist
+   dort leer, solange es keine Belege gibt - und sobald es welche gibt, hat die
+   Meldung ihren Zweck erfuellt. */
+.meldung { position: fixed; bottom: 18px; right: 18px; background: var(--tinte); color: var(--grund);
+  padding: 10px 16px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.25); max-width: 80vw; font-size: 14px; z-index: 50; }
+.meldung.fehler { background: var(--rot); color: #fff; }
+
+/* Rückgängig-Leiste. Sie verschwindet nicht von selbst: Wer gerade etwas
+   verworfen hat, merkt den Fehlgriff oft erst nach einem Blick auf die Akte -
+   und eine Frist, die abläuft, während man nachdenkt, ist keine Hilfe. Sie
+   weicht erst, wenn sie benutzt, weggeklickt oder von der nächsten
+   rückgängig zu machenden Handlung abgelöst wird. */
+.rueckgaengig { position: fixed; bottom: 18px; left: 18px; display: flex; align-items: center; gap: 10px;
+  background: var(--flaeche); color: var(--tinte); border: 1px solid var(--linie-stark);
+  padding: 8px 10px 8px 14px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  max-width: min(460px, 86vw); font-size: 13.5px; z-index: 51; }
+.rueckgaengig #rueckgaengig-text { flex: 1; min-width: 0; }
+.rueckgaengig .mini { flex: none; }
+@media (max-width: 560px) { .rueckgaengig { left: 12px; right: 12px; max-width: none; } }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--akzent); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Prüfliste (Workflow-Pack) */
+.pack-summe { font-weight: 600; margin: 6px 0 10px; }
+.pack-liste { display: flex; flex-direction: column; gap: 2px; }
+.pack-zeile { display: grid; grid-template-columns: 14px 1fr; gap: 8px; padding: 6px 0; border-top: 1px solid var(--linie); align-items: start; }
+.pack-zeile:first-child { border-top: none; }
+.pack-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; flex: none; }
+.pack-dot.g { background: var(--gruen); } .pack-dot.a { background: var(--amber); } .pack-dot.r { background: var(--rot); }
+.pack-titel { font-size: 14px; font-weight: 500; }
+.pack-belege { margin-top: 3px; display: flex; gap: 4px; flex-wrap: wrap; }
+.pack-hinweis { font-size: 12.5px; color: var(--gedaempft); margin-top: 2px; }
+.pack-zeile.fehlt .pack-titel { color: var(--gedaempft); }
+
+/* Vorschaltstufe Perfect Shield (Schalter angelegt, noch nicht aktiv) */
+
+
+/* Anmeldung – nur im AWS-Betrieb sichtbar. */
+.anmeldung {
+  padding: .25rem .7rem; border: 1px solid var(--linie-stark); border-radius: 6px;
+  background: var(--flaeche); color: var(--tinte); font: inherit; cursor: pointer;
+}
+.anmeldung:hover { background: var(--flaeche-2); border-color: var(--akzent); }
+
+/* Abschluss der Akte – der Löschknopf ist bewusst als Gefahr gekennzeichnet. */
+.abschluss-stand { margin: .5rem 0 .75rem; }
+.abschluss-zeile { display: flex; gap: .6rem; padding: .2rem 0; border-bottom: 1px solid var(--linie); }
+.abschluss-name { color: var(--gedaempft); min-width: 12rem; }
+.abschluss-wert { font-weight: 600; }
+.abschluss-wert.faellig, .nw-detail.faellig { color: var(--rot); }
+.abschluss-hinweis {
+  margin: .5rem 0 0; padding: .5rem .6rem; border-left: 3px solid var(--amber);
+  background: var(--amber-hell); color: var(--tinte); font-size: .9rem;
+}
+.abschluss-vorschau {
+  width: 100%; box-sizing: border-box; font-family: ui-monospace, monospace; font-size: .85rem;
+  background: var(--flaeche-2); color: var(--tinte); border: 1px solid var(--linie);
+  border-radius: 6px; padding: .5rem; resize: vertical;
+}
+.abschluss-bestaetigung {
+  display: flex; gap: .5rem; align-items: flex-start; margin: .6rem 0 0; font-size: .9rem;
+}
+.knopf.gefahr { background: var(--rot); border-color: var(--rot); color: #fff; }
+.knopf.gefahr:disabled { background: var(--linie-stark); border-color: var(--linie-stark); color: var(--flaeche); }
+.nachweis-zeile.handlungsbedarf { border-left: 3px solid var(--amber); padding-left: .5rem; }
+.abschluss-erledigt { margin: 0 0 .6rem; font-weight: 700; color: var(--gruen); }
+
+/* Kostenschätzung unter dem Frageeingabefeld – Hinweis, keine Rechnung. */
+.schaetzung {
+  margin: .4rem .2rem 0; font-size: .82rem; color: var(--gedaempft); text-align: center;
+}
+.schaetzung-haupt { color: var(--tinte); }
+
+/* Chronologie nach Tagen gruppiert: ein Datum, darunter was geschah. */
+.chrono-tag { display: grid; grid-template-columns: 4.6rem 1fr; gap: 8px; align-items: baseline; margin-bottom: 6px; }
+.chrono-was-liste { display: flex; flex-direction: column; gap: 2px; }
+
+
+/* Aktengedaechtnis: Umfang und Fehlendes ────────────────────────────────── */
+/* Ein dauerhafter Speicher, in den niemand hineinsehen kann, ist eine Zusage
+   ohne Nachweis. Diese Zeilen sind der Nachweis. */
+.kopf-rechts { display: flex; align-items: center; gap: 8px; }
+/* Der Schliesspfeil sitzt an der INNEREN Kante des Fensters, also dort,
+   wo die Arbeitsflaeche liegt: am Dokument rechts, an Chronologie,
+   Gedaechtnis und Belegen links. Aus der Kanzlei zweimal, und beide Male
+   dasselbe Empfinden - links am Dokument "besser zu sehen" rechts,
+   rechts an der Chronologie "finde ich links intuitiver". Vier Pfeile,
+   eine Regel: Sie zeigen zur Mitte, und dorthin faltet sich das Fenster. */
+.kopf-links { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ged-uebersicht { padding: 8px 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+.ged-satz { margin: 0 0 4px; }
+/* Fortschritt beim abschnittsweisen Einlesen. */
+.ged-fortschritt { padding: 10px 12px; border-top: 1px solid var(--linie); }
+.fortschritt-balken { height: 8px; border-radius: 999px; background: var(--flaeche-2);
+  border: 1px solid var(--linie); overflow: hidden; margin-bottom: 8px; }
+.fortschritt-fuell { height: 100%; width: 0; background: var(--akzent); transition: width .35s ease; }
+.ged-fortschritt .mini { margin-top: 4px; }
+
+/* Der Lesefortschritt sitzt, wo sonst die Meldung sitzt - nur groesser, weil
+   er stehenbleibt, solange gelesen wird. Beide zugleich kommen nicht vor:
+   waehrend gelesen wird, meldet nichts anderes. */
+.lesefortschritt { position: fixed; bottom: 18px; right: 18px; width: min(360px, calc(100vw - 36px));
+  background: var(--tinte); color: var(--grund); padding: 14px 16px 12px;
+  border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.25); z-index: 60; }
+.lesefortschritt .fortschritt-balken { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.28); }
+.lesefortschritt .fortschritt-fuell { background: var(--grund); }
+.lese-text { margin: 0; font-size: 13.5px; font-weight: 600; }
+.lese-dauer { margin: 2px 0 0; font-size: 12px; opacity: .72; }
+/* Der Spruch bekommt eigenen Platz, damit die Zeilen darueber nicht springen,
+   wenn ein kuerzerer kommt. */
+.lese-spruch { margin: 8px 0 0; font-size: 12.5px; opacity: .82; min-height: 2.6em; line-height: 1.3; }
+.lesefortschritt .mini { margin-top: 6px; background: transparent; color: var(--grund);
+  border-color: rgba(255,255,255,.35); }
+@media (prefers-reduced-motion: reduce) { .lesefortschritt .fortschritt-fuell { transition: none; } }
+.ged-satz.leise { color: var(--gedaempft); font-size: 12px; }
+.ged-zeile { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; padding: 2px 0; }
+.ged-was { color: var(--gedaempft); }
+.ged-wert { font-weight: 600; }
+.ged-zeile.fehlt .ged-wert { color: var(--rot); }
+.ged-umfang { margin: 6px 2px 0; font-size: 12px; color: var(--gedaempft); }
+
+.explorer-zeile { display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+  border: 1px solid var(--linie); border-radius: 8px; background: var(--flaeche); }
+.explorer-zeile .explorer-titelzeile { flex: 1; font-size: 13px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
+.explorer-zeile .explorer-marke { flex: none; font-size: 11.5px; color: var(--gedaempft); }
+/* Was fehlt, muss ins Auge fallen - sonst sucht man es Zeile fuer Zeile. */
+.explorer-zeile.fehlt { border-color: var(--rot); }
+.explorer-zeile.fehlt .explorer-marke { color: var(--rot); font-weight: 600; }
+.explorer-zeile.drin { opacity: .62; }
+
+/* Aufbewahrung: zwei Saetze je Akte - was los ist, was zu tun ist. Die Zahlen
+   stehen klein darunter; sie beantworten eine Rueckfrage, nicht die erste Frage. */
+.aufbewahrung-gruppe { font-size: 14px; margin: 4px 0 10px; color: var(--tinte); }
+.aufbewahrung-zeile { border: 1px solid var(--linie); border-left: 3px solid var(--linie-stark);
+  border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; background: var(--flaeche); }
+.aufbewahrung-zeile.handlungsbedarf { border-left-color: var(--amber); background: var(--flaeche); }
+.aufbewahrung-akte { font-weight: 700; }
+.aufbewahrung-was { margin: 7px 0 0; }
+.aufbewahrung-tun { margin: 3px 0 0; color: var(--akzent); }
+.aufbewahrung-tun::before { content: "→ "; }
+.aufbewahrung-fuss { margin-top: 8px; color: var(--gedaempft); font-size: 12px; }
+.aufbewahrung-ruhe { color: var(--gruen); background: var(--gruen-hell); border-radius: 8px;
+  padding: 11px 13px; margin: 0 0 12px; }
+.aufbewahrung-ruhig { margin-top: 14px; }
+.aufbewahrung-ruhig > summary { cursor: pointer; color: var(--gedaempft); font-size: 13px;
+  padding: 6px 0; }
+.aufbewahrung-ruhig[open] > summary { margin-bottom: 8px; }
+
+/* Der Kreis, der sich füllt ─────────────────────────────────────────────────
+   Aus der Kanzlei: "damit der Bearbeiter sieht, dass die KI für die
+   Bearbeitung Zeit braucht." Er steht im Knopf selbst, rechts neben dem Wort -
+   dort, wo der Blick beim Drücken ohnehin ist. Kein eigener Balken, kein
+   Überlagerungsfenster: Die Arbeitsfläche bleibt, wie sie war.
+
+   Gefüllt wird mit conic-gradient, ausgestanzt mit einer Maske: ein Ring, kein
+   Kuchen. Der Anteil kommt aus --anteil und wird zehnmal in der Sekunde neu
+   gesetzt; eine Übergangsanimation braucht es dafür nicht. */
+.warte-kreis { display: inline-block; width: 11px; height: 11px; margin-left: 6px;
+  vertical-align: -1px; border-radius: 50%; flex: none;
+  background: conic-gradient(currentColor calc(var(--anteil, 0) * 1%), var(--linie-stark) 0);
+  -webkit-mask: radial-gradient(circle, transparent 44%, #000 46%);
+  mask: radial-gradient(circle, transparent 44%, #000 46%); }
+/* Ein wartender Knopf ist gesperrt - aber nicht blass: Der Kreis ist das
+   Einzige, was in diesem Moment etwas zu sagen hat. */
+.mini:disabled { cursor: wait; }
+.mini.wartet, .knopf.wartet:disabled { opacity: 1; cursor: wait; }
+
+/* Die Meldung nach dem Schließen: was gesichert wurde. ────────────────────── */
+.schluss-hinweis { margin: 0 0 14px; padding: 9px 12px; border-radius: 8px;
+  background: var(--gruen-hell); border: 1px solid var(--gruen); color: var(--tinte);
+  font-size: 13px; line-height: 1.45; }
+.schluss-hinweis.fehler { background: var(--rot-hell); border-color: var(--rot); }
+
+/* Der Inhalt des Aktengedächtnisses in der Auswahl ─────────────────────────
+   Aus der Kanzlei: "zeig auch den Inhalt in dieser Ansicht". Die beiden
+   Spalten darueber sagen, WELCHE Dokumente drin sind; hier steht, was das
+   Programm daraus gemacht hat. Drei Bloecke, aufklappbar, jeder mit eigenem
+   Rollbereich - sonst schoebe ein Lebenssachverhalt von zehn Seiten die
+   Knoepfe des Dialogs aus dem Bild. */
+.ged-inhalt { margin: 4px 0 2px; border: 1px solid var(--linie); border-radius: 10px;
+  background: var(--flaeche-2); }
+.ged-inhalt-kopf { font-size: 12px; font-weight: 700; color: var(--gedaempft);
+  padding: 8px 10px; flex: none; cursor: pointer; }
+.ged-inhalt-kopf:hover { color: var(--akzent); }
+.ged-inhalt[open] > .ged-inhalt-kopf { border-bottom: 1px solid var(--linie); }
+.ged-inhalt-teile { padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+.ged-block { border: 1px solid var(--linie); border-radius: 8px; background: var(--flaeche); }
+.ged-block > summary { cursor: pointer; padding: 7px 10px; font-size: 12.5px; font-weight: 600;
+  color: var(--tinte); display: flex; align-items: center; gap: 8px; }
+.ged-block > summary:hover { color: var(--akzent); }
+.ged-block > summary .zahl { margin-left: auto; font-size: 11.5px; font-weight: 400;
+  color: var(--gedaempft); background: var(--flaeche-2); border: 1px solid var(--linie);
+  border-radius: 10px; padding: 0 7px; font-variant-numeric: tabular-nums; }
+.ged-block-text { padding: 2px 10px 10px; font-size: 12.5px; line-height: 1.5;
+  white-space: pre-wrap; overflow: auto; max-height: 15vh; color: var(--tinte); }
+/* 15vh, damit unter dem Lebenssachverhalt die beiden anderen Ueberschriften
+   stehen bleiben. Sonst sieht man nur den einen Block und muss raten, ob es
+   noch mehr gibt - und genau das Raten sollte hier aufhoeren. */
+.ged-block-liste { list-style: none; margin: 0; padding: 2px 6px 8px; overflow: auto;
+  max-height: 20vh; display: flex; flex-direction: column; gap: 3px; }
+.ged-block-zeile { display: flex; gap: 10px; padding: 4px 6px; border-radius: 6px;
+  font-size: 12.5px; line-height: 1.45; }
+.ged-block-zeile:nth-child(odd) { background: var(--flaeche-2); }
+.ged-block-datum { flex: 0 0 5.5rem; color: var(--gedaempft); font-variant-numeric: tabular-nums; }
+.ged-block-sache { flex: 1; }
+.ged-block-sache.stark { font-weight: 600; }
+.ged-block-frage { flex-direction: column; gap: 3px; }
+.ged-block-antwort { color: var(--gedaempft); white-space: pre-wrap; }
+
+/* Der Vorschlag für einen eigenen Auftrag ──────────────────────────────────
+   Aus der Kanzlei: "kann die KI entsprechende Vorschläge machen." Sie kann -
+   aber der Text geht danach in jede andere Akte mit. Die Warnung steht
+   deshalb über dem Feld und nicht unter den Knöpfen. */
+.vorschlag-warnung {
+  margin: 0 0 12px; padding: .55rem .7rem; border-left: 3px solid var(--amber);
+  background: var(--amber-hell); color: var(--tinte); font-size: 13px; line-height: 1.45;
+}
+.vorschlag-hinweis { margin: 2px 0 0; font-size: 12.5px; color: var(--gedaempft); }
+
+/* Behält AWS eine Abschrift der Aufrufe? ───────────────────────────────────
+   Grundsatz 5 sagt: die Modellaufrufprotokollierung bleibt aus. Steht sie an,
+   startet das Programm nicht; hier steht also entweder die Entwarnung oder
+   der offene Fall - und der muss sich vom Rest abheben. */
+.nachweis-mitschrift { margin: -6px 0 12px; padding: .5rem .65rem; border-radius: 6px;
+  font-size: 12.5px; line-height: 1.45; }
+.nachweis-mitschrift.gut { background: var(--gruen-hell); color: var(--tinte); }
+.nachweis-mitschrift.offen { background: var(--amber-hell); color: var(--tinte);
+  border-left: 3px solid var(--amber); }
+
+/* Der Selbsttest: Stehen die Absicherungen? ────────────────────────────────
+   Eine Liste, kein Formular. Das Auge soll die Spalte der Zeichen hinunter-
+   laufen koennen und dort haengenbleiben, wo kein Haken steht. */
+.selbsttest-liste { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
+.selbsttest-ueberschrift { margin: 18px 0 2px; font-size: 14px; }
+.st-zeile { display: flex; gap: 10px; align-items: flex-start;
+  padding: 7px 9px; border-radius: 6px; background: var(--flaeche-2); }
+.st-marke { flex: 0 0 1.1rem; text-align: center; font-weight: 700; line-height: 1.5; }
+.st-zeile.gut .st-marke { color: var(--gruen); }
+.st-zeile.offen .st-marke, .st-zeile.ungeprueft .st-marke { color: var(--amber); }
+.st-zeile.schlecht .st-marke { color: var(--rot); }
+.st-zeile.entfaellt { opacity: .65; }
+.st-zeile.schlecht { background: var(--rot-hell); }
+.st-zeile.offen { background: var(--amber-hell); }
+.st-haupt { min-width: 0; }
+.st-titel { font-weight: 600; font-size: 13px; overflow-wrap: anywhere; }
+.st-satz { font-size: 12.5px; color: var(--gedaempft); line-height: 1.45; overflow-wrap: anywhere; }
+.st-hinweis { font-size: 12px; color: var(--gedaempft); margin-top: 3px; font-style: italic; }
+
+/* Acht Punkte und dazu die Modelle werden laenger als ein kleiner Bildschirm.
+   Ohne das hier rutschten Ueberschrift und Knoepfe aus dem Fenster - gesehen
+   bei 1280x768, im Browser. Der Inhalt rollt, die Knoepfe bleiben stehen. */
+/* Die Strecke: eine duenne Linie, ein Wagen, am Ende die Flagge. Aus der
+   Kanzlei: "Das Bild ist ein wenig trocken." Es soll den Ablauf zeigen und
+   dabei nichts behaupten, was nicht auch in der Liste steht. */
+.st-bahn { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+.st-strecke { flex: 1; min-width: 0; position: relative; height: 1.5em;
+  border-bottom: 2px dashed var(--linie); }
+.st-wagen { position: absolute; bottom: -.15em; left: 0; font-size: 1.2em;
+  line-height: 1; will-change: transform;
+  /* Der Wagen zeigt in der Schrift nach links - gespiegelt faehrt er vorwaerts. */
+  transform: scaleX(-1); }
+.st-ziel { font-size: 1.2em; line-height: 1; opacity: 0; transform: scale(.7);
+  transition: opacity .25s ease, transform .25s ease; }
+.st-ziel.da { opacity: 1; transform: scale(1); }
+.st-ergebnis { margin: 0 0 12px; padding: .45rem .65rem; border-radius: 6px;
+  font-size: 13px; font-weight: 600; }
+.st-ergebnis.gut { background: var(--gruen-hell); color: var(--tinte); }
+.st-ergebnis.offen { background: var(--amber-hell); color: var(--tinte);
+  border-left: 3px solid var(--amber); }
+
+/* Bis der Wagen vorbeikommt, ist eine Zeile noch nicht da. */
+.st-zeile { transition: opacity .22s ease, transform .22s ease; }
+.st-zeile.st-neu { opacity: 0; transform: translateX(-6px); }
+
+/* Wer Bewegung abgestellt hat, bekommt alles auf einmal - ohne Ruckeln und
+   ohne Warten. Die Auskunft ist dieselbe. */
+@media (prefers-reduced-motion: reduce) {
+  .st-wagen, .st-ziel, .st-zeile { transition: none; }
+  .st-zeile.st-neu { opacity: 1; transform: none; }
+}
+
+.selbsttest-rollen { overflow: auto; max-height: 64vh; }
+.selbsttest-form > .dialog-knoepfe { border-top: 1px solid var(--linie); padding-top: 12px; }
+
+/* Eine Antwort, die unterwegs abgerissen ist ───────────────────────────────
+   Der stroemende Text ist ungeprueft. Bleibt er stehen, sieht er aus wie eine
+   fertige Antwort - deshalb wird er entfernt und durch diesen Satz ersetzt. */
+.strom-abbruch { margin: 0; padding: .5rem .65rem; border-radius: 6px;
+  background: var(--amber-hell); border-left: 3px solid var(--amber);
+  color: var(--tinte); font-size: 13px; line-height: 1.45; }
+
+/* ── Woran zuletzt gearbeitet wurde ───────────────────────────────────────
+   Eine Leiste zwischen Kopf und Arbeitsflaeche, nur beim Oeffnen. Aus der
+   Kanzlei am 25.09.2026: "beim Oeffnen der Akte sehen, was man als Letztes
+   gemacht hat, sodass man dann wieder daran ansetzen kann."
+   Sie ist bewusst schmal: Sie beantwortet eine Frage, die man einmal hat -
+   morgens - und darf danach nicht im Weg stehen. */
+.arbeitsstand { display: flex; align-items: flex-start; gap: 12px;
+  padding: 9px 14px; background: var(--flaeche-2);
+  border-bottom: 1px solid var(--linie); }
+.arbeitsstand-text { flex: 1; min-width: 0; }
+.arbeitsstand-kopf { margin: 0 0 3px; font-size: 12px; font-weight: 600;
+  color: var(--gedaempft); text-transform: uppercase; letter-spacing: .03em; }
+.arbeitsstand-kopf span { font-weight: 400; text-transform: none;
+  letter-spacing: 0; }
+.arbeitsstand-kopf span::before { content: " · "; }
+/* Die eigenen Fragen im Wortlaut - daran erkennt man sich wieder. */
+.arbeitsstand-fragen { margin: 0; padding: 0; list-style: none; }
+.arbeitsstand-fragen li { font-size: 13.5px; color: var(--tinte);
+  padding: 1px 0 1px 10px; position: relative;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arbeitsstand-fragen li::before { content: "„"; position: absolute; left: 0;
+  color: var(--gedaempft); }
+.arbeitsstand-fragen li::after { content: "\201C"; color: var(--gedaempft); }
+.arbeitsstand-zahlen { margin: 4px 0 0; font-size: 12px; color: var(--gedaempft); }
+.arbeitsstand-zu { font: inherit; font-size: 16px; line-height: 1;
+  color: var(--gedaempft); background: transparent; border: 0; cursor: pointer;
+  padding: 2px 6px; border-radius: 6px; flex: none; }
+.arbeitsstand-zu:hover { color: var(--tinte); background: var(--grund); }
+
+/* Archivierte Akten. Der Status kam vom Server immer schon mit; bis zum
+   25.09.2026 sah eine abgelegte Akte aus wie eine laufende.
+   Das WORT steht da, nicht nur eine Farbe: Wer eine Liste ueberfliegt, liest
+   eher als dass er Farben unterscheidet - und eine Farbe allein traegt fuer
+   jemanden mit Farbsehschwaeche gar nichts. */
+.archivmarke { display: inline-block; margin-left: 8px; padding: 1px 7px;
+  font-size: 11px; font-weight: 600; letter-spacing: .03em;
+  text-transform: uppercase; vertical-align: 1px;
+  color: var(--gedaempft); background: var(--flaeche-2);
+  border: 1px solid var(--linie-stark); border-radius: 999px; }
+
+/* Der Sprung zum Gesetzeswortlaut. Aus der Kanzlei am 25.09.2026: "wenn die
+   KI argumentiert, kann man dann bei Belegen schnell den Gesetzestext
+   nachlesen und schauen, ob man das Gesetz so auslegen kann."
+   Er steht NEBEN dem Paragrafen, nicht an seiner Stelle: Der Klick auf die
+   Nummer bleibt der Weg ins Dokument. Ein Klick kann nicht zweierlei tun. */
+.gesetzeslink { display: inline-block; margin-left: 5px; padding: 0 6px;
+  font-size: 11px; font-weight: 600; text-decoration: none; vertical-align: 1px;
+  color: var(--akzent); background: var(--flaeche-2);
+  border: 1px solid var(--linie-stark); border-radius: 999px; }
+.gesetzeslink:hover { background: var(--grund); border-color: var(--akzent); }
+.gesetzeslink::after { content: " ↗"; font-weight: 400; }
+
+/* Was beim Lesen der Dokumente nicht ging. Sie bleibt stehen, bis man sie
+   wegklickt - anders als die Meldung oben, die nach sechs Sekunden weg ist.
+   Vierzehn uebersprungene Dokumente gehen in sechs Sekunden unter. */
+.uebernahme { display: flex; align-items: flex-start; gap: 12px;
+  padding: 9px 14px; background: var(--flaeche-2);
+  border-bottom: 1px solid var(--linie-stark); }
+.uebernahme-text { flex: 1; min-width: 0; }
+.uebernahme-bilanz { margin: 0 0 4px; font-size: 13.5px; font-weight: 600;
+  color: var(--tinte); }
+.uebernahme-liste { margin: 0; padding: 0; list-style: none;
+  max-height: 96px; overflow: auto; }
+.uebernahme-liste li { font-size: 12.5px; color: var(--gedaempft);
+  padding: 1px 0 1px 12px; position: relative; }
+.uebernahme-liste li::before { content: "·"; position: absolute; left: 3px; }
+/* Zugeklappt ist die Leiste eine Zeile hoch. Aus der Kanzlei am 25.09.2026:
+   siebzehn Zeilen mit demselben Satz nahmen die halbe Arbeitsflaeche und
+   sagten nicht mehr als die Bilanz darueber. */
+.uebernahme-mehr { margin-top: 2px; }
+.uebernahme-mehr > summary { font-size: 12.5px; color: var(--gedaempft);
+  cursor: pointer; list-style: none; display: inline-flex; align-items: center;
+  gap: 4px; padding: 1px 0; }
+.uebernahme-mehr > summary::-webkit-details-marker { display: none; }
+.uebernahme-mehr > summary::before { content: "▸"; font-size: 10px;
+  transition: transform .12s ease; }
+.uebernahme-mehr[open] > summary::before { transform: rotate(90deg); }
+.uebernahme-mehr > summary:hover { color: var(--tinte); }
+.uebernahme-mehr > summary:focus-visible { outline: 2px solid var(--akzent);
+  outline-offset: 2px; border-radius: 3px; }
+
+/* Eine Akte, die geoeffnet wird. Aus der Kanzlei am 25.09.2026: "man denkt,
+   das Programm reagiert nicht" - das Oeffnen einer echten Akte fragt alle
+   Dokumente samt Unterordnern ab, eine Anfrage nach der anderen.
+   Die angeklickte Zeile zeigt den Kreis, die uebrigen warten mit. */
+#aktenliste li.wartet { cursor: wait; }
+#aktenliste li.wartet .az { display: flex; align-items: center; }
+#aktenliste.laedt li:not(.wartet) { opacity: .55; pointer-events: none; }
+#aktenliste.laedt { cursor: wait; }
+
+/* ── Nebenfenster ──────────────────────────────────────────────────────────
+   Aus der Kanzlei am 05.10.2026: "Oeffnen von Nebenfenstern in eigener
+   Ansicht, da ich in der Regel mit zwei Bildschirmen arbeite und die
+   Oberflaeche mit drei Fenstern zu klein wird."
+
+   Dasselbe HTML, dieselben Stile - nur alles ausgeblendet ausser dem einen
+   Abschnitt. Eine zweite Seite mit eigenem Aufbau waere eine zweite Seite,
+   die gepflegt werden muss, und die laeuft erfahrungsgemaess auseinander.
+
+   Warum hier "!important" steht, und zwar bewusst: Das Hauptfenster schaltet
+   Arbeitsflaeche und Spalten ueber das Attribut "hidden" - und im
+   Nebenfenster laeuft derselbe Code, der beim Start erst einmal die
+   Anmeldeseite zeigt und die Arbeitsflaeche wegblendet. Ein Stil, der mit
+   diesem Code um dasselbe Attribut ringt, verliert irgendwann; einer, der
+   ihn ueberschreibt, nicht. Das Nebenfenster ist genau der Fall, fuer den es
+   die Ausnahme gibt: EINE Ansicht, die immer sichtbar sein muss. */
+:root[data-nebenfenster] .kopf,
+:root[data-nebenfenster] .spalte.dokument,
+:root[data-nebenfenster] .spalte.cowork,
+:root[data-nebenfenster] #anmelden,
+:root[data-nebenfenster] #einstieg,
+:root[data-nebenfenster] #arbeitsstand,
+:root[data-nebenfenster] #uebernahme,
+:root[data-nebenfenster] #rueckgaengig,
+:root[data-nebenfenster] #lesefortschritt { display: none !important; }
+
+:root[data-nebenfenster] body { padding: 0; }
+:root[data-nebenfenster] #flaeche,
+:root[data-nebenfenster] #spalte-rechts { display: block !important;
+  height: 100vh; width: 100%; max-width: none; grid-template-columns: none; }
+
+/* Je Nebenfenster genau EIN Abschnitt - und die anderen bleiben weg, auch
+   wenn das Hauptfenster sie im gespeicherten Fensterstand offen hat. */
+:root[data-nebenfenster] .fenster { display: none !important; }
+:root[data-nebenfenster="chronologie"] #fenster-chronologie,
+:root[data-nebenfenster="belege"] #fenster-belege,
+:root[data-nebenfenster="gedaechtnis"] #gedaechtnis-fenster {
+  display: flex !important; width: 100%; max-width: none; height: 100vh;
+  border: 0; border-radius: 0; }
+
+/* Der Schliesspfeil und der Herausloesen-Knopf bleiben im Hauptfenster. */
+:root[data-nebenfenster] .fenster-zu,
+:root[data-nebenfenster] .fenster-los { display: none; }
+
+.fenster-los { flex: none; font: inherit; font-size: 13px; line-height: 1;
+  background: transparent; color: var(--gedaempft); border: 0; padding: 2px 4px;
+  cursor: pointer; border-radius: 4px; }
+.fenster-los:hover { color: var(--tinte); background: var(--flaeche-2); }
+.fenster-los:focus-visible { outline: 2px solid var(--akzent); outline-offset: 1px; }
+
+/* Der Hinweis, solange das Hauptfenster nichts offen hat. Im Hauptfenster
+   selbst kommt er nie zum Vorschein - dort bleibt er auf "hidden". */
+.neben-leer { margin: 0; padding: 24px 20px; color: var(--gedaempft);
+  font-size: 13.5px; line-height: 1.5; }
+:root[data-nebenfenster] .neben-leer { position: fixed; inset: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: center; background: var(--grund); z-index: 5; }
+:root[data-nebenfenster] .neben-leer[hidden] { display: none; }
+
+/* Ein Dokument, das die Ausschlussliste nicht vorgewaehlt hat. Es steht da,
+   nur blasser - niemand soll es uebersehen, und niemand soll es fuer einen
+   Fehler halten. Der Grund steht in der Zeile daneben. */
+.explorer-eintrag.nicht-vorgewaehlt .explorer-name { opacity: .62; }
+.explorer-eintrag.nicht-vorgewaehlt .meta { color: var(--amber); }
+/* Der Titel darf nie ganz verschwinden. Im schmalen Fenster war genau das
+   passiert: "nicht vorgewaehlt: Rechnung" ist laenger als die uebrige
+   Beschriftung, hat die ganze Zeile eingenommen und den Dokumenttitel auf
+   null Breite gedrueckt - das Dokument stand ohne Namen da. Ein Dokument
+   ohne Namen ist so gut wie keins, und die Liste verspricht das Gegenteil.
+   Darum eine Untergrenze fuer den Titel, und unter 560px rutscht die
+   Beschriftung unter ihn statt neben ihn. */
+.explorer-wahl .explorer-name { min-width: 10ch; }
+@media (max-width: 560px) {
+  .explorer-wahl { flex-wrap: wrap; }
+  /* 1 1: Die Zeile darf wieder schrumpfen, sonst schiebt der Einzug links
+     das letzte Wort rechts aus dem Fenster - "RSV" stand als "RS" da. */
+  .explorer-wahl .meta { flex: 1 1 100%; min-width: 0; margin-left: 26px; }
+}
+
+/* Der Knopf, der ein einzelnes Dokument aus dem Aktengedaechtnis nimmt.
+   Zurueckhaltend, weil er daneben steht und nicht gesucht wird - aber beim
+   Darueberfahren rot, weil er wegnimmt und nicht hinzufuegt. */
+.ged-vergessen { flex: none; font-size: 11.5px; padding: 2px 7px; }
+.ged-vergessen:hover { border-color: var(--rot); color: var(--rot); }
+/* In der Fragenliste steht er unter der Antwort, rechtsbuendig: Die Antwort
+   ist mehrzeilig, und ein Knopf mitten im Text liest sich wie ein Teil davon. */
+.ged-block-frage .ged-vergessen { align-self: flex-end; margin-top: 2px; }
+/* Dieselbe Untergrenze wie drueben: Der Titel darf nicht auf null gedrueckt
+   werden, nur weil rechts daneben noch ein Knopf steht. */
+.explorer-zeile .explorer-titelzeile { min-width: 10ch; }
+/* Zwei Zeilen statt einer, nur in dieser Spalte: Mit dem Knopf daneben blieb
+   vom Titel "Kuendigungss..." uebrig. Wer etwas aus dem Gedaechtnis nimmt,
+   muss vorher lesen koennen, was es ist - der Umfang und der Knopf duerfen
+   dafuer eine Zeile tiefer. */
+.explorer-zeile.ged-eintrag { flex-wrap: wrap; row-gap: 2px; }
+.explorer-zeile.ged-eintrag .explorer-titelzeile { flex: 1 0 100%; }
+.explorer-zeile.ged-eintrag .explorer-marke { margin-right: auto; }
