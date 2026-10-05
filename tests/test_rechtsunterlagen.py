@@ -68,18 +68,31 @@ def test_jede_genannte_unterlage_gibt_es_auch(datei: Path) -> None:
 class TestDieOffenenStellenSindGezaehlt:
     """Eine Stelle, die stillschweigend verschwindet, gilt als erledigt."""
 
-    def test_die_dsfa_nennt_siebzehn_und_hat_siebzehn(self) -> None:
-        assert _offene_stellen(DSFA) == list(range(1, 18))
-        assert "**siebzehn**" in DSFA.read_text(encoding="utf-8")
+    def test_die_dsfa_zaehlt_ihre_eigenen_stellen_richtig(self) -> None:
+        """Die Zahl im Text und die Zahl der Marken müssen übereinstimmen.
+
+        Geprüft wird nicht die Zahl, sondern ihre Übereinstimmung — sonst
+        hätte jede neue offene Stelle diesen Test zum Fehler gemacht statt
+        die fehlende Marke.
+        """
+        worte = {17: "siebzehn", 18: "achtzehn", 19: "neunzehn", 20: "zwanzig",
+                 21: "einundzwanzig", 22: "zweiundzwanzig"}
+        stellen = _offene_stellen(DSFA)
+        assert stellen == list(range(1, len(stellen) + 1)), stellen
+        text = DSFA.read_text(encoding="utf-8")
+        assert f"**{worte[len(stellen)]}**" in text, len(stellen)
+        assert f"Die {worte[len(stellen)]} offenen Stellen" in text
 
     def test_die_hinweise_nennen_neun_und_haben_neun(self) -> None:
         assert _offene_stellen(HINWEISE) == list(range(1, 10))
         assert "**neun**" in HINWEISE.read_text(encoding="utf-8")
 
     def test_die_dsfa_fuehrt_jede_stelle_in_ihrer_schlussliste(self) -> None:
-        tabelle = DSFA.read_text(encoding="utf-8").split("## 8. Die siebzehn")[1]
+        """Eine Stelle, die nur im Text steht, wird beim Abarbeiten übersehen."""
+        text = DSFA.read_text(encoding="utf-8")
+        tabelle = re.split(r"## 8\. Die \w+ offenen Stellen", text)[1]
         gelistet = sorted({int(n) for n in re.findall(r"^\| (\d+) \|", tabelle, re.M)})
-        assert gelistet == list(range(1, 18)), gelistet
+        assert gelistet == _offene_stellen(DSFA), (gelistet, _offene_stellen(DSFA))
 
 
 class TestDieUnterlagenPassenZumProgramm:

@@ -212,6 +212,10 @@ class Aktengedaechtnis(BaseModel):
     #       einer Woche nichts mehr wert.
     analyse_dokumente: list[str] = Field(default_factory=list)
     analyse_akte_dokumente: list[str] = Field(default_factory=list)
+    # Gesetzt, wenn aus der gespeicherten Analyse nachtraeglich ein Dokument
+    # entfernt wurde. Eine Analyse, der ihre Grundlage fehlt, sieht genauso
+    # vollstaendig aus wie eine vollstaendige - das muss dabeistehen.
+    analyse_hinweis: str = ""
     aktualisiert_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

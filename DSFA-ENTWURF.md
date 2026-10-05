@@ -16,7 +16,7 @@ Maßnahmen* dagegen im Programm stehen — jede mit Fundstelle.
 verbleibende Risiko tragbar ist und ob die Aufsichtsbehörde nach Art. 36
 einzuschalten ist, kann nur ein Jurist entscheiden, der das Mandatsgeschäft
 kennt. Diese Stellen sind mit **[KANZLEI n]** gekennzeichnet; es sind
-**siebzehn**, und sie stehen am Ende noch einmal in einer Liste.
+**neunzehn**, und sie stehen am Ende noch einmal in einer Liste.
 
 **Die Zahlen und Befunde stehen woanders.** Jede technische Angabe hier ist aus
 `DSFA-ANGABEN.md` übernommen, wo sie mit Datum und Fundstelle steht. Bei
@@ -72,9 +72,27 @@ Risikobewertung gebraucht wird.
 | Aktengedächtnis sichern | **Dokumenttexte und Abgeleitetes** | S3-Bucket der Kanzlei, Frankfurt, SSE-KMS |
 | Vermerk zurückschreiben | **nur der freigegebene Text** | jur\|nodes |
 
-**Was das Modell nie zu sehen bekommt:** Dateinamen, Dokumentkennungen,
-Nutzerkennungen, Sitzungskennungen, Aktenzeichen. Es sieht Systemanweisung,
-Passagen und Aufgabe (`providers/bedrock.py`).
+**Was das Modell nicht zu sehen bekommt:** Dokumentkennungen,
+Nutzerkennungen, Sitzungskennungen. Es sieht Systemanweisung, Passagen und
+Aufgabe (`providers/bedrock.py`).
+
+> **Berichtigt am 05.10.2026 nach der Zweitprüfung (Befund F11).** Hier stand
+> zusätzlich „Dateinamen" und „Aktenzeichen" — **das war falsch.** Das
+> **Aktenzeichen** steht in der ersten Zeile des Materials, und der
+> **Dokumenttitel** in jeder Passagenüberschrift; liefert jur|nodes keinen
+> Titel, ist das der **Dateiname** (`services/prompts.py`,
+> `jurnodes/http_adapter.py`). Dass dem Anbieter keine gesonderten
+> Metadatenobjekte übergeben werden, verhindert nicht, dass dieselben Angaben
+> als Text mitgehen.
+>
+> **[KANZLEI 18]** — zu entscheiden: ob dieser Umfang gewollt ist (das
+> Aktenzeichen hilft dem Modell bei der Einordnung, der Dokumenttitel bei der
+> Fundstelle) oder ob beides durch neutrale Bezeichnungen zu ersetzen ist. Eine
+> Ersetzung anonymisiert den Dokument**text** nicht; darin stehen weiterhin
+> Namen.
+>
+> `SICHERHEIT.md` enthält dieselbe zu weite Aussage („nie Dateinamen"). Die
+> Datei ist geschützt und wird nur auf ausdrückliche Anweisung geändert.
 
 ### 2.2 Wo dauerhaft gespeichert wird
 
@@ -293,8 +311,23 @@ dass sich an Anbieter, Region oder Vertrag etwas ändert.
 | Maßnahme | Stand |
 |---|---|
 | Derselbe Auftragsverarbeiter, derselbe AV-Vertrag | kein neuer Vertrag |
-| Verarbeitet, nicht gespeichert | kein Ablageort bei AWS; die Bilder entstehen auf dem Rechner der Kanzlei |
-| Abschaltbar mit einer Zeile | `JUSPERFECT_OCR=aus`; gescannte Blätter bleiben dann ungelesen |
+| Verarbeitet, nicht gespeichert | **nicht belegt — siehe unten** |
+| Abschaltbar mit einer Zeile | `JUSPERFECT_OCR=keine`; gescannte Blätter bleiben dann ungelesen |
+
+> **Berichtigt am 05.10.2026 nach der Zweitprüfung (Befund F12).** Die
+> Unterlagen schlossen aus dem Versand als Bytes **ohne** eigenen S3-Zwischen&shy;speicher,
+> AWS speichere die Bilder nicht. **Dieser Schluss trägt nicht.** Für die
+> KI-Dienste von AWS — anders als für Bedrock — gilt die Nicht-Speicherung nur
+> bei einer wirksamen **AI-services-Opt-out-Richtlinie** des Kontos. Ohne
+> diesen Nachweis ist „nicht gespeichert" eine Vermutung.
+>
+> **[KANZLEI 19]** — die wirksame Opt-out-Richtlinie für dieses AWS-Konto
+> beschaffen und datiert ablegen. Ein bloß erstellter Entwurf in AWS
+> Organizations ist nicht dasselbe wie eine wirksame Richtlinie. Bis dahin
+> darf die Unterlage keine Nicht-Speicherung behaupten.
+>
+> Abschalten der Texterkennung bis zur Klärung: `JUSPERFECT_OCR=keine` in
+> `START-JURNODES.bat` — **nicht** `aus`, wie es hier zuvor stand.
 
 **[KANZLEI 12]** — Erlaubnistatbestand nach Art. 9 Abs. 2 benennen, und
 bewerten, ob eine Beschränkung nach Rechtsgebiet getroffen werden soll. Das
@@ -384,7 +417,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 
 ---
 
-## 8. Die siebzehn offenen Stellen auf einen Blick
+## 8. Die neunzehn offenen Stellen auf einen Blick
 
 | Nr. | Was zu entscheiden ist | Abschnitt |
 |---|---|---|
@@ -405,6 +438,8 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 14 | Was den Betroffenen über die Übermittlung gesagt wird | R8 |
 | 15 | Schulung und KI-Kompetenz nach Art. 4 KI-VO | 6 |
 | 17 | Verbleibendes Risiko, Art. 36, Beteiligung des DSB, Überprüfungsfrist | 7 |
+| 18 | Sollen Aktenzeichen und Dokumenttitel an das Modell gehen? | 2.1 |
+| 19 | Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen | R6 |
 
 ---
 

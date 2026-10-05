@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1644 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `8eec4af`.
+1650 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `8e2eb54`.
 
 ---
 
@@ -150,6 +150,101 @@ danach fragt.
 
 **Zum fünften Mal an diesem Tag dieselbe Form:** Eine Prüfung, die den Namen
 misst statt der Sache, misst etwas anderes als die Sache.
+
+---
+
+## Die Zweitprüfung vom 05.10.2026 — 13 Befunde
+
+Die Kanzlei hat das Projekt von einer zweiten KI prüfen lassen. **Der Bericht
+ist ernst zu nehmen.** Er liegt unverändert in `zweitpruefung/`, zusammen mit
+17 Gegenproben.
+
+**Ich habe alle 17 am eigenen Bestand nachlaufen lassen: alle grün.** Bei
+diesen Gegenproben heißt grün *die Lücke besteht*. Kein Befund ist auf Zuruf
+übernommen, keiner ließ sich entkräften.
+
+> **Der eigentliche Befund steht nicht in der Liste:** Alle 1625 vorhandenen
+> Prüfungen waren grün — und haben nichts davon gezeigt. Eine Prüfung, die den
+> gewollten Weg misst, misst nicht den Fehlerweg.
+
+### Was sofort behoben ist
+
+**F02.1 — und es war mein Fehler von heute Vormittag.** Die gespeicherte
+Aktenanalyse wurde beim Entfernen eines Dokuments **nicht** mitbereinigt: Ein
+Chronologieereignis aus dem gelöschten Dokument stand anschließend weiter in
+der Analyse. Die Zusage lautete „samt allem Abgeleiteten", eine eigene Prüfung
+behauptete sie — und keine prüfte sie für die Analyse, weil es die Analyse beim
+Schreiben jener Prüfung noch nicht gab.
+
+Behoben, mit sechs Prüfungen. Fällt aus der Analyse etwas heraus, trägt sie
+jetzt den Satz *„Aus dieser Analyse wurde nachträglich ein Dokument entfernt …
+der Rest ist nicht neu gerechnet."* — eine Analyse, der ihre Grundlage fehlt,
+sieht sonst genauso vollständig aus wie eine vollständige.
+
+**Die Lehre:** Ein neues Feld im Gedächtnis ist nicht fertig, wenn es
+geschrieben und angezeigt wird. Es ist fertig, wenn auch gesagt ist, **was beim
+Löschen damit geschieht.**
+
+### Was in den Unterlagen berichtigt ist
+
+| Befund | Was falsch war |
+|---|---|
+| **F11** | „Das Modell sieht nie Dateinamen und Aktenzeichen." **Falsch.** Das Aktenzeichen steht in der ersten Materialzeile, der Dokumenttitel in jeder Passagenüberschrift — und ohne Titel aus jur|nodes ist das der Dateiname. Neue offene Stelle `[KANZLEI 18]`: Ist dieser Umfang gewollt? |
+| **F12** | „Textract verarbeitet, speichert aber nicht." **Nicht belegt.** Für die KI-Dienste von AWS gilt das nur mit einer wirksamen **AI-services-Opt-out-Richtlinie** des Kontos. Neue offene Stelle `[KANZLEI 19]`: diese Richtlinie beschaffen und datiert ablegen. Bis dahin darf die Unterlage keine Nicht-Speicherung behaupten. |
+| | Dazu berichtigt: Abschalten heißt `JUSPERFECT_OCR=keine`, nicht `aus`. |
+
+`SICHERHEIT.md` trägt dieselbe zu weite Aussage zu den Dateinamen. **Die Datei
+ist geschützt** — sie wird nur auf ausdrückliche Anweisung geändert.
+
+### Die Reihenfolge, die ich vorschlage
+
+Der Bericht schlägt eine vor; ich folge ihr im Wesentlichen, mit einer
+Abweichung: **F09 (Fristensperre) gehört nach vorn.** Ein erfundener
+Fristablauf ist der einzige Befund, der unmittelbar einen Mandanten schädigen
+kann.
+
+1. **F09** — Fristensperre. `26.05.26` und `26. Mai` entgehen dem Datumsmuster,
+   „muss bis zum … eingereicht werden" dem Fristwortmuster. Die Absolutaussage
+   „wird nie berechnet" ist durch eine Musterprüfung nicht zu halten; es braucht
+   eine strukturelle Trennung von Auslöser, zitiertem Termin und Rechnung.
+2. **F01** — Fehlerprotokolle abdichten. Der bereinigte Fehler geht sauber
+   hinaus, der ursprüngliche steht über `raise … from e` im Traceback des
+   Servers. Eine saubere HTTP-Antwort beweist kein sauberes Protokoll.
+3. **F04, F05** — eine gemeinsame Ausgabeprüfung für **alle** Modelltexte
+   (Entwurf, Triage-Kernaussage, Analysehinweise) und kein Rohtext im Stream vor
+   der Prüfung.
+4. **F02.2/2.3, F03, F06, F07** — Löschung vollständig und beständig, S3-Schreiben
+   an die gelesene Revision gebunden, Freigabe über **alle** geschriebenen
+   Felder, Aktenrechte bei jedem Entwurfszugriff neu prüfen.
+5. **F08, F10, F11, F13** — zurückgegebene Aktenidentität prüfen, Nachweis
+   **vor** der Übermittlung anlegen, Metadaten im Material klären, erlaubte
+   Profilkennungen auch in der Anwendung begrenzen.
+6. **F12** — der Opt-out-Nachweis. Kanzlei, nicht Entwicklung.
+
+Erst danach die E-Akte in den Betrieb. Sie ist eine Erweiterung; die obigen
+Punkte sind Zusagen, die nicht halten.
+
+### Wo ich dem Bericht nicht folge
+
+* **„Keine Fristberechnung" ganz aufgeben** — nein. Die Zusage bleibt, der
+  Nachweis muss besser werden. Was nicht hält, ist die *Musterprüfung*, nicht
+  das Ziel.
+* **Pseudonymisierung erneut untersuchen** (DSFA 3.2) — der Bericht hat recht,
+  dass die pauschale Verwerfung zu kurz greift. Aufgenommen, aber nachrangig.
+* **F13** — richtig, aber die mitgelieferte Zugriffsrichtlinie nennt bereits
+  die sechs Regionen namentlich. Der Befund betrifft die Anwendung, nicht das
+  Konto.
+
+### Was der Bericht beantwortet hat
+
+**Die Regionen der Inferenzprofile**, mit Quellenangabe aus der
+AWS-Dokumentation vom 05.10.2026: Aus Frankfurt verteilen beide benutzten
+Modellprofile **und** `eu.guardrail.v1:0` auf dieselben sechs Regionen.
+**Zürich und London sind nicht darunter.**
+
+Das ist der öffentliche Dokumentationsstand und **kein Nachweis für dieses
+Konto** — dafür ist `GetInferenceProfile` aus Frankfurt je Modellkennung
+abzufragen und datiert abzulegen. Die Auskunft von AWS bleibt erbeten.
 
 ---
 

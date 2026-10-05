@@ -319,3 +319,96 @@ class DieSchnittstelleGibtZurueckWasDieAnsichtBraucht(unittest.TestCase):
         self.assertGreaterEqual(self.c.delete(f"/api/akten/{AKTE}/gedaechtnis/fragen/7").status_code,
                                 400)
         self.assertEqual(len(self.d.gedaechtnis.lesen(AKTE).fragen_antworten), 2)
+
+
+class DieGespeicherteAnalyseFaelltMit(unittest.TestCase):
+    """Befund F02 der Zweitprüfung vom 05.10.2026 — und es war mein Fehler.
+
+    Die gespeicherte Aktenanalyse ist am Vormittag des 05.10.2026 dazugekommen.
+    Beim Entfernen eines Dokuments wurde sie **nicht** mitbereinigt: Ein
+    Chronologieereignis aus dem entfernten Dokument stand anschließend
+    weiterhin in der zurückgegebenen Analyse.
+
+    Die Zusage lautete „samt allem Abgeleiteten". Eine Prüfung in dieser Datei
+    behauptete sie. Keine prüfte sie für die Analyse — weil es die Analyse beim
+    Schreiben der Prüfung noch nicht gab.
+
+    **Die Lehre:** Ein neues Feld im Gedächtnis ist nicht fertig, wenn es
+    geschrieben und angezeigt wird. Es ist fertig, wenn auch gesagt ist, was
+    beim Löschen damit geschieht.
+    """
+
+    def setUp(self) -> None:
+        from jusperfect.domain.models import Aktenanalyse, BeteiligtenEintrag
+
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        e = einstellungen(JUSPERFECT_GEDAECHTNIS="lokal",
+                          JUSPERFECT_GEDAECHTNIS_PFAD=self._tmp.name)
+        self.dienst = dienste(einstellungen=e).gedaechtnis
+        g = Aktengedaechtnis(
+            akte_id=AKTE, aktenzeichen="115/26 AR", bezeichnung="Test",
+            dokumente=[
+                GedaechtnisDokument(dokument_id=f"D-{nr:03d}", titel=f"Schreiben {nr}",
+                                    nummer=nr, seiten=[Seite(nummer=1, text="Text")])
+                for nr in (1, 2)
+            ],
+            letzte_dokumentnummer=2,
+            analyse=Aktenanalyse(
+                chronologie=[
+                    ChronologieEintrag(datum="2026-05-04", ereignis="Aus D-001",
+                                       quellen=[_quelle("D1-S1-P1", "D-001")]),
+                    ChronologieEintrag(datum="2026-05-06", ereignis="Aus D-002",
+                                       quellen=[_quelle("D2-S1-P1", "D-002")]),
+                    ChronologieEintrag(datum="2026-05-07", ereignis="Aus beiden",
+                                       quellen=[_quelle("D1-S1-P1", "D-001"),
+                                                _quelle("D2-S1-P1", "D-002")]),
+                ],
+                beteiligte=[BeteiligtenEintrag(rolle="Zeuge", bezeichnung="X",
+                                               quellen=[_quelle("D1-S1-P1", "D-001")])],
+            ),
+            analyse_dokumente=["D-001", "D-002"],
+            analyse_akte_dokumente=["D-001", "D-002"],
+        )
+        self.dienst.ablegen(g)
+        self.dienst.lesen(AKTE)
+
+    def test_was_das_dokument_zitiert_faellt_aus_der_analyse(self) -> None:
+        g = self.dienst.dokument_vergessen(AKTE, "D-001")
+        assert [x.ereignis for x in g.analyse.chronologie] == ["Aus D-002"]
+        assert g.analyse.beteiligte == []
+
+    def test_ein_eintrag_aus_zwei_quellen_faellt_ganz(self) -> None:
+        """Derselbe Maßstab wie bei der dauerhaften Chronologie: Ein Eintrag,
+        dem die halbe Grundlage fehlt, stünde sonst weiter da."""
+        g = self.dienst.dokument_vergessen(AKTE, "D-001")
+        assert "Aus beiden" not in [x.ereignis for x in g.analyse.chronologie]
+
+    def test_der_umfang_der_analyse_wird_nachgezogen(self) -> None:
+        g = self.dienst.dokument_vergessen(AKTE, "D-001")
+        assert g.analyse_dokumente == ["D-002"]
+
+    def test_und_es_steht_dabei_dass_nicht_neu_gerechnet_wurde(self) -> None:
+        """Eine Analyse, der ihre Grundlage fehlt, sieht genauso vollständig
+        aus wie eine vollständige."""
+        g = self.dienst.dokument_vergessen(AKTE, "D-001")
+        assert "nachträglich ein Dokument entfernt" in g.analyse_hinweis
+        assert "nicht neu" in g.analyse_hinweis
+
+    def test_ein_unbeteiligtes_dokument_laesst_die_analyse_in_ruhe(self) -> None:
+        """Sonst trüge jede Löschung einen Hinweis, der nichts bedeutet."""
+        g = self.dienst.lesen(AKTE)
+        g.dokumente.append(GedaechtnisDokument(dokument_id="D-003", titel="Drittes",
+                                               nummer=3, seiten=[Seite(nummer=1, text="T")]))
+        g.letzte_dokumentnummer = 3
+        self.dienst.ablegen(g)
+        nach = self.dienst.dokument_vergessen(AKTE, "D-003")
+        assert len(nach.analyse.chronologie) == 3
+        assert nach.analyse_hinweis == ""
+
+    def test_ohne_analyse_geschieht_nichts(self) -> None:
+        g = self.dienst.lesen(AKTE)
+        g.analyse = None
+        self.dienst.ablegen(g)
+        nach = self.dienst.dokument_vergessen(AKTE, "D-001")
+        assert nach.analyse is None

@@ -614,6 +614,16 @@ class Gedaechtnisdienst:
         das Dokument auch nur mitzitieren. Das ist strenger als noetig und
         Absicht: Ein Eintrag, der aus zwei Quellen zusammengesetzt wurde,
         stuende sonst weiter da, obwohl die Haelfte seiner Grundlage fehlt.
+
+        **Die gespeicherte Analyse fiel bis zum 05.10.2026 durch dieses Netz.**
+        Sie ist am selben Tag dazugekommen (``analyse_merken``), und hier ist
+        sie schlicht vergessen worden - obwohl die Zusage "samt allem
+        Abgeleiteten" lautete und obwohl eine eigene Pruefung sie behauptete.
+        Gefunden hat es die Zweitpruefung desselben Tages, Befund F02.
+
+        Die Lehre: Ein neues Feld im Gedaechtnis ist nicht fertig, wenn es
+        geschrieben und angezeigt wird. Es ist fertig, wenn auch gesagt ist,
+        was beim Loeschen damit geschieht.
         """
         index = index_bauen(Gedaechtnisdienst._passagen(g))
         if g.lebenssachverhalt.strip():
@@ -629,6 +639,44 @@ class Gedaechtnisdienst:
             if eintrag.quellen and not any(q.dokument_id == dokument_id for q in eintrag.quellen)
         ]
         g.chronologie_passagen = [k for k in g.chronologie_passagen if k not in entfallene]
+        Gedaechtnisdienst._analyse_bereinigen(g, dokument_id)
+
+    @staticmethod
+    def _analyse_bereinigen(g: Aktengedaechtnis, dokument_id: str) -> None:
+        """Die gespeicherte Analyse nach demselben Massstab wie die Chronologie.
+
+        Jede ihrer sechs Listen traegt Quellen. Ein Eintrag faellt GANZ, sobald
+        er das entfallene Dokument auch nur mitzitiert - dieselbe Strenge wie
+        oben, aus demselben Grund.
+
+        Bleibt danach nichts uebrig, was das entfernte Dokument nicht beruehrt
+        haette, faellt die Analyse insgesamt: Eine Analyse, der ihre Grundlage
+        fehlt, sieht genauso vollstaendig aus wie eine vollstaendige.
+        """
+        if g.analyse is None:
+            return
+        betroffen = False
+        for name in ("chronologie", "beteiligte", "forderungen", "beweismittel",
+                     "offene_punkte", "widersprueche"):
+            vorher = getattr(g.analyse, name, None)
+            if not isinstance(vorher, list):
+                continue
+            behalten = [e for e in vorher
+                        if not any(q.dokument_id == dokument_id
+                                   for q in getattr(e, "quellen", []) or [])]
+            if len(behalten) != len(vorher):
+                betroffen = True
+            setattr(g.analyse, name, behalten)
+        if not betroffen:
+            return
+        # Der Umfang stimmt nicht mehr: Das Dokument gehoerte zur Analyse und
+        # gehoert jetzt nicht mehr dazu. Beides muss die Oberflaeche wissen,
+        # sonst steht dort ein Stand, den es so nie gab.
+        g.analyse_dokumente = [d for d in g.analyse_dokumente if d != dokument_id]
+        g.analyse_hinweis = (
+            "Aus dieser Analyse wurde nachträglich ein Dokument entfernt. "
+            "Was darauf beruhte, ist herausgenommen; der Rest ist nicht neu "
+            "gerechnet.")
 
     def ablegen(self, gedaechtnis: Aktengedaechtnis) -> None:
         if self._speicher is None:

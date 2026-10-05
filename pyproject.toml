@@ -55,3 +55,9 @@ include = ["jusperfect*"]
 
 [tool.setuptools.package-data]
 jusperfect = ["static/*", "packs/*.json"]
+
+[tool.pytest.ini_options]
+# Die Gegenproben der Zweitpruefung liegen bewusst ausserhalb von tests/.
+# Bei ihnen bedeutet GRUEN: die Luecke besteht noch. Im taeglichen Lauf waere
+# das verwirrend; sie werden einzeln aufgerufen (siehe zweitpruefung/README.md).
+testpaths = ["tests"]
