@@ -238,9 +238,22 @@ aber auf mehrere. Dasselbe gilt für das Geländerprofil `eu.guardrail.v1:0`.
 
 | Grenze | Wirkung |
 |---|---|
-| Region in den Einstellungen | nur EU-Regionen zulässig; alles andere bricht beim Start ab |
+| Region in den Einstellungen | nur die **namentlich aufgeführten** EU- und EWR-Regionen zulässig; alles andere bricht beim Start ab |
 | Zugriffsrichtlinie | ausdrückliches **Verbot** jedes Bedrock-Aufrufs außerhalb `eu-*` — ein Verbot wiegt in AWS schwerer als jede Erlaubnis |
 | Durch das Geländer geht | nur Frage und Antwort, nicht der Akteninhalt |
+
+**Am 05.10.2026 berichtigt, auf einen Hinweis aus der Kanzlei hin.** Bis dahin
+prüften Programm und Richtlinie auf den Vorsatz `eu-`. Der ist eine
+Namenskonvention von AWS und **kein Nachweis**: `eu-central-2` ist Zürich
+(Schweiz), `eu-west-2` ist London (Vereinigtes Königreich). Beide hätten die
+Prüfung bestanden. Das Programm prüft seitdem gegen eine aufgeschriebene Liste;
+die Richtlinie noch nicht (geschützte Datei, Vorschlag in `DSFA-ANGABEN.md`).
+
+**Was auch die engere Liste nicht leistet:** `aws:RequestedRegion` und die
+Einstellung betreffen die Region, an die der **Aufruf** geht — Frankfurt. Wohin
+das Inferenzprofil und das Geländerprofil intern verteilen, entscheidet AWS und
+steht in keiner Richtlinie. Deshalb bleibt die Auskunft von AWS erforderlich;
+und eine Antwort, die nur `eu-`-Regionen nennt, genügt dafür nicht.
 
 **[KANZLEI 11] — eine Angabe ist ungesichert.** Welche Regionen das
 Geländerprofil benutzt, nennt AWS in der Konsole nicht. Eine Zusammenfassung

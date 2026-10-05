@@ -80,6 +80,53 @@ Gründen:
    die Angabe zu, wäre das für den Eintrag zum Drittlandbezug erheblich. Gerade
    deshalb darf sie nicht aus zweiter Hand übernommen werden.
 
+### Berichtigt am 05.10.2026: „eu-" ist kein Nachweis
+
+**Aus der Kanzlei: „Zürich ist eu-central-2 und nicht eu-central-1."** Das
+stimmt — und es deckt einen Fehler in dieser Unterlage und im Programm auf.
+
+Als Nachweis dafür, dass keine Übermittlung in ein Drittland stattfindet, stand
+hier und im Verarbeitungsverzeichnis der Vorsatz **`eu-`**. Das Programm prüfte
+ihn genauso (`region.startswith("eu-")`), und die Zugriffsrichtlinie prüft ihn
+bis heute so (`"aws:RequestedRegion": "eu-*"`).
+
+**Der Vorsatz ist eine Namenskonvention von AWS und keine Aussage über die
+Europäische Union.** Zwei Regionen tragen ihn und liegen außerhalb der EU und
+des EWR:
+
+| Region | Ort | |
+|---|---|---|
+| `eu-central-2` | Zürich | Schweiz |
+| `eu-west-2` | London | Vereinigtes Königreich |
+
+Beide hätten die Prüfung bestanden.
+
+**Im Programm behoben am 05.10.2026.** `jusperfect/config.py` prüft nicht mehr
+den Vorsatz, sondern eine **aufgeschriebene Liste** der EU- und EWR-Regionen
+(`EU_EWR_REGIONEN`): Frankfurt, Irland, Paris, Mailand, Spanien, Stockholm.
+Alles andere bricht beim Start ab, und der Fehlertext nennt den Grund —
+„`eu-central-2` liegt in Zürich, Schweiz — außerhalb der EU und des EWR". Eine
+neue EU-Region von AWS wird abgewiesen, bis sie in der Liste steht; das ist die
+sichere Richtung, und die Meldung sagt, wo die Liste steht. 16 Prüfungen halten
+das fest (`tests/test_eu_regionen.py`).
+
+**Offen bleibt — und das ist der eigentliche Punkt:**
+
+| | |
+|---|---|
+| Die **Zugriffsrichtlinie** prüft weiter `eu-*` | `infra/iam-nur-claude.json` ist eine geschützte Datei und wird nur auf ausdrückliche Anweisung geändert. Der Vorschlag steht unten |
+| `aws:RequestedRegion` trifft die Frage ohnehin nicht | Die Bedingung gilt für die Region, an die der **Aufruf** geht (Frankfurt). Wohin das **Inferenzprofil** und `eu.guardrail.v1:0` intern verteilen, entscheidet AWS und steht in keiner Richtlinie |
+
+**Der Punkt ist damit nicht erledigt, sondern geschärft.** Die Liste der
+Zielregionen bleibt beim AWS-Support zu erfragen. Neu ist nur: Auch eine
+Antwort, die ausschließlich `eu-`-Regionen nennt, beantwortet die Frage **nicht**
+— es kommt auf die Regionen selbst an, nicht auf ihren Namen.
+
+**Vorschlag für die Zugriffsrichtlinie** (nur auf Anweisung einzusetzen): die
+Bedingung `StringNotLike` auf `eu-*` durch ein `StringNotEquals` auf die sechs
+Regionen ersetzen. Dann weist AWS selbst jeden Aufruf nach Zürich oder London
+ab, unabhängig davon, was im Programm eingestellt ist.
+
 **Zu beschaffen ist sie beim AWS-Support oder aus der Dokumentation zu den
 Inferenzprofilen**, und zwar ausdrücklich für `eu.guardrail.v1:0` und für die
 drei Modellkennungen, die das Programm benutzt. Bis dahin bleibt es bei dem

@@ -200,9 +200,21 @@ Gesetzestexten erfolgt über einen Link im Browser des Bearbeiters; dabei geht
 
 | Grenze | Wirkung |
 |---|---|
-| Region | Nur EU-Regionen sind in den Einstellungen zulässig; alles andere bricht beim Start ab (`config.py`) |
+| Region | Nur die **namentlich aufgeführten** EU- und EWR-Regionen sind in den Einstellungen zulässig; alles andere bricht beim Start ab (`config.py::EU_EWR_REGIONEN`) |
 | Modellaufruf | Über das europäische Inferenzprofil (`eu.`-Vorsatz), das die Verarbeitung in europäischen Regionen hält |
 | Zugriffsrichtlinie | Ein ausdrückliches **Verbot** jedes Bedrock-Aufrufs außerhalb `eu-*` — ein Verbot wiegt in AWS schwerer als jede Erlaubnis |
+
+> **Berichtigt am 05.10.2026, und es gehört in die Bewertung.** Bis zu diesem
+> Tag prüfte das Programm auf den Vorsatz `eu-`, und dieser Eintrag stützte sich
+> darauf. **Der Vorsatz ist eine Namenskonvention von AWS, keine Aussage über
+> die EU:** `eu-central-2` ist Zürich (Schweiz), `eu-west-2` ist London
+> (Vereinigtes Königreich). Beide hätten die Prüfung bestanden.
+>
+> Im Programm ist das behoben — geprüft wird gegen eine aufgeschriebene Liste.
+> **Die Zugriffsrichtlinie prüft weiterhin `eu-*`**; sie ist eine geschützte
+> Datei und wird nur auf Anweisung geändert (Vorschlag in `DSFA-ANGABEN.md`).
+> Und beides trifft die eigentliche Frage nicht: Wohin das Inferenzprofil
+> intern verteilt, entscheidet AWS.
 
 **Eine Angabe ist offen:** Das regionsübergreifende Geländerprofil
 (`eu.guardrail.v1:0`) verteilt die Prüfung der **Frage** auf mehrere

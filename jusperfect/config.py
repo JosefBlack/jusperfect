@@ -91,6 +91,47 @@ def _schalter(env: Mapping[str, str], name: str, standard: bool) -> bool:
 _PROFILREGIONEN = ("eu-",)
 
 
+#: Die AWS-Regionen, die wirklich in der EU oder im EWR liegen.
+#:
+#: **Aus der Kanzlei am 05.10.2026: „Zuerich ist eu-central-2 und nicht
+#: eu-central-1."** Das stimmt - und es deckt einen Fehler auf, der bis dahin
+#: in der Pruefung stand: Geprueft wurde auf den Vorsatz "eu-", und
+#: "eu-central-2" faengt mit "eu-" an. Der Vorsatz ist eine Namenskonvention
+#: von AWS und keine Aussage ueber die Europaeische Union.
+#:
+#: Zwei Regionen tragen ihn und liegen ausserhalb der EU und des EWR:
+#:
+#:   eu-central-2  Zuerich      Schweiz
+#:   eu-west-2     London       Vereinigtes Koenigreich
+#:
+#: Fuer eine Kanzlei, deren Unterlage "Uebermittlung in Drittlaender: keine"
+#: sagt, ist das der Unterschied zwischen einem Satz, der stimmt, und einem,
+#: der sich auf eine Buchstabenfolge stuetzt.
+#:
+#: **Fail closed, mit Ansage.** Eine neue EU-Region, die AWS erst spaeter
+#: eroeffnet, wird hier abgewiesen, bis sie in dieser Liste steht. Das ist die
+#: sichere Richtung, und der Fehlertext sagt, wo die Liste steht.
+#:
+#: Die Liste gehoert gegen das Regionenverzeichnis von AWS geprueft; sie ist
+#: hier aufgeschrieben und nicht abgeleitet, weil sie sich nicht ableiten
+#: laesst - genau das war der Fehler.
+EU_EWR_REGIONEN = (
+    "eu-central-1",   # Frankfurt am Main, Deutschland
+    "eu-west-1",      # Irland
+    "eu-west-3",      # Paris, Frankreich
+    "eu-south-1",     # Mailand, Italien
+    "eu-south-2",     # Spanien (Aragon)
+    "eu-north-1",     # Stockholm, Schweden
+)
+
+#: Was wie eine EU-Region aussieht und keine ist. Nur fuer die Fehlermeldung:
+#: "nicht erlaubt" hilft weniger als "das liegt in der Schweiz".
+_SCHEIN_EU_REGIONEN = {
+    "eu-central-2": "Zürich, Schweiz",
+    "eu-west-2": "London, Vereinigtes Königreich",
+}
+
+
 def _woerter(wert: str | None, standard: tuple[str, ...]) -> tuple[str, ...]:
     """Eine durch Komma getrennte Liste – oder die Vorgabe.
 
@@ -428,8 +469,17 @@ class Einstellungen:
             raise KonfigurationsFehler("JUSPERFECT_JURNODES_URL ist nicht gesetzt.")
         if self.jurnodes_adapter == "webdav" and not self.jurnodes_webdav_pfad:
             raise KonfigurationsFehler("Für JUSPERFECT_JURNODES_ADAPTER=webdav ist JUSPERFECT_JURNODES_WEBDAV (der Aktenordner) nötig.")
-        if not self.aws_region.startswith("eu-"):
-            raise KonfigurationsFehler(f"Nur EU-Regionen sind zulässig, nicht {self.aws_region!r}.")
+        if self.aws_region not in EU_EWR_REGIONEN:
+            # Der Vorsatz "eu-" ist eine Namenskonvention von AWS und keine
+            # Aussage ueber die EU. Wer eu-central-2 eintraegt, soll nicht
+            # "nicht erlaubt" lesen, sondern "das liegt in der Schweiz".
+            wo = _SCHEIN_EU_REGIONEN.get(self.aws_region)
+            grund = (f"{self.aws_region!r} liegt in {wo} – außerhalb der EU und des EWR."
+                     if wo else f"{self.aws_region!r} ist keine EU- oder EWR-Region.")
+            raise KonfigurationsFehler(
+                f"{grund} Zulässig sind: {', '.join(EU_EWR_REGIONEN)}. "
+                "Die Liste steht in jusperfect/config.py::EU_EWR_REGIONEN; eine "
+                "neue EU-Region von AWS ist dort einzutragen.")
         if self.sitzung_ttl_sekunden <= 0 or self.monatsbudget_eur <= 0:
             raise KonfigurationsFehler("Lebensdauer und Monatsbudget müssen positiv sein.")
         # Platzhalter statt Werte: derselbe Fehler wie beim Schutzgelaender,
