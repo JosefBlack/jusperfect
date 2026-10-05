@@ -9,6 +9,10 @@ Die Kanzlei hat das Projekt von einer zweiten KI prüfen lassen. Grundlage war
 bestanden alle — und haben die Lücken trotzdem nicht gezeigt. Das ist der
 eigentliche Befund.
 
+**Stand 05.10.2026: zwei Befunde behoben** (F02.1, F09), zwei in den Unterlagen
+berichtigt (F11, F12). Die Gegenproben 4 und 10 sind damit rot — bei ihnen heißt
+das: geschlossen.
+
 | Datei | Was darin steht |
 |---|---|
 | `PRUEFBERICHT.md` | der Bericht im Wortlaut, unverändert |
@@ -53,7 +57,7 @@ Fassung hier bleibt unverändert als Beleg stehen.
 | **F06** | der bestätigte Prüfsummenstand umfasst den Betreff nicht | offen |
 | **F07** | Entwürfe bleiben nach Aktenrechteentzug lesbar und freigebbar | offen |
 | **F08** | eine fremde `/record`-Antwort wird nicht gegen die angefragte Akte geprüft | offen |
-| **F09** | Datums- und Sprachvarianten umgehen die Fristensperre | offen |
+| **F09** | Datums- und Sprachvarianten umgehen die Fristensperre | ~~offen~~ **behoben 05.10.2026** |
 | **F10** | ein fehlgeschlagener Modellaufruf hinterlässt keinen Nachweis | offen |
 | **F11** | Dateinamen und Aktenzeichen gehen über das Material doch zum Modell | **Unterlagen berichtigt**, Technik offen |
 | **F12** | die Nicht-Speicherung bei Textract ist nicht nachgewiesen | **Unterlagen berichtigt**, Nachweis offen |

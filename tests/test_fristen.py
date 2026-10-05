@@ -21,7 +21,7 @@ import unittest
 from jusperfect.domain.models import ChronologieEintrag, OffenerPunkt, Passage
 from jusperfect.services import prompts
 from jusperfect.services.fristen import (
-    ERSATZ, entschaerfen, felder_entschaerfen, hinweis,
+    ERSATZ, ERSATZ_UNBELEGT, entschaerfen, felder_entschaerfen, hinweis,
 )
 
 KUENDIGUNG = (
@@ -75,11 +75,29 @@ class WasStehenBleibt(unittest.TestCase):
         _, zahl = entschaerfen(satz, _index())
         self.assertEqual(zahl, 0)
 
-    def test_ein_datum_ohne_fristwort_bleibt(self):
+    def test_ein_datum_aus_der_akte_bleibt_auch_ohne_fristwort(self):
         """Ein Termin oder Zugangstag wird nicht angetastet - dort waere das
-        Streichen der schwerere Fehler."""
-        _, zahl = entschaerfen("Die Besprechung findet am 12.09.2026 statt.", _index())
+        Streichen der schwerere Fehler.
+
+        Bis zum 05.10.2026 stand hier der 12.09.2026, der in der Akte nirgends
+        vorkommt, und diese Pruefung verlangte, dass er stehen bleibt: Ohne
+        Fristwort wurde gar nicht geprueft. Genau daran hing Befund F09 - mit
+        „Die Klage muss bis zum 26.05.2026 eingereicht werden" kam durch
+        dieselbe Luecke ein erfundener Fristablauf durch.
+
+        Die Zusage lautet seitdem anders und zugleich enger: Ein Datum **aus
+        der Akte** bleibt ohne Fristwort unangetastet. Eines, das in keiner
+        Passage steht, faellt - der naechste Test.
+        """
+        _, zahl = entschaerfen("Die Besprechung fand am 27.04.2026 statt.", _index())
         self.assertEqual(zahl, 0)
+
+    def test_ein_datum_das_nirgends_steht_faellt_auch_ohne_fristwort(self):
+        neu, zahl = entschaerfen("Die Besprechung findet am 12.09.2026 statt.", _index())
+        self.assertEqual(zahl, 1)
+        self.assertIn(ERSATZ_UNBELEGT, neu)
+        # Kein Hinweis auf den Fristenkalender: Hier geht es um keine Frist.
+        self.assertNotIn("Fristenkalender", neu)
 
     def test_ein_belegtes_datum_im_fristsatz_bleibt(self):
         """Steht das Datum in der Akte, ist es keine Rechnung."""
@@ -354,3 +372,150 @@ class EinDatumIstNichtSchonDeshalbEineFrist(unittest.TestCase):
     def test_ohne_fristwort_wird_nichts_angefasst(self):
         self.assertEqual(0, self._lauf("Der Ortstermin fand am 27.01.2026 statt.",
                                        "Der Ortstermin fand am 27.01.2026 statt."))
+
+
+class F09DatumsUndSprachvarianten(unittest.TestCase):
+    """Befund F09 der Zweitprüfung vom 05.10.2026, Gegenprobe 10.
+
+    Die Sperre hing an zwei Wortlisten. Drei Sätze kamen unverändert durch,
+    obwohl keiner von ihnen ein Datum aus der Akte nannte – die Quelle sprach
+    allein von einem Zugang am 05.05.2026:
+
+        „Die Klagefrist endet am 26.05.26."        zweistelliges Jahr
+        „Die Klagefrist endet am 26. Mai."         Monatsname ohne Jahr
+        „Die Klage muss bis zum 26.05.2026 ..."    kein Wort der Fristliste
+
+    Die Belegpflicht hielt sie nicht auf: `[Q: D1-S1-P1]` war eine gültige
+    Kennung, nur stützte die Passage die Aussage nicht. Und die Fristensperre
+    sah hin, weil das Muster die erste und zweite Schreibweise nicht kannte
+    und bei der dritten kein Fristwort danebenstand.
+
+    Was dagegen gebaut wurde, ist **keine größere Wortliste** – der Bericht
+    sagt zu Recht, dass die über beliebige natürliche Sprache nichts beweist.
+    Die Beweisrichtung ist umgekehrt: Jedes Datum muss sich auf eine Stelle
+    zurückführen lassen, die das Programm selbst mitgeschickt hat. Ob ein
+    Fristwort danebensteht, entscheidet nur noch den Wortlaut des Ersatzes.
+
+    Diese Klasse ist die Gegenprobe in richtiger Polarität: grün heißt, die
+    Lücke ist zu. Die zweite Hälfte ist die wichtigere – sie hält fest, was
+    durch die Verschärfung **nicht** mitgerissen werden darf.
+    """
+
+    def _lauf(self, antwort: str, quelle: str = "Zugang am 05.05.2026.",
+              kalender=(), datum=None) -> tuple[str, int]:
+        p = Passage(kennung="D1-S1-P1", dokument_id="D1",
+                    dokument_titel="Kündigung", seite=1, text=quelle,
+                    dokument_datum=datum)
+        return entschaerfen(antwort, {p.kennung: p}, kalender)
+
+    # ── Die drei Umgehungen ───────────────────────────────────────────────
+
+    def test_ein_zweistelliges_jahr_umgeht_die_sperre_nicht_mehr(self):
+        neu, zahl = self._lauf("Die Klagefrist endet am 26.05.26 [Q: D1-S1-P1].")
+        self.assertEqual(zahl, 1, neu)
+        self.assertNotIn("26.05.26", neu)
+        self.assertIn(ERSATZ, neu)
+        self.assertIn("Klagefrist", neu, "Die Warnung selbst bleibt stehen.")
+
+    def test_ein_monatsname_ohne_jahr_umgeht_die_sperre_nicht_mehr(self):
+        neu, zahl = self._lauf("Die Klagefrist endet am 26. Mai [Q: D1-S1-P1].")
+        self.assertEqual(zahl, 1, neu)
+        self.assertNotIn("26. Mai", neu)
+
+    def test_ein_fristende_ohne_fristwort_umgeht_die_sperre_nicht_mehr(self):
+        neu, zahl = self._lauf(
+            "Die Klage muss bis zum 26.05.2026 eingereicht werden [Q: D1-S1-P1].")
+        self.assertEqual(zahl, 1, neu)
+        self.assertNotIn("26.05.2026", neu)
+
+    def test_ein_datum_ohne_jahr_hinter_einem_anlass_wird_geprueft(self):
+        """„endet am 26.05." ist dieselbe Umgehung in der dritten Schreibweise."""
+        _, zahl = self._lauf("Die Frist endet am 26.05.")
+        self.assertEqual(zahl, 1)
+
+    # ── Was nicht mitgerissen werden darf ─────────────────────────────────
+
+    def test_ein_zweistelliges_jahr_aus_der_akte_bleibt(self):
+        """Die Akte schreibt vierstellig, die Antwort zweistellig – dasselbe Datum."""
+        neu, zahl = self._lauf(
+            "Die Kündigungsfrist endet am 30.09.26.",
+            "hiermit kündigen wir ordentlich zum 30.09.2026.")
+        self.assertEqual(zahl, 0, neu)
+
+    def test_ein_monatsname_ohne_jahr_aus_der_akte_bleibt(self):
+        neu, zahl = self._lauf(
+            "Die Kündigungsfrist endet am 30. September.",
+            "hiermit kündigen wir ordentlich zum 30.09.2026.")
+        self.assertEqual(zahl, 0, neu)
+
+    def test_eine_vertragsziffer_ist_kein_datum(self):
+        """„Ziffer 2.1." sieht aus wie ein Datum ohne Jahr.
+
+        Eine Vertragsziffer aus dem Text zu streichen wäre der schwerere
+        Fehler. Ohne einen Anlass davor – „am", „bis zum", „Frist" – wird die
+        Zahl deshalb nicht als Datum gelesen.
+        """
+        satz = "Die Ziffer 2.1. des Mietvertrages regelt die Kaution."
+        neu, zahl = self._lauf(satz)
+        self.assertEqual(zahl, 0, neu)
+        self.assertEqual(neu, satz)
+
+    def test_eine_versionsnummer_ist_kein_datum(self):
+        satz = "Die Fassung 1.13.2024 ist freigegeben."
+        neu, zahl = self._lauf(satz)
+        self.assertEqual(zahl, 0, neu)
+        self.assertEqual(neu, satz)
+
+    def test_das_dokumentdatum_aus_der_kopfzeile_bleibt(self):
+        """Es steht in den Stammdaten und fast nie im Text.
+
+        Das Material nennt es in der Kopfzeile der Passage, und der Auftrag
+        verlangt ausdrücklich, dass das Modell es nennt. Es als unbelegt zu
+        streichen hätte genau die fünf Tage wieder getilgt, die am 28.09.2026
+        in fünf Prüfbogenläufen gefehlt haben.
+        """
+        from datetime import date as _date
+
+        neu, zahl = self._lauf("Das Kündigungsschreiben datiert vom 04.05.2026.",
+                               "hiermit kündigen wir das Arbeitsverhältnis.",
+                               datum=_date(2026, 5, 4))
+        self.assertEqual(zahl, 0, neu)
+
+    def test_die_kopfzeile_belegt_aber_kein_fristende(self):
+        """Sonst belegte das Briefdatum jede behauptete Frist.
+
+        „Kündigung, datiert 04.05.2026" würde als Endpunkt durchgehen, weil in
+        der Kopfzeile das Wort „Kündigung" steht. Die Kopfzeile zählt deshalb
+        als Stelle für eine Tatsache und nie als Nachweis eines Fristendes.
+        """
+        from datetime import date as _date
+
+        neu, zahl = self._lauf("Die Kündigungsfrist endet am 04.05.2026.",
+                               "hiermit kündigen wir das Arbeitsverhältnis.",
+                               datum=_date(2026, 5, 4))
+        self.assertEqual(zahl, 1, neu)
+
+    def test_der_fristenkalender_gilt_auch_fuer_ein_datum_ohne_jahr(self):
+        neu, zahl = self._lauf("Die Frist endet am 31. Juli.", kalender=["2026-07-31"])
+        self.assertEqual(zahl, 0, neu)
+
+
+class DieJahreszahlWirdNichtGeraten(unittest.TestCase):
+    """Zweistellig ist zweideutig: „26" ist 2026, „98" ist 1998.
+
+    Die Grenze liegt zwanzig Jahre vor uns – ein Mietvertrag läuft so lange,
+    ein Schriftsatz nicht. Sie steht als `JAHRESSPANNE` im Modul, damit sie
+    nachlesbar ist und nicht im Muster versteckt.
+    """
+
+    def test_das_naheliegende_jahrhundert(self):
+        from jusperfect.services.fristen import JAHRESSPANNE, _jahr
+        from datetime import date as _date
+
+        self.assertEqual(_jahr("2026"), 2026)
+        self.assertEqual(_jahr("26"), 2026)
+        self.assertEqual(_jahr("98"), 1998)
+        # Die Grenze selbst, aus dem heutigen Tag gerechnet.
+        grenze = _date.today().year + JAHRESSPANNE
+        self.assertEqual(_jahr(f"{grenze % 100:02d}"), grenze)
+        self.assertEqual(_jahr(f"{(grenze + 1) % 100:02d}"), 1900 + (grenze + 1) % 100)

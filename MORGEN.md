@@ -185,6 +185,52 @@ sieht sonst genauso vollständig aus wie eine vollständige.
 geschrieben und angezeigt wird. Es ist fertig, wenn auch gesagt ist, **was beim
 Löschen damit geschieht.**
 
+**F09 — die Fristensperre, behoben am 05.10.2026.** Drei Sätze kamen durch,
+obwohl keiner ein Datum aus der Akte nannte:
+
+| Satz | Warum er durchkam |
+|---|---|
+| „Die Klagefrist endet am **26.05.26**." | zweistelliges Jahr — das Datumsmuster kannte es nicht |
+| „Die Klagefrist endet am **26. Mai**." | Monatsname ohne Jahr — dasselbe |
+| „Die Klage muss **bis zum 26.05.2026** eingereicht werden." | kein Wort der Fristliste |
+
+Gebaut ist **keine größere Wortliste.** Der Bericht hat recht: Über beliebige
+natürliche Sprache beweist eine Wortliste nichts. **Die Beweisrichtung ist
+umgekehrt.**
+
+Vorher: *Ein Datum fällt, wenn ein Fristwort danebensteht.*
+Jetzt: *Jedes Datum muss sich auf eine Stelle zurückführen lassen, die das
+Programm selbst mitgeschickt hat* — eine Passage, deren Kopfzeile (Titel und
+Dokumentdatum) oder den Fristenkalender aus jur|nodes. Findet sich dort nichts,
+wird es ersetzt, ganz ohne Wortliste. Denn woher sollte es sonst kommen.
+
+Die Wortlisten sind nicht verschwunden, sie entscheiden nur nicht mehr über die
+Zusage: Eine behauptet weiter ein *Ende* und verschärft dann die Prüfung — die
+Akte muss das Datum selbst als Endpunkt führen —, die andere wählt nur noch den
+**Wortlaut des Ersatzes**. Fällt eine von beiden aus, wird weniger streng oder
+unschöner geprüft, nie gar nicht.
+
+**Was dadurch strenger wird, und das gehört gesagt:** Ein erfundenes Datum
+fällt jetzt auch dann, wenn es nach keiner Frist klingt. „Die Besprechung
+findet am 12.09.2026 statt" ohne jede Stelle in der Akte ist ebenfalls
+erfunden. Eine Prüfung, die bisher ausdrücklich das Gegenteil verlangte, ist
+umgeschrieben — sie war die Lücke.
+
+**Damit kein richtiges Datum mitgerissen wird**, zählt als Stelle nun auch die
+Kopfzeile der Passage: Das Dokumentdatum steht in den Stammdaten und fast nie
+im Text, und der Auftrag verlangt, dass das Modell es nennt. Als *Endpunkt*
+taugt die Kopfzeile dagegen nicht — „Kündigung, datiert 04.05.2026" würde sonst
+jede behauptete Kündigungsfrist zum Briefdatum belegen.
+
+**Nachgemessen, nicht behauptet:** Über alle fünf Testakten (903.720 Zeichen)
+stehen 248 Daten im Text. **Keines davon** wird in einem neutralen Satz
+gestrichen. Die Form ohne Jahr („26.05.") kommt darin genau einmal vor; sie
+gilt nur hinter einem Anlass („am", „bis zum", „Frist …"), damit aus einer
+Vertragsziffer „2.1." kein Datum wird.
+
+Behoben mit 12 neuen Prüfungen in `tests/test_fristen.py`; Gegenprobe 10 ist
+dreifach rot, also geschlossen. **1666 Prüfungen grün.**
+
 ### Was in den Unterlagen berichtigt ist
 
 | Befund | Was falsch war |
@@ -203,10 +249,11 @@ Abweichung: **F09 (Fristensperre) gehört nach vorn.** Ein erfundener
 Fristablauf ist der einzige Befund, der unmittelbar einen Mandanten schädigen
 kann.
 
-1. **F09** — Fristensperre. `26.05.26` und `26. Mai` entgehen dem Datumsmuster,
-   „muss bis zum … eingereicht werden" dem Fristwortmuster. Die Absolutaussage
-   „wird nie berechnet" ist durch eine Musterprüfung nicht zu halten; es braucht
-   eine strukturelle Trennung von Auslöser, zitiertem Termin und Rechnung.
+1. ~~**F09** — Fristensperre. `26.05.26` und `26. Mai` entgehen dem
+   Datumsmuster, „muss bis zum … eingereicht werden" dem Fristwortmuster.~~
+   **Erledigt am 05.10.2026** — umgekehrte Beweisrichtung statt größerer
+   Wortliste; Gegenprobe 10 dreifach rot. Siehe oben.
+   **Als nächstes ist damit F01 der erste Punkt.**
 2. **F01** — Fehlerprotokolle abdichten. Der bereinigte Fehler geht sauber
    hinaus, der ursprüngliche steht über `raise … from e` im Traceback des
    Servers. Eine saubere HTTP-Antwort beweist kein sauberes Protokoll.
@@ -228,7 +275,8 @@ Punkte sind Zusagen, die nicht halten.
 
 * **„Keine Fristberechnung" ganz aufgeben** — nein. Die Zusage bleibt, der
   Nachweis muss besser werden. Was nicht hält, ist die *Musterprüfung*, nicht
-  das Ziel.
+  das Ziel. ~~Offen.~~ **Am 05.10.2026 eingelöst:** Der Nachweis hängt nicht
+  mehr an einer Wortliste, sondern an der Stelle, aus der das Datum stammt.
 * **Pseudonymisierung erneut untersuchen** (DSFA 3.2) — der Bericht hat recht,
   dass die pauschale Verwerfung zu kurz greift. Aufgenommen, aber nachrangig.
 * **F13** — richtig, aber die mitgelieferte Zugriffsrichtlinie nennt bereits
