@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1583 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `ece65d2`.
+1599 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `7e45fb8`.
 
 ---
 
@@ -61,6 +61,68 @@ dem 05.10.2026, und die 17 fremden Dokumente würden dauerhaft abgelegt.
 Dreimal dasselbe: **Eine Probe, die anders misst als der Betrieb, misst etwas
 anderes als den Betrieb.** Der dritte Fehler hat sich selbst gefangen, weil
 seit dem zweiten gilt: kein Urteil ohne verstandenen Maßstab.
+
+---
+
+## „eu-" ist eine Namenskonvention — der Hinweis vom 05.10.2026
+
+**Aus der Kanzlei: „Zürich ist eu-central-2 und nicht eu-central-1. Wir können
+den Punkt abhaken."**
+
+Der erste Satz stimmt. Der zweite leider nicht — und zwar aus einem Grund, der
+die Sache **schlimmer** macht, nicht besser.
+
+### Was dabei herauskam
+
+Als Nachweis dafür, dass keine Übermittlung in ein Drittland stattfindet, stand
+in den Unterlagen der Vorsatz **`eu-`**. Das Programm prüfte ihn genauso:
+
+```python
+if not self.aws_region.startswith("eu-"):
+```
+
+`eu-central-2` fängt mit `eu-` an. **Die Prüfung hätte Zürich durchgelassen** —
+und `eu-west-2`, London, ebenso. Beide liegen außerhalb der EU und des EWR.
+
+| Region | Ort | |
+|---|---|---|
+| `eu-central-2` | Zürich | Schweiz |
+| `eu-west-2` | London | Vereinigtes Königreich |
+
+Für eine Kanzlei, deren Unterlage „Übermittlung in Drittländer: keine" sagt, ist
+das der Unterschied zwischen einem Satz, der stimmt, und einem, der sich auf
+eine Buchstabenfolge stützt.
+
+### Behoben
+
+`jusperfect/config.py` prüft nicht mehr den Vorsatz, sondern eine
+**aufgeschriebene Liste** — `EU_EWR_REGIONEN`: Frankfurt, Irland, Paris,
+Mailand, Spanien, Stockholm. Der Fehlertext nennt den Grund statt nur der
+Ablehnung:
+
+> `'eu-central-2'` liegt in Zürich, Schweiz – außerhalb der EU und des EWR.
+
+Eine neue EU-Region von AWS wird abgewiesen, bis sie in der Liste steht. Das ist
+die sichere Richtung, und die Meldung sagt, wo die Liste steht. 16 Prüfungen
+halten es fest.
+
+### Was offen bleibt — und warum der Punkt nicht abzuhaken ist
+
+1. **Die Zugriffsrichtlinie prüft weiter `eu-*`.** `infra/iam-nur-claude.json`
+   ist geschützt und wird nur auf ausdrückliche Anweisung geändert. Der
+   Vorschlag steht in `DSFA-ANGABEN.md`: `StringNotLike` auf `eu-*` durch
+   `StringNotEquals` auf die sechs Regionen ersetzen. **Eine Anweisung genügt.**
+2. **Beides trifft die eigentliche Frage ohnehin nicht.** `aws:RequestedRegion`
+   und die Einstellung betreffen die Region, an die der **Aufruf** geht —
+   Frankfurt. Wohin das Inferenzprofil und `eu.guardrail.v1:0` **intern**
+   verteilen, entscheidet AWS und steht in keiner Richtlinie.
+3. **Neu dazugelernt:** Auch eine Antwort von AWS, die ausschließlich
+   `eu-`-Regionen nennt, beantwortet die Frage **nicht**. Es kommt auf die
+   Regionen selbst an. Die Frage an den AWS-Support ist entsprechend zu
+   stellen: *welche Regionen, namentlich.*
+
+**Zum fünften Mal an diesem Tag dieselbe Form:** Eine Prüfung, die den Namen
+misst statt der Sache, misst etwas anderes als die Sache.
 
 ---
 
