@@ -4,6 +4,14 @@
 Programm ist, worauf zu sehen ist und was bereits bekannt ist — damit die
 Prüfung nicht dort anfängt, wo schon jemand war.
 
+**Zweierlei wird erbeten, und beides zählt:**
+
+1. **Eine Prüfung** des Programms — die Abschnitte „Die Zusagen" und „Worauf
+   besonders zu sehen ist".
+2. **Antworten auf fünf offene Fragen** — der Abschnitt „Offene Fragen". Zwei
+   davon sind Wissensfragen (jur|nodes, AWS), drei sind Urteilsfragen. Wer nur
+   eines von beidem leisten kann, leistet gern nur das.
+
 ---
 
 ## Worum es geht
@@ -80,7 +88,11 @@ In dieser Reihenfolge — oben steht, was am meisten schadet, wenn es falsch ist
 
 ---
 
-## Bekannt und offen — bitte nicht als Fund melden
+## Bekannt und offen — nicht als Fund melden, aber gern als Antwort
+
+Diese fünf Punkte sind bekannt. Sie noch einmal zu melden hilft nicht.
+**Etwas dazu zu sagen schon** — die Fragen stehen weiter unten unter
+„Offene Fragen".
 
 1. **Der Korrespondenzordner von jur|nodes.** Das Feld
    `correspondenceFolderId` liefert Schriftstücke, die nicht zu der abgefragten
@@ -99,6 +111,144 @@ In dieser Reihenfolge — oben steht, was am meisten schadet, wenn es falsch ist
 5. **Zugriff je Bearbeiter.** Technisch vorhanden, in der Kanzlei nicht
    eingeschaltet: Alle eingetragenen Nutzer sehen alle Akten. Bewusst so, und
    offen.
+
+---
+
+## Offene Fragen, zu denen eine zweite Meinung willkommen ist
+
+**Zur Behandlung der Antworten, vorab.** Was hier zurückkommt, ist eine zweite
+Meinung und keine Auskunft aus der Quelle. Für die Fragen 1 und 2 gilt
+ausdrücklich: Eine Antwort von Ihnen ersetzt **nicht** die Antwort des
+Herstellers bzw. von AWS. Sie wird als Hinweis behandelt, nicht als Beleg —
+dieselbe Regel, nach der eine Zusammenfassung aus dem Netz am 01.10.2026 schon
+einmal als „ausdrücklich nicht gesichert" in die Unterlage gegangen ist.
+
+**Und: Bitte nicht raten.** „Weiß ich nicht" ist hier eine nützliche Antwort.
+Ein erfundener Schnittstellenpfad kostet einen Prüflauf an echten Mandatsakten.
+
+---
+
+### Frage 1 — Wie liest man die E-Akte von jur|nodes?
+
+**Kennen Sie das Produkt jur|nodes?** Es ist eine Aktenverwaltung für
+Anwaltskanzleien mit einer REST-Schnittstelle (API-Fassung 1.0.1).
+
+In der Oberfläche liegen **Korrespondenz und Vermerke** einer Akte in einem
+Bereich namens **E-Akte**, zusammen mit den Mails. Über die Schnittstelle
+finden wir dorthin keinen Weg.
+
+Was bekannt ist:
+
+| | |
+|---|---|
+| Was es gibt | `/record/search`, `/record`, `/file-system/folder/content`, `/file-system/file/download`, `/relation/search`, `/todo/search`, `/record/note`, `/file-system/add-file` |
+| Die Akte wird angesprochen über | den Abfrageparameter `identifier` (ein Schlüssel wie `FL6BDPWJ…`), **nicht** über das Aktenzeichen — das heißt `recordSign` und ist ein eigenes Feld |
+| 16 geratene Pfade für die E-Akte | alle 404, mit OPTIONS gefragt (`/record/process`, `/process`, `/efile`, `/record/entry`, `/record/history`, `/record/mail/search`, `/record/document/search` und neun weitere) |
+| `GET /record/note` | weist **jede** Parameterform mit Status 405 und „Bitte Daten angeben" ab. Probiert: `id`, `record`, `recordIdentifier`, `identifier`, `recordId`, `noteIdentifier`, `note`, `sign`, `recordSign`, `data` — je mit Schlüssel und Aktenzeichen, auch mit `page=1` |
+| Allein `id` verhält sich anders | Zeichenkette → 400 „cannot be parsed into number"; **Zahl** → wieder 405 „Bitte Daten angeben". Die Zahl wird angenommen und genügt nicht |
+| `/record/note/search`, `/note/search` | 404 |
+| Eine OpenAPI-Beschreibung | liefert der Server nicht: sechs übliche Pfade unterhalb der Zugangskennung und vierundzwanzig darüber, alle 404 |
+
+**Gefragt ist:** Kennen Sie diesen Hersteller oder diese Schnittstelle? Gibt es
+einen Pfad für die E-Akte? Welche Zahl erwartet `id` bei `/record/note`?
+
+**Wenn Sie das Produkt nicht kennen, sagen Sie das bitte** und raten Sie
+nicht. Die Anfrage an den Hersteller ist formuliert und geht ohnehin hinaus.
+
+---
+
+### Frage 2 — In welche Regionen verteilt das EU-Inferenzprofil von AWS Bedrock?
+
+Das Programm ruft Claude über **AWS Bedrock** in Frankfurt (`eu-central-1`)
+auf, und zwar über das **europäische Inferenzprofil**: Die Modellkennung trägt
+den Vorsatz `eu.`, etwa `eu.anthropic.claude-opus-4-6-v1`. Dazu kommt ein
+Schutzgeländer über das regionsübergreifende Profil **`eu.guardrail.v1:0`**.
+
+AWS beschreibt das in der Konsole nur als „across Regions within your
+geography" und nennt die Regionen nicht.
+
+**Gefragt ist — namentlich, nicht „bleibt in Europa":**
+
+1. In welche Regionen verteilt das `eu.`-Inferenzprofil für die
+   Claude-Modelle?
+2. Dasselbe für das Geländerprofil `eu.guardrail.v1:0`.
+3. Ist in einer der beiden Mengen **`eu-central-2` (Zürich, Schweiz)** oder
+   **`eu-west-2` (London, Vereinigtes Königreich)** enthalten?
+
+**Warum Punkt 3 entscheidend ist:** Beide tragen den Vorsatz `eu-` und liegen
+außerhalb der EU und des EWR. Für eine Kanzlei, deren Datenschutzunterlage
+„Übermittlung in Drittländer: keine" sagt, ist das der Unterschied zwischen
+einem Satz, der stimmt, und einem, der sich auf eine Buchstabenfolge stützt.
+Genau daran ist am 05.10.2026 ein Fehler im Programm aufgefallen: Es prüfte auf
+den Vorsatz statt auf die Regionen.
+
+**Mit Quellenangabe, bitte** — und wenn die Angabe aus dem Gedächtnis stammt,
+sagen Sie das dazu.
+
+---
+
+### Frage 3 — Tragen die vier Entwurfsentscheidungen?
+
+Hier geht es nicht um Wissen, sondern um ein Urteil. Vier Entscheidungen, bei
+denen eine Gegenrede nützlich wäre:
+
+**3a · Belegpflicht: entfernen statt markieren.** Eine Aussage des Modells ohne
+Verweis auf eine mitgeschickte Passage wird aus der Antwort **entfernt**. Die
+Alternative wäre, sie zu markieren und stehen zu lassen. Entfernen heißt:
+Der Bearbeiter sieht nicht, was das Modell gesagt hätte. Ist das die richtige
+Seite des Irrtums? (`jusperfect/services/belegpflicht.py`)
+
+**3b · Beim Entfernen eines Dokuments fällt zu viel.** Wird ein Dokument aus
+dem Aktengedächtnis genommen, fallen gespeicherte Antworten und
+Zeitstrahleinträge **ganz**, sobald sie es auch nur mitzitieren — auch wenn sie
+sich zur Hälfte auf ein anderes Dokument stützen. Begründung: Ein Eintrag aus
+zwei Quellen stünde sonst weiter da, obwohl die Hälfte seiner Grundlage fehlt.
+Zu streng? (`jusperfect/services/gedaechtnis.py::dokument_vergessen`)
+
+**3c · Die Ausschlussliste prüft den Titel, nicht den Inhalt.** Dokumente, deren
+**Titel** eines von neun Wörtern trägt (Rechnung, Kostennote, RSV …), kommen
+ohne Haken in die Auswahl — sie sollen nicht ins Aktengedächtnis. Eine
+Rechnung, die „Schreiben vom 14.03." heißt, geht durch. Gibt es einen Weg, der
+zuverlässiger ist, **ohne** den Inhalt zu deuten? (`jusperfect/static/app.js`,
+`nichtVorwaehlenGrund`)
+
+**3d · Veraltet-Erkennung über Dokumentkennungen.** Eine gespeicherte
+Aktenanalyse meldet sich als veraltet, wenn die Akte heute Dokumentkennungen
+enthält, die sie beim Rechnen nicht enthielt. Geänderte oder ersetzte Dokumente
+mit gleicher Kennung erkennt das **nicht**. Reicht das, oder braucht es eine
+Prüfsumme je Dokument — mit allem, was daran hängt?
+(`jusperfect/services/gedaechtnis.py::analyse_stand`)
+
+---
+
+### Frage 4 — Die Rechtsdokumentation
+
+`DSFA-ENTWURF.md` (Folgenabschätzung nach Art. 35 DSGVO) und
+`DATENSCHUTZHINWEISE-ENTWURF.md` (Hinweise nach Art. 13, Mandatsklausel) sind
+Entwürfe der Entwicklung. **26 Stellen sind als `[KANZLEI n]` offen gelassen**,
+weil sie eine rechtliche Bewertung verlangen; sie stehen am Ende jeder Datei in
+einer Liste.
+
+**Gefragt ist nicht die Bewertung** — die trifft die Kanzlei. Gefragt ist:
+
+1. **Fehlt ein Risiko?** Acht sind beschrieben (Abschnitt 4 des DSFA-Entwurfs).
+2. **Ist eine der Maßnahmen zu optimistisch dargestellt?** Jede nennt ihren
+   Nachweis im Programm — stimmt die Zuordnung?
+3. **Fehlt eine Angabe, die Art. 30 oder Art. 35 verlangt?**
+4. **Ist eine der offenen Stellen in Wahrheit keine** — also etwas, das die
+   Entwicklung hätte beantworten können und sich zu bequem gedrückt hat?
+
+Punkt 4 ist ernst gemeint. Eine Unterlage, die eine technische Frage als
+Rechtsfrage ausgibt, schiebt Arbeit auf den Falschen.
+
+---
+
+### Frage 5 — Was würden Sie als Nächstes bauen?
+
+Am Programm ist nichts offen, was das Arbeiten mit einer Akte verhindert. Die
+Arbeitsliste steht in `MORGEN.md`. **Wenn Sie den Bestand gelesen haben: Was
+fehlt Ihrer Meinung nach am meisten?** Gern auch etwas, das in der Liste nicht
+vorkommt.
 
 ---
 
@@ -141,11 +291,23 @@ wo sie echt klingen. Echte Aktenzeichen kommen in Befundbeschreibungen vor
 
 ## Was eine nützliche Antwort enthält
 
+**Bei einem Fund:**
+
 - **Datei und Zeile.** „Die Fehlerbehandlung ist schwach" hilft nicht.
 - **Den Weg dorthin.** Welche Eingabe, welcher Zustand, welche Reihenfolge?
 - **Warum es schadet.** Und für wen — Mandant, Kanzlei, Dritter.
 - **Eine Einschätzung**, wie sicher Sie sind. Eine Vermutung ist willkommen,
   wenn sie als Vermutung gekennzeichnet ist.
+
+**Bei einer Antwort auf die offenen Fragen:**
+
+- **Woher Sie es wissen.** Dokumentation, eigene Erfahrung, Gedächtnis? Jede
+  dieser drei Herkünfte ist brauchbar — aber sie werden verschieden behandelt.
+- **Was Sie nicht wissen.** „Zu Frage 1 kenne ich das Produkt nicht" ist eine
+  vollständige Antwort auf Frage 1 und erspart einen Prüflauf an echten Akten.
+- **Bei Frage 2 die Quelle**, möglichst mit Datum. Eine Regionsliste aus dem
+  Gedächtnis geht als ungesicherter Zwischenstand in die Unterlage, nicht als
+  Beleg.
 
 Und, ausdrücklich erbeten: **Wo halten Sie eine Entscheidung für falsch, die
 hier als Absicht dokumentiert ist?** Die Begründungen stehen in `KONZEPT.md`,

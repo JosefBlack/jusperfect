@@ -11,8 +11,8 @@ beide in der E-Akte, erklärt das auch den zweiten Punkt: Das Feld
 Akte, weil die Korrespondenz überhaupt nicht im Dateisystem liegt.
 
 **Geraten wird deshalb trotzdem nicht.** Sechzehn Pfadnamen für die E-Akte sind
-am 01.10.2026 geprüft worden, alle 404; sechsunddreißig Pfade für die
-Beschreibung ebenso. Regel 10 gilt: bei Dritten warten, nicht raten.
+am 01.10.2026 geprüft worden, alle 404; die Pfade für die Beschreibung ebenso —
+sechs unterhalb der Zugangskennung und vierundzwanzig darüber. Regel 10 gilt: bei Dritten warten, nicht raten.
 
 Was es stattdessen gibt: **Die Kanzlei hat die Beschreibung.** Am 23.09.2026
 hat sie die OpenAPI-Beschreibung ihres Servers geliefert; daraus sind die

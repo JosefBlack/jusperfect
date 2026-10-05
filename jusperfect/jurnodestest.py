@@ -798,8 +798,9 @@ def _beschreibung_auswerten(daten: Mapping, endpunkte: Any) -> None:
 def _beschreibung_aus_datei(pfad: str, endpunkte: Any) -> bool:
     """Die Beschreibung von der Festplatte lesen - ohne Netz, ohne Raten.
 
-    Der Server der Kanzlei gibt seine Beschreibung nicht heraus (sechsunddreissig
-    Pfade, alle 404, gemessen am 01. und 05.10.2026). **Die Kanzlei hat sie
+    Der Server der Kanzlei gibt seine Beschreibung nicht heraus (sechs uebliche
+    Pfade unterhalb der Zugangskennung, vierundzwanzig darueber, alle 404 -
+    gemessen am 01. und 05.10.2026). **Die Kanzlei hat sie
     trotzdem:** Am 23.09.2026 hat sie die OpenAPI-Beschreibung ihres Servers
     geliefert, und daraus sind die Pfade abgeschrieben, mit denen das Programm
     heute arbeitet.

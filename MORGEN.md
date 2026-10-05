@@ -175,7 +175,8 @@ gemessen wurde: niedrige Nummer, befüllt 2022/23, unabhängig vom Anlagedatum
 der Akte, und in der Oberfläche unter dieser Akte nicht zu finden.
 
 **Geraten wird trotzdem nicht.** 16 Pfadnamen für die E-Akte sind geprüft, alle
-404; 36 Pfade für eine Beschreibung ebenso. Regel 10 gilt: bei Dritten warten,
+404; die Pfade für eine Beschreibung ebenso — sechs unterhalb der Zugangskennung
+und vierundzwanzig darüber. Regel 10 gilt: bei Dritten warten,
 nicht raten.
 
 ### Der Weg, der ohne den Hersteller auskommt

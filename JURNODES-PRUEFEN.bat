@@ -41,8 +41,9 @@ rem Aus der Kanzlei am 05.10.2026: "Die Korrespondenz bei jurnodes und die
 rem Vermerke finden sich in der E-Akte." Damit ist es EINE Frage und nicht
 rem zwei - wer den Weg in die E-Akte kennt, hat beides.
 rem
-rem Der Server gibt seine Beschreibung nicht heraus (36 Pfade geprueft, alle
-rem 404). Die Kanzlei hat sie aber: Am 23.09.2026 wurde die
+rem Der Server gibt seine Beschreibung nicht heraus - sechs uebliche Pfade
+rem unterhalb der Zugangskennung, vierundzwanzig darueber, alle 404.
+rem Die Kanzlei hat sie aber: Am 23.09.2026 wurde die
 rem OpenAPI-Beschreibung des Servers schon einmal geliefert, und daraus sind
 rem die Pfade abgeschrieben, mit denen das Programm heute arbeitet.
 rem
