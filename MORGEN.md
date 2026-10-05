@@ -329,6 +329,50 @@ tragenden Beleg nicht ausgegeben wird.
 14 rot. **1709 Prüfungen grün.** Im Browser nachgesehen: Der Strom zeigt
 zuerst „jusperfect schreibt … (412 Zeichen)", dann die geprüften Aussagen.
 
+**F02.2, F02.3, F03, F06 und F07 — behoben am 05.10.2026.** Fünf Befunde in
+einem Zug, weil sie dieselbe Form haben: Eine Zusage galt für den gewollten
+Weg und nicht für den zweiten.
+
+| Befund | Was durchkam | Was jetzt gilt |
+|---|---|---|
+| **F02.2** | ein Satz mit `[Q: D1-…, D2-…]` blieb nach dem Entfernen von D1 stehen; nur der Verweis verschwand | eine Aussage, die das entfernte Dokument auch nur **mitzitiert**, fällt ganz — wie Chronologie und Antworten es schon immer taten |
+| **F02.3** | eine offene Sitzung behielt den Auszug; die nächste Frage antwortete darauf, und die Antwort wurde **neu** gespeichert | das Dokument verschwindet aus jeder offenen Sitzung, und ein verspätetes Ergebnis wird an einer Grabmarke erkannt und abgewiesen |
+| **F03** | zwei Vorgänge, ein Speicher: Der ältere überschrieb die Löschung des jüngeren | die erwartete Revision hängt am **gelesenen Stand**, nicht in einer Tabelle des Speichers |
+| **F06** | ein in einem anderen Fenster geänderter **Betreff** ging ungesehen in den Vermerk und in den Titel | die Prüfsumme deckt die ganze Freigabevorlage: Akte, Art, Betreff, Text |
+| **F07** | wem die Akte entzogen war, der konnte den fertigen Entwurf weiter lesen **und freigeben** | die Aktenberechtigung wird bei jedem Entwurfszugriff neu geprüft |
+
+**Die Form dahinter, und sie wiederholt sich:** *„Vergessen" räumt das
+Gedächtnis auf* galt — aber nicht für das zweite Fenster. *Die Freigabe ist an
+den gesehenen Text gebunden* galt — aber der Betreff war kein Text. *Der
+bedingte Schreibzugriff schützt vor Überschreiben* galt — aber die Bedingung
+gehörte nicht mehr zu dem Inhalt, den sie schützen sollte.
+
+**Zwei Entscheidungen, die bedacht sind und nicht beiläufig:**
+
+* **Die Sitzung wird nicht geschlossen**, nur das eine Dokument entfernt. Sie
+  zu schließen wäre eine Strafe für eine Löschung, die der Bearbeiter selbst
+  ausgelöst hat; sein Dialog und seine Belege für alle übrigen Dokumente
+  gingen mit.
+* **Die Grabmarke** (`vergessene_dokumente`) trägt nur die Kennung, die in
+  jur|nodes ohnehin steht — keinen Inhalt. Sie beantwortet die eine Frage, die
+  sich sonst nicht beantworten lässt: ob ein Dokument nie hier war oder
+  bewusst entfernt wurde. Ein bewusstes Wiedereinlesen nimmt sie zurück, und
+  das ist eine eigene Handlung des Bearbeiters — so verlangt es der Bericht.
+
+**Eine strengere Regel kam dabei heraus, die der Bericht nicht genannt hat:**
+Ein frisch gebautes Gedächtnis, das nie gelesen wurde, überschreibt nichts
+mehr. Wer nicht gelesen hat, weiß nicht, was er überschreibt.
+
+**Im Browser nachgesehen, und dort einen Rest gefunden:** Der Server nahm das
+Dokument aus der Sitzung — und die linke Spalte zeigte seinen Text weiter,
+weil die Oberfläche nur die Gedächtnisansicht neu zeichnete. Ein Fenster, das
+zeigt, was es nicht mehr hat, lädt zum Zitieren ein. Die Oberfläche lädt die
+Sitzung jetzt mit nach; nachgesehen und bestätigt.
+
+23 neue Prüfungen in `tests/test_freigabe_umfang.py` und
+`tests/test_vergessen_vollstaendig.py`, Gegenproben 4, 5, 6 und 15 rot.
+**1736 Prüfungen grün.**
+
 ### Was in den Unterlagen berichtigt ist
 
 | Befund | Was falsch war |
@@ -361,9 +405,11 @@ kann.
    (Entwurf, Triage-Kernaussage, Analysehinweise) und kein Rohtext im Stream vor
    der Prüfung.~~ **Erledigt am 05.10.2026** — Gegenproben 1, 2, 3 und 14 rot.
    Siehe oben. **Als nächstes ist damit F02.2/2.3, F03, F06, F07 an der Reihe.**
-4. **F02.2/2.3, F03, F06, F07** — Löschung vollständig und beständig, S3-Schreiben
-   an die gelesene Revision gebunden, Freigabe über **alle** geschriebenen
-   Felder, Aktenrechte bei jedem Entwurfszugriff neu prüfen.
+4. ~~**F02.2/2.3, F03, F06, F07** — Löschung vollständig und beständig,
+   S3-Schreiben an die gelesene Revision gebunden, Freigabe über **alle**
+   geschriebenen Felder, Aktenrechte bei jedem Entwurfszugriff neu prüfen.~~
+   **Erledigt am 05.10.2026** — Gegenproben 4, 5, 6 und 15 rot. Siehe oben.
+   **Als nächstes sind damit F08, F10 und F13 an der Reihe.**
 5. **F08, F10, F11, F13** — zurückgegebene Aktenidentität prüfen, Nachweis
    **vor** der Übermittlung anlegen, Metadaten im Material klären, erlaubte
    Profilkennungen auch in der Anwendung begrenzen.

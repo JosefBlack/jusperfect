@@ -94,7 +94,6 @@ class AwsGedaechtnisSpeicher:
         self._s3 = s3
         self._bucket = bucket
         self._kms = kms_schluessel_id
-        self._etags: dict[str, str | None] = {}
 
     @staticmethod
     def _schluessel(akte_id: str) -> str:
@@ -108,7 +107,6 @@ class AwsGedaechtnisSpeicher:
         except Exception as e:
             code = getattr(e, "response", {}).get("Error", {}).get("Code", "")
             if code in ("NoSuchKey", "404", "NotFound") or type(e).__name__ == "NoSuchKey":
-                self._etags[self._schluessel(akte_id)] = None
                 return None
             raise GedaechtnisFehler(_nicht_erreichbar(e)) from e
         try:
@@ -117,14 +115,19 @@ class AwsGedaechtnisSpeicher:
             raise GedaechtnisFehler(f"AWS-Aktengedächtnis ist nicht lesbar ({type(e).__name__}).") from e
         if gedaechtnis.akte_id != akte_id:
             raise GedaechtnisFehler("Das geladene Aktengedächtnis gehört zu einer anderen Akte.")
-        self._etags[self._schluessel(akte_id)] = antwort.get("ETag")
+        # Die Revision gehoert an DIESES Objekt, nicht in eine Tabelle des
+        # Speichers - siehe `Aktengedaechtnis._revision` und Befund F03.
+        gedaechtnis._revision = antwort.get("ETag")
         return gedaechtnis
 
     def ablegen(self, gedaechtnis: Aktengedaechtnis) -> None:
         try:
             schluessel = self._schluessel(gedaechtnis.akte_id)
-            bedingung = ({"IfMatch": self._etags[schluessel]}
-                         if self._etags.get(schluessel) else {"IfNoneMatch": "*"})
+            # Erwartet wird die Revision, mit der DIESER Stand gelesen wurde.
+            # Ohne Revision ist es ein neues Gedaechtnis: dann darf es noch
+            # nichts geben.
+            bedingung = ({"IfMatch": gedaechtnis._revision}
+                         if gedaechtnis._revision else {"IfNoneMatch": "*"})
             antwort = self._s3.put_object(
                 Bucket=self._bucket,
                 Key=schluessel,
@@ -137,12 +140,14 @@ class AwsGedaechtnisSpeicher:
             )
         except Exception as e:
             code = getattr(e, "response", {}).get("Error", {}).get("Code", "")
-            if code in ("PreconditionFailed", "412"):
+            if code in ("PreconditionFailed", "412", "ConditionalRequestConflict"):
                 raise GedaechtnisFehler(
-                    "Das Aktengedächtnis wurde zwischenzeitlich geändert. Bitte Vorgang wiederholen."
+                    "Das Aktengedächtnis wurde zwischenzeitlich von einer anderen Stelle "
+                    "geändert. Ihr Stand ist nicht gespeichert worden. Bitte die Akte neu "
+                    "laden und den Vorgang wiederholen."
                 ) from e
             raise GedaechtnisFehler(f"AWS-Aktengedächtnis konnte nicht gespeichert werden ({type(e).__name__}).") from e
-        self._etags[schluessel] = antwort.get("ETag")
+        gedaechtnis._revision = antwort.get("ETag")
 
     def auflisten(self) -> list[Aktengedaechtnis]:
         ergebnis: list[Aktengedaechtnis] = []
@@ -169,4 +174,3 @@ class AwsGedaechtnisSpeicher:
             self._s3.delete_object(Bucket=self._bucket, Key=self._schluessel(akte_id))
         except Exception as e:
             raise GedaechtnisFehler(f"AWS-Aktengedächtnis konnte nicht gelöscht werden ({type(e).__name__}).") from e
-        self._etags.pop(self._schluessel(akte_id), None)

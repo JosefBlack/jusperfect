@@ -8,6 +8,7 @@ gebunden; der jur|nodes-Adapter prüft sie, bevor er schreibt.
 
 from __future__ import annotations
 
+import threading
 import uuid
 
 from jusperfect.config import Einstellungen
@@ -45,14 +46,55 @@ class EntwurfNichtGefunden(LookupError):
     pass
 
 
+FREIGABE_FASSUNG = "1"
+
+
+def freigabevorlage(entwurf) -> str:
+    """Genau das, was nach jur|nodes geschrieben wird – als ein Text.
+
+    Befund F06 der Zweitprüfung vom 05.10.2026. Bestätigt wurde bisher die
+    Prüfsumme **des Textes**. Geschrieben werden aber vier Dinge: Akte, Art,
+    Betreff und Text. Fenster A lud den Entwurf, Fenster B änderte nur den
+    Betreff, Fenster A gab mit der alten Prüfsumme frei – und der neue, dort
+    nie gesehene Betreff ging in den Vermerktext **und** in den Titel nach
+    jur|nodes.
+
+    Die Kryptografie war dabei nicht gebrochen; sie signierte nur das, was ihr
+    gegeben wurde, und das war zu wenig. Deshalb steht hier eine *Vorlage*:
+    eine feste, benannte Reihenfolge über alle geschriebenen Felder. Ändert
+    sich eines, ändert sich die Prüfsumme, und die Freigabe wird abgewiesen.
+
+    Die Fassungsnummer in der ersten Zeile ist kein Zierrat: Kommt ein Feld
+    hinzu, bekommt sie eine neue Nummer, und alte Prüfsummen passen nicht mehr
+    – was richtig ist, denn sie bezeugen eine Ansicht, die es nicht mehr gibt.
+    """
+    return "\n".join([
+        f"jusperfect-freigabe/{FREIGABE_FASSUNG}",
+        f"akte: {entwurf.akte_id}",
+        f"art: {getattr(entwurf.art, 'value', entwurf.art)}",
+        f"betreff: {entwurf.betreff}",
+        "text:",
+        entwurf.text,
+    ])
+
+
 class Entwurfsdienst:
     def __init__(self, ausgang: Ausgang, speicher: SitzungsSpeicher,
-                 adapter: JurNodesAdapter, freigabestelle: Freigabestelle, einstellungen: Einstellungen) -> None:
+                 adapter: JurNodesAdapter, freigabestelle: Freigabestelle,
+                 einstellungen: Einstellungen, berechtigungen=None) -> None:
         self._ausgang = ausgang
         self._speicher = speicher
         self._adapter = adapter
         self._freigabestelle = freigabestelle
         self._e = einstellungen
+        # Befund F07: Die Aktenberechtigung wurde beim Entwurf nie geprueft -
+        # nur, ob der Nutzer ihn selbst angelegt hat. Wer die Akte verlor,
+        # konnte den fertigen Entwurf weiter lesen und freigeben.
+        self._berechtigungen = berechtigungen
+        # Pruefen, Statuswechsel und Schreiben gehoeren zusammen. Ohne diese
+        # Klammer gaben zwei gleichzeitige Freigaben beide den Statustest frei
+        # und schrieben zwei Vermerke in dieselbe Akte.
+        self._freigabeschloss = threading.Lock()
 
     def erstellen(self, identitaet: Identitaet, sitzung: Sitzung, passagen: list[Passage], art: EntwurfArt,
                   anweisung: str, empfaenger: str, beteiligte: list[Beteiligter], fristen: list[Frist],
@@ -110,9 +152,26 @@ class Entwurfsdienst:
         return entwurf
 
     def lesen(self, identitaet: Identitaet, entwurf_id: str) -> Entwurf:
+        """Der Entwurf – und nur, wenn die Akte jetzt noch offensteht.
+
+        Befund F07 der Zweitprüfung vom 05.10.2026: Geprüft wurde allein die
+        Erstellerkennung. Ein Nutzer, dem die Akte entzogen worden war, bekam
+        auf die Sitzung richtig 403 – und konnte denselben Entwurf weiter
+        lesen und sogar freigeben, also in genau diese Akte schreiben.
+
+        Geprüft wird bei **jedem** Zugriff neu, nicht beim Anlegen: Eine
+        Rechteänderung wirkt sonst erst beim nächsten Entwurf, und der
+        vorbereitete Schreibweg bleibt offen.
+
+        Dass in dieser Kanzlei alle alle Akten sehen, ändert daran nichts –
+        dann geht die Prüfung eben immer durch. Die Lücke bestand für den
+        eingeschränkten Betrieb, den das Programm ausdrücklich kann.
+        """
         entwurf = self._speicher.entwurf_lesen(entwurf_id)
         if entwurf is None or entwurf.erstellt_von != identitaet.nutzer_id:
             raise EntwurfNichtGefunden("Der Entwurf ist unbekannt oder abgelaufen.")
+        if self._berechtigungen is not None:
+            self._berechtigungen.pruefen(identitaet, entwurf.akte_id)
         return entwurf
 
     def bearbeiten(self, identitaet: Identitaet, entwurf_id: str, betreff: str, text: str) -> Entwurf:
@@ -125,30 +184,52 @@ class Entwurfsdienst:
         self._speicher.entwurf_ablegen(entwurf)
         return entwurf
 
-    def freigeben(self, identitaet: Identitaet, entwurf_id: str, bestaetigung: bool, text_pruefsumme: str) -> Entwurf:
+    def freigeben(self, identitaet: Identitaet, entwurf_id: str, bestaetigung: bool,
+                  freigabe_pruefsumme: str) -> Entwurf:
         """Schreibt den Entwurf als Vermerk in die jur|nodes-Akte.
 
-        ``text_pruefsumme`` ist die Prüfsumme des Textes, den die Oberfläche
-        angezeigt hat. So kann niemand einen Text freigeben, den er nicht
-        gesehen hat – auch nicht durch einen zwischenzeitlichen Bearbeitungsschritt.
+        ``freigabe_pruefsumme`` ist die Prüfsumme der **Freigabevorlage** –
+        Akte, Art, Betreff und Text zusammen, also alles, was geschrieben
+        wird. Bis zum 05.10.2026 war es die Prüfsumme des Textes allein; ein
+        in einem anderen Fenster geänderter Betreff kam damit ungesehen in den
+        Vermerk und in den Titel (Befund F06, siehe ``freigabevorlage``).
+
+        Prüfen, Statuswechsel und Schreiben stehen unter einem Schloss und in
+        dieser Reihenfolge. Vorher wurde erst geschrieben und dann der Status
+        gesetzt: Zwei gleichzeitige Freigaben kamen beide am Statustest vorbei
+        und schrieben zwei Vermerke in dieselbe Akte.
         """
         from jusperfect.security.approval import text_pruefsumme as pruefsumme
 
-        entwurf = self.lesen(identitaet, entwurf_id)
-        if not bestaetigung:
-            raise EntwurfFehler("Ohne ausdrückliche Bestätigung wird nichts nach jur|nodes geschrieben.")
-        if entwurf.status != EntwurfStatus.ENTWURF:
-            raise EntwurfFehler("Der Entwurf wurde bereits freigegeben oder verworfen.")
-        if pruefsumme(entwurf.text) != text_pruefsumme:
-            raise EntwurfFehler("Der angezeigte Text stimmt nicht mit dem gespeicherten Entwurf überein. Bitte neu laden.")
-        text_fuer_akte = f"{KENNZEICHNUNG}\n{entwurf.betreff}\n\n{entwurf.text}"
-        freigabe = self._freigabestelle.erteilen(entwurf.id, entwurf.akte_id, identitaet.nutzer_id, text_fuer_akte)
-        referenz = self._adapter.vermerk_schreiben(entwurf.akte_id, f"{ENTWURF_BEZEICHNUNG[entwurf.art]}: {entwurf.betreff}",
-                                                   text_fuer_akte, freigabe)
-        entwurf = entwurf.model_copy(update={"status": EntwurfStatus.FREIGEGEBEN, "jurnodes_referenz": referenz})
-        self._speicher.entwurf_ablegen(entwurf)
+        with self._freigabeschloss:
+            entwurf = self.lesen(identitaet, entwurf_id)
+            if not bestaetigung:
+                raise EntwurfFehler("Ohne ausdrückliche Bestätigung wird nichts nach jur|nodes geschrieben.")
+            if entwurf.status != EntwurfStatus.ENTWURF:
+                raise EntwurfFehler("Der Entwurf wurde bereits freigegeben oder verworfen.")
+            if pruefsumme(freigabevorlage(entwurf)) != freigabe_pruefsumme:
+                raise EntwurfFehler(
+                    "Der angezeigte Entwurf stimmt nicht mehr mit dem gespeicherten überein – "
+                    "Betreff oder Text wurden zwischenzeitlich geändert. Bitte neu laden.")
+            # Erst sperren, dann schreiben: Schlaegt das Schreiben fehl, geht
+            # der Entwurf zurueck in den Entwurfsstand, und der Fehler geht
+            # weiter. Ein zweiter Aufruf findet bis dahin "bereits freigegeben".
+            gesperrt = entwurf.model_copy(update={"status": EntwurfStatus.FREIGEGEBEN})
+            self._speicher.entwurf_ablegen(gesperrt)
+            text_fuer_akte = f"{KENNZEICHNUNG}\n{entwurf.betreff}\n\n{entwurf.text}"
+            try:
+                freigabe = self._freigabestelle.erteilen(entwurf.id, entwurf.akte_id,
+                                                         identitaet.nutzer_id, text_fuer_akte)
+                referenz = self._adapter.vermerk_schreiben(
+                    entwurf.akte_id, f"{ENTWURF_BEZEICHNUNG[entwurf.art]}: {entwurf.betreff}",
+                    text_fuer_akte, freigabe)
+            except Exception:
+                self._speicher.entwurf_ablegen(entwurf)
+                raise
+            entwurf = gesperrt.model_copy(update={"jurnodes_referenz": referenz})
+            self._speicher.entwurf_ablegen(entwurf)
         ereignis(_log, "entwurf_freigegeben", entwurf_id=entwurf.id, akte=entwurf.akte_id, nutzer=identitaet.nutzer_id,
-                 referenz=referenz, pruefsumme=text_pruefsumme[:12])
+                 referenz=referenz, pruefsumme=freigabe_pruefsumme[:12])
         return entwurf
 
     def verwerfen(self, identitaet: Identitaet, entwurf_id: str) -> None:

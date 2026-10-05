@@ -9,9 +9,13 @@ Die Kanzlei hat das Projekt von einer zweiten KI prüfen lassen. Grundlage war
 bestanden alle — und haben die Lücken trotzdem nicht gezeigt. Das ist der
 eigentliche Befund.
 
-**Stand 05.10.2026: fünf Befunde behoben** (F01, F02.1, F04, F05, F09), zwei in
-den Unterlagen berichtigt (F11, F12). Zehn der siebzehn Gegenproben sind damit
-rot — bei ihnen heißt das: geschlossen.
+**Stand 05.10.2026: zehn Befunde behoben** (F01, F02 vollständig, F03, F04, F05,
+F06, F07, F09), zwei in den Unterlagen berichtigt (F11, F12). Dreizehn der
+siebzehn Gegenproben sind damit rot — bei ihnen heißt das: geschlossen.
+
+**Offen bleiben drei:** F08 (fremde `/record`-Antwort), F10 (Nachweis vor der
+Übermittlung), F13 (Profilkennungen in der Anwendung) — dazu F11 und F12, deren
+Technik bzw. Nachweis noch aussteht.
 
 | Datei | Was darin steht |
 |---|---|
@@ -49,13 +53,13 @@ Fassung hier bleibt unverändert als Beleg stehen.
 |---|---|---|
 | **F01** | Anbieterfehler gelangen über den Traceback ins Serverprotokoll | ~~offen~~ **behoben 05.10.2026** |
 | **F02.1** | „Vergessen" ließ die gespeicherte **Analyse** stehen | ~~offen~~ **behoben 05.10.2026** |
-| **F02.2** | ein gemischt belegter Lebenssachverhalt bleibt ganz stehen | offen |
-| **F02.3** | eine offene Sitzung behält die Passagen und speichert Antworten darauf neu | offen |
-| **F03** | gemeinsamer ETag-Zustand lässt alte S3-Stände Löschungen überschreiben | offen |
+| **F02.2** | ein gemischt belegter Lebenssachverhalt bleibt ganz stehen | ~~offen~~ **behoben 05.10.2026** |
+| **F02.3** | eine offene Sitzung behält die Passagen und speichert Antworten darauf neu | ~~offen~~ **behoben 05.10.2026** |
+| **F03** | gemeinsamer ETag-Zustand lässt alte S3-Stände Löschungen überschreiben | ~~offen~~ **behoben 05.10.2026** |
 | **F04** | Belegpflicht gilt nicht für Entwürfe, Triage-Kernaussage und Analysehinweise | ~~offen~~ **behoben 05.10.2026** |
 | **F05** | der Stream zeigt Rohtext vor der Belegprüfung | ~~offen~~ **behoben 05.10.2026** |
-| **F06** | der bestätigte Prüfsummenstand umfasst den Betreff nicht | offen |
-| **F07** | Entwürfe bleiben nach Aktenrechteentzug lesbar und freigebbar | offen |
+| **F06** | der bestätigte Prüfsummenstand umfasst den Betreff nicht | ~~offen~~ **behoben 05.10.2026** |
+| **F07** | Entwürfe bleiben nach Aktenrechteentzug lesbar und freigebbar | ~~offen~~ **behoben 05.10.2026** |
 | **F08** | eine fremde `/record`-Antwort wird nicht gegen die angefragte Akte geprüft | offen |
 | **F09** | Datums- und Sprachvarianten umgehen die Fristensperre | ~~offen~~ **behoben 05.10.2026** |
 | **F10** | ein fehlgeschlagener Modellaufruf hinterlässt keinen Nachweis | offen |

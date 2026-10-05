@@ -291,6 +291,9 @@ class Gedaechtnisdienst:
             g.letzte_dokumentnummer += 1
             neu.nummer = g.letzte_dokumentnummer
             g.dokumente.append(neu)
+        # Ein bewusstes Wiedereinlesen nimmt die Grabmarke zurueck. Es ist
+        # eine eigene Handlung des Bearbeiters - genau so soll es sein.
+        g.vergessene_dokumente = [x for x in g.vergessene_dokumente if x != dokument.id]
         g.aktualisiert_am = datetime.now(timezone.utc)
         self._speicher.ablegen(g)
         ereignis(_log, "gedaechtnis_dokument", akte=sitzung.akte_id,
@@ -308,6 +311,21 @@ class Gedaechtnisdienst:
         if self._speicher is None or not antwort.quellen or not antwort.text.strip():
             return
         g = self._gelesen(sitzung.akte_id) or self._neu(sitzung)
+        # Ein verspaetetes Ergebnis kommt nicht zurueck.
+        #
+        # Befund F02.3 der Zweitpruefung vom 05.10.2026: Eine Frage, die noch
+        # unterwegs war, als das Dokument entfernt wurde, legte ihre Antwort
+        # hinterher neu im Gedaechtnis ab - mitsamt dem Inhalt, der gerade
+        # geloescht worden war. Die Oberflaeche meldete Erfolg, und durch die
+        # Hintertuer kam derselbe Text zurueck.
+        #
+        # Unterschieden wird an der Grabmarke und nicht daran, ob das Dokument
+        # im Gedaechtnis liegt: Ein noch nicht eingelesenes Dokument ist etwas
+        # anderes als ein entferntes, und eine Antwort darauf gehoert gemerkt.
+        if any(q.dokument_id in g.vergessene_dokumente for q in antwort.quellen):
+            ereignis(_log, "gedaechtnis_antwort_verworfen", akte=sitzung.akte_id,
+                     grund="dokument_entfernt")
+            return
         g.fragen_antworten.append(GedaechtnisAntwort(
             frage=frage.strip(), antwort=antwort.text, quellen=antwort.quellen, modell=antwort.modell,
         ))
@@ -575,11 +593,52 @@ class Gedaechtnisdienst:
             if not any(q.dokument_id == dokument_id for q in runde.quellen)
         ]
         self._abgeleitetes_bereinigen(g, entfallene, dokument_id)
+        if dokument_id not in g.vergessene_dokumente:
+            g.vergessene_dokumente.append(dokument_id)
         g.aktualisiert_am = datetime.now(timezone.utc)
         self._speicher.ablegen(g)
+        geschlossene = self._offene_sitzungen_bereinigen(akte_id, dokument_id)
         ereignis(_log, "gedaechtnis_dokument_vergessen", akte=akte_id, dokument=dokument_id,
-                 verworfene_fragen=vorher - len(g.fragen_antworten))
+                 verworfene_fragen=vorher - len(g.fragen_antworten),
+                 bereinigte_sitzungen=geschlossene)
         return g
+
+    def _offene_sitzungen_bereinigen(self, akte_id: str, dokument_id: str) -> int:
+        """Das Dokument auch aus den offenen Sitzungen nehmen.
+
+        Befund F02.3 der Zweitprüfung vom 05.10.2026. „Vergessen" räumte das
+        Gedächtnis auf und ließ ein bereits geöffnetes Fenster unberührt. Dort
+        lag der Auszug weiter im Sitzungsspeicher; die nächste Frage
+        antwortete darauf, und ``antwort_merken`` legte diese Antwort **neu**
+        im Gedächtnis ab. Die Oberfläche meldete erfolgreiches Entfernen,
+        während derselbe Inhalt durch die Hintertür zurückkam.
+
+        Ein Löschverlangen, das nur gilt, solange niemand ein zweites Fenster
+        offen hat, ist keines.
+
+        Was hier nicht geschieht: die Sitzung schließen. Der Bearbeiter
+        verlöre seinen Dialog und seine Belege für alle übrigen Dokumente,
+        und das wäre eine Strafe für eine Löschung, die er selbst ausgelöst
+        hat. Entfernt wird genau das eine Dokument.
+        """
+        if self._sitzungsspeicher is None:
+            return 0
+        betroffen = 0
+        for sitzung_id in self._sitzungsspeicher.sitzungen_der_akte(akte_id):
+            sitzung = self._sitzungsspeicher.sitzung_lesen(sitzung_id)
+            if sitzung is None:
+                continue
+            if not any(d.dokument_id == dokument_id for d in sitzung.geladen):
+                continue
+            sitzung.geladen = [d for d in sitzung.geladen if d.dokument_id != dokument_id]
+            sitzung.hinweise = list(sitzung.hinweise) + [
+                "Ein Dokument ist aus dem Aktengedächtnis entfernt worden und steht "
+                "dieser Sitzung nicht mehr zur Verfügung."
+            ]
+            self._sitzungsspeicher.text_loeschen(sitzung_id, dokument_id)
+            self._sitzungsspeicher.sitzung_ablegen(sitzung)
+            betroffen += 1
+        return betroffen
 
     def antwort_vergessen(self, akte_id: str, nummer: int) -> Aktengedaechtnis:
         """Entfernt genau eine gespeicherte Frage-Antwort-Runde."""
@@ -627,7 +686,12 @@ class Gedaechtnisdienst:
         """
         index = index_bauen(Gedaechtnisdienst._passagen(g))
         if g.lebenssachverhalt.strip():
-            belegt = aussage_fail_closed(g.lebenssachverhalt, index)
+            # verlangt_alle: Eine Aussage, die das entfernte Dokument auch nur
+            # MITzitiert, faellt ganz (Befund F02.2 der Zweitpruefung,
+            # 05.10.2026). Vorher blieb sie mit der verbliebenen Kennung
+            # stehen - dass die andere Quelle den Text allein traegt, wusste
+            # niemand. Chronologie und Antworten waren schon immer so streng.
+            belegt = aussage_fail_closed(g.lebenssachverhalt, index, verlangt_alle=True)
             leer = not belegt.quellen or belegt.text == VERZICHT
             # VERZICHT ist die Ersatzantwort auf eine Frage. Im Lebenssachverhalt
             # waere sie eine Aussage ueber die Akte, die niemand getroffen hat.

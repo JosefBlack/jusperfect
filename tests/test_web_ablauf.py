@@ -175,11 +175,18 @@ class Entwuerfe(unittest.TestCase):
     def test_entwurf_angelegt(self):
         self.assertEqual(self.e["status"], "entwurf")
         self.assertEqual(self.e["betreff"], "Deckungsanfrage")
-        self.assertEqual(self.e["text_pruefsumme"], text_pruefsumme(self.e["text"]))
+        # Die Pruefsumme deckt die ganze Freigabevorlage ab, nicht nur den
+        # Text - Akte, Art und Betreff werden mitgeschrieben (Befund F06).
+        from jusperfect.services.entwuerfe import freigabevorlage
+        from jusperfect.domain.models import Entwurf
+        self.assertEqual(self.e["freigabe_pruefsumme"],
+                         text_pruefsumme(freigabevorlage(Entwurf.model_validate(
+                             {k: v for k, v in self.e.items()
+                              if k != "freigabe_pruefsumme"}))))
         self.assertEqual(self.d.adapter.geschriebene_vermerke, [])
 
     def test_freigabe_schreibt_nach_jurnodes(self):
-        r = self.c.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": True, "text_pruefsumme": self.e["text_pruefsumme"]})
+        r = self.c.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": True, "freigabe_pruefsumme": self.e["freigabe_pruefsumme"]})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json()["status"], "freigegeben")
         vermerk = self.d.adapter.geschriebene_vermerke[0]
@@ -187,22 +194,22 @@ class Entwuerfe(unittest.TestCase):
         self.assertTrue(vermerk["text"].startswith("ENTWURF – anwaltliche Prüfung erforderlich"))
 
     def test_ohne_bestaetigung_nichts(self):
-        r = self.c.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": False, "text_pruefsumme": self.e["text_pruefsumme"]})
+        r = self.c.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": False, "freigabe_pruefsumme": self.e["freigabe_pruefsumme"]})
         self.assertEqual(r.status_code, 422)
         self.assertEqual(self.d.adapter.geschriebene_vermerke, [])
 
     def test_bearbeitet_dann_alte_pruefsumme_abgewiesen(self):
         neu = self.c.put(f"/api/entwuerfe/{self.e['id']}", json={"betreff": "", "text": self.e["text"] + " Zusatz"}).json()
-        r = self.c.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": True, "text_pruefsumme": self.e["text_pruefsumme"]})
+        r = self.c.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": True, "freigabe_pruefsumme": self.e["freigabe_pruefsumme"]})
         self.assertEqual(r.status_code, 422)
-        r = self.c.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": True, "text_pruefsumme": neu["text_pruefsumme"]})
+        r = self.c.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": True, "freigabe_pruefsumme": neu["freigabe_pruefsumme"]})
         self.assertEqual(r.status_code, 200)
         self.assertIn("Zusatz", self.d.adapter.geschriebene_vermerke[0]["text"])
 
     def test_fremder_nutzer_sieht_entwurf_nicht(self):
         c2 = client(self.d, "ra-kaminski")
         self.assertEqual(c2.get(f"/api/entwuerfe/{self.e['id']}").status_code, 404)
-        r = c2.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": True, "text_pruefsumme": self.e["text_pruefsumme"]})
+        r = c2.post(f"/api/entwuerfe/{self.e['id']}/freigabe", json={"bestaetigung": True, "freigabe_pruefsumme": self.e["freigabe_pruefsumme"]})
         self.assertEqual(r.status_code, 404)
 
     def test_verwerfen(self):

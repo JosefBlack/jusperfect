@@ -144,7 +144,21 @@ class Belegergebnis:
     verworfen: int = 0
 
 
-def aussage_fail_closed(text: str, index: dict[str, Passage]) -> Belegergebnis:
+def aussage_fail_closed(text: str, index: dict[str, Passage],
+                        verlangt_alle: bool = False) -> Belegergebnis:
+    """Freitext fail closed. ``verlangt_alle`` verschärft den Maßstab.
+
+    Gewöhnlich genügt **ein** tragender Beleg: Nennt das Modell neben einer
+    richtigen Kennung eine erfundene, bleibt die Aussage mit der richtigen
+    stehen.
+
+    Beim Aufräumen nach einem gelöschten Dokument ist das falsch, und zwar
+    genau umgekehrt (Befund F02.2 der Zweitprüfung vom 05.10.2026): Dort waren
+    beim Schreiben **alle** Kennungen gültig. Löst eine nicht mehr auf, gehört
+    sie zum entfernten Dokument. Die Aussage stand dann auf zwei Grundlagen,
+    und eine fehlt – dass die andere sie allein trägt, weiß niemand. Mit
+    ``verlangt_alle`` fällt sie deshalb ganz, wie ein Chronologieeintrag auch.
+    """
     if ZITAT_RE.search(text) is None:
         return Belegergebnis(VERZICHT, [], ["Die Antwort trug keinen Beleg und wurde zurückgehalten."], 1)
 
@@ -172,7 +186,8 @@ def aussage_fail_closed(text: str, index: dict[str, Passage]) -> Belegergebnis:
             hinweise += [UNBELEGT_HINWEIS] * vorlauf_verworfen
         kennungen = [k.strip() for k in m.group(1).split(",") if k.strip()]
         gueltig = [k for k in kennungen if k in index]
-        if gueltig:
+        traegt = bool(gueltig) and (len(gueltig) == len(kennungen) or not verlangt_alle)
+        if traegt:
             teile.append(koerper + f"[Q: {', '.join(gueltig)}]")
             gefunden.extend(gueltig)
             for k in gueltig:

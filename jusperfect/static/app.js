@@ -2089,7 +2089,15 @@ async function gedaechtnisDokumentVergessen(e) {
   if (!confirm(teile.join("\n"))) return;
   const akte = encodeURIComponent(sitzung.sitzung.akte_id);
   const dok = e.dokument_id.split("/").map(encodeURIComponent).join("/");
-  sitzung.gedaechtnis = await api("DELETE", `/api/akten/${akte}/gedaechtnis/dokumente/${dok}`);
+  const gedaechtnisStand = await api("DELETE", `/api/akten/${akte}/gedaechtnis/dokumente/${dok}`);
+  // Auch die offene Sitzung hat das Dokument verloren (Befund F02.3 der
+  // Zweitpruefung, 05.10.2026: Sie behielt es, und die naechste Frage
+  // antwortete darauf). Ohne dieses Nachladen stuende der Text weiter in der
+  // linken Spalte und in den Belegen - ein Fenster, das zeigt, was es nicht
+  // mehr hat.
+  sitzung = await api("GET", `/api/sitzungen/${sitzung.sitzung.id}`);
+  sitzung.gedaechtnis = gedaechtnisStand;
+  await passagenLaden();
   // Der Zeitstrahl der Oberflaeche traegt die Eintraege aus der Analyse
   // getrennt mit. Bliebe er stehen, zeigte das Fenster weiter einen Eintrag,
   // den es im Gedaechtnis nicht mehr gibt.
@@ -3460,7 +3468,10 @@ async function entwurfStarten(art, anweisung, empfaenger, auftrag) {
   const frei = document.createElement("button"); frei.className = "mini"; frei.textContent = "Freigeben und in jur|nodes ablegen";
   frei.addEventListener("click", () => mitKnopf(frei, async () => {
     if (!confirm("Diesen von der KI vorbereiteten Entwurf als Vermerk in die jur|nodes-Akte schreiben?")) return;
-    const f = await api("POST", `/api/entwuerfe/${e.id}/freigabe`, { bestaetigung: true, text_pruefsumme: e.text_pruefsumme });
+    // Die Pruefsumme deckt seit dem 05.10.2026 Akte, Art, Betreff UND Text ab.
+    // Vorher nur den Text - ein in einem anderen Fenster geaenderter Betreff
+    // ging damit ungesehen in den Vermerk (Befund F06 der Zweitpruefung).
+    const f = await api("POST", `/api/entwuerfe/${e.id}/freigabe`, { bestaetigung: true, freigabe_pruefsumme: e.freigabe_pruefsumme });
     frei.replaceWith(Object.assign(document.createElement("span"), { textContent: `In jur|nodes abgelegt (${f.jurnodes_referenz || ""})` }));
   }));
   fuss.appendChild(frei);

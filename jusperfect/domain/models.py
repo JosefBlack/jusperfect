@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 
 
 # ── Aus jur|nodes ───────────────────────────────────────────────────────────
@@ -165,6 +165,19 @@ class ChronologieEintrag(BaseModel):
 
 class Aktengedaechtnis(BaseModel):
     """Dauerhafte, aktenbezogene Arbeitskopie im eigenen Kanzlei-AWS-Konto."""
+
+    # Die Revision, mit der GENAU DIESER Stand gelesen wurde.
+    #
+    # Kein Inhalt und kein Bestandteil der Ablage - ein privates Feld geht
+    # weder in `model_dump_json` noch nach S3. Es haengt am Objekt, und das
+    # ist der ganze Punkt (Befund F03 der Zweitpruefung, 05.10.2026): Vorher
+    # fuehrte der Speicher eine gemeinsame Tabelle je Objektname. Lasen zwei
+    # Vorgaenge denselben Stand und schrieb der zweite zuerst, nahm der erste
+    # beim Speichern dessen neue Revision - und ueberschrieb damit eine
+    # Loeschung, die er nie gesehen hatte. Die Bedingung schuetzte nichts,
+    # weil sie nicht mehr zum Inhalt gehoerte, den sie schuetzen sollte.
+    _revision: str | None = PrivateAttr(default=None)
+
     schema_version: int = 4
     akte_id: str
     aktenzeichen: str = ""
@@ -182,6 +195,21 @@ class Aktengedaechtnis(BaseModel):
     # eine Kennung, die auf ein entferntes Dokument zeigte, soll ins Leere
     # zeigen und nicht auf ein anderes.
     letzte_dokumentnummer: int = 0
+    # Welche Auszuege ausdruecklich entfernt worden sind.
+    #
+    # Eine Grabmarke, kein Inhalt: nur die Kennung, die in jur|nodes ohnehin
+    # steht. Sie beantwortet die eine Frage, die sich sonst nicht beantworten
+    # laesst - ob ein Dokument nie hier war oder bewusst entfernt wurde.
+    #
+    # Gebraucht wird das gegen verspaetete Ergebnisse (Befund F02.3 der
+    # Zweitpruefung, 05.10.2026): Eine Antwort, die waehrend des Loeschens
+    # noch unterwegs war, darf nicht hinterher wieder abgelegt werden. Ohne
+    # die Marke liesse sich das nicht von einem Dokument unterscheiden, das
+    # bloss noch nicht eingelesen ist.
+    #
+    # Wird das Dokument spaeter bewusst neu eingelesen, faellt die Marke -
+    # das ist dann eine eigene Handlung des Bearbeiters.
+    vergessene_dokumente: list[str] = Field(default_factory=list)
     lebenssachverhalt: str = ""
     lebenssachverhalt_quellen: list[Quelle] = Field(default_factory=list)
     verarbeitete_passagen: list[str] = Field(default_factory=list)

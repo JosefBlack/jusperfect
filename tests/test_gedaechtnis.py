@@ -84,8 +84,11 @@ class Aws(unittest.TestCase):
         self.assertEqual(s3.put_argumente["SSEKMSKeyId"], "kms-1")
         self.assertNotIn("A/1", s3.put_argumente["Key"])
         self.assertEqual(s3.put_argumente["IfNoneMatch"], "*")
-        self.assertEqual(speicher.lesen("A/1").aktenzeichen, "1/26")
-        speicher.ablegen(_gedaechtnis())
+        # Fortgeschrieben wird der GELESENE Stand – er traegt die Revision,
+        # gegen die geschrieben wird (Befund F03 der Zweitpruefung).
+        gelesen = speicher.lesen("A/1")
+        self.assertEqual(gelesen.aktenzeichen, "1/26")
+        speicher.ablegen(gelesen)
         self.assertEqual(s3.put_argumente["IfMatch"], '"etag-neu"')
         speicher.loeschen("A/1")
         self.assertIsNone(speicher.lesen("A/1"))

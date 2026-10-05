@@ -228,7 +228,7 @@ bei einem Auskunftsverlangen mitbedacht werden muss.
 | Öffentlicher Zugriff vollständig blockiert, Versionierung aus | was gelöscht wird, soll gelöscht sein |
 | Objektnamen ohne Aktenzeichen | nur SHA-256-Ableitung |
 | Beschränkter Programmbenutzer | nur dieser Bucket, nur dieser Schlüssel |
-| **Gezielte Löschung einzelner Einträge** | seit 05.10.2026: ein Dokument samt allem Abgeleiteten, oder eine einzelne Frage-Antwort-Runde. Bedient Art. 16 und 17 ohne Verwerfen der ganzen Fallkopie |
+| **Gezielte Löschung einzelner Einträge** | seit 05.10.2026: ein Dokument samt allem Abgeleiteten, oder eine einzelne Frage-Antwort-Runde. Bedient Art. 16 und 17 ohne Verwerfen der ganzen Fallkopie. Erfasst sind auch offene Sitzungen und verspätete Ergebnisse — ein Löschverlangen, das nur gilt, solange niemand ein zweites Fenster offen hat, wäre keines |
 | Obergrenzen | 100 Frage-Antwort-Runden, 500 Zeitstrahleinträge |
 
 **[KANZLEI 7] — die offene Entscheidung: Wann wird gelöscht?** Heute beginnt

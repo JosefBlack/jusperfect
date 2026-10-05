@@ -162,7 +162,7 @@ kein Protokoll**:
 | Objektnamen | enthalten **kein Aktenzeichen**, nur dessen SHA-256-Ableitung |
 | Zugriff | ein eigener, auf genau diesen Bucket und diesen Schlüssel beschränkter Programmbenutzer |
 | Löschung | über den berechtigungsgeprüften Weg des Programms, oder mit dem Abschluss der Akte |
-| Gezielte Löschung | seit dem 05.10.2026 in der Oberfläche: ein einzelnes Dokument **samt allem daraus Abgeleiteten**, oder eine einzelne Frage-Antwort-Runde. Das bedient Berichtigungs- und Löschverlangen nach Art. 16 und 17 DSGVO, ohne die ganze Fallkopie zu verwerfen |
+| Gezielte Löschung | seit dem 05.10.2026 in der Oberfläche: ein einzelnes Dokument **samt allem daraus Abgeleiteten**, oder eine einzelne Frage-Antwort-Runde. Das bedient Berichtigungs- und Löschverlangen nach Art. 16 und 17 DSGVO, ohne die ganze Fallkopie zu verwerfen. Mit erfasst sind seit demselben Tag die bereits **geöffneten Sitzungen** und ein Ergebnis, das beim Löschen noch unterwegs war; eine Aussage, die das entfernte Dokument auch nur mitzitiert, fällt ganz (Befund F02 der Zweitprüfung) |
 
 **[KANZLEI] — die entscheidende offene Frage: Wann wird gelöscht?**
 

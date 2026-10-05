@@ -190,7 +190,16 @@ class DanachStimmtDerSchirm(unittest.TestCase):
         self.block = _block("gedaechtnisDokumentVergessen")
 
     def test_die_antwort_des_servers_wird_uebernommen(self) -> None:
-        self.assertIn("sitzung.gedaechtnis = await api(\"DELETE\"", self.block)
+        self.assertIn('await api("DELETE", `/api/akten/${akte}/gedaechtnis/dokumente/',
+                      self.block)
+        self.assertIn("sitzung.gedaechtnis = gedaechtnisStand", self.block)
+
+    def test_auch_die_sitzung_wird_neu_geladen(self) -> None:
+        """Seit dem 05.10.2026 verliert die offene Sitzung das Dokument mit
+        (Befund F02.3). Ohne dieses Nachladen stünde sein Text weiter in der
+        linken Spalte – im Browser gesehen."""
+        self.assertIn('api("GET", `/api/sitzungen/', self.block)
+        self.assertIn("passagenLaden()", self.block)
 
     def test_der_zeitstrahl_der_oberflaeche_wird_mitgeraeumt(self) -> None:
         """Er trägt die Einträge aus der Analyse getrennt mit."""

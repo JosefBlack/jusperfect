@@ -39,7 +39,9 @@ from jusperfect.services.auftragsvorschlag import Vorschlagsdienst, VorschlagFeh
 from jusperfect.services.ausgang import Ausgang
 from jusperfect.services.posteingang import PosteingangFehler, Posteingangsdienst
 from jusperfect.services.referenzen import ReferenzFehler, Referenzendienst
-from jusperfect.services.entwuerfe import EntwurfFehler, EntwurfNichtGefunden, Entwurfsdienst
+from jusperfect.services.entwuerfe import (
+    EntwurfFehler, EntwurfNichtGefunden, Entwurfsdienst, freigabevorlage,
+)
 from jusperfect.services.kosten import BudgetErschoepft, Kostenwaechter
 from jusperfect.services.abschluss import AbschlussFehler, Abschlussdienst
 from jusperfect.services.aufsicht import Aufsichtsdienst
@@ -166,7 +168,8 @@ class Dienste:
             self.gedaechtnis, e.dialog_max_runden,
         )
         self.analyse = Analysedienst(self.ausgang, e, wissen)
-        self.entwuerfe = Entwurfsdienst(self.ausgang, self.speicher, self.adapter, self.freigabestelle, e)
+        self.entwuerfe = Entwurfsdienst(self.ausgang, self.speicher, self.adapter,
+                                        self.freigabestelle, e, self.berechtigungen)
         self.workflow = Workflowdienst()
         self.abschluss = Abschlussdienst(self.gedaechtnis, self.adapter, self.berechtigungen,
                                          self.speicher, self.freigabestelle, e)
@@ -240,7 +243,9 @@ class EntwurfBearbeiten(BaseModel):
 
 class EntwurfFreigeben(BaseModel):
     bestaetigung: bool
-    text_pruefsumme: str = Field(min_length=64, max_length=64)
+    # Ueber die ganze Freigabevorlage (Akte, Art, Betreff, Text), nicht nur
+    # ueber den Text - siehe services/entwuerfe.freigabevorlage.
+    freigabe_pruefsumme: str = Field(min_length=64, max_length=64)
 
 
 class AbschlussAusfuehren(BaseModel):
@@ -891,7 +896,8 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
 
     @app.post("/api/entwuerfe/{entwurf_id}/freigabe")
     def entwurf_freigeben(entwurf_id: str, daten: EntwurfFreigeben, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
-        return _entwurf_antwort(d.entwuerfe.freigeben(ident, entwurf_id, daten.bestaetigung, daten.text_pruefsumme))
+        return _entwurf_antwort(d.entwuerfe.freigeben(ident, entwurf_id, daten.bestaetigung,
+                                                     daten.freigabe_pruefsumme))
 
     @app.delete("/api/entwuerfe/{entwurf_id}", status_code=204)
     def entwurf_verwerfen(entwurf_id: str, ident: Identitaet = Depends(identitaet)) -> None:
@@ -937,5 +943,8 @@ def _kostenschaetzung(d: Dienste, sitzung: Any) -> dict[str, Any]:
 
 def _entwurf_antwort(entwurf: Any) -> dict[str, Any]:
     daten = entwurf.model_dump()
-    daten["text_pruefsumme"] = text_pruefsumme(entwurf.text)
+    # Ueber die ganze Freigabevorlage, nicht nur ueber den Text: Betreff, Art
+    # und Akte werden mitgeschrieben und gehoeren deshalb in die Pruefsumme
+    # (Befund F06 der Zweitpruefung, 05.10.2026).
+    daten["freigabe_pruefsumme"] = text_pruefsumme(freigabevorlage(entwurf))
     return daten
