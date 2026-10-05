@@ -31,10 +31,12 @@ Aufruf:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import sys
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from jusperfect.jurnodes.base import serverwort
@@ -708,6 +710,122 @@ _BESCHREIBUNGSPFADE = (
 )
 
 
+#: Woerter, an denen die E-Akte in einer Beschreibung zu erkennen waere.
+#:
+#: Aus der Kanzlei am 05.10.2026: "Die Korrespondenz bei jurnodes und die
+#: Vermerke finden sich in der E-Akte." Damit ist es EINE Frage und nicht
+#: zwei: Wer den Weg in die E-Akte kennt, hat beides.
+#:
+#: Gesucht wird in der Beschreibung des HERSTELLERS, nicht geraten. Wonach
+#: gesucht wird, steht hier, damit es nachvollziehbar ist; was gefunden wird,
+#: entscheidet die Datei und nicht diese Liste.
+#: Verglichen wird ohne Trennzeichen: "/electronic-file/search" wird zu
+#: "electronicfilesearch". Ohne diesen Schritt ging am 05.10.2026 beim ersten
+#: Versuch genau der Pfad durch, auf den es ankam - der Hersteller schreibt
+#: "electronic-file", die Liste hiess "electronicfile".
+_EAKTE_WOERTER = (
+    "eakte", "efile", "electronic", "elektronisch",
+    "korrespondenz", "correspondence", "vermerk", "note", "mail", "posteingang",
+    "schriftverkehr", "schriftstueck", "journal", "verlauf", "history",
+)
+
+
+def _ohne_trenner(text: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", text.lower())
+
+
+def _beschreibung_auswerten(daten: Mapping, endpunkte: Any) -> None:
+    """Was in einer vorliegenden OpenAPI-Beschreibung steht.
+
+    Gedruckt werden **Pfade und Parameternamen** - die Beschreibung des
+    Herstellers, kein Akteninhalt. Eine Schnittstellenbeschreibung enthaelt
+    keine Mandantendaten; sie sagt nur, was es gibt.
+    """
+    pfade = daten.get("paths")
+    if not isinstance(pfade, Mapping):
+        _sagen("!", "Die Datei hat keinen Abschnitt „paths“.")
+        return
+
+    namen = sorted(str(name) for name in pfade)
+    _sagen("✓", f"{len(namen)} Pfade stehen darin. Alle, der Reihe nach:")
+    for name in namen:
+        eintrag = pfade.get(name)
+        verfahren = ""
+        if isinstance(eintrag, Mapping):
+            verfahren = " ".join(sorted(v.upper() for v in eintrag
+                                        if isinstance(v, str) and len(v) < 8))
+        print(f"        {name}    {verfahren}")
+
+    # Die eigentliche Frage: Wo ist die E-Akte?
+    treffer = [name for name in namen
+               if any(wort in _ohne_trenner(name) for wort in _EAKTE_WOERTER)]
+    print()
+    if treffer:
+        _sagen("✓", "Pfade, die nach E-Akte, Korrespondenz oder Vermerk klingen:")
+        for name in treffer:
+            print(f"        {name}")
+        _sagen(" ", "Diese Pfade sind der naechste Schritt - mit der Akte gefragt.")
+    else:
+        _sagen("!", "Kein Pfad traegt eines dieser Woerter im Namen:")
+        _sagen(" ", "  " + ", ".join(_EAKTE_WOERTER))
+        _sagen(" ", "Dann liegt die E-Akte nicht in dieser Beschreibung - und")
+        _sagen(" ", "die Frage an den Hersteller bleibt. Sie steht unten.")
+
+    eintrag = pfade.get(endpunkte.vermerke)
+    if not isinstance(eintrag, Mapping):
+        _sagen("!", f"Zu {endpunkte.vermerke} steht darin nichts.")
+        return
+    print()
+    _sagen(" ", f"Und zu {endpunkte.vermerke} im einzelnen:")
+    for verfahren, inhalt in eintrag.items():
+        if not isinstance(inhalt, Mapping):
+            continue
+        _sagen(" ", f"   {verfahren.upper()} {endpunkte.vermerke}:")
+        vorgaben = inhalt.get("parameters")
+        if not isinstance(vorgaben, list) or not vorgaben:
+            _sagen(" ", "      (keine Abfrageparameter genannt)")
+            continue
+        for vorgabe in vorgaben:
+            if not isinstance(vorgabe, Mapping):
+                continue
+            art = vorgabe.get("schema")
+            art = art.get("type") if isinstance(art, Mapping) else None
+            pflicht = " (Pflicht)" if vorgabe.get("required") else ""
+            _sagen(" ", f"      {vorgabe.get('name')} "
+                        f"[{vorgabe.get('in')}, {art or 'ohne Art'}]{pflicht}")
+
+
+def _beschreibung_aus_datei(pfad: str, endpunkte: Any) -> bool:
+    """Die Beschreibung von der Festplatte lesen - ohne Netz, ohne Raten.
+
+    Der Server der Kanzlei gibt seine Beschreibung nicht heraus (sechsunddreissig
+    Pfade, alle 404, gemessen am 01. und 05.10.2026). **Die Kanzlei hat sie
+    trotzdem:** Am 23.09.2026 hat sie die OpenAPI-Beschreibung ihres Servers
+    geliefert, und daraus sind die Pfade abgeschrieben, mit denen das Programm
+    heute arbeitet.
+
+    Liegt diese Datei noch auf einem Rechner der Kanzlei, beantwortet sie die
+    Frage nach der E-Akte in einem Lauf - und niemand muss auf den Hersteller
+    warten.
+    """
+    datei = Path(pfad).expanduser()
+    _sagen(" ", f"Beschreibung aus der Datei: {datei}")
+    if not datei.is_file():
+        _sagen("✗", "Die Datei gibt es nicht.")
+        return False
+    try:
+        daten = json.loads(datei.read_text(encoding="utf-8"))
+    except Exception as fehler:
+        _sagen("✗", f"Sie laesst sich nicht als JSON lesen: {type(fehler).__name__}")
+        _sagen(" ", "Liegt sie als YAML vor, bitte einmal als JSON speichern.")
+        return False
+    if not isinstance(daten, Mapping):
+        _sagen("✗", "Das ist keine OpenAPI-Beschreibung.")
+        return False
+    _beschreibung_auswerten(daten, endpunkte)
+    return True
+
+
 def _beschreibung_suchen(client: Any, endpunkte: Any) -> bool:
     """Die OpenAPI-Beschreibung beim Server selbst holen - und auslesen.
 
@@ -735,29 +853,7 @@ def _beschreibung_suchen(client: Any, endpunkte: Any) -> bool:
             continue
 
         _sagen("✓", f"{pfad}: die Beschreibung liegt vor.")
-        pfade = daten.get("paths")
-        if not isinstance(pfade, Mapping):
-            return True
-        eintrag = pfade.get(endpunkte.vermerke)
-        if not isinstance(eintrag, Mapping):
-            _sagen("!", f"Zu {endpunkte.vermerke} steht darin nichts.")
-            return True
-        for verfahren, inhalt in eintrag.items():
-            if not isinstance(inhalt, Mapping):
-                continue
-            _sagen(" ", f"   {verfahren.upper()} {endpunkte.vermerke}:")
-            vorgaben = inhalt.get("parameters")
-            if not isinstance(vorgaben, list) or not vorgaben:
-                _sagen(" ", "      (keine Abfrageparameter genannt)")
-                continue
-            for vorgabe in vorgaben:
-                if not isinstance(vorgabe, Mapping):
-                    continue
-                art = vorgabe.get("schema")
-                art = art.get("type") if isinstance(art, Mapping) else None
-                pflicht = " (Pflicht)" if vorgabe.get("required") else ""
-                _sagen(" ", f"      {vorgabe.get('name')} "
-                            f"[{vorgabe.get('in')}, {art or 'ohne Art'}]{pflicht}")
+        _beschreibung_auswerten(daten, endpunkte)
         return True
     # Noch nicht aufgeben: Die Beschreibung muss nicht unter der Kennung der
     # Kanzlei liegen. Sie gehoert zum Server, nicht zum Mandanten - also auch
@@ -788,11 +884,15 @@ def _beschreibung_suchen(client: Any, endpunkte: Any) -> bool:
             if isinstance(daten, Mapping) and "paths" in daten:
                 _sagen("✓", f"{adresse}: die Beschreibung liegt hier.")
                 _sagen(" ", "Sie gehoert zum Server, nicht zur Kennung der Kanzlei.")
+                _beschreibung_auswerten(daten, endpunkte)
                 return True
 
     _sagen("!", f"Keiner der ueblichen Pfade traegt eine Beschreibung "
                 f"({len(_BESCHREIBUNGSPFADE)} unter der Kennung, "
                 f"{len(gefragt)} darueber).")
+    # Die Kanzlei hat sie trotzdem: am 23.09.2026 schon einmal geliefert.
+    _sagen(" ", "Liegt die Beschreibung als Datei vor, liest die Probe sie:")
+    _sagen(" ", "  JURNODES-PRUEFEN.bat ... --beschreibung PFAD\\ZUR\\DATEI.json")
     return False
 
 
@@ -1059,9 +1159,15 @@ def _vermerke_suchen(client: Any, endpunkte: Any, kennung: str,
     _sagen(" ", "Nimmt keine Form etwas an, hilft nur noch der Hersteller.")
     _sagen(" ", "Der Satz dafuer, fertig zum Abschicken:")
     print()
-    print("      Die Vermerke einer Akte stehen in jur|nodes in der E-AKTE -")
-    print("      dort, wo auch die Mails liegen. Ueber welchen Pfad liefert")
-    print("      die REST-Schnittstelle diese Eintraege zu einer Akte?")
+    print("      In der Oberflaeche von jur|nodes liegen die KORRESPONDENZ und")
+    print("      die VERMERKE einer Akte in der E-AKTE. Ueber welchen Pfad")
+    print("      liefert die REST-Schnittstelle die Eintraege der E-Akte zu")
+    print("      einer Akte - Korrespondenz, Vermerke und Mails?")
+    print()
+    print("      Daran haengt vermutlich auch correspondenceFolderId: Liegt die")
+    print("      Korrespondenz gar nicht im Dateisystem, waere jenes Feld etwas")
+    print("      anderes. Das wuerde erklaeren, warum der Ordner dahinter in")
+    print("      drei geprueften Akten nie zur Akte passte.")
     print()
     print("      Und, falls es derselbe ist: Mit welchem Parameter liefert")
     print("      GET /record/note die Vermerke")
@@ -1305,6 +1411,9 @@ def _ablauf(argv: list[str] | None = None) -> int:
                           help="Eine Akte, an der die übrigen Pfade geprüft werden")
     zerleger.add_argument("--kennung", metavar="IDENTIFIER", default=None,
                           help="Die Kennung der Akte, falls sie schon bekannt ist")
+    zerleger.add_argument("--beschreibung", metavar="DATEI", default=None,
+                          help="Die OpenAPI-Beschreibung des Servers als Datei. "
+                               "Sie beantwortet die Frage nach der E-Akte ohne Raten.")
     argumente = zerleger.parse_args(argv)
     # Leerraum abschneiden. Aus der Kanzlei am 05.10.2026 kam ein Lauf, der
     # nach " X-100-2026" suchte - mit einem Leerzeichen davor, wie es beim
@@ -1350,6 +1459,19 @@ def _ablauf(argv: list[str] | None = None) -> int:
     print()
     _sagen(" ", f"Adresse: {e.jurnodes_url or '(nicht gesetzt)'}")
     _sagen(" ", f"Pfade aus: {e.jurnodes_endpunkte_datei or 'der Vorgabe im Programm'}")
+
+    # Die Beschreibung zuerst, und ohne Netz: Sie braucht weder Adresse noch
+    # Zugang. Wer nur wissen will, was die Schnittstelle kann, bekommt es hier
+    # - auch auf einem Rechner, der gar keinen jur|nodes-Zugang hat.
+    if argumente.beschreibung:
+        print()
+        print(TRENNER)
+        print("  Die Beschreibung der Schnittstelle")
+        print(TRENNER)
+        print()
+        gelesen = _beschreibung_aus_datei(argumente.beschreibung, endpunkte)
+        if not e.jurnodes_url:
+            return 0 if gelesen else 2
 
     if not e.jurnodes_url:
         print()

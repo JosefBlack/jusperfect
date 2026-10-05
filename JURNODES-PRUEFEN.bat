@@ -35,15 +35,34 @@ rem Beteiligte und Fristen. Es steht nur in der eigenen Ausgabe.
 set "AKTE="
 set /p AKTE=Aktenzeichen fuer die Probe (leer lassen geht auch): 
 
+rem Die Beschreibung der Schnittstelle, falls sie als Datei vorliegt.
+rem
+rem Aus der Kanzlei am 05.10.2026: "Die Korrespondenz bei jurnodes und die
+rem Vermerke finden sich in der E-Akte." Damit ist es EINE Frage und nicht
+rem zwei - wer den Weg in die E-Akte kennt, hat beides.
+rem
+rem Der Server gibt seine Beschreibung nicht heraus (36 Pfade geprueft, alle
+rem 404). Die Kanzlei hat sie aber: Am 23.09.2026 wurde die
+rem OpenAPI-Beschreibung des Servers schon einmal geliefert, und daraus sind
+rem die Pfade abgeschrieben, mit denen das Programm heute arbeitet.
+rem
+rem Liegt diese Datei noch irgendwo, beantwortet sie die Frage in einem Lauf.
+rem Hier den vollstaendigen Pfad eintragen, etwa C:\Temp\jurnodes-api.json -
+rem oder leer lassen, dann wird nur die Schnittstelle gefragt.
+set "BESCHREIBUNG="
+set /p BESCHREIBUNG=Datei mit der Schnittstellenbeschreibung (leer lassen geht auch): 
+
 echo.
+set "ZUSATZ="
+if defined BESCHREIBUNG set "ZUSATZ=--beschreibung "%BESCHREIBUNG%""
 if defined AKTE goto mitakte
 rem Das Programm schreibt selbst mit - auf den Schirm UND in die Datei.
 rem Eine Umleitung mit ">" liesse den Schirm still und ginge an einem
 rem offenen Editor zugrunde; beides ist am 23.09.2026 passiert.
-"%PY%" -m jusperfect.jurnodestest
+"%PY%" -m jusperfect.jurnodestest %ZUSATZ%
 goto fertig
 :mitakte
-"%PY%" -m jusperfect.jurnodestest --akte "%AKTE%"
+"%PY%" -m jusperfect.jurnodestest --akte "%AKTE%" %ZUSATZ%
 
 :fertig
 echo.
