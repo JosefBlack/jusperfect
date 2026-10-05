@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1599 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `7e45fb8`.
+1625 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `d58a271`.
 
 ---
 
@@ -106,13 +106,37 @@ Eine neue EU-Region von AWS wird abgewiesen, bis sie in der Liste steht. Das ist
 die sichere Richtung, und die Meldung sagt, wo die Liste steht. 16 Prüfungen
 halten es fest.
 
-### Was offen bleibt — und warum der Punkt nicht abzuhaken ist
+### Die Zugriffsrichtlinie — ~~offen~~ **erledigt am 05.10.2026**
 
-1. **Die Zugriffsrichtlinie prüft weiter `eu-*`.** `infra/iam-nur-claude.json`
-   ist geschützt und wird nur auf ausdrückliche Anweisung geändert. Der
-   Vorschlag steht in `DSFA-ANGABEN.md`: `StringNotLike` auf `eu-*` durch
-   `StringNotEquals` auf die sechs Regionen ersetzen. **Eine Anweisung genügt.**
-2. **Beides trifft die eigentliche Frage ohnehin nicht.** `aws:RequestedRegion`
+Auf ausdrückliche Anweisung der Kanzlei („Ja, bau es in die Zugriffsrichtlinie
+ein"). `infra/iam-nur-claude.json` und `infra/IAM.md` sind geschützte Dateien.
+
+* Die Anweisung heißt jetzt **`NurEuUndEwr`** und prüft mit `StringNotEquals`
+  gegen die sechs namentlich genannten Regionen. **In der ganzen Datei steht
+  kein `eu-*` mehr** — auch nicht in den Ressourcen von `ClaudeAufrufen`,
+  `SchutzgelaenderAnwenden` und `KeinAnderesModell`.
+* Beim **Inferenzprofil** bleibt der Stern an der Stelle der Region. Dort stand
+  nie `eu-*`, und jede weitere Zeile wäre eine weitere Stelle, an der die
+  Kontonummer von Hand einzutragen ist — die Fehlerquelle vom 02.10.2026.
+* **Eine zweite Lücke mitgeschlossen:** Am 23.09.2026 war gemessen worden, dass
+  `bedrock:ApplyGuardrail` **zwei** Ressourcenarten braucht — `guardrail` und
+  `guardrail-profile` —, sobald das regionsübergreifende Profil benutzt wird.
+  In der Datei stand nur die erste. Jetzt stehen beide. Wer die Datei einsetzt,
+  ohne die zweite Zeile, kann dieselbe Ablehnung wieder bekommen wie am
+  02.10.2026.
+* 26 Prüfungen halten das Ergebnis fest, darunter eine, die **Richtlinie und
+  Programm gegeneinander** prüft: Laufen die beiden Regionslisten auseinander,
+  erlaubt das eine, was das andere verbietet, und niemand merkt es.
+
+**Einzusetzen in der Kanzlei:** AWS-Konsole → IAM → Richtlinien →
+`jusperfect-nur-claude` → Bearbeiten → JSON → Inhalt durch
+`infra\iam-nur-claude.json` aus dem neuen Programmordner ersetzen → speichern.
+AWS hält höchstens fünf Fassungen; beim Speichern die älteste abwählen, wenn er
+danach fragt.
+
+### Was weiterhin offen bleibt
+
+1. **Die Auskunft von AWS.** **Beides trifft die eigentliche Frage ohnehin nicht.** `aws:RequestedRegion`
    und die Einstellung betreffen die Region, an die der **Aufruf** geht —
    Frankfurt. Wohin das Inferenzprofil und `eu.guardrail.v1:0` **intern**
    verteilen, entscheidet AWS und steht in keiner Richtlinie.
@@ -120,6 +144,10 @@ halten es fest.
    `eu-`-Regionen nennt, beantwortet die Frage **nicht**. Es kommt auf die
    Regionen selbst an. Die Frage an den AWS-Support ist entsprechend zu
    stellen: *welche Regionen, namentlich.*
+4. **Eine neue EU-Region von AWS** wird jetzt an zwei Stellen abgewiesen, bis
+   sie eingetragen ist: in `jusperfect/config.py::EU_EWR_REGIONEN` und in der
+   Richtlinie. Das ist die sichere Richtung — und beide Stellen müssen
+   zusammen geändert werden. Eine Prüfung achtet darauf.
 
 **Zum fünften Mal an diesem Tag dieselbe Form:** Eine Prüfung, die den Namen
 misst statt der Sache, misst etwas anderes als die Sache.
