@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1537 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `632b77e`.
+1562 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `fafd15f`.
 
 ---
 
@@ -362,6 +362,41 @@ technischen Maßnahmen nach Art. 32 mit ihrem Nachweis im Programm.
 für besondere Kategorien, § 43e BRAO und § 203 StGB, die Erforderlichkeit einer
 DSFA nach Art. 35, und die Löschfristen.
 
+---
+
+**Am 05.10.2026 ist der Rest dazugekommen — die Entwürfe stehen vollständig,
+die Bewertung ist die Arbeit der Kanzlei.**
+
+| Datei | Was darin steht | Offen |
+|---|---|---|
+| `DSFA-ENTWURF.md` | **neu** — Art. 35: acht Risiken, jedes mit dem, was im Programm dagegen steht und wo es nachzulesen ist | **17** Stellen `[KANZLEI n]`, am Ende in einer Liste |
+| `DATENSCHUTZHINWEISE-ENTWURF.md` | **neu** — Text nach Art. 13, zwei Fassungen für die Mandatsbedingungen (mit und ohne Einwilligung), drei Sätze fürs Erstgespräch, die vier Fragen Betroffener | **9** Stellen |
+| `VERARBEITUNGSVERZEICHNIS-ENTWURF.md` | nachgezogen auf den 05.10.2026 | 12 Stellen wie bisher |
+| `DSFA-ANGABEN.md` | nachgezogen; der Befund zum Korrespondenzordner trägt jetzt einen eigenen Abschnitt | — |
+
+**Die acht Risiken im DSFA-Entwurf:** Vermengung von Mandaten (R1, am
+05.10.2026 eingetreten) · eine falsche Aussage wird für wahr genommen (R2) ·
+die dauerhafte Fallkopie (R3) · Übermittlung an einen Auftragsverarbeiter unter
+Berufsgeheimnis (R4) · Drittlandbezug durch EU-Profil und Schutzgeländer (R5) ·
+besondere Kategorien, verstärkt durch die Texterkennung (R6) · Zugriff
+innerhalb der Kanzlei (R7) · Auskunft, Berichtigung, Löschung (R8).
+
+**Ein Fehler in den vorhandenen Unterlagen, dabei gefunden und behoben.**
+`VERARBEITUNGSVERZEICHNIS-ENTWURF.md` sagte „Aktengedächtnis abgeschaltet" und
+`DSFA-ANGABEN.md` „eingerichtet, eingeschaltet nicht" — **da lief es bereits**
+und hatte eine echte Akte mit 55 Dokumenten dauerhaft abgelegt. Eine
+Datenschutzunterlage, die einen Zustand beschreibt, den es nicht mehr gibt,
+ist schlimmer als keine: Sie sieht aus wie eine Prüfung und ist eine Behauptung.
+
+**25 Prüfungen halten das künftig fest.** Sie gleichen ab, was
+`START-JURNODES.bat` einschaltet, mit dem, was die Unterlagen davon sagen —
+Aktengedächtnis, Texterkennung, Korrespondenzordner — und zählen die offenen
+Stellen, damit keine stillschweigend verschwindet.
+
+**Was die Kanzlei jetzt tut:** die 17 und die 9 Stellen durchgehen. Die
+dringendsten drei: die Löschfrist (R3), die Auskunft von AWS zu den Regionen
+des Schutzgeländers (R5) und die Vorfrage Einwilligung oder nicht.
+
 **Eine Angabe in `DSFA-ANGABEN.md` war überholt und ist berichtigt:** Dort
 stand, über das Laufwerk sei ein archivierter Aktenstatus nicht zu erkennen und
 die Lücke schließe sich mit der Schnittstelle. Die Schnittstelle steht seit dem
@@ -369,7 +404,7 @@ die Lücke schließe sich mit der Schnittstelle. Die Schnittstelle steht seit de
 `archivedDate`). Eine Löschung, die dem Aktenstatus folgt, ist damit technisch
 möglich — ob sie gewollt ist, ist Punkt 6.2 des Entwurfs.
 
-Muss um die Texterkennung ergänzt werden, falls Aufgabe 1 kommt.
+Die Texterkennung ist in allen vier Unterlagen nachgetragen (eingeschaltet am 02.10.2026).
 
 ### 4. ~~Aktengedächtnis ins AWS-Konto~~ — **erledigt 01.10.2026**
 
