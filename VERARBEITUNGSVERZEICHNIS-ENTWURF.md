@@ -1,7 +1,14 @@
 # Verarbeitungsverzeichnis — Entwurf für den Eintrag „jusperfect"
 
-**Stand: 28.09.2026.** Entwurf nach Art. 30 Abs. 1 DSGVO, zum Übernehmen in das
+**Stand: 05.10.2026.** Entwurf nach Art. 30 Abs. 1 DSGVO, zum Übernehmen in das
 Verzeichnis der Verarbeitungstätigkeiten der Kanzlei.
+
+> **Geändert am 05.10.2026.** Die Fassung vom 28.09.2026 beschrieb den Betrieb
+> **mit abgeschaltetem Aktengedächtnis**. Es ist seit dem 05.10.2026
+> eingeschaltet; damit entsteht eine dauerhafte Kopie von Akteninhalt außerhalb
+> von jur|nodes. Abschnitt 6 ist daraufhin neu gefasst. Dazu kommen die
+> Texterkennung (Abschnitt 7.1) und der Befund zum Korrespondenzordner
+> (Abschnitt 8a).
 
 ---
 
@@ -17,10 +24,10 @@ welcher Rechtsgrundlage, wie lange gespeichert werden darf und ob eine
 Datenschutz-Folgenabschätzung nach Art. 35 DSGVO erforderlich ist, entscheidet
 die Kanzlei.
 
-**Zwei Dinge gelten für jede Zeile unten:** Sie beschreibt den Stand vom
-28.09.2026, und sie beschreibt den Betrieb **mit abgeschaltetem
-Aktengedächtnis**. Was sich mit dem Einschalten ändert, steht in Abschnitt 6
-gesondert.
+**Eines gilt für jede Zeile unten:** Sie beschreibt den Stand vom 05.10.2026 —
+also den Betrieb **mit eingeschaltetem Aktengedächtnis**. Was vorher galt,
+steht in Abschnitt 6 zum Vergleich daneben, weil der Unterschied der eigentliche
+Gegenstand der Bewertung ist.
 
 ---
 
@@ -116,7 +123,7 @@ Protokolleintrag mit Inhalt lässt sich nicht schreiben.
 
 ## 6. Speicherdauer und Löschung
 
-### 6.1 Heute (Aktengedächtnis abgeschaltet)
+### 6.1 Bis zum 05.10.2026 (Aktengedächtnis abgeschaltet) — zum Vergleich
 
 | Ort | Dauer |
 |---|---|
@@ -125,23 +132,26 @@ Protokolleintrag mit Inhalt lässt sich nicht schreiben.
 | Verarbeitungsnachweis | dauerhaft, **ohne Inhalte** (siehe 5.3) |
 | jur\|nodes | unverändert die führende Akte; jusperfect liest daraus |
 
-**Es entsteht keine dauerhafte Kopie des Akteninhalts außerhalb von
-jur|nodes.** Stand 28.09.2026, `JUSPERFECT_GEDAECHTNIS=aus`.
+In diesem Zustand entstand **keine** dauerhafte Kopie des Akteninhalts
+außerhalb von jur|nodes. Er gilt seit dem 05.10.2026 nicht mehr.
 
-### 6.2 Mit eingeschaltetem Aktengedächtnis — **noch nicht in Betrieb**
+### 6.2 Seit dem 05.10.2026: das Aktengedächtnis ist in Betrieb
 
-Eingerichtet am 28.09.2026, eingeschaltet nicht. **Mit dem Einschalten ändert
-sich dieser Eintrag wesentlich**, denn dann entsteht erstmals eine dauerhafte
-Kopie von Akteninhalt außerhalb von jur|nodes:
+Eingerichtet am 28.09.2026, **eingeschaltet am 05.10.2026**. An diesem Tag hat
+die Kanzlei die erste echte Akte vollständig eingelesen. Damit besteht erstmals
+eine dauerhafte Kopie von Akteninhalt außerhalb von jur|nodes — **Mandatsgut,
+kein Protokoll**:
 
 | | |
 |---|---|
-| Inhalt | Lebenssachverhalt, Chronologie, frühere Fragen mit belegten Antworten, ausgelesene Dokumenttexte |
+| Inhalt | Lebenssachverhalt, Chronologie, frühere Fragen mit belegten Antworten, ausgelesene Dokumenttexte, die zuletzt gelaufene Aktenanalyse |
+| Obergrenzen | 100 Frage-Antwort-Runden, 500 Chronologieeinträge |
 | Ort | S3-Bucket der Kanzlei, Region Frankfurt, im eigenen AWS-Konto |
 | Verschlüsselung | serverseitig mit einem Schlüssel der Kanzlei (KMS, symmetrisch, Single-Region — kein Schlüsselmaterial verlässt Frankfurt) |
 | Objektnamen | enthalten **kein Aktenzeichen**, nur dessen SHA-256-Ableitung |
 | Zugriff | ein eigener, auf genau diesen Bucket und diesen Schlüssel beschränkter Programmbenutzer |
 | Löschung | über den berechtigungsgeprüften Weg des Programms, oder mit dem Abschluss der Akte |
+| Gezielte Löschung | seit dem 05.10.2026 in der Oberfläche: ein einzelnes Dokument **samt allem daraus Abgeleiteten**, oder eine einzelne Frage-Antwort-Runde. Das bedient Berichtigungs- und Löschverlangen nach Art. 16 und 17 DSGVO, ohne die ganze Fallkopie zu verwerfen |
 
 **[KANZLEI] — die entscheidende offene Frage: Wann wird gelöscht?**
 
@@ -162,10 +172,16 @@ welcher Frist nach Archivierung, ist eine Entscheidung der Kanzlei.
 | | |
 |---|---|
 | Empfänger | **Amazon Web Services** — [KANZLEI] vertragsschließende Gesellschaft nach Ihrem AV-Vertrag |
-| Leistung | Amazon Bedrock (Sprachmodell), S3 und KMS (nur bei eingeschaltetem Aktengedächtnis) |
+| Leistung | Amazon Bedrock (Sprachmodell), **Amazon Textract** (Texterkennung gescannter Seiten, seit 02.10.2026), S3 und KMS (Aktengedächtnis, seit 05.10.2026) |
 | Ort der Verarbeitung | Region Frankfurt, `eu-central-1` |
 | AV-Vertrag | **[KANZLEI]** — Datum, Fassung, Ablage |
 | Berufsgeheimnis | **[KANZLEI]** — Verpflichtung nach § 43e BRAO, § 203 StGB prüfen und dokumentieren |
+
+**Zur Texterkennung.** Es ist **derselbe** Auftragsverarbeiter und derselbe
+AV-Vertrag, kein zweiter. Übermittelt wird **ein Bild je Seite**, erzeugt auf
+dem Rechner der Kanzlei; bei AWS wird es **verarbeitet, nicht gespeichert** —
+kein Ablageort, keine Löschfrist, nichts hier zu nennen außer der Verarbeitung
+selbst. Einzelheiten in `DSFA-ANGABEN.md`.
 
 **Kein weiterer Anbieter.** Das Programm ruft genau einen Modellanbieter auf,
 und zwar über eine einzige geprüfte Stelle im Programm (`services/ausgang.py`).
@@ -195,6 +211,30 @@ für die Unterlage ist die Liste nachzutragen (`DSFA-ANGABEN.md`, Abschnitt
 „Noch nicht festgestellt"). Akteninhalt geht dabei nicht durch das Geländer —
 nur Frage und Antwort.
 
+## 8a. Ein Befund, der in die Bewertung gehört: fremde Schriftstücke
+
+Am 05.10.2026 hat sich an drei echten Akten gezeigt, dass die Schnittstelle von
+jur|nodes über das Feld `correspondenceFolderId` Schriftstücke liefert, die
+**nicht zu der abgefragten Akte gehören** — in einer Akte 17 von 55. In der
+Oberfläche von jur|nodes sind sie unter dieser Akte nicht zu finden.
+
+Das ist kein Fehler des Programms; der Durchlauf hat die Akte an keiner Stelle
+verlassen. Für diesen Eintrag ist es trotzdem erheblich, weil es den Umfang der
+Verarbeitung betrifft:
+
+| | |
+|---|---|
+| Was geschehen ist | Akteninhalt eines fremden Mandats wurde in die Arbeitsakte eines anderen Mandats gelesen |
+| Wohin | in den Arbeitsspeicher der Sitzung und an das Modell; **nicht** in das Aktengedächtnis (das war damals aus) |
+| Was seitdem gilt | Der Korrespondenzordner wird **nicht mehr gelesen**. Damit fehlt die Korrespondenz — die sichere Richtung |
+| Offen beim Hersteller | worauf das Feld tatsächlich zeigt und wie die Zugehörigkeit einer Datei zu einer Akte zuverlässig zu bestimmen ist |
+
+**[KANZLEI]** — zu bewerten: ob eine kanzleiinterne Vermengung von Mandaten
+eine Verletzung im Sinne des Art. 4 Nr. 12 DSGVO ist und ob Art. 33 greift. Aus
+Sicht der Entwicklung ist **kein Abfluss nach außen** festzustellen: Die
+Schriftstücke stammen aus dem eigenen Aktenbestand der Kanzlei, die
+Verarbeitung lief im selben AWS-Konto desselben Auftragsverarbeiters.
+
 ## 9. Rechtsgrundlage
 
 **[KANZLEI]** — vollständig offen, weil es eine Bewertung ist.
@@ -210,7 +250,7 @@ Zu entscheiden sind mindestens:
 ## 10. Technische und organisatorische Maßnahmen (Art. 32 DSGVO)
 
 Die folgenden Maßnahmen sind im Programm umgesetzt und durch Prüfungen
-gehalten — 1247 automatische Prüfungen, Stand 28.09.2026.
+gehalten — 1562 automatische Prüfungen, Stand 05.10.2026.
 
 ### 10.1 Datenminimierung
 
@@ -239,7 +279,8 @@ gehalten — 1247 automatische Prüfungen, Stand 28.09.2026.
 | Kein Löschrecht in jur\|nodes | Das Programm kann im Aktenbestand nichts löschen |
 | Nur lesende Schnittstellenzugriffe | Bis auf den einen freigegebenen Vermerk |
 | Beschränkter AWS-Benutzer | Darf Claude aufrufen und sonst nichts; Verbote ausdrücklich gesetzt |
-| Verschlüsselung der Fallkopie | SSE-KMS mit eigenem Schlüssel (nur bei 6.2) |
+| Verschlüsselung der Fallkopie | SSE-KMS mit eigenem Schlüssel der Kanzlei |
+| Gezielte Löschung | Einzelne Dokumente und einzelne Frage-Antwort-Runden lassen sich aus der Fallkopie entfernen, samt allem daraus Abgeleiteten |
 | Anbieterbegrenzung | Ein Verbot jedes Modells, das nicht Claude in EU ist |
 
 ### 10.4 Fail-closed-Sicherungen beim Start
@@ -269,8 +310,8 @@ Das ist keine Warnung, sondern ein Abbruch. Geprüft in `tests/test_config.py`.
 | Fehlt | Warum |
 |---|---|
 | Die rechtliche Bewertung | Sache der Kanzlei |
-| Der Text der Mandantenhinweise | Eine Formulierungsfrage, keine technische |
-| Die Erforderlichkeit einer DSFA | Art. 35 — Bewertung |
+| Der Text der Mandantenhinweise | Entwurf seit 05.10.2026 in `DATENSCHUTZHINWEISE-ENTWURF.md` |
+| Die Erforderlichkeit einer DSFA | Art. 35 — Bewertung. Entwurf seit 05.10.2026 in `DSFA-ENTWURF.md` |
 | Die Liste der Regionen des Geländerprofils | Bei AWS nachzulesen, noch nicht festgestellt |
 | Ein Löschkonzept mit Fristen | Hängt an der Entscheidung in 6.2 |
 
@@ -284,6 +325,8 @@ Das ist keine Warnung, sondern ein Abbruch. Geprüft in `tests/test_config.py`.
 | `SICHERHEIT.md` | Die 16 Grundsätze und das Löschkonzept |
 | `KONZEPT.md` | Warum das Programm so gebaut ist |
 | `infra/IAM.md` | Die Zugriffsrichtlinie im Wortlaut |
+| `DSFA-ENTWURF.md` | Der Entwurf der Folgenabschätzung nach Art. 35 |
+| `DATENSCHUTZHINWEISE-ENTWURF.md` | Entwurf der Hinweise nach Art. 13 und der Mandatsklausel |
 
 **Bei Widerspruch gilt `DSFA-ANGABEN.md`** — dort steht, was gemessen wurde,
 und an welchem Tag.

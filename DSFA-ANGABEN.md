@@ -193,15 +193,19 @@ Beim Laufwerksweg, den die Kanzlei am 22.09.2026 gewählt hat, gilt `akte`:
 Gesetzt in `START-KANZLEI.bat`. Die Einstellung `lokal` ist mit echten Akten
 unzulässig und wird vom Programm abgewiesen.
 
-### Die Ablage in AWS — eingerichtet am 28.09.2026, noch nicht eingeschaltet
+### Die Ablage in AWS — eingerichtet am 28.09.2026, **eingeschaltet am 05.10.2026**
 
 Für den Weg über die Schnittstelle, den die Kanzlei seit dem 23.09.2026 geht,
 ist `akte` nicht brauchbar: jur|nodes ersetzt eine vorhandene Datei nicht,
 sondern weist sie ab. Das Gedächtnis ist deshalb seit dem 25.09.2026
 abgeschaltet und wandert nach AWS.
 
-**Eingerichtet ist es, eingeschaltet nicht.** Die Werte, damit sie nicht
-erraten werden müssen:
+**Seit dem 05.10.2026 ist es in Betrieb.** Die Kanzlei hat an diesem Tag die
+erste echte Akte vollständig eingelesen (55 Dokumente). Damit liegt erstmals
+dauerhaft Akteninhalt außerhalb von jur|nodes — das ist der Umstand, der die
+Rechtsdokumentation auslöst.
+
+Die Werte, damit sie nicht erraten werden müssen:
 
 | | |
 |---|---|
@@ -217,7 +221,9 @@ erraten werden müssen:
 | Schlüssellöschung durch Verwalter | nicht erlaubt |
 | Rechte des Programms | `jusperfect-gedaechtnis`, angefügt an den Benutzer `jusperfect-test`: `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` auf den Bucketinhalt, `s3:ListBucket` auf den Bucket, `kms:Encrypt`, `kms:Decrypt`, `kms:GenerateDataKey` auf genau diesen Schlüssel |
 | Objektnamen | `akten/<SHA-256 der Aktenkennung>/gedaechtnis.json` — **kein Aktenzeichen** in Verwaltungsdaten |
-| Inhalt | Lebenssachverhalt, Zeitstrahl, frühere Fragen mit belegten Antworten, ausgelesene Dokumenttexte |
+| Inhalt | Lebenssachverhalt, Zeitstrahl, frühere Fragen mit belegten Antworten (die letzten 100), ausgelesene Dokumenttexte, seit dem 05.10.2026 zusätzlich die zuletzt gelaufene Aktenanalyse |
+| Obergrenzen | 100 Frage-Antwort-Runden, 500 Zeitstrahleinträge (`config.py`) |
+| Gezielte Löschung einzelner Einträge | seit dem 05.10.2026 in der Oberfläche: ein Dokument samt allem daraus Abgeleiteten, oder eine einzelne Frage-Antwort-Runde |
 | Nachgewiesen am 28.09.2026 | `GEDAECHTNIS-AWS-PRUEFEN.bat`: Ablegen, Zurücklesen Zeichen für Zeichen, Entfernen — alle drei bestanden |
 
 **Was das für die Unterlage bedeutet.** Mit dem Einschalten legt jusperfect
@@ -226,9 +232,10 @@ kein Protokoll. Derselbe Auftragsverarbeiter wie für die Verarbeitung (AWS
 Frankfurt), also **kein neuer AV-Vertrag**; aber Zweck, Kategorien,
 Speicherdauer, Empfänger und Betroffenenrechte müssen es nennen.
 
-Eingeschaltet wird es mit drei Zeilen in `START-JURNODES.bat`
-(`JUSPERFECT_GEDAECHTNIS=aws` samt Bucket und Schlüssel). **Solange die
-Rechtsdokumentation nicht steht, bleibt es aus.**
+Eingeschaltet ist es über `JUSPERFECT_GEDAECHTNIS=aws` samt Bucket und
+Schlüssel in `START-JURNODES.bat`. **Ausgeschaltet wird es mit derselben Zeile
+auf `aus`;** was bereits abgelegt ist, bleibt dann liegen und ist über den
+Abschluss der Akte oder einzeln über „vergessen" zu entfernen.
 
 Die Angaben, die das Verarbeitungsverzeichnis dazu braucht — Zweck,
 Kategorien, Speicherdauer, Empfänger, Betroffenenrechte — sind in
@@ -395,6 +402,51 @@ Massnahme und gehört als solche in die DSFA.
   ein eigener IAM-Benutzer je Rechner, damit sich ein einzelner zurückziehen
   lässt und im AWS-Aufrufprotokoll steht, von wo ein Aufruf kam
   (`AWS-EINRICHTEN.md`, „Ein zweiter Rechner").
+
+---
+
+## Fremde Schriftstücke über den Korrespondenzordner — Befund vom 05.10.2026
+
+**Für die DSFA der wichtigste Einzelbefund des Tages.** Er betrifft nicht das
+Programm, sondern die Schnittstelle von jur|nodes — und er betrifft das
+Mandantengeheimnis.
+
+In der Bausache X-100-2026 standen in der Arbeitsakte drei Schriftstücke aus
+einer fremden Verkehrsunfallsache. Gemessen an der echten Schnittstelle am
+05.10.2026, an **drei** Akten mit demselben Ergebnis:
+
+| | |
+|---|---|
+| Der Dateiordner | passt jedesmal zur Akte; befüllt ab dem Anlagedatum |
+| Der Korrespondenzordner | passt **nie**; niedrige Nummer, befüllt durchweg 2022/23, unabhängig vom Anlagedatum der Akte |
+| In der Akte X-100-2026 | 17 von 55 Dokumenten stammten aus dem Korrespondenzzweig |
+| In der Oberfläche von jur\|nodes | sind diese Schriftstücke unter dieser Akte **nicht zu finden** |
+
+Das Feld `correspondenceFolderId` zeigt offenbar nicht auf die Korrespondenz
+**dieser** Akte. Worauf dann, weiß nur der Hersteller; die Anfrage ist
+formuliert und abzuschicken.
+
+**Was daraus folgt — und was das Programm bereits getan hat:**
+
+- **Der Korrespondenzordner wird seit dem 05.10.2026 nicht mehr gelesen**
+  (`JUSPERFECT_KORRESPONDENZ` aus, Vorgabe). Damit fehlt die Korrespondenz;
+  das ist die sichere Richtung. Fremde Schriftstücke in einer Arbeitsakte sind
+  teurer als fehlende.
+- **Das Programm hat richtig gearbeitet.** `GET /record` nennt für diese Akte
+  selbst diesen Ordner; der Durchlauf hat die Akte an keiner Stelle verlassen.
+  Das prüft die Probe seitdem ausdrücklich.
+- **Für die DSFA erheblich:** Hätte das Aktengedächtnis zu diesem Zeitpunkt
+  schon gearbeitet, wären die 17 fremden Dokumente dauerhaft abgelegt worden.
+  Das ist das Risiko, das die Unterlage unter „Vermengung von Mandaten"
+  beschreiben muss — und zugleich der Grund, warum eine gezielte Löschung
+  einzelner Einträge gebraucht wird (seit dem 05.10.2026 vorhanden).
+
+**[KANZLEI]** — zu entscheiden: ob die betroffenen Akten in jur|nodes zu
+prüfen sind und ob eine Meldung nach Art. 33 DSGVO in Betracht kommt. Aus
+Sicht der Entwicklung ist **kein** Datenabfluss nach außen festzustellen: Die
+Schriftstücke gehören dem eigenen Aktenbestand der Kanzlei, und die
+Verarbeitung lief im selben AWS-Konto. Ob eine kanzleiinterne Vermengung von
+Mandaten meldepflichtig ist, bewertet die Kanzlei.
 
 ---
 
