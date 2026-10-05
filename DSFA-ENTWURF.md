@@ -142,21 +142,36 @@ wie die Kanzlei das Berufsgeheimnis gewichtet.
 
 **Das größte Risiko, und es ist am 05.10.2026 eingetreten.**
 
-Die Schnittstelle von jur|nodes lieferte über das Feld `correspondenceFolderId`
-Schriftstücke, die nicht zu der abgefragten Akte gehören — in einer Akte 17 von
-55, an drei Akten dasselbe Muster. Akteninhalt eines fremden Mandats wurde in
-die Arbeitsakte eines anderen gelesen und ging an das Modell.
+Akteninhalt eines fremden Mandats wurde in die Arbeitsakte eines anderen
+gelesen und ging an das Modell — in einer Akte 17 von 55 Dokumenten, an drei
+Akten dasselbe Muster.
+
+**Die Ursache liegt im Programm.** Am Abend des 05.10.2026 hat die Beschreibung
+des Herstellers sie gezeigt: jur|nodes führt **zwei getrennte Ordnerbäume** mit
+je eigenen Nummern — das Dateisystem und die Korrespondenz. Das Programm hat
+die Nummer des **Korrespondenz**ordners an den Pfad des **Dateisystems**
+geschickt. Dort gibt es diese Nummer auch; sie gehört zu einem anderen Ordner,
+und zwar zu dem einer fremden Akte.
+
+Die Fassung dieses Entwurfs von heute früh führte den Vorgang auf ein Verhalten
+der Schnittstelle zurück und hielt fest, das Programm habe richtig gearbeitet.
+**Das war falsch und ist hiermit berichtigt.**
 
 | Folge für die Betroffenen | Dass Angaben aus ihrem Mandat in der Bearbeitung eines fremden Mandats auftauchen — der Kernbereich des § 203 StGB |
 |---|---|
 | **Was es verhindert hat** | Das Aktengedächtnis war zu diesem Zeitpunkt **aus**. Es ist nichts dauerhaft abgelegt worden |
-| **Was seitdem gilt** | Der Korrespondenzordner wird nicht mehr gelesen. Die Korrespondenz fehlt damit — die sichere Richtung |
-| **Was das Programm selbst prüft** | Der Durchlauf durch die Ordner meldet seitdem ausdrücklich, wenn er die Akte verlässt |
-| **Was offen ist** | Worauf das Feld tatsächlich zeigt. Die Anfrage an den Hersteller ist formuliert |
+| **Was seitdem gilt** | Der falsche Weg wird nicht mehr gegangen. Die Korrespondenz fehlt damit — die sichere Richtung |
+| **Was das Programm selbst prüft** | Der Durchlauf durch die Ordner meldet ausdrücklich, wenn er die Akte verlässt |
+| **Der richtige Weg** | ist seit dem 05.10.2026 belegt (`POST /correspondence/search`) und in der Probe gemessen, aber **noch nicht im Betrieb**. Erst ein Lauf an einer echten Akte zeigt, was der Server liefert |
 
 **[KANZLEI 6]** — zu bewerten: ob dies eine Verletzung nach Art. 4 Nr. 12 ist
 und ob Art. 33 greift. Aus Sicht der Entwicklung **kein Abfluss nach außen**:
 eigener Aktenbestand, eigenes AWS-Konto, derselbe Auftragsverarbeiter.
+
+**Für diese Bewertung erheblich:** Die Ursache liegt im Programm und damit beim
+Verantwortlichen, nicht beim Auftragsverarbeiter und nicht beim Hersteller der
+Aktenverwaltung. Umfang und Richtung des Vorgangs ändert das nicht, die
+Zurechnung schon.
 
 ---
 

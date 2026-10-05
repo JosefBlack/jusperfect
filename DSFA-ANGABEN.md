@@ -469,19 +469,42 @@ einer fremden Verkehrsunfallsache. Gemessen an der echten Schnittstelle am
 | In der Akte X-100-2026 | 17 von 55 Dokumenten stammten aus dem Korrespondenzzweig |
 | In der Oberfläche von jur\|nodes | sind diese Schriftstücke unter dieser Akte **nicht zu finden** |
 
-Das Feld `correspondenceFolderId` zeigt offenbar nicht auf die Korrespondenz
-**dieser** Akte. Worauf dann, weiß nur der Hersteller; die Anfrage ist
-formuliert und abzuschicken.
+### Aufgeklärt am 05.10.2026, abends — **es war unser Fehler**
+
+Die Kanzlei hat die OpenAPI-Beschreibung des Herstellers geliefert (Fassung
+1.0.2, 85 Pfade; sie liegt jetzt unter
+`schnittstelle/jurnodes-api-1.0.2.json`). Darin steht die Erklärung.
+
+**jur|nodes führt zwei getrennte Ordnerbäume, jeden mit eigenen Nummern:**
+
+| Baum | Gelesen über | In der Akte |
+|---|---|---|
+| Dateiordner | `/file-system/folder/content?folderId=…` | `fileFolderId` |
+| **Korrespondenzordner** | `/correspondence/search` | `correspondenceFolderId` |
+
+Das Programm hat `correspondenceFolderId` an **`/file-system/folder/content`**
+geschickt — eine Nummer aus dem einen Baum an den anderen. Dort gibt es diese
+Nummer auch; sie gehört nur zu einem anderen Ordner, und zwar zu dem einer
+fremden Akte.
+
+Daraus folgt jede einzelne Beobachtung: die niedrige Nummer (eigener, kleinerer
+Nummernkreis), der Inhalt von 2022/23 (fremde Akten), das Fehlen in der
+Oberfläche (er gehört nicht dazu), und dass es bei drei Akten gleich aussah.
+
+**Es war kein Fehler von jur|nodes.** Die Schnittstelle hat beantwortet, was
+gefragt wurde. Gefragt war das Falsche. Die Sätze „Das Programm hat richtig
+gearbeitet" in der Fassung von heute früh waren falsch und sind hiermit
+berichtigt.
 
 **Was daraus folgt — und was das Programm bereits getan hat:**
 
-- **Der Korrespondenzordner wird seit dem 05.10.2026 nicht mehr gelesen**
+- **Der falsche Weg wird seit dem 05.10.2026 nicht mehr gegangen**
   (`JUSPERFECT_KORRESPONDENZ` aus, Vorgabe). Damit fehlt die Korrespondenz;
   das ist die sichere Richtung. Fremde Schriftstücke in einer Arbeitsakte sind
   teurer als fehlende.
-- **Das Programm hat richtig gearbeitet.** `GET /record` nennt für diese Akte
-  selbst diesen Ordner; der Durchlauf hat die Akte an keiner Stelle verlassen.
-  Das prüft die Probe seitdem ausdrücklich.
+- **Der richtige Weg ist seit dem 05.10.2026 belegt** und in der Probe
+  gemessen, aber noch nicht im Betrieb: `POST /correspondence/search`. Erst ein
+  Lauf an einer echten Akte zeigt, was der Server wirklich liefert.
 - **Für die DSFA erheblich:** Hätte das Aktengedächtnis zu diesem Zeitpunkt
   schon gearbeitet, wären die 17 fremden Dokumente dauerhaft abgelegt worden.
   Das ist das Risiko, das die Unterlage unter „Vermengung von Mandaten"
@@ -494,6 +517,12 @@ Sicht der Entwicklung ist **kein** Datenabfluss nach außen festzustellen: Die
 Schriftstücke gehören dem eigenen Aktenbestand der Kanzlei, und die
 Verarbeitung lief im selben AWS-Konto. Ob eine kanzleiinterne Vermengung von
 Mandaten meldepflichtig ist, bewertet die Kanzlei.
+
+**Für diese Bewertung erheblich, seit dem Abend des 05.10.2026:** Die Ursache
+liegt **im Programm**, nicht beim Hersteller — eine Ordnernummer aus dem einen
+Namensraum, abgefragt im anderen. Das ändert nichts an Umfang und Richtung des
+Vorgangs, wohl aber an der Zurechnung: Es war ein Fehler des
+Verantwortlichen.
 
 ---
 

@@ -225,27 +225,30 @@ nur Frage und Antwort.
 
 ## 8a. Ein Befund, der in die Bewertung gehört: fremde Schriftstücke
 
-Am 05.10.2026 hat sich an drei echten Akten gezeigt, dass die Schnittstelle von
-jur|nodes über das Feld `correspondenceFolderId` Schriftstücke liefert, die
-**nicht zu der abgefragten Akte gehören** — in einer Akte 17 von 55. In der
-Oberfläche von jur|nodes sind sie unter dieser Akte nicht zu finden.
+Am 05.10.2026 hat sich an drei echten Akten gezeigt, dass über das Feld
+`correspondenceFolderId` Schriftstücke in die Arbeitsakte gelangten, die
+**nicht zu ihr gehören** — in einer Akte 17 von 55.
 
-Das ist kein Fehler des Programms; der Durchlauf hat die Akte an keiner Stelle
-verlassen. Für diesen Eintrag ist es trotzdem erheblich, weil es den Umfang der
-Verarbeitung betrifft:
+**Die Ursache liegt im Programm.** jur|nodes führt zwei getrennte Ordnerbäume
+mit je eigenen Nummern; das Programm hat die Nummer des Korrespondenzordners am
+Pfad des Dateisystems abgefragt. Eine frühere Fassung dieses Entwurfs führte
+den Vorgang auf ein Verhalten der Schnittstelle zurück — **das war falsch und
+ist berichtigt.**
 
 | | |
 |---|---|
 | Was geschehen ist | Akteninhalt eines fremden Mandats wurde in die Arbeitsakte eines anderen Mandats gelesen |
 | Wohin | in den Arbeitsspeicher der Sitzung und an das Modell; **nicht** in das Aktengedächtnis (das war damals aus) |
 | Was seitdem gilt | Der Korrespondenzordner wird **nicht mehr gelesen**. Damit fehlt die Korrespondenz — die sichere Richtung |
-| Offen beim Hersteller | worauf das Feld tatsächlich zeigt und wie die Zugehörigkeit einer Datei zu einer Akte zuverlässig zu bestimmen ist |
+| Der richtige Weg | `POST /correspondence/search` — seit dem 05.10.2026 belegt, in der Probe gemessen, noch nicht im Betrieb |
 
 **[KANZLEI]** — zu bewerten: ob eine kanzleiinterne Vermengung von Mandaten
 eine Verletzung im Sinne des Art. 4 Nr. 12 DSGVO ist und ob Art. 33 greift. Aus
 Sicht der Entwicklung ist **kein Abfluss nach außen** festzustellen: Die
 Schriftstücke stammen aus dem eigenen Aktenbestand der Kanzlei, die
-Verarbeitung lief im selben AWS-Konto desselben Auftragsverarbeiters.
+Verarbeitung lief im selben AWS-Konto desselben Auftragsverarbeiters. Die
+Ursache liegt jedoch **beim Verantwortlichen** — im Programm —, nicht beim
+Auftragsverarbeiter und nicht beim Hersteller der Aktenverwaltung.
 
 ## 9. Rechtsgrundlage
 

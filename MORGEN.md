@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1625 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `d58a271`.
+1644 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `8eec4af`.
 
 ---
 
@@ -31,20 +31,19 @@ Korrespondenzordner wurde **dreieinhalb Jahre früher** befüllt.
 17 von 55.** Die drei, die aufgefallen sind, waren der Inhalt eines einzigen
 Unterordners.
 
-**Das Programm hat richtig gearbeitet.** `GET /record` nennt für diese Akte
-`correspondenceFolderId 2871`; die vier Unterordner führen `parentFolder 2871`.
-Der Durchlauf hat die Akte an keiner Stelle verlassen — das prüft
-`_ordnerbaum` seitdem ausdrücklich. **Der Befund gehört in die Ablage der
-Kanzlei und zum Hersteller, nicht in den Quelltext.**
+**Berichtigt am Abend des 05.10.2026: Das Programm hat NICHT richtig
+gearbeitet.** Es hat die Nummer des Korrespondenzordners am Pfad des
+Dateisystems abgefragt — zwei getrennte Ordnerbäume, eine Nummer im falschen
+Namensraum. Siehe den Abschnitt „Aufgeklärt am 05.10.2026, abends".
 
 **Hinzu kommt:** In der Oberfläche von jur|nodes sind diese Schriftstücke unter
 dieser Akte **nicht zu finden**. Die Schnittstelle liefert sie, die Oberfläche
 zeigt sie nicht.
 
-**Offen — Kanzlei:** Die Anfrage an den Hersteller ist fertig formuliert
-(Ordnerzuordnung und Vermerke in einem Text) und abzuschicken. Bis zur Klärung
-**diese Akte nicht in jusperfect öffnen**: Das Aktengedächtnis arbeitet seit
-dem 05.10.2026, und die 17 fremden Dokumente würden dauerhaft abgelegt.
+**Erledigt — die Anfrage an den Hersteller entfällt.** Die Ursache lag im
+Programm; der falsche Weg ist abgeschaltet. Die Akte lässt sich wieder öffnen,
+sobald das Aktengedächtnis für sie geleert ist, falls dort noch fremde
+Auszüge liegen — einzeln über „vergessen".
 
 **Was der Weg dorthin gekostet hat — drei eigene Fehler, alle derselben Form:**
 
@@ -151,6 +150,76 @@ danach fragt.
 
 **Zum fünften Mal an diesem Tag dieselbe Form:** Eine Prüfung, die den Namen
 misst statt der Sache, misst etwas anderes als die Sache.
+
+---
+
+## Aufgeklärt am 05.10.2026, abends: es war unser Fehler
+
+**Die Kanzlei hat die OpenAPI-Beschreibung des Herstellers geliefert** — jur|nodes
+API 1.0.2, 85 Pfade. Sie liegt jetzt im Bestand unter
+`schnittstelle/jurnodes-api-1.0.2.json`, die Auswertung in
+`schnittstelle/README.md`.
+
+### Der Fehler
+
+jur|nodes führt **zwei getrennte Ordnerbäume**, jeden mit eigenen Nummern:
+
+| Baum | Gelesen über | In der Akte |
+|---|---|---|
+| Dateiordner | `/file-system/folder/content?folderId=…` | `fileFolderId` |
+| **Korrespondenzordner** | `/correspondence/search` | `correspondenceFolderId` |
+
+Das Programm hat `correspondenceFolderId` an **`/file-system/folder/content`**
+geschickt. Dort gibt es diese Nummer auch — sie gehört nur zu einem **anderen
+Ordner**, und zwar zu dem einer fremden Akte.
+
+Daraus folgt **jede einzelne** Beobachtung vom 02. und 05.10.2026: die niedrige
+Nummer (eigener, kleinerer Nummernkreis), der Inhalt von 2022/23 (fremde
+Akten), dass die Oberfläche ihn unter dieser Akte nicht zeigt (er gehört nicht
+dazu), und dass es bei drei Akten gleich aussah.
+
+> **Der Satz „Das Programm hat richtig gearbeitet" war falsch.** Er stand heute
+> früh in `MORGEN.md`, in `DSFA-ANGABEN.md`, im Verarbeitungsverzeichnis, im
+> DSFA-Entwurf und in der Anfrage an den Hersteller. Überall berichtigt.
+>
+> **Die Lehre, und sie ist dieselbe wie fünfmal zuvor an diesem Tag:** Eine
+> Nummer ohne ihren Namensraum ist keine Nummer. Dass `2871` eine Antwort
+> ergab, hat niemanden misstrauisch gemacht — der Pfad hat sie ja
+> angenommen.
+
+### Was die Beschreibung sonst beantwortet
+
+| Frage | Antwort |
+|---|---|
+| Wo liegt die E-Akte? | `POST /correspondence/search` mit `{"recordIdentifier", "page"}` |
+| Wo liegen die **Vermerke**? | darin, als Einträge mit `type: "note"`; die Nummer steht in `referenceNote`. **Telefonvermerke** tragen `type: "phonecall"` — der Wunsch vom 28.09.2026 |
+| Warum sagte `/record/note` immer 405? | Es braucht **zwei** Pflichtparameter: `id` **und** `record`. Zwanzig Namen wurden probiert, jeder mit **einem** Wert. „Bitte Daten angeben" war wörtlich zu nehmen |
+| Welche Arten gibt es? | `mail · bea · post · fax · webnodes · sms · eda · note · file` |
+
+### Was gebaut ist, und was nicht
+
+**Gebaut:** Die Probe geht den richtigen Weg — `_korrespondenz_lesen` fragt
+`/correspondence/search`, zählt Arten, Ordnernummern und Zeitraum, sucht die
+Einträge vom Typ `note` heraus und ruft bis zu drei Vermerke mit **beiden**
+Pflichtparametern ab. Gezeigt werden Art und **Länge** des Inhalts, nie der
+Inhalt und nie ein Betreff; 17 Prüfungen halten das fest.
+
+**Nicht gebaut:** Im Betrieb ist noch nichts geändert. `correspondenceFolderId`
+bleibt abgeschaltet.
+
+> **Warum nicht gleich?** Weil wir die Antwort des Servers noch nicht gesehen
+> haben. Genau dieser Schritt — aus einer Beschreibung unmittelbar in den
+> Betrieb — hat heute früh die 17 fremden Dokumente erzeugt.
+
+### Zu tun
+
+1. **Kanzlei:** `JURNODES-PRUEFEN.bat` an `X-100-2026` laufen lassen und
+   `jurnodestest.txt` schicken. Die Probe geht jetzt zuerst über die
+   Korrespondenz.
+2. Mit dem Lauf: die Korrespondenz in den Betrieb einbauen — Dateien über
+   `referenceFile`, Vermerke über `/record/note`.
+3. **Die Anfrage an den Hersteller ist nicht mehr nötig** und darf nicht so
+   hinausgehen: Sie behauptet einen Fehler, den es nicht gibt.
 
 ---
 

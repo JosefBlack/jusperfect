@@ -94,12 +94,11 @@ Diese fünf Punkte sind bekannt. Sie noch einmal zu melden hilft nicht.
 **Etwas dazu zu sagen schon** — die Fragen stehen weiter unten unter
 „Offene Fragen".
 
-1. **Der Korrespondenzordner von jur|nodes.** Das Feld
-   `correspondenceFolderId` liefert Schriftstücke, die nicht zu der abgefragten
-   Akte gehören (an drei Akten gemessen, in einer 17 von 55). Das Feld wird
-   seit dem 05.10.2026 **nicht mehr gelesen**. Die Vermutung: Korrespondenz und
-   Vermerke liegen in der E-Akte, die über die Schnittstelle nicht erreichbar
-   ist. Anfrage an den Hersteller läuft.
+1. **Der Korrespondenzordner — aufgeklärt am 05.10.2026.** Es war ein Fehler
+   im Programm: zwei getrennte Ordnerbäume in jur|nodes, und die Nummer des
+   einen wurde am Pfad des anderen abgefragt. Der falsche Weg ist abgeschaltet,
+   der richtige belegt und in der Probe gemessen, aber **noch nicht im
+   Betrieb**. Einzelheiten in `schnittstelle/README.md`.
 2. **Die Regionen des Schutzgeländers.** Wohin das EU-Inferenzprofil und
    `eu.guardrail.v1:0` **intern** verteilen, ist bei AWS erfragt und noch nicht
    beantwortet.
@@ -107,7 +106,8 @@ Diese fünf Punkte sind bekannt. Sie noch einmal zu melden hilft nicht.
    `DATENSCHUTZHINWEISE-ENTWURF.md` sind Entwürfe; 26 Stellen sind als
    `[KANZLEI n]` offen gelassen und von der Kanzlei zu bewerten, nicht von der
    Entwicklung.
-4. **Die Vermerke** aus jur|nodes werden nicht gelesen — siehe Punkt 1.
+4. **Die Vermerke** aus jur|nodes werden noch nicht gelesen. Der Weg steht
+   seit dem 05.10.2026 fest — siehe Punkt 1.
 5. **Zugriff je Bearbeiter.** Technisch vorhanden, in der Kanzlei nicht
    eingeschaltet: Alle eingetragenen Nutzer sehen alle Akten. Bewusst so, und
    offen.
@@ -128,32 +128,27 @@ Ein erfundener Schnittstellenpfad kostet einen Prüflauf an echten Mandatsakten.
 
 ---
 
-### Frage 1 — Wie liest man die E-Akte von jur|nodes?
+### ~~Frage 1 — Wie liest man die E-Akte von jur|nodes?~~ — **beantwortet**
 
-**Kennen Sie das Produkt jur|nodes?** Es ist eine Aktenverwaltung für
-Anwaltskanzleien mit einer REST-Schnittstelle (API-Fassung 1.0.1).
+Am Abend des 05.10.2026 hat die Kanzlei die OpenAPI-Beschreibung des
+Herstellers geliefert (Fassung 1.0.2, 85 Pfade). Sie liegt im Paket unter
+`schnittstelle/jurnodes-api-1.0.2.json`, die Auswertung in
+`schnittstelle/README.md`. Kurz:
 
-In der Oberfläche liegen **Korrespondenz und Vermerke** einer Akte in einem
-Bereich namens **E-Akte**, zusammen mit den Mails. Über die Schnittstelle
-finden wir dorthin keinen Weg.
+* Die E-Akte heißt **Korrespondenz**: `POST /correspondence/search`.
+* Die **Vermerke** sind Korrespondenzen vom Typ `note`, mit der Nummer in
+  `referenceNote`; **Telefonvermerke** tragen `type: "phonecall"`.
+* `GET /record/note` braucht **zwei** Pflichtparameter — `id` **und**
+  `record`. Daran ist die Suche vier Wochen gescheitert.
+* **Der Befund zum Korrespondenzordner war ein Fehler im Programm**, kein
+  Verhalten des Herstellers: zwei getrennte Ordnerbäume, eine Nummer aus dem
+  einen am Pfad des anderen abgefragt.
 
-Was bekannt ist:
-
-| | |
-|---|---|
-| Was es gibt | `/record/search`, `/record`, `/file-system/folder/content`, `/file-system/file/download`, `/relation/search`, `/todo/search`, `/record/note`, `/file-system/add-file` |
-| Die Akte wird angesprochen über | den Abfrageparameter `identifier` (ein Schlüssel wie `FL6BDPWJ…`), **nicht** über das Aktenzeichen — das heißt `recordSign` und ist ein eigenes Feld |
-| 16 geratene Pfade für die E-Akte | alle 404, mit OPTIONS gefragt (`/record/process`, `/process`, `/efile`, `/record/entry`, `/record/history`, `/record/mail/search`, `/record/document/search` und neun weitere) |
-| `GET /record/note` | weist **jede** Parameterform mit Status 405 und „Bitte Daten angeben" ab. Probiert: `id`, `record`, `recordIdentifier`, `identifier`, `recordId`, `noteIdentifier`, `note`, `sign`, `recordSign`, `data` — je mit Schlüssel und Aktenzeichen, auch mit `page=1` |
-| Allein `id` verhält sich anders | Zeichenkette → 400 „cannot be parsed into number"; **Zahl** → wieder 405 „Bitte Daten angeben". Die Zahl wird angenommen und genügt nicht |
-| `/record/note/search`, `/note/search` | 404 |
-| Eine OpenAPI-Beschreibung | liefert der Server nicht: sechs übliche Pfade unterhalb der Zugangskennung und vierundzwanzig darüber, alle 404 |
-
-**Gefragt ist:** Kennen Sie diesen Hersteller oder diese Schnittstelle? Gibt es
-einen Pfad für die E-Akte? Welche Zahl erwartet `id` bei `/record/note`?
-
-**Wenn Sie das Produkt nicht kennen, sagen Sie das bitte** und raten Sie
-nicht. Die Anfrage an den Hersteller ist formuliert und geht ohnehin hinaus.
+**Was hier trotzdem willkommen ist:** ein Blick auf
+`schnittstelle/README.md` und auf `jusperfect/jurnodestest.py::_korrespondenz_lesen`
+— ist die Auswertung richtig gelesen? Besonders: Reicht
+`POST /correspondence/search` wirklich für **alle** Korrespondenz, oder braucht
+es zusätzlich den Ordnerbaum über `/correspondence/folder`?
 
 ---
 

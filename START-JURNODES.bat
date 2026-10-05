@@ -148,12 +148,19 @@ REM zeigten am 05.10. dasselbe Muster: Der Dateiordner passt jedesmal zur
 REM Akte, der Korrespondenzordner nie - niedrige Nummer, befuellt stets
 REM 2022/23, unabhaengig davon, wann die Akte angelegt wurde.
 REM
-REM Das Feld correspondenceFolderId zeigt offenbar nicht auf die
-REM Korrespondenz DIESER Akte. Worauf dann, weiss nur der Hersteller.
-REM Bis zu seiner Antwort wird es nicht gelesen - fremde Schriftstuecke
-REM in einer Arbeitsakte sind teurer als fehlende.
+REM AUFGEKLAERT am Abend des 05.10.2026, und es war UNSER Fehler:
+REM jur|nodes fuehrt ZWEI getrennte Ordnerbaeume mit je eigenen Nummern -
+REM das Dateisystem und die Korrespondenz. Das Programm hat die Nummer des
+REM Korrespondenzordners am Pfad des Dateisystems abgefragt. Dort gibt es
+REM die Nummer auch, sie gehoert nur zu einem anderen Ordner - dem einer
+REM fremden Akte.
 REM
-REM Weg zurueck, erst mit der Antwort: das REM der naechsten Zeile weg.
+REM Der richtige Weg steht fest: POST /correspondence/search. Er ist in der
+REM Probe gemessen, aber noch nicht im Betrieb - erst ein Lauf an einer
+REM echten Akte zeigt, was der Server wirklich liefert.
+REM
+REM Diese Zeile bleibt deshalb aus. Sie einzuschalten wuerde den FALSCHEN
+REM Weg wieder gehen.
 REM set JUSPERFECT_KORRESPONDENZ=ein
 
 REM --- Was nicht von selbst angehakt wird ------------------------------
