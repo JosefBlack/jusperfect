@@ -2487,9 +2487,16 @@ async function frageStellen() {
     strom.remove(); throw new Error((f && f.fehler) || `Fehler ${resp.status}`);
   }
 
-  // Der Text strömt roh (Schreibgefühl); am Ende ersetzt ihn die belegte,
-  // fail-closed geprüfte Fassung mit klickbaren Fundstellen.
-  let roh = "";
+  // Es strömt nur Geprüftes (Befund F05 der Zweitprüfung, 05.10.2026).
+  //
+  // Vorher stand hier der Rohtext: schönes Schreibgefühl, und der Bearbeiter
+  // sah eine Aussage, die der Abschlussfilter gleich darauf zurückhielt. Die
+  // Zusage lautet "entfernen, nicht zeigen" - ein Text, der erst dasteht und
+  // dann verschwindet, ist gezeigt worden.
+  //
+  // Bis zur ersten abgeschlossenen Aussage steht deshalb nur da, DASS
+  // gearbeitet wird. Danach kommt der geprüfte Stand, und am Ende ersetzt ihn
+  // die Endfassung mit klickbaren Fundstellen.
   let gepruefteAntwort = false;   // kam ein "fertig"-Ereignis?
   const finalisiere = (antwort) => {
     gepruefteAntwort = true;
@@ -2503,7 +2510,20 @@ async function frageStellen() {
   const verarbeite = (zeile) => {
     if (!zeile.trim()) return;
     let ev; try { ev = JSON.parse(zeile); } catch (e) { return; }
-    if (ev.type === "text") { roh += ev.text; strom.textContent = roh; thread.scrollTop = thread.scrollHeight; }
+    if (ev.type === "fortschritt") {
+      // Nur wenn noch nichts Geprüftes dasteht - sonst flackerte der Text.
+      if (!strom.dataset.geprueft) {
+        strom.className = "stromtext wartet";
+        strom.textContent = "jusperfect schreibt \u2026 (" + ev.zeichen + " Zeichen)";
+      }
+      thread.scrollTop = thread.scrollHeight;
+    }
+    else if (ev.type === "geprueft") {
+      strom.dataset.geprueft = "1";
+      strom.className = "stromtext";
+      strom.textContent = ev.text;
+      thread.scrollTop = thread.scrollHeight;
+    }
     else if (ev.type === "fertig") finalisiere(ev.antwort);
     else if (ev.type === "fehler") { gepruefteAntwort = true; strom.remove(); melden(ev.detail, true); }
   };

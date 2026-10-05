@@ -137,10 +137,16 @@ class DemoProvider:
         treffer.sort(key=lambda t: -t[0])
         if not treffer:
             return "Zu dieser Frage finden sich in den geladenen Dokumenten keine belastbaren Angaben."
-        zeilen = ["Demo-Antwort (ohne KI, nur Stichwortabgleich):", ""]
-        for _, kennung, satz in treffer[:4]:
-            zeilen.append(f"- {satz} [Q: {kennung}]")
-        return "\n".join(zeilen)
+        # Keine Kopfzeile "Demo-Antwort (ohne KI, …)".
+        #
+        # Sie stand hier und war ein technischer Hinweis mitten in einer
+        # Aussage - genau die Vermischung, die Befund F04 der Zweitpruefung
+        # beanstandet. Seit dem 05.10.2026 traegt jede Einheit ihren eigenen
+        # Beleg; die Kopfzeile traegt keinen und wurde folgerichtig
+        # zurueckgehalten. Dass es der Demo-Anbieter ist, steht in der
+        # Kopfleiste der Oberflaeche ("Demo (ohne KI)") und gehoert nicht in
+        # den Antworttext.
+        return "\n".join(f"- {satz} [Q: {kennung}]" for _, kennung, satz in treffer[:4])
 
     # ── Aktengedaechtnis ───────────────────────────────────────────────────
 

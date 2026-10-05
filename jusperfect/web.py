@@ -692,8 +692,12 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         def strom():
             try:
                 for art, wert in d.analyse.frage_stream(ident, sitzung, passagen, daten.frage, beteiligte, fristen, referenzen):
-                    if art == "text":
-                        yield json.dumps({"type": "text", "text": wert}, ensure_ascii=False) + "\n"
+                    if art == "fortschritt":
+                        # Nur die Zeichenzahl: dass gearbeitet wird, nicht was
+                        # dasteht (Befund F05 der Zweitpruefung, 05.10.2026).
+                        yield json.dumps({"type": "fortschritt", "zeichen": wert}) + "\n"
+                    elif art == "geprueft":
+                        yield json.dumps({"type": "geprueft", "text": wert}, ensure_ascii=False) + "\n"
                     else:
                         d.sitzungen.dialog_merken(ident, sitzung.id, daten.frage, wert)
                         d.gedaechtnis.antwort_merken(sitzung, daten.frage, wert)

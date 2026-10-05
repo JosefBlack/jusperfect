@@ -78,7 +78,11 @@ class _SpyProvider:
 
     def fragen(self, system, material, aufgabe, *, max_tokens=8000, modell_id=None):
         self.gesehen_aufgabe = aufgabe
-        return ProviderAntwort(text='{"betreff": "Test", "text": "Ein Entwurf."}', nutzung=Nutzung(), modell=self.modell_id)
+        # Mit Beleg: Seit dem 05.10.2026 (Befund F04) wird ein Entwurf ohne
+        # einen einzigen tragenden Beleg nicht mehr ausgegeben. Geprueft wird
+        # hier das Muster im Prompt, nicht die Belegpflicht.
+        return ProviderAntwort(text='{"betreff": "Test", "text": "Ein Entwurf [Q: D1-S1-P1]."}',
+                               nutzung=Nutzung(), modell=self.modell_id)
 
     def fragen_stream(self, system, material, aufgabe, *, max_tokens=8000, modell_id=None):
         yield self.fragen(system, material, aufgabe)

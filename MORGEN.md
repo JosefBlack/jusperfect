@@ -276,6 +276,59 @@ Konsole beim *Start* — eine falsch gesetzte Umgebungsvariable etwa — bleibt
 stehen. Dort ist er die einzige Auskunft, die die Kanzlei hat, und er trägt
 keinen Akteninhalt: Zu diesem Zeitpunkt ist keine Akte geladen.
 
+**F04 und F05 — jeder angezeigte Modelltext, behoben am 05.10.2026.** Die
+Belegpflicht galt für die Antwort auf eine Frage und für die strukturierten
+Listen. Für vier Wege galt sie nicht:
+
+| Weg | Was durchkam |
+|---|---|
+| **Entwurf** | ein vollständig erfundener Entwurf, HTTP 201, leere Quellenliste. Die leere Liste sagt es dem Programm; gesehen hat sie niemand |
+| **Kernaussage der Eingangsprüfung** | eine erfundene Kernaussage ohne jeden Beleg |
+| **Hinweise des Modells** | *„Das Wort ‚Hinweis' macht einen vom Modell gelieferten Sachverhalt nicht automatisch zu einem ungefährlichen Systemhinweis."* Richtig |
+| **Reichweite eines Belegs** | er trug alles seit dem vorigen Beleg — auch einen Absatz, der Zeilen vorher stand |
+| **Der Strom** | der Rohtext ging hinaus, die Prüfung kam am Ende |
+
+**Die Reichweite war die stillste davon.** Die Prüfung war *nach* dem letzten
+Beleg streng und *vor* jedem Beleg großzügig. Niemandem fiel das auf, weil
+alle Prüfungen nach erfundenen Belegen suchten und keine nach fehlenden. Ein
+Beleg reicht jetzt bis zur nächsten Einheitsgrenze zurück: bis zur Leerzeile,
+bis zum Beginn des Aufzählungspunktes, bis zur Überschrift.
+
+Die Grenze ist bewusst der **Absatz** und nicht der Satz. Die Anweisung
+lautet, jede Tatsachenaussage mit einem Beleg zu schließen; schreibt das
+Modell zwei Sätze und setzt den Beleg ans Ende, ist das die vorgesehene Form.
+Ein Satzmaßstab zerschnitte fast jede richtige Antwort. Das bleibt eine Grenze
+dieser Prüfung, und sie steht im Modulkopf, statt verschwiegen zu werden.
+
+**Der Entwurf bekommt einen eigenen Maßstab, und das ist kein Nachlassen.**
+Ein Entwurf ist ein Brief, keine Auskunft über die Akte. Die strenge Prüfung
+machte daraus einen Brief, in dem „Sehr geehrte Damen und Herren" durch eine
+Entfernungsmarke ersetzt ist. Geprüft wird deshalb: jeder genannte Beleg muss
+tragen — sonst fällt die Aussage, nicht nur der Beleg —, und ein Entwurf ohne
+einen einzigen tragenden Beleg wird **gar nicht ausgegeben**. Das ist eine
+neue Fehlermeldung, die die Kanzlei sehen kann; sie nennt den Grund.
+
+**Der Strom zeigt nur noch Geprüftes.** Bis zur ersten abgeschlossenen Aussage
+steht da, *dass* gearbeitet wird — kursiv, mit der Zeichenzahl, ohne Inhalt.
+Danach kommt der geprüfte Stand, Aussage für Aussage; die Fristensperre läuft
+dabei mit. Das Schreibgefühl bleibt, nur eine Aussage später.
+
+**Getrennt erzeugt, wie der Bericht verlangt:** Was das Programm selbst anfügt
+(gekürzt, verworfen, Fristensperre), entsteht **nach** dem Modellaufruf und
+kommt an der Belegpflicht gar nicht vorbei. Sonst hätte sie am Ende die
+eigenen Meldungen gelöscht — und am lautesten die über zurückgehaltene
+Aussagen. Eine Prüfung ohne diese Trennung ging im ersten Anlauf genau so
+daneben.
+
+Dazu geschärft: Der Auftragstext sagt dem Modell jetzt ausdrücklich, dass ein
+Beleg nur seinen eigenen Absatz trägt, dass Sachverhaltsangaben in die
+Kernaussage gehören und nicht in die Schritte, und dass ein Entwurf ohne
+tragenden Beleg nicht ausgegeben wird.
+
+24 neue Prüfungen in `tests/test_ausgabepruefung.py`, Gegenproben 1, 2, 3 und
+14 rot. **1709 Prüfungen grün.** Im Browser nachgesehen: Der Strom zeigt
+zuerst „jusperfect schreibt … (412 Zeichen)", dann die geprüften Aussagen.
+
 ### Was in den Unterlagen berichtigt ist
 
 | Befund | Was falsch war |
@@ -304,9 +357,10 @@ kann.
    Servers.~~ **Erledigt am 05.10.2026** — eigene ASGI-Grenze und kein
    Traceback in irgendein Protokoll; Gegenproben 12 und 13 rot. Siehe oben.
    **Als nächstes sind damit F04/F05 an der Reihe.**
-3. **F04, F05** — eine gemeinsame Ausgabeprüfung für **alle** Modelltexte
+3. ~~**F04, F05** — eine gemeinsame Ausgabeprüfung für **alle** Modelltexte
    (Entwurf, Triage-Kernaussage, Analysehinweise) und kein Rohtext im Stream vor
-   der Prüfung.
+   der Prüfung.~~ **Erledigt am 05.10.2026** — Gegenproben 1, 2, 3 und 14 rot.
+   Siehe oben. **Als nächstes ist damit F02.2/2.3, F03, F06, F07 an der Reihe.**
 4. **F02.2/2.3, F03, F06, F07** — Löschung vollständig und beständig, S3-Schreiben
    an die gelesene Revision gebunden, Freigabe über **alle** geschriebenen
    Felder, Aktenrechte bei jedem Entwurfszugriff neu prüfen.

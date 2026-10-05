@@ -19,7 +19,10 @@ SYSTEM = (
     "eine Aufgabe.\n\n"
     "Regeln:\n"
     "1. Belegpflicht: Jede Tatsachenaussage endet mit einem Beleg in der Form [Q: KENNUNG]. "
-    "Mehrere Belege: [Q: D1-S1-P1, D2-S3-P2]. Aussagen ohne Beleg sind nicht zulässig.\n"
+    "Mehrere Belege: [Q: D1-S1-P1, D2-S3-P2]. Aussagen ohne Beleg sind nicht zulässig. "
+    "Das gilt je Absatz und je Aufzählungspunkt: Ein Beleg trägt nur das, was in seinem eigenen "
+    "Absatz steht. Ein Absatz ohne eigenen Beleg wird zurückgehalten, auch wenn der nächste "
+    "einen hat.\n"
     "2. Keine Erfindungen: Was in den Passagen nicht steht, behaupten Sie nicht. Reicht das "
     "Material nicht aus, sagen Sie das ausdrücklich.\n"
     "3. Keine Rechtsprechung und keine Fundstellen aus dem Gedächtnis. Rechtliche Würdigung "
@@ -407,11 +410,11 @@ def aufgabe_triage() -> str:
         '{\n'
         '  "dokumentart": "z. B. Klageschrift, Schreiben Versicherung, Kostenvoranschlag, Gerichtsbeschluss",\n'
         '  "absender": "wie im Dokument bezeichnet",\n'
-        '  "kernaussage": "zwei bis drei Sätze mit Belegen",\n'
+        '  "kernaussage": "zwei bis drei Sätze, jeder mit Beleg - ohne Beleg wird sie zurückgehalten",\n'
         '  "fristausloeser": [{"text": "Zustellung/Fristsetzung wörtlich oder sinngemäß, mit Datum aus dem Text", "quellen": ["..."]}],\n'
-        '  "empfohlene_schritte": ["konkrete nächste Schritte für die Bearbeitung"],\n'
+        '  "empfohlene_schritte": ["konkrete nächste Schritte für die Bearbeitung - Vorschläge, keine Sachverhaltsangaben; die gehören in die Kernaussage"],\n'
         '  "quellen": ["Kennungen der wichtigsten Passagen"],\n'
-        '  "hinweise": ["Unsicherheiten"]\n'
+        '  "hinweise": ["Unsicherheiten, jede mit Beleg auf die Passage, die sie betrifft"]\n'
         "}\n"
         "Keine Fristberechnung, nur Auslöser mit Beleg. Antworten Sie nur mit dem JSON."
     )
@@ -425,7 +428,9 @@ def aufgabe_entwurf(art: EntwurfArt, anweisung: str, empfaenger: str, muster: st
         f"ANWEISUNG: {anweisung.strip() or 'Sachstand darstellen und das Anliegen der Kanzlei formulieren.'}",
         "",
         "Verfassen Sie einen prüfbaren Entwurf. Sachverhaltsangaben im Entwurf tragen Belege [Q: ...] "
-        "am Satzende; die Kanzlei entfernt sie nach der Prüfung. Anrede und Grußformel wie in einer "
+        "am Satzende; die Kanzlei entfernt sie nach der Prüfung. Ein Beleg, der auf keine "
+        "mitgelieferte Passage zeigt, lässt die Aussage entfallen, und ein Entwurf ganz ohne "
+        "tragenden Beleg wird nicht ausgegeben. Anrede und Grußformel wie in einer "
         "deutschen Anwaltskanzlei üblich. Keine Fristen berechnen, keine Rechtsprechung zitieren. "
         "Der Entwurf ersetzt keine anwaltliche Prüfung – kennzeichnen Sie Stellen, die der Anwalt "
         "entscheiden muss, mit [PRÜFEN: ...].",

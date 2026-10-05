@@ -9,8 +9,8 @@ Die Kanzlei hat das Projekt von einer zweiten KI prüfen lassen. Grundlage war
 bestanden alle — und haben die Lücken trotzdem nicht gezeigt. Das ist der
 eigentliche Befund.
 
-**Stand 05.10.2026: drei Befunde behoben** (F01, F02.1, F09), zwei in den
-Unterlagen berichtigt (F11, F12). Die Gegenproben 4, 10, 12 und 13 sind damit
+**Stand 05.10.2026: fünf Befunde behoben** (F01, F02.1, F04, F05, F09), zwei in
+den Unterlagen berichtigt (F11, F12). Zehn der siebzehn Gegenproben sind damit
 rot — bei ihnen heißt das: geschlossen.
 
 | Datei | Was darin steht |
@@ -52,8 +52,8 @@ Fassung hier bleibt unverändert als Beleg stehen.
 | **F02.2** | ein gemischt belegter Lebenssachverhalt bleibt ganz stehen | offen |
 | **F02.3** | eine offene Sitzung behält die Passagen und speichert Antworten darauf neu | offen |
 | **F03** | gemeinsamer ETag-Zustand lässt alte S3-Stände Löschungen überschreiben | offen |
-| **F04** | Belegpflicht gilt nicht für Entwürfe, Triage-Kernaussage und Analysehinweise | offen |
-| **F05** | der Stream zeigt Rohtext vor der Belegprüfung | offen |
+| **F04** | Belegpflicht gilt nicht für Entwürfe, Triage-Kernaussage und Analysehinweise | ~~offen~~ **behoben 05.10.2026** |
+| **F05** | der Stream zeigt Rohtext vor der Belegprüfung | ~~offen~~ **behoben 05.10.2026** |
 | **F06** | der bestätigte Prüfsummenstand umfasst den Betreff nicht | offen |
 | **F07** | Entwürfe bleiben nach Aktenrechteentzug lesbar und freigebbar | offen |
 | **F08** | eine fremde `/record`-Antwort wird nicht gegen die angefragte Akte geprüft | offen |

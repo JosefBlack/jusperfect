@@ -178,7 +178,18 @@ class _KlebeProvider:
 
 
 class Streaming(unittest.TestCase):
-    """Die Frage strömt stückweise; die Belegpflicht greift am Ende."""
+    """Die Frage strömt stückweise – und es strömt nur Geprüftes.
+
+    Befund F05 der Zweitprüfung vom 05.10.2026: Vorher ging der Rohtext
+    hinaus und die Prüfung kam am Ende. Der Bearbeiter sah also – und konnte
+    kopieren –, was der Abschlussfilter gleich darauf zurückhielt; bei
+    langsamer Übertragung lange. Die Zusage lautet „entfernen, nicht zeigen",
+    und ein Text, der erst dasteht und dann verschwindet, ist gezeigt worden.
+
+    Bis zur ersten abgeschlossenen Aussage sieht der Bearbeiter seitdem nur,
+    **dass** gearbeitet wird: ein Fortschrittsereignis mit der Zeichenzahl,
+    ohne Inhalt.
+    """
 
     def _sitzung(self, d):
         c = client(d, "ra-weber")
@@ -186,16 +197,23 @@ class Streaming(unittest.TestCase):
         c.post(f"/api/sitzungen/{sid}/dokumente", json={"dokument_ids": ["D-001", "D-002", "D-004"]})
         return c, sid
 
-    def test_stream_liefert_textstuecke_und_fertig(self):
+    def test_stream_liefert_fortschritt_und_fertig(self):
         c, sid = self._sitzung(dienste())
         r = c.post(f"/api/sitzungen/{sid}/frage/stream",
                    json={"frage": "Welche Geschwindigkeit fuhr der Mandant?"})
         self.assertEqual(r.status_code, 200)
         self.assertTrue(r.headers["content-type"].startswith("application/x-ndjson"))
         ereignisse = _stromzeilen(r)
-        text_ev = [e for e in ereignisse if e["type"] == "text"]
+        fortschritt = [e for e in ereignisse if e["type"] == "fortschritt"]
         fertig = [e for e in ereignisse if e["type"] == "fertig"]
-        self.assertGreater(len(text_ev), 1, "es sollte in mehreren Stücken strömen")
+        self.assertGreater(len(fortschritt), 1, "es sollte in mehreren Stücken strömen")
+        # Der Fortschritt traegt keinen Inhalt, nur die Zeichenzahl - und die
+        # waechst, sonst waere es kein Fortschritt.
+        for e in fortschritt:
+            self.assertEqual(set(e) - {"type"}, {"zeichen"})
+        self.assertLess(fortschritt[0]["zeichen"], fortschritt[-1]["zeichen"])
+        self.assertFalse([e for e in ereignisse if e["type"] == "text"],
+                         "Rohtext geht seit dem 05.10.2026 nicht mehr hinaus.")
         self.assertEqual(len(fertig), 1)
         antwort = fertig[0]["antwort"]
         sichtbar = {p["kennung"] for p in c.get(f"/api/sitzungen/{sid}/passagen").json()["passagen"]}
@@ -209,9 +227,14 @@ class Streaming(unittest.TestCase):
         c, sid = self._sitzung(dienste(provider=prov))
         r = c.post(f"/api/sitzungen/{sid}/frage/stream", json={"frage": "Was steht drin?"})
         ereignisse = _stromzeilen(r)
-        # Roh strömt alles – auch das Erfundene.
-        roh = "".join(e["text"] for e in ereignisse if e["type"] == "text")
-        self.assertIn("Frei erfunden", roh)
+        # **Nichts** von dem Erfundenen geht hinaus – auch nicht für einen
+        # Augenblick. Geprüft wird der ganze Strom, nicht nur das Ende.
+        alles = json.dumps(ereignisse, ensure_ascii=False)
+        self.assertNotIn("Frei erfunden", alles)
+        # Was geprüft gesendet wurde, trägt die echte Aussage und die Marke.
+        gepruefte = [e for e in ereignisse if e["type"] == "geprueft"]
+        self.assertTrue(gepruefte, "Belegtes soll schon während des Stroms kommen.")
+        self.assertIn("Belegtes", gepruefte[-1]["text"])
         # Fertig: die unbelegte Aussage ist raus, nur die echte Kennung bleibt.
         antwort = [e for e in ereignisse if e["type"] == "fertig"][0]["antwort"]
         self.assertIn("Belegtes", antwort["text"])

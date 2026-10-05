@@ -32,10 +32,101 @@ from jusperfect.services.fristen import (
     felder_entschaerfen as frist_felder_entschaerfen,
     hinweis as frist_hinweis,
 )
-from jusperfect.services.belegpflicht import aussage_fail_closed, eintraege_fail_closed
+from jusperfect.services.belegpflicht import (
+    aussage_fail_closed, eintraege_fail_closed, feld_fail_closed,
+)
 from jusperfect.services.quellen import index_bauen, quellen_aus_kennungen
 
 M = TypeVar("M", bound=BaseModel)
+
+
+KEINE_KERNAUSSAGE = (
+    "Zu diesem Dokument liegt keine belegte Kernaussage vor; die Eingangsprüfung "
+    "wurde insoweit zurückgehalten.")
+
+
+def _bis_zum_letzten_beleg(roh: str) -> str:
+    """Der Teil des Rohtextes, der mit einer abgeschlossenen Aussage endet.
+
+    Der Auftragstext verlangt, dass jede Tatsachenaussage mit ``[Q: …]``
+    endet. Solange kein vollständiger Beleg dasteht, ist die Aussage nicht
+    fertig – und was nicht fertig ist, ist nicht zu prüfen.
+    """
+    from jusperfect.services.quellen import ZITAT_RE
+
+    letzter = None
+    for letzter in ZITAT_RE.finditer(roh):
+        pass
+    return roh[:letzter.end()] if letzter else ""
+
+
+def _vorschau_pruefen(text: str, index: dict, fristen) -> str:
+    """Dieselben Prüfungen wie am Ende, nur auf dem bisherigen Stück.
+
+    Wird nichts Belegtes gefunden, geht gar nichts hinaus: Der Verzicht-Satz
+    gehört in die Endfassung und nicht in eine Vorschau, in der die nächste
+    Aussage den Beleg noch bringen kann.
+    """
+    ergebnis = aussage_fail_closed(text, index)
+    if not ergebnis.quellen:
+        return ""
+    sauber, _ = frist_entschaerfen(ergebnis.text, index, fristen)
+    return sauber
+
+
+def _modellhinweise_pruefen(hinweise, index: dict) -> tuple[list[str], int]:
+    """Die Hinweise des Modells durch die Belegpflicht, die eigenen nicht.
+
+    Befund F04 der Zweitprüfung vom 05.10.2026: *„Das Wort ‚Hinweis' macht
+    einen vom Modell gelieferten Sachverhalt nicht automatisch zu einem
+    ungefährlichen Systemhinweis."* Richtig – „Die Kündigung ging am 04.05.
+    zu, das steht aber nur im Begleitschreiben" ist eine Tatsachenaussage im
+    Gewand einer Unsicherheit.
+
+    Die Trennung ist der eigentliche Punkt und nicht die Prüfung: Was das
+    Programm selbst anfügt (gekürzt, verworfen, Fristensperre), entsteht
+    **nach** diesem Aufruf und kommt hier gar nicht vorbei. Sonst hätte die
+    Belegpflicht am Ende die eigenen Meldungen gelöscht.
+    """
+    behalten: list[str] = []
+    verworfen = 0
+    for hinweis in hinweise or ():
+        ergebnis = feld_fail_closed(str(hinweis), index)
+        if ergebnis is None:
+            verworfen += 1
+        else:
+            behalten.append(ergebnis.text)
+    return behalten, verworfen
+
+
+def _schritte_pruefen(schritte, index: dict) -> tuple[list[str], int]:
+    """Empfohlene Schritte: Ein genannter Beleg muss tragen.
+
+    Hier ist der Maßstab bewusst weicher als bei der Kernaussage, und das hat
+    einen Grund: Ein Schritt ist ein Vorschlag („Mandantin anrufen"), keine
+    Aussage über die Akte. Einen Beleg dafür zu verlangen hieße, jeden
+    Vorschlag zu streichen.
+
+    Was nicht durchgeht, ist ein **Sachverhalt im Gewand eines Schrittes**,
+    der sich auf eine Passage beruft, die es nicht gibt. Nennt ein Schritt
+    einen Beleg, muss der tragen; sonst fällt der ganze Schritt. Dass ein
+    Schritt ganz ohne Beleg eine Tatsache einschmuggeln kann, bleibt – deshalb
+    sagt der Auftragstext jetzt ausdrücklich, dass Sachverhaltsangaben in die
+    Kernaussage gehören und nicht in die Schritte.
+    """
+    from jusperfect.services.quellen import ZITAT_RE
+
+    behalten: list[str] = []
+    verworfen = 0
+    for schritt in schritte or ():
+        text = str(schritt)
+        treffer = list(ZITAT_RE.finditer(text))
+        if treffer and not any(k.strip() in index
+                               for m in treffer for k in m.group(1).split(",")):
+            verworfen += 1
+            continue
+        behalten.append(text)
+    return behalten, verworfen
 
 
 class AktenZuGross(RuntimeError):
@@ -115,19 +206,46 @@ class Analysedienst:
     def frage_stream(self, identitaet: Identitaet, sitzung: Sitzung, passagen: list[Passage], frage: str,
                      beteiligte: list[Beteiligter], fristen: list[Frist],
                      referenzen: list[Passage] = ()):
-        """Wie ``frage``, aber stückweise: erst ("text", Stück), zuletzt
-        ("fertig", Antwort). Der Text strömt roh; die Belegpflicht greift am
-        Ende über den vollständigen Text, damit keine unbelegte Aussage
-        stehen bleibt.
+        """Wie ``frage``, aber stückweise – und **nur Geprüftes**.
+
+        Drei Arten von Ereignissen:
+
+        * ``("fortschritt", Zeichenzahl)`` – das Modell schreibt. Kein Inhalt.
+        * ``("geprueft", Text)`` – alle bis hier abgeschlossenen Aussagen,
+          durch die Belegpflicht und die Fristensperre gelaufen. Ersetzt die
+          vorige Fassung, sie wächst nur.
+        * ``("fertig", Antwort)`` – die Endfassung mit Quellen und Hinweisen.
+
+        **Warum nicht mehr roh (Befund F05 der Zweitprüfung, 05.10.2026).**
+        Vorher strömte der Rohtext und die Prüfung kam am Ende. Der Bearbeiter
+        sah also – und konnte kopieren –, was der Abschlussfilter gleich
+        darauf ausdrücklich zurückhielt; bei langsamer Übertragung lange. Die
+        Zusage lautet „entfernen, nicht zeigen", und ein Text, der erst
+        dasteht und dann verschwindet, ist gezeigt worden.
+
+        Gesendet wird deshalb erst, wenn eine Aussage abgeschlossen ist – das
+        ist am ``[Q: …]`` zu erkennen, mit dem sie laut Auftragstext endet.
+        Bis dahin sieht der Bearbeiter, dass gearbeitet wird, und sonst
+        nichts. Das Schreibgefühl bleibt, nur eine Aussage später.
         """
         auswahl, hinweise, material = self._frage_vorbereiten(sitzung, passagen, frage, beteiligte, fristen, referenzen)
+        index = index_bauen(auswahl)
         kontext = Ausgangskontext(identitaet, sitzung.id, sitzung.akte_id, "frage", passagen=len(auswahl))
         durchgang: Durchgang | None = None
+        roh, gesendet = "", ""
         for stueck in self._ausgang.fragen_stream(kontext, prompts.SYSTEM, material, prompts.aufgabe_frage(frage)):
-            if isinstance(stueck, str):
-                yield ("text", stueck)
-            else:
+            if not isinstance(stueck, str):
                 durchgang = stueck
+                continue
+            roh += stueck
+            yield ("fortschritt", len(roh))
+            abgeschlossen = _bis_zum_letzten_beleg(roh)
+            if not abgeschlossen:
+                continue
+            vorschau = _vorschau_pruefen(abgeschlossen, index, fristen)
+            if vorschau and vorschau != gesendet:
+                gesendet = vorschau
+                yield ("geprueft", vorschau)
         if durchgang is None:
             raise AnalyseFehler("Der Anbieter lieferte keine Antwort.")
         yield ("fertig", self._frage_belegen(durchgang, auswahl, hinweise, fristen))
@@ -210,7 +328,8 @@ class Analysedienst:
         return self._analyse_pruefen(analyse, roh, index_bauen(auswahl), durchgang, fristen)
 
     def _analyse_pruefen(self, analyse: Aktenanalyse, roh: dict, index: dict,
-                         durchgang: Durchgang, fristen: list[Frist]) -> Aktenanalyse:
+                         durchgang: Durchgang, fristen: list[Frist],
+                         eigene_hinweise: list[str] = ()) -> Aktenanalyse:
         """Belegpflicht, Aufräumen und Fristensperre über ein Analyseergebnis.
 
         Eigens herausgezogen, weil es zwei Wege zur Analyse gibt: über die
@@ -219,7 +338,16 @@ class Analysedienst:
         auf beiden Wegen dasselbe sein; zwei Fassungen dieser Prüfung wären mit
         der Zeit zwei verschiedene Prüfungen.
         """
-        hinweise = list(analyse.hinweise)
+        # Die Hinweise des Modells sind Aussagen über die Akte, keine
+        # Systemmeldungen - sie gehen durch dieselbe Prüfung wie alles andere.
+        # Was das Programm selbst anfügt, entsteht danach und getrennt.
+        hinweise, verworfene_hinweise = _modellhinweise_pruefen(analyse.hinweise, index)
+        # Die eigenen davor, und zwar erst hier: Gingen sie durch die Prüfung,
+        # löschte die Belegpflicht die Meldungen des Programms über sich selbst.
+        hinweise = list(eigene_hinweise) + hinweise
+        if verworfene_hinweise:
+            hinweise.append(f"{verworfene_hinweise} Hinweis(e) des Modells ohne "
+                            f"belastbaren Beleg entfernt.")
         # Fail closed: Ein Eintrag ohne gültige Quelle wird nicht aufgenommen.
         for liste_name in ("chronologie", "beteiligte", "forderungen", "beweismittel", "offene_punkte", "widersprueche"):
             behalten, verworfen = eintraege_fail_closed(
@@ -280,14 +408,13 @@ class Analysedienst:
         analyse, durchgang, roh = self._strukturiert(
             kontext, material, prompts.aufgabe_analyse_gedaechtnis(), Aktenanalyse)
         index = index_bauen(alle_passagen)
-        hinweise = [
+        eigener_hinweis = [
             "Diese Analyse beruht auf dem Lebenssachverhalt aus dem Aktengedächtnis, "
             f"nicht unmittelbar auf den Dokumenten. Er ist abschnittsweise aus allen "
             f"{len({p.dokument_id for p in alle_passagen})} Dokumenten dieser Akte entstanden; "
             "die Fundstellen zeigen auf die Originalpassagen und sind gegen diese geprüft."
-        ] + list(analyse.hinweise)
-        analyse.hinweise = hinweise
-        return self._analyse_pruefen(analyse, roh, index, durchgang, fristen)
+        ]
+        return self._analyse_pruefen(analyse, roh, index, durchgang, fristen, eigener_hinweis)
 
     def chronologie(self, identitaet: Identitaet, sitzung: Sitzung, passagen: list[Passage],
                     beteiligte: list[Beteiligter], fristen: list[Frist],
@@ -344,7 +471,23 @@ class Analysedienst:
         # Das Modell wählt der Ausgang anhand der Funktion („triage").
         triage, durchgang, roh = self._strukturiert(kontext, material, prompts.aufgabe_triage(), Triage)
         index = index_bauen(auswahl)
-        hinweise = list(triage.hinweise)
+        # Erst die Belegpflicht, dann alles andere - und die eigenen Hinweise
+        # entstehen getrennt von denen des Modells (Befund F04, 05.10.2026).
+        hinweise, verworfene_hinweise = _modellhinweise_pruefen(triage.hinweise, index)
+        kernergebnis = feld_fail_closed(triage.kernaussage, index)
+        if kernergebnis is None:
+            triage.kernaussage = KEINE_KERNAUSSAGE
+            hinweise.append("Die Kernaussage trug keinen belastbaren Beleg und wurde zurückgehalten.")
+        else:
+            triage.kernaussage = kernergebnis.text
+        triage.empfohlene_schritte, verworfene_schritte = _schritte_pruefen(
+            triage.empfohlene_schritte, index)
+        if verworfene_schritte:
+            hinweise.append(f"{verworfene_schritte} empfohlene(r) Schritt(e) mit "
+                            f"unauflösbarem Beleg entfernt.")
+        if verworfene_hinweise:
+            hinweise.append(f"{verworfene_hinweise} Hinweis(e) des Modells ohne "
+                            f"belastbaren Beleg entfernt.")
         if gekuerzt:
             hinweise.insert(0, "Das Dokument war zu lang für einen Aufruf; die Prüfung beruht auf dem Anfang.")
         triage.quellen = quellen_aus_kennungen(_kennungen(roh), index, hinweise)

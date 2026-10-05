@@ -21,6 +21,7 @@ from jusperfect.security.protokoll import ereignis, protokoll
 from jusperfect.services import prompts
 # Umbenannt: siehe analyse.py - der Parameter "fristen" wuerde das
 # Modul innerhalb der Methode ueberdecken.
+from jusperfect.services.belegpflicht import entwurf_fail_closed
 from jusperfect.services.fristen import (
     entschaerfen as frist_entschaerfen,
     hinweis as frist_hinweis,
@@ -28,7 +29,7 @@ from jusperfect.services.fristen import (
 from jusperfect.services.ausgang import Ausgang, Ausgangskontext
 from jusperfect.services.json_ausgabe import AusgabeUnbrauchbar, json_extrahieren
 from jusperfect.services.passagen import budget_anwenden, relevante_passagen
-from jusperfect.services.quellen import index_bauen, zitate_aufloesen
+from jusperfect.services.quellen import index_bauen
 from jusperfect.speicher.base import SitzungsSpeicher
 
 _log = protokoll("entwuerfe")
@@ -76,7 +77,23 @@ class Entwurfsdienst:
         if not text:
             raise EntwurfFehler("Das Modell hat keinen Entwurf geliefert.")
         index = index_bauen(auswahl)
-        text, quellen, hinweise = zitate_aufloesen(text, index)
+        # Fail closed, auch im Entwurf (Befund F04 der Zweitpruefung,
+        # 05.10.2026). Vorher stand hier nur `zitate_aufloesen`: Das setzt an
+        # die Stelle eines nicht auflösbaren Belegs die Marke „[Q: ohne
+        # Beleg]" und laesst die Behauptung stehen. Ein vollstaendig
+        # erfundener Entwurf kam so mit HTTP 201 und leerer Quellenliste
+        # heraus - die leere Liste sagt es dem Programm, gesehen hat sie
+        # niemand.
+        ergebnis = entwurf_fail_closed(text, index)
+        text, quellen, hinweise = ergebnis.text, ergebnis.quellen, list(ergebnis.hinweise)
+        if not quellen:
+            raise EntwurfFehler(
+                "Der Entwurf trug keinen einzigen belastbaren Beleg und wird deshalb "
+                "nicht ausgegeben. Bitte die Anweisung genauer fassen oder die Auswahl "
+                "der Dokumente prüfen.")
+        if ergebnis.verworfen:
+            hinweise.insert(0, f"{ergebnis.verworfen} Aussage(n) ohne belastbaren Beleg "
+                               f"aus dem Entwurf entfernt.")
         # Ein Entwurf geht am Ende hinaus. Eine gerechnete Frist darin waere der
         # teuerste Fehler, den dieses Programm machen kann.
         text, gerechnet = frist_entschaerfen(text, index, fristen)

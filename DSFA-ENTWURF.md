@@ -202,7 +202,7 @@ einen davon ungeprüft in einen Schriftsatz, trifft der Schaden den Mandanten.
 
 | Maßnahme | Wirkung | Nachweis |
 |---|---|---|
-| **Belegpflicht, fail closed** | Eine Aussage ohne Verweis auf eine mitgeschickte Passage wird **entfernt**, nicht markiert | `services/belegpflicht.py` |
+| **Belegpflicht, fail closed** | Eine Aussage ohne Verweis auf eine mitgeschickte Passage wird **entfernt**, nicht markiert. Seit dem 05.10.2026 für **jeden** angezeigten Modelltext: Antwort, Entwurf, Kernaussage der Eingangsprüfung, Hinweise des Modells – und schon im laufenden Text, nicht erst am Ende (Befunde F04/F05 der Zweitprüfung) | `services/belegpflicht.py` |
 | Fundstellen auf Passagenebene | `D2-S1-P3` — jede Aussage ist am Originaldokument nachprüfbar, mit einem Klick | |
 | Die tragende Stelle wird hervorgehoben | und wenn sie sich nicht zuordnen lässt, steht das daneben: *„Bitte nachlesen."* | |
 | Fristensperre | Fristen werden erkannt, nie berechnet — auch wenn die Akte dazu auffordert | `services/fristen.py`, in vier Prüfbogenläufen gehalten |

@@ -352,6 +352,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
   border-radius: 3px; padding: 0 3px; font-family: Consolas, monospace; font-size: 12.5px; }
 .stromtext { margin: 6px 0; white-space: pre-wrap; color: var(--gedaempft); }
 .stromtext::after { content: "▍"; margin-left: 1px; color: var(--akzent); animation: blinken 1s steps(2, start) infinite; }
+/* Solange nur die Zeichenzahl dasteht: kursiv, damit niemand sie fuer die
+   Antwort haelt. Der Cursor bleibt - es wird ja geschrieben. */
+.stromtext.wartet { font-style: italic; }
 @keyframes blinken { to { visibility: hidden; } }
 .karte-c .titelzeile { font-weight: 700; padding: 8px 12px 0; }
 .karte-c .fuss { display: flex; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border-top: 1px solid var(--linie);

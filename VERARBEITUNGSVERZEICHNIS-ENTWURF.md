@@ -64,7 +64,7 @@ Die Verarbeitung dient der **Bearbeitung des einzelnen Mandats**, und zwar:
 |---|---|
 | Keine automatisierte Entscheidung im Sinne des Art. 22 DSGVO | Jede Ausgabe ist ein Vorschlag; geschrieben wird nur, was ein Mensch ausdrücklich freigibt (`security/approval.py`, HMAC an Nutzer, Akte, Textprüfsumme gebunden) |
 | Keine Fristberechnung | Fristensperre (`services/fristen.py`), in Prüfbogenläufen am 16., 17., 22. und 28.09.2026 jeweils gehalten. Die Zweitprüfung vom 05.10.2026 fand drei Schreibweisen, die sie umgingen (zweistelliges Jahr, Monatsname ohne Jahr, Fristende ohne Fristwort); **am selben Tag geschlossen** — jedes angezeigte Datum muss sich seitdem auf eine mitgeschickte Passage, deren Kopfzeile oder den Fristenkalender zurückführen lassen |
-| Keine Aussage ohne Fundstelle | Belegpflicht fail closed: Eine Aussage ohne Verweis auf eine mitgeschickte Passage wird **entfernt**, nicht markiert (`services/belegpflicht.py`) |
+| Keine Aussage ohne Fundstelle | Belegpflicht fail closed: Eine Aussage ohne Verweis auf eine mitgeschickte Passage wird **entfernt**, nicht markiert (`services/belegpflicht.py`). Bis zum 05.10.2026 galt das für die Antwort und die strukturierten Listen, nicht für Entwürfe, die Kernaussage der Eingangsprüfung und die Hinweise des Modells; und der laufende Text zeigte Ungeprüftes, bis die Prüfung am Ende kam. Beides ist geschlossen (Befunde F04/F05 der Zweitprüfung) |
 | Kein Training des Modells | Amazon Bedrock verwendet Eingaben nicht zum Training; zugesichert im AWS-Vertragswerk |
 | Keine Profilbildung, kein Abgleich über Akten hinweg | Jede Sitzung arbeitet an genau einer Akte |
 
@@ -291,7 +291,7 @@ gehalten — 1562 automatische Prüfungen, Stand 05.10.2026.
 
 | Maßnahme | Wirkung |
 |---|---|
-| Belegpflicht fail closed | Unbelegte Aussagen werden entfernt |
+| Belegpflicht fail closed | Unbelegte Aussagen werden entfernt – in jedem angezeigten Modelltext und schon im laufenden Text |
 | Fundstellen auf Passagenebene | Jede Aussage ist am Originaldokument nachprüfbar |
 | Fristensperre | Keine berechneten Fristen, auch wenn die Akte dazu auffordert |
 | Verarbeitungsnachweis | Jeder Modellaufruf hinterlässt eine Zeile |

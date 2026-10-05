@@ -16,6 +16,36 @@ Zwei Formen:
   Textstellen hereinkommt.
 * Strukturierte Einträge (Chronologie, Beteiligte, Widersprüche …): Ein
   Eintrag ohne gültige Quelle wird nicht aufgenommen.
+* Kurze Felder (Kernaussage, ein Hinweis, ein Schritt): dieselbe Prüfung, nur
+  fällt hier das ganze Feld, statt eine Marke zu hinterlassen.
+* Entwürfe: ein eigener Maßstab, siehe ``entwurf_fail_closed``.
+
+---
+
+## Wie weit ein Beleg zurückreicht (Befund F04, 05.10.2026)
+
+Bis zum 05.10.2026 galt: alles seit dem vorigen Beleg. Damit nahm ein Beleg
+auch mit, was Absätze vorher stand:
+
+    Die Gegenseite hat den Anspruch in voller Höhe anerkannt.
+
+    Der Vertrag ist unterschrieben [Q: D1-S1-P1].
+
+Der erste Absatz steht in keiner Passage. Er kam vollständig durch, und
+``verworfen`` zählte null. Die Prüfung war **nach** dem letzten Beleg streng
+und **vor** jedem Beleg großzügig – eine Unsymmetrie, die niemandem auffiel,
+weil alle Prüfungen nach erfundenen Belegen suchten und keine nach fehlenden.
+
+**Ein Beleg reicht jetzt bis zur nächsten Einheitsgrenze zurück**, nicht
+weiter: bis zur Leerzeile davor, bis zum Beginn des Aufzählungspunktes, bis
+zur Überschrift. Was davor steht, ist eine eigene Aussage und braucht einen
+eigenen Beleg.
+
+Die Grenze ist bewusst der **Absatz** und nicht der Satz. Die Anweisung an das
+Modell lautet, jede Tatsachenaussage mit einem Beleg zu schließen; schreibt es
+zwei Sätze und setzt den Beleg ans Ende, ist das die vorgesehene Form. Ein
+Satzmaßstab würde fast jede richtige Antwort zerschneiden. Das bleibt eine
+Grenze dieser Prüfung, und sie steht hier, statt verschwiegen zu werden.
 """
 
 from __future__ import annotations
@@ -34,6 +64,76 @@ ENTFERNT = "[Aussage ohne belastbaren Beleg entfernt]"
 # und der Leerraum dahinter. Bewusst eng gefasst - alles andere ist eine neue
 # Aussage und braucht einen eigenen Beleg.
 _SATZSCHLUSS = re.compile(r"[\s.,;:!?)\]\}\"\u201c\u201d\u201e\u00bb\u00ab\u2013\u2014-]*")
+
+# Woran eine neue Aussageeinheit beginnt. Drei Formen, und jede musste
+# einzeln hin: Eine Leerzeile trennt Absaetze; eine Zeile, die mit einem
+# Aufzaehlungszeichen oder einer Ueberschrift anfaengt, beginnt selbst eine;
+# und eine Ueberschrift beendet ihre Einheit auch dann, wenn die naechste
+# Zeile gewoehnlicher Text ist. Die dritte fehlte im ersten Entwurf, und
+# "## Behauptung\nBelegter Satz [Q: …]" kam damit vollstaendig durch.
+_GRENZMUSTER = (
+    # (Muster, ob der ganze Treffer der Trenner ist)
+    (re.compile(r"\n[^\S\n]*\n"), True),
+    (re.compile(r"\n(?=[^\S\n]*(?:[-*\u2022\u2013]\s|\d+[.)]\s|#{1,6}\s))"), True),
+    (re.compile(r"(?m)^[^\S\n]*#{1,6}\s[^\n]*\n"), False),
+)
+
+
+def _einheiten(koerper: str) -> list[str]:
+    """Der Rumpf vor einem Beleg, zerlegt in Einheiten samt Trennern.
+
+    Gerade Stellen sind Einheiten, ungerade die Trenner dazwischen. Die
+    **letzte** Einheit ist die, die der Beleg traegt; alles davor ist eine
+    eigene Aussage. Die Trenner bleiben erhalten, sonst klebte eine Liste nach
+    der Pruefung zusammen.
+    """
+    grenzen: list[tuple[int, int]] = []
+    for muster, ganz in _GRENZMUSTER:
+        for treffer in muster.finditer(koerper):
+            grenzen.append((treffer.start(), treffer.end()) if ganz
+                           else (treffer.end() - 1, treffer.end()))
+    if not grenzen:
+        return [koerper]
+    teile: list[str] = []
+    stelle = 0
+    for anfang, ende in sorted(set(grenzen)):
+        if anfang < stelle:          # ueberlappende Grenzen: die erste gilt
+            continue
+        teile.append(koerper[stelle:anfang])
+        teile.append(koerper[anfang:ende])
+        stelle = ende
+    teile.append(koerper[stelle:])
+    return teile
+
+
+UNBELEGT_HINWEIS = "Aussage ohne belastbaren Beleg entfernt (genannt: —)."
+
+
+def _marken_glaetten(text: str) -> str:
+    """Mehrere Marken hintereinander werden eine; eine Marke bekommt Luft."""
+    text = re.sub(rf"(?:{re.escape(ENTFERNT)}\s*){{2,}}", ENTFERNT + " ", text)
+    # Sonst klebt die Marke am vorigen Beleg: "[Q: D1-S1-P1][Aussage ohne …]".
+    text = re.sub(rf"(?<=\S)(?={re.escape(ENTFERNT)})", " ", text)
+    return text.strip()
+
+
+def _vorlauf_pruefen(stuecke: list[str]) -> tuple[str, int]:
+    """Die Einheiten vor der belegten: zurückhalten, was Substanz hat.
+
+    Gerade Stellen sind Einheiten, ungerade die Trenner. Die Trenner bleiben
+    stehen, damit eine Liste nach der Prüfung noch eine Liste ist.
+    """
+    teile: list[str] = []
+    verworfen = 0
+    for i, stueck in enumerate(stuecke):
+        if i % 2:
+            teile.append(stueck)              # Trenner
+        elif stueck.strip():
+            teile.append(ENTFERNT)
+            verworfen += 1
+        else:
+            teile.append(stueck)              # nur Leerraum
+    return "".join(teile), verworfen
 
 
 @dataclass
@@ -59,7 +159,17 @@ def aussage_fail_closed(text: str, index: dict[str, Passage]) -> Belegergebnis:
     hat_gueltig = False
     letzte = 0
     for m in ZITAT_RE.finditer(text):
-        koerper = text[letzte:m.start()]
+        # Nicht mehr alles seit dem vorigen Beleg: nur die letzte Einheit.
+        # Was davor steht, ist eine eigene Aussage ohne eigenen Beleg und
+        # faellt wie jede andere auch (Befund F04, siehe Modulkopf).
+        stuecke = _einheiten(text[letzte:m.start()])
+        koerper = stuecke[-1]
+        vorlauf, vorlauf_verworfen = _vorlauf_pruefen(stuecke[:-1])
+        if vorlauf:
+            teile.append(vorlauf)
+        if vorlauf_verworfen:
+            verworfen += vorlauf_verworfen
+            hinweise += [UNBELEGT_HINWEIS] * vorlauf_verworfen
         kennungen = [k.strip() for k in m.group(1).split(",") if k.strip()]
         gueltig = [k for k in kennungen if k in index]
         if gueltig:
@@ -106,7 +216,7 @@ def aussage_fail_closed(text: str, index: dict[str, Passage]) -> Belegergebnis:
 
     neuer_text = "".join(teile)
     # Mehrere zurückgehaltene Abschnitte hintereinander werden zu einer Marke.
-    neuer_text = re.sub(rf"(?:{re.escape(ENTFERNT)}\s*){{2,}}", ENTFERNT + " ", neuer_text).strip()
+    neuer_text = _marken_glaetten(neuer_text)
     quellen = quellen_aus_kennungen(gefunden, index, [], aussagen)
     return Belegergebnis(neuer_text, quellen, hinweise, verworfen)
 
@@ -149,3 +259,83 @@ def _eintragstext(roh: object) -> str:
         return ""
     return " ".join(str(w) for k, w in roh.items()
                     if k != "quellen" and isinstance(w, str) and w.strip())
+
+
+def feld_fail_closed(text: str, index: dict[str, Passage]) -> Belegergebnis | None:
+    """Ein kurzes Feld: Kernaussage, ein Hinweis, ein Schritt.
+
+    Befund F04 der Zweitprüfung vom 05.10.2026: Die Belegpflicht galt für die
+    Antwort auf eine Frage und für die strukturierten Listen – nicht für die
+    Kernaussage der Eingangsprüfung und nicht für die Hinweise, die das Modell
+    liefert. *„Das Wort ‚Hinweis' macht einen vom Modell gelieferten
+    Sachverhalt nicht automatisch zu einem ungefährlichen Systemhinweis."*
+
+    Der Unterschied zur Antwort ist nur die Folge, nicht der Maßstab: Hier
+    fällt das **ganze Feld**, statt eine Marke zu hinterlassen. Ein einzelner
+    Hinweis, von dem nur noch „[Aussage ohne belastbaren Beleg entfernt]"
+    übrig wäre, ist keine Auskunft, sondern Lärm.
+
+    Gibt ``None`` zurück, wenn nichts bleibt.
+    """
+    if not text or not text.strip():
+        return None
+    ergebnis = aussage_fail_closed(text, index)
+    if not ergebnis.quellen:
+        return None
+    return ergebnis
+
+
+def entwurf_fail_closed(text: str, index: dict[str, Passage]) -> Belegergebnis:
+    """Ein Entwurf – derselbe Grundsatz, ein anderer Maßstab. Und warum.
+
+    Ein Entwurf ist kein Bericht über die Akte, sondern ein Brief. Die
+    Anweisung an das Modell sagt es ausdrücklich: *„Sachverhaltsangaben im
+    Entwurf tragen Belege [Q: ...] am Satzende"* – Anrede, Grußformel und die
+    Formulierung des Anliegens tragen keine. Die strenge Prüfung der Antwort
+    würde daraus einen Brief machen, in dem „Sehr geehrte Damen und Herren"
+    durch eine Entfernungsmarke ersetzt ist.
+
+    Geprüft wird deshalb zweierlei, und beides ist hart:
+
+    1. **Jeder Beleg muss tragen.** Löst er auf keine mitgelieferte Passage
+       auf, fällt die Aussage, die er tragen sollte – nicht nur der Beleg.
+       Bisher blieb sie stehen und bekam die Marke „[Q: ohne Beleg]".
+    2. **Ein Entwurf ohne einen einzigen tragenden Beleg ist keiner.** Genau
+       das war der reproduzierte Fall: ein vollständig erfundener Entwurf,
+       HTTP 201, leere Quellenliste. Die leere Quellenliste sagt es dem
+       Programm; gesehen hat sie niemand.
+
+    Was bleibt und bewusst bleibt: ein Satz ohne Beleg, der auch keinen
+    beansprucht. Er ist die Form des Briefes, nicht seine Tatsachenbehauptung.
+    Diese Grenze ist mit dem Auge zu ziehen – deshalb geht ein Entwurf nie
+    ohne menschliche Freigabe hinaus, und deshalb steht sie hier.
+    """
+    teile: list[str] = []
+    gefunden: list[str] = []
+    hinweise: list[str] = []
+    aussagen: dict[str, str] = {}
+    verworfen = 0
+    letzte = 0
+    for m in ZITAT_RE.finditer(text):
+        stuecke = _einheiten(text[letzte:m.start()])
+        koerper = stuecke[-1]
+        teile.append("".join(stuecke[:-1]))
+        kennungen = [k.strip() for k in m.group(1).split(",") if k.strip()]
+        gueltig = [k for k in kennungen if k in index]
+        if gueltig:
+            teile.append(koerper + f"[Q: {', '.join(gueltig)}]")
+            gefunden.extend(gueltig)
+            for k in gueltig:
+                aussagen.setdefault(k, koerper)
+        else:
+            teile.append(ENTFERNT)
+            verworfen += 1
+            genannt = ", ".join(kennungen) or "—"
+            hinweise.append(f"Aussage ohne belastbaren Beleg entfernt (genannt: {genannt}).")
+        letzte = m.end()
+    teile.append(text[letzte:])
+
+    neuer_text = "".join(teile)
+    neuer_text = _marken_glaetten(neuer_text)
+    quellen = quellen_aus_kennungen(gefunden, index, [], aussagen)
+    return Belegergebnis(neuer_text, quellen, hinweise, verworfen)
