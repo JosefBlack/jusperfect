@@ -167,3 +167,38 @@ class TestDieWortlisteBleibtNachpruefbar:
         for wort in ("eakte", "efile", "electronic", "korrespondenz",
                      "correspondence", "vermerk", "note"):
             assert wort in _EAKTE_WOERTER
+
+
+def test_die_mitgelieferte_beschreibung_ist_da() -> None:
+    """Seit dem 05.10.2026 liegt sie im Programmordner."""
+    from jusperfect.jurnodestest import BEILIEGENDE_BESCHREIBUNG
+
+    assert BEILIEGENDE_BESCHREIBUNG.is_file(), BEILIEGENDE_BESCHREIBUNG
+
+
+def test_ohne_angabe_wird_sie_genommen(capsys) -> None:
+    """Aus der Kanzlei am 05.10.2026: „Datei mit der Schnittstellenbeschreibung
+    wird angefragt bei JURNODES-PRUEFEN.bat."
+
+    Sie lag zu dem Zeitpunkt schon daneben. Ein Werkzeug, das nach etwas fragt,
+    was danebenliegt, ist eine Hürde ohne Zweck.
+    """
+    from jusperfect import jurnodestest
+
+    ende = jurnodestest._ablauf([])
+    ausgabe = capsys.readouterr().out
+    assert "jurnodes-api-1.0.2.json" in ausgabe
+    assert "85 Pfade stehen darin" in ausgabe
+    # Ohne Adresse endet die Probe danach sauber, statt ins Leere zu laufen.
+    assert ende in (0, 2)
+
+
+def test_die_bat_zeigt_die_mitgelieferte_an_statt_zu_fragen() -> None:
+    bat = (Path(__file__).resolve().parent.parent / "JURNODES-PRUEFEN.bat"
+           ).read_bytes().decode("cp1252")
+    assert "schnittstelle\\jurnodes-api-1.0.2.json" in bat
+    assert "if exist" in bat
+    # Und die Sprungmarken, ohne die cmd nicht weiterkommt.
+    for marke in (":beschreibung_da", ":beschreibung_fertig"):
+        assert marke in bat, marke
+        assert f"goto {marke[1:]}" in bat, marke

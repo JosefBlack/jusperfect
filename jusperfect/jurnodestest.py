@@ -795,6 +795,15 @@ def _beschreibung_auswerten(daten: Mapping, endpunkte: Any) -> None:
                         f"[{vorgabe.get('in')}, {art or 'ohne Art'}]{pflicht}")
 
 
+#: Die mitgelieferte Beschreibung des Herstellers.
+#:
+#: Seit dem 05.10.2026 liegt sie im Programmordner. Wer die Probe aufruft,
+#: soll sie nicht erst suchen muessen - ein Werkzeug, das nach etwas fragt,
+#: was danebenliegt, ist eine Huerde ohne Zweck.
+BEILIEGENDE_BESCHREIBUNG = (Path(__file__).resolve().parent.parent
+                            / "schnittstelle" / "jurnodes-api-1.0.2.json")
+
+
 def _beschreibung_aus_datei(pfad: str, endpunkte: Any) -> bool:
     """Die Beschreibung von der Festplatte lesen - ohne Netz, ohne Raten.
 
@@ -1533,7 +1542,8 @@ def _ablauf(argv: list[str] | None = None) -> int:
                           help="Die Kennung der Akte, falls sie schon bekannt ist")
     zerleger.add_argument("--beschreibung", metavar="DATEI", default=None,
                           help="Die OpenAPI-Beschreibung des Servers als Datei. "
-                               "Sie beantwortet die Frage nach der E-Akte ohne Raten.")
+                               "Ohne Angabe wird die mitgelieferte genommen "
+                               f"({BEILIEGENDE_BESCHREIBUNG.name}).")
     argumente = zerleger.parse_args(argv)
     # Leerraum abschneiden. Aus der Kanzlei am 05.10.2026 kam ein Lauf, der
     # nach " X-100-2026" suchte - mit einem Leerzeichen davor, wie es beim
@@ -1583,6 +1593,11 @@ def _ablauf(argv: list[str] | None = None) -> int:
     # Die Beschreibung zuerst, und ohne Netz: Sie braucht weder Adresse noch
     # Zugang. Wer nur wissen will, was die Schnittstelle kann, bekommt es hier
     # - auch auf einem Rechner, der gar keinen jur|nodes-Zugang hat.
+    # Ohne Angabe die mitgelieferte nehmen. Sie liegt seit dem 05.10.2026 im
+    # Programmordner; danach noch zu fragen hiesse, nach etwas zu fragen, das
+    # schon dasteht.
+    if not argumente.beschreibung and BEILIEGENDE_BESCHREIBUNG.is_file():
+        argumente.beschreibung = str(BEILIEGENDE_BESCHREIBUNG)
     if argumente.beschreibung:
         print()
         print(TRENNER)

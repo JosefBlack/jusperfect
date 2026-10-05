@@ -35,24 +35,31 @@ rem Beteiligte und Fristen. Es steht nur in der eigenen Ausgabe.
 set "AKTE="
 set /p AKTE=Aktenzeichen fuer die Probe (leer lassen geht auch): 
 
-rem Die Beschreibung der Schnittstelle, falls sie als Datei vorliegt.
+rem Die Beschreibung der Schnittstelle.
 rem
-rem Aus der Kanzlei am 05.10.2026: "Die Korrespondenz bei jurnodes und die
-rem Vermerke finden sich in der E-Akte." Damit ist es EINE Frage und nicht
-rem zwei - wer den Weg in die E-Akte kennt, hat beides.
+rem Sie liegt seit dem 05.10.2026 IM PROGRAMMORDNER - die Kanzlei hat sie an
+rem diesem Tag geliefert (jur|nodes API 1.0.2, 85 Pfade). Es muss also nichts
+rem mehr eingetragen werden; die Probe nimmt sie von selbst.
 rem
-rem Der Server gibt seine Beschreibung nicht heraus - sechs uebliche Pfade
-rem unterhalb der Zugangskennung, vierundzwanzig darueber, alle 404.
-rem Die Kanzlei hat sie aber: Am 23.09.2026 wurde die
-rem OpenAPI-Beschreibung des Servers schon einmal geliefert, und daraus sind
-rem die Pfade abgeschrieben, mit denen das Programm heute arbeitet.
-rem
-rem Liegt diese Datei noch irgendwo, beantwortet sie die Frage in einem Lauf.
-rem Hier den vollstaendigen Pfad eintragen, etwa C:\Temp\jurnodes-api.json -
-rem oder leer lassen, dann wird nur die Schnittstelle gefragt.
-set "BESCHREIBUNG="
-set /p BESCHREIBUNG=Datei mit der Schnittstellenbeschreibung (leer lassen geht auch): 
+rem Gefragt wird nur noch, wenn die Datei fehlt - oder wenn jemand bewusst
+rem eine andere nehmen will, etwa eine neuere Fassung vom Hersteller.
+set "BESCHREIBUNG=%~dp0schnittstelle\jurnodes-api-1.0.2.json"
+if exist "%BESCHREIBUNG%" goto beschreibung_da
 
+echo Die Beschreibung der Schnittstelle liegt nicht im Programmordner.
+echo Erwartet unter: schnittstelle\jurnodes-api-1.0.2.json
+echo.
+set "BESCHREIBUNG="
+set /p BESCHREIBUNG=Pfad zu einer Beschreibung (leer lassen geht auch): 
+goto beschreibung_fertig
+
+:beschreibung_da
+echo Beschreibung der Schnittstelle: schnittstelle\jurnodes-api-1.0.2.json
+echo Eine andere Datei? Dann hier den Pfad eintragen, sonst einfach Eingabe.
+set /p BESCHREIBUNG=Andere Beschreibung (Eingabe = die obige nehmen): 
+if not defined BESCHREIBUNG set "BESCHREIBUNG=%~dp0schnittstelle\jurnodes-api-1.0.2.json"
+
+:beschreibung_fertig
 echo.
 set "ZUSATZ="
 if defined BESCHREIBUNG set "ZUSATZ=--beschreibung "%BESCHREIBUNG%""
