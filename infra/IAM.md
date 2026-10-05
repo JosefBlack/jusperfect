@@ -5,6 +5,54 @@
 > gerade etwas nicht läuft, hebt sie auf. Änderungen gehören besprochen, nicht
 > nebenbei erledigt.
 
+## Geändert am 05.10.2026: „eu-" ist kein Nachweis
+
+Auf ausdrückliche Anweisung der Kanzlei, nach ihrem Hinweis: **„Zürich ist
+eu-central-2 und nicht eu-central-1."**
+
+Bis zu diesem Tag sperrte die Anweisung `NurEuropa` jeden Bedrock-Aufruf
+außerhalb von `eu-*`. **Der Vorsatz `eu-` ist eine Namenskonvention von AWS und
+keine Aussage über die Europäische Union.** Zwei Regionen tragen ihn und liegen
+außerhalb der EU und des EWR:
+
+| Region | Ort | |
+|---|---|---|
+| `eu-central-2` | Zürich | Schweiz |
+| `eu-west-2` | London | Vereinigtes Königreich |
+
+Beide hätten die Sperre passiert. Für eine Kanzlei, deren
+Datenschutzunterlage „Übermittlung in Drittländer: keine" sagt, ist das der
+Unterschied zwischen einem Satz, der stimmt, und einem, der sich auf eine
+Buchstabenfolge stützt.
+
+**Was geändert wurde:**
+
+1. `NurEuropa` heißt jetzt **`NurEuUndEwr`** und prüft mit `StringNotEquals`
+   gegen **sechs namentlich genannte Regionen** — Frankfurt, Irland, Paris,
+   Mailand, Spanien, Stockholm. Das ist die entscheidende Grenze.
+2. Dieselben sechs Regionen stehen ausgeschrieben in `ClaudeAufrufen`,
+   `SchutzgelaenderAnwenden` und `KeinAnderesModell`. Dort ist es nicht
+   entscheidend — wer eine Zürcher Ressource ansprechen will, muss den Zürcher
+   Endpunkt aufrufen, und den sperrt Ziffer 1. Es steht trotzdem da, damit in
+   dieser Datei **kein einziges `eu-*`** mehr vorkommt, auf das sich jemand
+   verlassen könnte.
+3. Beim Inferenzprofil bleibt der Stern an der Stelle der Region. Dort stand nie
+   `eu-*`, und jede weitere Zeile wäre eine weitere Stelle, an der die
+   Kontonummer von Hand einzutragen ist — die Fehlerquelle vom 02.10.2026.
+
+**Was diese Änderung nicht leistet, und das gehört dazu:** `aws:RequestedRegion`
+ist die Region, an die der **Aufruf** geht. Wohin das Inferenzprofil und
+`eu.guardrail.v1:0` **intern** verteilen, entscheidet AWS und steht in keiner
+Richtlinie. Die Auskunft von AWS dazu bleibt offen (`DSFA-ANGABEN.md`, „Noch
+nicht festgestellt") — und eine Antwort, die nur `eu-`-Regionen nennt, genügt
+dafür nicht.
+
+**Eine neue EU-Region von AWS** wird von dieser Richtlinie abgewiesen, bis sie
+hier und in `jusperfect/config.py::EU_EWR_REGIONEN` eingetragen ist. Das ist die
+sichere Richtung.
+
+---
+
 ## Wozu
 
 jusperfect schickt **echten Aktentext** an ein Sprachmodell. Welches Modell das
@@ -43,7 +91,7 @@ nachzusehen oder etwas zu prüfen, braucht eine eigene Richtlinie. Dafür ist
 | `SchutzgelaenderAnwenden` | erlaubt `bedrock:ApplyGuardrail` – ohne diese Anweisung geht **kein einziger** Modellaufruf durch, solange ein Schutzgeländer gesetzt ist |
 | `ModelleAnsehen` | erlaubt, die Modellliste, die gebuchten Modellabonnements und den Zustand der Aufrufprotokollierung zu **lesen** – nötig, um zu sehen, was freigeschaltet ist und dass nichts mitgeschrieben wird |
 | `KeinAnderesModell` | **verbietet** jeden Modellaufruf, der nicht Claude ist |
-| `NurEuropa` | **verbietet** jeden Bedrock-Aufruf außerhalb europäischer Regionen |
+| `NurEuUndEwr` | **verbietet** jeden Bedrock-Aufruf außerhalb der sechs namentlich genannten EU- und EWR-Regionen |
 | `KeineModellverwaltung` | verbietet Feinabstimmung, Stapelverarbeitung, das Ein- und Ausschalten der Aufrufprotokollierung und das Ändern oder Löschen von Guardrails |
 
 `TexterkennungFuerScans` ist am 01.10.2026 auf ausdrückliche Anweisung der
@@ -73,16 +121,24 @@ den der Betrieb so nicht geht. Eine Probe, die anders fragt als der Betrieb,
 prüft etwas anderes als den Betrieb; dieser Satz steht in diesem Projekt an
 mehreren Stellen, und hier hat er wieder zugeschlagen.
 
-Die Ressource lautet `arn:aws:bedrock:eu-*:*:guardrail/*` und bewusst nicht
+Die Ressourcen sind Schutzgeländer in den sechs Regionen, und bewusst nicht
 `*`:
 
 * Nur **Schutzgeländer**, nichts anderes.
-* Nur in **europäischen** Regionen, unabhängig von der Sperre `NurEuropa`.
+* Nur in den **namentlich genannten** Regionen, unabhängig von der Sperre
+  `NurEuUndEwr`.
 * Der Stern an der Stelle der Kontonummer ist Absicht. Dort stand in den
   beiden anderen Anweisungen `AWS-KONTONUMMER`, und dieser Platzhalter hat am
   02.10.2026 in der Kanzlei eine rote Zeile erzeugt. Eine Angabe, die
   eingetragen werden **muss**, ist eine Fehlerquelle; hier wird keine
   gebraucht, weil die Richtlinie ohnehin nur im eigenen Konto gilt.
+
+**`guardrail-profile/*` steht seit dem 05.10.2026 daneben, und zwar gemessen.**
+Am 23.09.2026 hat sich in der Kanzlei gezeigt, dass `bedrock:ApplyGuardrail`
+**zwei** Ressourcenarten braucht, sobald das regionsübergreifende Profil
+`eu.guardrail.v1:0` benutzt wird: Mit `guardrail/*` allein blieb die Ablehnung
+bestehen, mit beiden lief es. In dieser Datei stand bisher nur die erste Zeile.
+Wer sie einsetzt, ohne die zweite, kann dieselbe Ablehnung wieder bekommen.
 
 Datenschutzrechtlich ist Textract **derselbe Auftragsverarbeiter** wie für die
 Texte (AWS, Frankfurt) – also kein neuer Vertrag. Genannt werden muss es in

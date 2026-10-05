@@ -259,18 +259,34 @@ class DieRichtlinieBleibtEineRichtlinie(unittest.TestCase):
             erlaubt += aktion if isinstance(aktion, list) else [aktion]
         self.assertIn("bedrock:ApplyGuardrail", erlaubt)
 
-    def test_das_recht_gilt_nur_fuer_gelaender_in_europa(self):
+    def test_das_recht_gilt_nur_fuer_gelaender_in_der_eu(self):
         """Eng gefasst, und ohne Platzhalter.
+
+        Geprüft wird die **Zusage**, nicht der Wortlaut: Am 05.10.2026 ist aus
+        der einen Zeile ``arn:aws:bedrock:eu-*:*:guardrail/*`` eine Liste
+        geworden — die sechs EU- und EWR-Regionen, je für ``guardrail`` und
+        ``guardrail-profile``. Ein Test, der die alte Zeile wörtlich verlangte,
+        hätte die Verbesserung zum Fehler erklärt.
 
         Der Platzhalter ``AWS-KONTONUMMER`` in den beiden anderen Anweisungen
         hat am 02.10.2026 in der Kanzlei eine rote Zeile erzeugt. Eine Angabe,
         die eingetragen werden **muss**, ist eine Fehlerquelle – hier wird
         keine gebraucht.
         """
+        from jusperfect.config import EU_EWR_REGIONEN
+
         satz = next(s for s in self._richtlinie()["Statement"]
                     if s.get("Sid") == "SchutzgelaenderAnwenden")
-        self.assertEqual("arn:aws:bedrock:eu-*:*:guardrail/*", satz["Resource"])
-        self.assertNotIn("AWS-KONTONUMMER", satz["Resource"])
+        ressourcen = satz["Resource"]
+        self.assertIsInstance(ressourcen, list)
+        for eintrag in ressourcen:
+            # Nur Geländer, nur in einer der namentlich genannten Regionen,
+            # und ohne Platzhalter.
+            self.assertRegex(eintrag, r":(guardrail|guardrail-profile)/\*$")
+            self.assertIn(eintrag.split(":")[3], EU_EWR_REGIONEN)
+            self.assertNotIn("AWS-KONTONUMMER", eintrag)
+        # "eu-*" haette Zuerich und London eingeschlossen.
+        self.assertNotIn("eu-*", " ".join(ressourcen))
 
     def test_aendern_und_loeschen_bleibt_verboten(self):
         """Anwenden ist etwas anderes als verwalten.

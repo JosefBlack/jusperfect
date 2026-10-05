@@ -146,7 +146,7 @@ Die zweite Zeile ist die Folge der regionsübergreifenden Verarbeitung: Mit
 der ersten Zeile blieb die Ablehnung bestehen; mit beiden lief es. Festgestellt
 am 23.09.2026, durch Ausprobieren in dieser Reihenfolge.
 
-`infra/iam-nur-claude.json` führt keine der beiden. Die Datei ist geschützt.
+**Seit dem 05.10.2026 führt `infra/iam-nur-claude.json` beide** — auf ausdrückliche Anweisung der Kanzlei, zusammen mit der Umstellung von `eu-*` auf die sechs namentlich genannten Regionen.
 
 **Die Probe ist durchgelaufen.** Am 23.09.2026 hat der Modell-Testlauf alle
 fünf erfundenen Sätze durchgelassen — Bausache, Kündigungsschutz,
