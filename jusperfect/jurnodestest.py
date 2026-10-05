@@ -1046,6 +1046,122 @@ _EAKTE_PFADE = (
 )
 
 
+def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
+    """Die E-Akte - jetzt auf dem Weg, den der Hersteller beschreibt.
+
+    **Seit dem 05.10.2026 wird hier nicht mehr geraten.** Die Kanzlei hat die
+    OpenAPI-Beschreibung geliefert (Fassung 1.0.2, 85 Pfade). Darin steht:
+
+      POST /correspondence/search  {"recordIdentifier": "...", "page": 1}
+
+    Das ist die E-Akte. Sie fuehrt Mails, beA, Post, Fax, SMS, Dateien - und
+    die Vermerke, als Eintraege vom Typ "note" mit einer Nummer in
+    "referenceNote".
+
+    Gezeigt werden Anzahl, Arten, Ordnernummern und Zeitraum. **Kein
+    Betreff** - der traegt den Fall.
+    """
+    _sagen(" ", "Die E-Akte heisst in der Schnittstelle KORRESPONDENZ.")
+    _sagen(" ", f"{endpunkte.korrespondenz_suche}, Seite 1:")
+    try:
+        antwort = client.post(endpunkte.korrespondenz_suche,
+                              json={"recordIdentifier": kennung, "page": 1})
+    except Exception as fehler:
+        _sagen("✗", f"Korrespondenz: {type(fehler).__name__}")
+        return
+    if antwort.status_code >= 400:
+        _sagen("✗", f"Korrespondenz: Status {antwort.status_code}")
+        _wortlaut(antwort)
+        return
+    try:
+        daten = antwort.json()
+    except ValueError:
+        _sagen("!", "Korrespondenz: keine JSON-Antwort")
+        return
+
+    eintraege = daten.get("elements") if isinstance(daten, Mapping) else None
+    if not isinstance(eintraege, list):
+        _sagen("!", "Korrespondenz: keine Liste „elements“ in der Antwort.")
+        return
+    gesamt = daten.get("amountTotal")
+    seiten = daten.get("pagesTotal")
+    _sagen("✓", f"{len(eintraege)} Eintrag/Einträge auf Seite 1, "
+                f"amountTotal {gesamt}, pagesTotal {seiten}")
+    if not eintraege:
+        _sagen(" ", "Diese Akte hat keine Korrespondenz - oder das Recht fehlt.")
+        return
+
+    _sagen(" ", "Die Feldnamen des ersten Eintrags:")
+    for zeile in felder({"elements": eintraege}):
+        _sagen(" ", f"     {zeile}")
+    _arten_zeigen(daten)
+
+    # Die Ordnernummern - der Punkt, an dem sich der Fehler vom 02.10.2026
+    # zeigen muss: Sie gehoeren in den KORRESPONDENZbaum, nicht in den
+    # Dateibaum, und die Akte nennt ihren eigenen in correspondenceFolderId.
+    ordner = sorted({str(e.get("folderId")) for e in eintraege
+                     if isinstance(e, Mapping) and e.get("folderId") is not None})
+    if ordner:
+        _sagen(" ", f"Ordnernummern (Korrespondenzbaum): {', '.join(ordner[:12])}")
+
+    tage = sorted(_als_tag(e.get("postmark")) for e in eintraege
+                  if isinstance(e, Mapping) and _als_tag(e.get("postmark")))
+    if tage:
+        _sagen(" ", f"Poststempel von {tage[0]} bis {tage[-1]}")
+
+    vermerke = [e for e in eintraege
+                if isinstance(e, Mapping) and e.get("type") == "note"]
+    _sagen("✓" if vermerke else " ",
+           f"Davon Vermerke (type=note): {len(vermerke)}")
+    _vermerke_lesen(client, endpunkte, kennung, vermerke)
+
+
+def _vermerke_lesen(client: Any, endpunkte: Any, kennung: str,
+                    vermerke: list) -> None:
+    """Hoechstens drei Vermerke abrufen - zum Nachweis, nicht zum Auslesen.
+
+    GET /record/note braucht ZWEI Pflichtparameter: die Nummer des Vermerks
+    UND den Identifier der Akte. Daran ist die Suche vier Wochen lang
+    gescheitert; zwanzig Parameternamen wurden probiert, jeder mit EINEM Wert.
+
+    Gezeigt werden Feldnamen, Art und LAENGE des Inhalts - nicht der Inhalt.
+    """
+    if not vermerke:
+        _sagen(" ", "Ohne Vermerk in dieser Akte bleibt /record/note ungeprueft.")
+        return
+    _sagen(" ", f"{endpunkte.vermerke} mit BEIDEN Pflichtparametern "
+                f"({endpunkte.vermerkparameter} + {endpunkte.vermerkakteparameter}):")
+    for eintrag in vermerke[:3]:
+        nummer = eintrag.get("referenceNote")
+        if nummer is None:
+            _sagen("!", "Ein Eintrag vom Typ note ohne referenceNote.")
+            continue
+        try:
+            antwort = client.get(endpunkte.vermerke, params={
+                endpunkte.vermerkparameter: nummer,
+                endpunkte.vermerkakteparameter: kennung})
+        except Exception as fehler:
+            _sagen("✗", f"Vermerk {nummer}: {type(fehler).__name__}")
+            continue
+        if antwort.status_code >= 400:
+            _sagen("✗", f"Vermerk {nummer}: Status {antwort.status_code}")
+            _wortlaut(antwort)
+            continue
+        try:
+            vermerk = antwort.json()
+        except ValueError:
+            _sagen("!", f"Vermerk {nummer}: keine JSON-Antwort")
+            continue
+        if not isinstance(vermerk, Mapping):
+            _sagen("!", f"Vermerk {nummer}: unerwartete Form")
+            continue
+        art = vermerk.get("type")
+        laenge = len(str(vermerk.get("content") or ""))
+        _sagen("✓", f"Vermerk {nummer}: type={art}, contentType="
+                    f"{vermerk.get('contentType')}, {laenge} Zeichen Inhalt")
+        _sagen(" ", f"     Felder: {', '.join(sorted(vermerk))}")
+
+
 def _eakte_suchen(client: Any, endpunkte: Any, kennung: str) -> None:
     """Wo liegt die E-Akte? Dort stehen die Vermerke, nicht in der To-Do-Liste.
 
@@ -1153,6 +1269,9 @@ def _vermerke_suchen(client: Any, endpunkte: Any, kennung: str,
         _zaehlen(client, f"{pfad} mit recordIdentifier", pfad,
                  **{"recordIdentifier": kennung})
 
+    # Zuerst der Weg, den die Beschreibung des Herstellers nennt. Was er
+    # beantwortet, muss niemand mehr erraten.
+    _korrespondenz_lesen(client, endpunkte, kennung)
     _vermerke_als_todo(client, endpunkte, kennung)
     _eakte_suchen(client, endpunkte, kennung)
     _beschreibung_suchen(client, endpunkte)

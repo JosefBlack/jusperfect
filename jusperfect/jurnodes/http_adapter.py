@@ -66,6 +66,16 @@ class Endpunkte:
     fristen: str = "/todo/search"                    # GET
     vermerke: str = "/record/note"                   # POST {model: RecordNote}
     datei_hinzufuegen: str = "/file-system/add-file"  # POST (multipart)
+    # Die E-Akte. Seit dem 05.10.2026 belegt, nicht geraten: Die Kanzlei hat
+    # die Beschreibung des Herstellers geliefert (Fassung 1.0.2, 85 Pfade),
+    # sie liegt unter schnittstelle/jurnodes-api-1.0.2.json.
+    #
+    # Sie heisst dort "Korrespondenz" und umfasst Mails, beA, Post, Fax, SMS,
+    # Dateien - und VERMERKE. Ein eigener Ordnerbaum mit eigenen Nummern,
+    # getrennt vom Dateisystem; genau das war der Fehler vom 02.10.2026.
+    korrespondenz_suche: str = "/correspondence/search"   # POST {recordIdentifier, page}
+    korrespondenz: str = "/correspondence"                # GET ?identifier=
+    korrespondenz_ordner: str = "/correspondence/folder"  # GET ?id=
 
     #: Die Abfrageparameter. Auch sie stehen in der Beschreibung des Herstellers.
     suchparameter: str = "sign"           # Suche nach Aktenzeichen
@@ -74,6 +84,13 @@ class Endpunkte:
     ordnerparameter: str = "folderId"     # Der Dateiordner einer Akte
     akteparameter: str = "recordIdentifier"   # Beziehungen und Fristen einer Akte
     fristenart: str = "frist"             # /todo/search kennt auch task und resubmit
+    #: GET /record/note braucht ZWEI Pflichtparameter, nicht einen. Daran ist
+    #: die Suche nach den Vermerken vier Wochen lang gescheitert: Zwanzig
+    #: Parameternamen wurden probiert, jeder mit EINEM Wert, und der Server
+    #: antwortete jedes Mal "Bitte Daten angeben". Das war woertlich zu
+    #: nehmen - es fehlten Daten, nicht der richtige Name.
+    vermerkparameter: str = "id"          # die Nummer des Vermerks
+    vermerkakteparameter: str = "record"  # der Identifier der Akte, zusaetzlich
 
     @classmethod
     def aus_datei(cls, pfad: "Path | str | None") -> "Endpunkte":

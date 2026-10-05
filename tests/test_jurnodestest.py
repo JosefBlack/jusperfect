@@ -18,6 +18,7 @@ nur, und in der Ausgabe steht kein Akteninhalt.
 from __future__ import annotations
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -114,15 +115,50 @@ class DieAusgabeTraegtKeinenAkteninhalt(unittest.TestCase):
 
 
 class EsLiestNur(unittest.TestCase):
-    def test_der_schreibende_pfad_wird_nicht_aufgerufen(self):
-        """Der Vermerk ist der einzige POST der Schnittstelle. Er bleibt aus."""
-        quelle = (Path(__file__).resolve().parent.parent
-                  / "jusperfect" / "jurnodestest.py").read_text(encoding="utf-8")
-        self.assertNotIn(".post(", quelle)
+    """Die Zusage ist: Es wird nichts geschrieben, angelegt oder gelöscht.
+
+    **Bis zum 05.10.2026 wurde das als „kein POST" geprüft**, und das war
+    dasselbe — der Vermerk war der einzige POST, den die Probe kannte. Seit die
+    Beschreibung des Herstellers vorliegt, ist es nicht mehr dasselbe: Er hat
+    die **Suche** in der E-Akte als POST gebaut (`/correspondence/search`).
+
+    Geprüft wird deshalb jetzt die Zusage selbst: POST **nur** auf Pfade, die
+    suchen. Jeder andere bleibt aus. Ein Test, der weiter „kein POST" verlangt
+    hätte, hätte die Probe davon abgehalten, die E-Akte überhaupt zu lesen.
+    """
+
+    #: Pfade, die POST verlangen und trotzdem nur lesen - so gebaut vom
+    #: Hersteller, nachzulesen in schnittstelle/jurnodes-api-1.0.2.json.
+    LESENDE_POSTS = ("/correspondence/search",)
+
+    def _quelle(self) -> str:
+        return (Path(__file__).resolve().parent.parent
+                / "jusperfect" / "jurnodestest.py").read_text(encoding="utf-8")
+
+    def test_es_wird_nichts_geschrieben_angelegt_oder_geloescht(self):
+        quelle = self._quelle()
         self.assertNotIn(".put(", quelle)
         self.assertNotIn(".delete(", quelle)
+        self.assertNotIn(".patch(", quelle)
+
+    def test_post_nur_auf_pfade_die_suchen(self):
+        """Jeder POST in der Probe muss auf einen Suchpfad zeigen."""
+        quelle = self._quelle()
+        for stelle in re.finditer(r"\.post\(\s*([^,\n]+)", quelle):
+            ziel = stelle.group(1).strip()
+            self.assertTrue(
+                any(p.rsplit("/", 1)[-1] in ziel or "korrespondenz_suche" in ziel
+                    for p in self.LESENDE_POSTS),
+                f"POST auf {ziel} - das ist kein Suchpfad.")
+
+    def test_der_schreibende_vermerkpfad_wird_nicht_beschrieben(self):
+        """`POST /record/note` legt einen Vermerk an. Die Probe liest ihn nur —
+        mit GET und beiden Pflichtparametern."""
+        quelle = self._quelle()
         self.assertIn("Nicht angefasst", quelle,
                       "Dass er nicht angefasst wird, gehört in die Ausgabe.")
+        # Der Vermerk wird gelesen, nicht geschrieben.
+        self.assertIn("client.get(endpunkte.vermerke", quelle)
 
 
 if __name__ == "__main__":
@@ -474,6 +510,10 @@ def test_beide_kennungen_werden_durchprobiert(monkeypatch) -> None:
         vermerke = "/record/note"
         fristen = "/todo/search"
         akteparameter = "recordIdentifier"
+        # Seit dem 05.10.2026 geht die Probe zuerst ueber die Korrespondenz.
+        korrespondenz_suche = "/correspondence/search"
+        vermerkparameter = "id"
+        vermerkakteparameter = "record"
 
     p._vermerke_suchen(_Client(), _Endpunkte(), "FL6BDPWJ940ALEY4BVP0", "X-100-2026")
 
@@ -507,6 +547,10 @@ def test_der_satz_fuer_den_hersteller_steht_am_ende(capsys) -> None:
         vermerke = "/record/note"
         fristen = "/todo/search"
         akteparameter = "recordIdentifier"
+        # Seit dem 05.10.2026 geht die Probe zuerst ueber die Korrespondenz.
+        korrespondenz_suche = "/correspondence/search"
+        vermerkparameter = "id"
+        vermerkakteparameter = "record"
 
     p._vermerke_suchen(_Client(), _Endpunkte(), "FL6B", "X-100-2026")
     ausgabe = capsys.readouterr().out
@@ -575,6 +619,10 @@ def test_nur_die_zahlen_der_eigenen_akte_werden_probiert() -> None:
         vermerke = "/record/note"
         fristen = "/todo/search"
         akteparameter = "recordIdentifier"
+        # Seit dem 05.10.2026 geht die Probe zuerst ueber die Korrespondenz.
+        korrespondenz_suche = "/correspondence/search"
+        vermerkparameter = "id"
+        vermerkakteparameter = "record"
         akte = "/record"
         kennungparameter = "identifier"
 
@@ -610,6 +658,10 @@ def test_ohne_zahlen_wird_nichts_erfunden() -> None:
         vermerke = "/record/note"
         fristen = "/todo/search"
         akteparameter = "recordIdentifier"
+        # Seit dem 05.10.2026 geht die Probe zuerst ueber die Korrespondenz.
+        korrespondenz_suche = "/correspondence/search"
+        vermerkparameter = "id"
+        vermerkakteparameter = "record"
         akte = "/record"
         kennungparameter = "identifier"
 
