@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1488 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `66d2915`.
+1500 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `d145e3e`.
 
 ---
 
@@ -667,7 +667,7 @@ ein Ordnerfeld am Dokument.
 
 ---
 
-### 12. ~~Ein einzelnes Dokument aus dem Aktengedächtnis nehmen~~ — **erledigt 05.10.2026**
+### 12. ~~Einzelnes aus dem Aktengedächtnis nehmen — Dokument und Frage~~ — **erledigt 05.10.2026**
 
 Bisher gab es nur alles oder nichts: `GEDAECHTNIS-LEEREN.bat` warf das ganze
 Gedächtnis weg. Wer ein einziges Dokument heraushaben wollte, zahlte das
@@ -702,6 +702,22 @@ eigenen Zeile.
 **Was der Weg nicht ist:** Die Akte in jur|nodes bleibt unberührt. Entfernt wird
 nur, was sich jusperfect gemerkt hat; das steht auch so in der Rückfrage, weil
 es die erste Frage ist, die dabei aufkommt.
+
+**Nachtrag am selben Tag: auch eine einzelne gespeicherte Frage.** In der Liste
+„Frühere Fragen und Antworten" steht je Runde derselbe Knopf. Eine gespeicherte
+Antwort kann falsch oder überholt sein — etwa weil sie aus einem Dokument
+stammt, das inzwischen durch eine neue Fassung ersetzt wurde; sie geht bei jeder
+späteren Frage als Vorwissen mit.
+
+**Dabei eine Falle, die nicht in der Anzeige steckt:** Der Server löscht eine
+Frage nach **Stelle** in der Liste. Hätte die Oberfläche die Stelle von vorhin
+geschickt und in der Zwischenzeit jemand an derselben Akte gearbeitet — zwei
+Anwälte, zwei Rechner —, wäre eine **andere** Frage weg, ohne dass es jemand
+bemerkt. Die Stelle wird deshalb erst beim Klick frisch bestimmt, anhand von
+Frage, Antwort und Zeitpunkt. **Am 05.10.2026 im Browser nachgestellt:** Während
+das Fenster offen stand, löschte ein zweiter Zugang dieselbe Frage. Es kam keine
+Rückfrage, es wurde nichts gelöscht, die Liste ging von zwei auf eins, und der
+Grund stand auf dem Schirm.
 
 ---
 
