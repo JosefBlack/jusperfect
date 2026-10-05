@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1500 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `d145e3e`.
+1530 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `df3e78b`.
 
 ---
 
@@ -718,6 +718,71 @@ Frage, Antwort und Zeitpunkt. **Am 05.10.2026 im Browser nachgestellt:** Währen
 das Fenster offen stand, löschte ein zweiter Zugang dieselbe Frage. Es kam keine
 Rückfrage, es wurde nichts gelöscht, die Liste ging von zwei auf eins, und der
 Grund stand auf dem Schirm.
+
+---
+
+### 13. ~~Die Aktenanalyse aufbewahren~~ — **erledigt 05.10.2026**
+
+Die Analyse kostet einen Modellaufruf über die ganze Akte — an der echten Akte
+rund 28 Cent. Von allem, was ein Durchgang erzeugt, war sie das **Teuerste und
+das Einzige, das niemand aufbewahrt hat**: Sie stand im Fenster und war weg,
+sobald das Programm geschlossen wurde. Nur ihr Zeitstrahl wurde fortgeschrieben.
+
+Sie liegt jetzt im Aktengedächtnis und steht beim Öffnen der Akte wieder da,
+überschrieben mit **„Stand vom …"**. Der Abruf kostet nichts.
+
+**Aus der Kanzlei:** „Wichtig ist, dass das Programm vielleicht selber erkennt,
+wenn neue Dokumente in der Akte sind." Mitgeschrieben wird deshalb auch, **was
+die Akte damals enthielt**. Kommen später Dokumente dazu, steht über dem
+Ergebnis, welche fehlen — **beim Namen genannt** —, und daneben ein Knopf
+„neu rechnen".
+
+**Der Punkt, an dem die Warnung sonst wertlos geworden wäre:** Verglichen wird
+gegen das, was die Akte **damals enthielt**, nicht gegen das, was in die
+Analyse eingegangen ist. Sonst zählte jedes bewusst nicht vorgewählte
+Dokument — eine Rechnung etwa — bei jedem Öffnen wieder als „neu".
+
+Der Knopf **Analyse** fragt jetzt nach, wenn schon eine vorliegt: mit Datum,
+mit dem, was seitdem dazugekommen ist, und mit dem Preis. Beim ersten Mal
+fragt er nicht.
+
+**Im Browser nachgestellt:** rechnen, Programm neu starten, Analyse ist wieder
+da; dann ein neues Dokument in die Akte legen — die Warnung erscheint und nennt
+es. Dabei fiel auf, dass ein Titel, der selbst auf einen Punkt endet, zu
+„02.10.." führte; die Titel stehen jetzt am Schluss ohne Satzzeichen dahinter.
+
+**Und ein eigener Fehler, den der Browserlauf gefangen hat:** Zweimal hat die
+Probe gegen einen Server gemessen, der noch den Stand von vor der Änderung
+trug — `pkill -f jusperfect` traf die eigene Kommandozeile und nicht den
+Server, und weil das Programm bei belegtem Anschluss nicht zweimal startet,
+antwortete weiter der alte. Dieselbe Lehre wie am 05.10. zuvor: **Eine Probe,
+die etwas anderes misst als den Betrieb, misst etwas anderes als den Betrieb.**
+Erkennbar war es nur daran, dass eine neue Schnittstelle mit 405 antwortete,
+während dieselbe Prüfung im Testlauf grün war.
+
+---
+
+### 14. ~~Eine ausführliche Anleitung~~ — **erledigt 05.10.2026**
+
+Auf ausdrückliche Anweisung der Kanzlei geändert (Regel 4).
+
+`ANLEITUNG.md`, Teil 2, beschrieb noch den **Zwei-Fenster-Explorer mit Ziehen**
+und „alle →". Den gibt es seit Wochen nicht mehr; es ist eine Liste mit Haken.
+
+Neu beschrieben: das Lesen in Portionen mit Balken und Anhalten, die
+Texterkennung für Scans, die Ausschlussliste, das Aktengedächtnis im Alltag
+samt „vergessen", die gespeicherte Aktenanalyse mit Stand und Veraltungshinweis,
+der Zeitstrahl, die abtrennbaren Fenster, die Rückfrage beim Schließen.
+
+**Neu dazu: „Was wie lange gespeichert bleibt"** — eine Tabelle über
+Aktengedächtnis, Sitzung und jur|nodes. Das ist die Frage, die bei einem
+KI-Programm zuerst zu stellen ist, und sie stand nirgends zusammen.
+
+**Berichtigt:** Der Kopf sagte, die Fassung sei „zum Ausprobieren, nicht für
+echte Mandantenakten", während die Kanzlei seit dem 23.09.2026 damit arbeitet.
+Jetzt steht dort, was wirklich noch fehlt (vor allem die DSFA), was inzwischen
+steht (Modellaufrufprotokollierung, Schutzgeländer) und die offene Frage zum
+Korrespondenzordner.
 
 ---
 
