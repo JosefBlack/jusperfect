@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1650 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `8e2eb54`.
+1653 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `fb66f9e`.
 
 ---
 
