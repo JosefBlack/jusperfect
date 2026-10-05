@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1530 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `df3e78b`.
+1537 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `632b77e`.
 
 ---
 
@@ -783,6 +783,22 @@ echte Mandantenakten", während die Kanzlei seit dem 23.09.2026 damit arbeitet.
 Jetzt steht dort, was wirklich noch fehlt (vor allem die DSFA), was inzwischen
 steht (Modellaufrufprotokollierung, Schutzgeländer) und die offene Frage zum
 Korrespondenzordner.
+
+**Nachtrag am selben Tag: dasselbe als Seite zum Durchklicken.** `HILFE.html`
+liegt neben dem Programm, öffnet sich mit einem Doppelklick und **braucht kein
+Internet** — genau dafür ist sie da, wenn etwas klemmt.
+
+Abschnitt 4 ist neu geschrieben; drei Abschnitte kommen dazu (5 Aktengedächtnis,
+6 Aktenanalyse, 9 Was wie lange bleibt), alles Spätere ist umnummeriert. Fünf
+neue Störungen, darunter zwei, die **wie ein Fehler aussehen und keiner sind**:
+der gelbe Hinweis über der Analyse und das blasse Dokument ohne Haken.
+
+Gemessen in echtem Chromium bei 1280 und 390 Pixel: kein waagerechter Überlauf,
+kein Konsolenfehler, kein Verweis ins Leere, die Suche findet die neuen
+Einträge, hell und dunkel. Sieben neue Prüfungen — eine zählt die
+Abschnittsnummern lückenlos nach, eine besteht darauf, dass der
+**Zwei-Fenster-Explorer nicht mehr vorkommt**: Eine Anleitung, die eine
+Bedienung beschreibt, die es nicht gibt, kostet erst Zeit und dann Vertrauen.
 
 ---
 
