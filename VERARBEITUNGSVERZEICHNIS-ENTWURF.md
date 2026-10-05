@@ -117,9 +117,20 @@ Rechtsgebiet; eine Beschränkung wäre organisatorisch zu treffen.
 |---|---|
 | Zeitpunkt, Nutzerkennung, Funktion, Modell, Aktenkennung, Tokenzahl, Kosten | **Kein Akteninhalt.** Das Material erscheint nur als Kurzkennung (Prüfsumme und Länge) |
 
-Technisch erzwungen: `security/protokoll.py` weist Felder wie `text`, `frage`,
-`antwort`, `passagen` **aktiv zurück** (Ausnahme `ProtokollVerstoss`). Ein
-Protokolleintrag mit Inhalt lässt sich nicht schreiben.
+Technisch erzwungen, an zwei Stellen:
+
+1. `security/protokoll.py` weist Felder wie `text`, `frage`, `antwort`,
+   `passagen` **aktiv zurück** (Ausnahme `ProtokollVerstoss`).
+2. `fehlergrenze.py` nimmt **jedem** Protokolleintrag dieses Programms die
+   angehängte Ausnahme ab und ersetzt sie durch die Namen der Ausnahmekette
+   und die Code-Stelle. Ein Traceback, und mit ihm der Wortlaut einer fremden
+   Fehlermeldung, erreicht kein Protokoll.
+
+**Der zweite Punkt ist seit dem 05.10.2026 da, und bis dahin war die Aussage
+zu weit.** Die Zweitprüfung hat gezeigt (Befund F01): Punkt 1 galt nur für den
+eigenen Protokollkanal. Eine abgelehnte AWS-Anfrage wurde über Starlette
+erneut geworfen und von Uvicorn samt Ursache protokolliert — und in einer
+Ablehnung von AWS steht mitunter ein Stück der Anfrage.
 
 ## 6. Speicherdauer und Löschung
 

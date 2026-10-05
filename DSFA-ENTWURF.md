@@ -138,7 +138,7 @@ Dokument 44 — Stellen, die beim Lesen übersehen werden.
 
 | Maßnahme | Nachweis |
 |---|---|
-| Kein Akteninhalt im Protokoll | technisch erzwungen, `security/protokoll.py` weist Inhaltsfelder zurück |
+| Kein Akteninhalt im Protokoll | technisch erzwungen an zwei Stellen: `security/protokoll.py` weist Inhaltsfelder zurück, `fehlergrenze.py` nimmt jedem Protokolleintrag den Traceback ab. Der zweite Riegel ist seit dem 05.10.2026 da; bis dahin galt der erste nur für den eigenen Protokollkanal (Befund F01 der Zweitprüfung) |
 | Nachweis nur mit Prüfsumme und Länge | `domain/models.py::Nutzungseintrag` |
 | Objektnamen ohne Aktenzeichen | nur SHA-256-Ableitung |
 | Auswahl der Passagen durch den Bearbeiter | zwei Fenster, Haken je Dokument |

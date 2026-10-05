@@ -9,9 +9,9 @@ Die Kanzlei hat das Projekt von einer zweiten KI prüfen lassen. Grundlage war
 bestanden alle — und haben die Lücken trotzdem nicht gezeigt. Das ist der
 eigentliche Befund.
 
-**Stand 05.10.2026: zwei Befunde behoben** (F02.1, F09), zwei in den Unterlagen
-berichtigt (F11, F12). Die Gegenproben 4 und 10 sind damit rot — bei ihnen heißt
-das: geschlossen.
+**Stand 05.10.2026: drei Befunde behoben** (F01, F02.1, F09), zwei in den
+Unterlagen berichtigt (F11, F12). Die Gegenproben 4, 10, 12 und 13 sind damit
+rot — bei ihnen heißt das: geschlossen.
 
 | Datei | Was darin steht |
 |---|---|
@@ -47,7 +47,7 @@ Fassung hier bleibt unverändert als Beleg stehen.
 
 | | Befund | Stand |
 |---|---|---|
-| **F01** | Anbieterfehler gelangen über den Traceback ins Serverprotokoll | offen |
+| **F01** | Anbieterfehler gelangen über den Traceback ins Serverprotokoll | ~~offen~~ **behoben 05.10.2026** |
 | **F02.1** | „Vergessen" ließ die gespeicherte **Analyse** stehen | ~~offen~~ **behoben 05.10.2026** |
 | **F02.2** | ein gemischt belegter Lebenssachverhalt bleibt ganz stehen | offen |
 | **F02.3** | eine offene Sitzung behält die Passagen und speichert Antworten darauf neu | offen |

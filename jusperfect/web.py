@@ -21,6 +21,9 @@ from pydantic import BaseModel, Field
 from jusperfect import __version__
 from jusperfect.config import Einstellungen, KonfigurationsFehler
 from jusperfect.domain.models import EntwurfArt, Kosten
+from jusperfect.fehlergrenze import (
+    UNBEKANNT, Fehlergrenze, protokolle_eindaemmen,
+)
 from jusperfect.jurnodes.base import AkteNichtGefunden, DokumentNichtGefunden, JurNodesAdapter, JurNodesFehler
 from jusperfect.modellprotokoll import Befund, beim_start_pruefen
 from jusperfect.ocr.base import OcrDienst
@@ -291,12 +294,34 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         (KonfigurationsFehler, 500), (JurNodesFehler, 502), (ProviderFehler, 502), (SpeicherFehler, 503),
     ]
 
-    @app.exception_handler(Exception)
-    async def fachfehler(request: Request, exc: Exception) -> JSONResponse:
+    def _status_fuer(exc: Exception) -> tuple[int, str]:
         for typ, status in _abbildung:
             if isinstance(exc, typ):
-                return JSONResponse({"fehler": str(exc)}, status_code=status)
-        return JSONResponse({"fehler": "Interner Fehler. Der Vorgang wurde abgebrochen."}, status_code=500)
+                return status, str(exc)
+        return 500, UNBEKANNT
+
+    # Je Fehlertyp ein eigener Handler, nicht mehr einer fuer ``Exception``.
+    #
+    # Der Unterschied ist nicht Geschmack, sondern Befund F01 der
+    # Zweitprueferin: Ist ein Handler fuer ``Exception`` eingetragen, sendet
+    # Starlettes ServerErrorMiddleware zwar dessen Antwort - und **wirft die
+    # Ausnahme danach erneut**. Uvicorn protokolliert daraufhin den
+    # vollstaendigen Traceback samt Ursache, und in der Ursache steht der
+    # Wortlaut von AWS. Ein eigener Handler je Typ wird von
+    # ExceptionMiddleware behandelt und nicht erneut geworfen.
+    def _handler(status: int):
+        async def behandeln(request: Request, exc: Exception) -> JSONResponse:
+            return JSONResponse({"fehler": str(exc)}, status_code=status)
+        return behandeln
+
+    for _typ, _status in _abbildung:
+        app.add_exception_handler(_typ, _handler(_status))
+
+    # Und die Grenze darum: Was dennoch durchkommt - ein Programmfehler, ein
+    # Fehler aus einer anderen Schicht -, wird hier inhaltsfrei beantwortet
+    # und inhaltsfrei protokolliert. Nach aussen tritt keine Ausnahme.
+    protokolle_eindaemmen()
+    app.add_middleware(Fehlergrenze, status_fuer=_status_fuer)
 
     # ── Status ────────────────────────────────────────────────────────────
 

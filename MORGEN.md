@@ -231,6 +231,51 @@ Vertragsziffer „2.1." kein Datum wird.
 Behoben mit 12 neuen Prüfungen in `tests/test_fristen.py`; Gegenprobe 10 ist
 dreifach rot, also geschlossen. **1666 Prüfungen grün.**
 
+**F01 — das Serverprotokoll, behoben am 05.10.2026.** Die HTTP-Antwort war
+sauber, das Protokoll nicht. Der Weg, den niemand gesehen hatte:
+
+1. Der Anbieter behält die AWS-Ausnahme: `raise ProviderFehler(…) from e`.
+2. Der eigene Handler für `Exception` sendet eine saubere 502.
+3. **Starlette wirft danach erneut** — so arbeitet `ServerErrorMiddleware`,
+   wenn ein Handler für `Exception` eingetragen ist.
+4. Uvicorn protokolliert den vollständigen Traceback **samt Ursache**.
+5. `access_log=False` schaltet diesen Kanal nicht ab, und die Feldsperren aus
+   `security/protokoll.py` kommen auf diesem Weg nie zum Einsatz.
+
+Gebaut sind zwei Riegel, unabhängig voneinander, in
+`jusperfect/fehlergrenze.py`:
+
+* **Eine eigene ASGI-Grenze.** Sie liegt zwischen `ServerErrorMiddleware` und
+  der Anwendung und lässt **keine** Ausnahme nach außen. Uvicorn sieht nichts,
+  also protokolliert es nichts. Dazu hat jetzt **jeder Fehlertyp seinen
+  eigenen Handler** statt eines gemeinsamen für `Exception` — die behandelt
+  Starlettes `ExceptionMiddleware`, ohne erneut zu werfen.
+* **Kein Traceback in irgendein Protokoll.** An der einen Stelle, durch die
+  jeder Protokolleintrag geht, wird die Ausnahme abgenommen und durch die
+  **Namen** der Kette samt Code-Stelle ersetzt:
+  `ProviderFehler (bedrock.py:241) <- ClientError (client.py:1057)`.
+  Klassennamen, Dateinamen und Zeilennummern sind Programmtext; ein Wortlaut
+  geht nie mit, auch nicht der eigene. Das wirkt für **jeden** Kanal im
+  Prozess — Uvicorn, botocore, httpx, und was später dazukommt. botocore und
+  die übrigen lauten Bibliotheken stehen zusätzlich auf WARNUNG, weil sie auf
+  DEBUG die vollständige Anfrage mitschreiben.
+
+**Kein Pfad im Protokoll.** Eine Fehlerzeile nennt Verfahren, Vorgangsnummer
+und Kette — nicht den Pfad. Ein Pfad trägt Sitzungs- und Aktenkennungen;
+genau deshalb stehen die Zugriffsprotokolle aus. Dieselbe Vorgangsnummer steht
+in der Antwort, damit „inhaltsfrei" nicht „unauffindbar" heißt.
+
+**Geprüft am echten Weg, nicht am nachgebauten.** Die neue Prüfung schickt die
+Anfrage durch Uvicorns eigene `RequestResponseCycle` mit einer echten
+h11-Verbindung; ersetzt ist allein der Netzanschluss. Die Gegenprobe hatte
+genau dort aufgehört. 19 Prüfungen in `tests/test_fehlergrenze.py`,
+Gegenproben 12 und 13 rot.
+
+**Was ausdrücklich offen bleibt und kein Versehen ist:** Ein Traceback auf der
+Konsole beim *Start* — eine falsch gesetzte Umgebungsvariable etwa — bleibt
+stehen. Dort ist er die einzige Auskunft, die die Kanzlei hat, und er trägt
+keinen Akteninhalt: Zu diesem Zeitpunkt ist keine Akte geladen.
+
 ### Was in den Unterlagen berichtigt ist
 
 | Befund | Was falsch war |
@@ -254,9 +299,11 @@ kann.
    **Erledigt am 05.10.2026** — umgekehrte Beweisrichtung statt größerer
    Wortliste; Gegenprobe 10 dreifach rot. Siehe oben.
    **Als nächstes ist damit F01 der erste Punkt.**
-2. **F01** — Fehlerprotokolle abdichten. Der bereinigte Fehler geht sauber
+2. ~~**F01** — Fehlerprotokolle abdichten. Der bereinigte Fehler geht sauber
    hinaus, der ursprüngliche steht über `raise … from e` im Traceback des
-   Servers. Eine saubere HTTP-Antwort beweist kein sauberes Protokoll.
+   Servers.~~ **Erledigt am 05.10.2026** — eigene ASGI-Grenze und kein
+   Traceback in irgendein Protokoll; Gegenproben 12 und 13 rot. Siehe oben.
+   **Als nächstes sind damit F04/F05 an der Reihe.**
 3. **F04, F05** — eine gemeinsame Ausgabeprüfung für **alle** Modelltexte
    (Entwurf, Triage-Kernaussage, Analysehinweise) und kein Rohtext im Stream vor
    der Prüfung.
