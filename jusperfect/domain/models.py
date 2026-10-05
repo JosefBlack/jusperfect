@@ -195,6 +195,23 @@ class Aktengedaechtnis(BaseModel):
     # Chronologie werden getrennt fortgeschrieben. Eine gemeinsame Marke
     # hiesse, dass der eine Lauf dem anderen die Arbeit wegnimmt.
     chronologie_passagen: list[str] = Field(default_factory=list)
+    # Die zuletzt gelaufene Aktenanalyse. Sie kostet einen Modellaufruf ueber
+    # die ganze Akte und war bis zum 05.10.2026 weg, sobald das Programm
+    # geschlossen wurde - das teuerste Zwischenergebnis und das einzige, das
+    # niemand aufbewahrt hat.
+    analyse: Aktenanalyse | None = None
+    analyse_am: datetime | None = None
+    # Zwei Listen, zwei verschiedene Fragen.
+    #   analyse_dokumente - was in die Analyse eingegangen IST. Daran haengt,
+    #       wofuer ihre Aussagen gelten.
+    #   analyse_akte_dokumente - was die Akte in jurnodes zu dem Zeitpunkt
+    #       ueberhaupt enthielt. Nur daran laesst sich spaeter erkennen, ob
+    #       seitdem etwas NEU dazugekommen ist. Ohne diese zweite Liste zaehlte
+    #       jedes bewusst nicht vorgewaehlte Dokument - eine Rechnung etwa -
+    #       bei jedem Oeffnen wieder als "neu", und die Warnung waere nach
+    #       einer Woche nichts mehr wert.
+    analyse_dokumente: list[str] = Field(default_factory=list)
+    analyse_akte_dokumente: list[str] = Field(default_factory=list)
     aktualisiert_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

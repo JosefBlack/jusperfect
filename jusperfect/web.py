@@ -702,6 +702,13 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         sitzung = d.sitzungen.laden(ident, sitzung_id)
         passagen = d.sitzungen.passagen(sitzung)
         beteiligte, fristen = d.sitzungen.beteiligte(sitzung), d.sitzungen.fristen(sitzung)
+        # Wofuer die Aussagen der Analyse gelten. Ueber die Dokumente gerechnet
+        # sind es die geladenen; ueber das Gedaechtnis gerechnet deckt sie die
+        # ganze eingelesene Akte ab, weil der Lebenssachverhalt aus allen
+        # Dokumenten entstanden ist. Das ist nicht dasselbe, und es als
+        # dasselbe zu speichern hiesse, die Reichweite der Analyse falsch zu
+        # protokollieren.
+        erfasst = {x.dokument_id for x in passagen}
         try:
             ergebnis = d.analyse.analysieren(ident, sitzung, passagen, beteiligte, fristen)
         except AktenZuGross as zu_gross:
@@ -718,6 +725,7 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
                 raise
             ergebnis = d.analyse.analysieren_ueber_gedaechtnis(
                 ident, sitzung, g.lebenssachverhalt, g.chronologie, passagen, beteiligte, fristen)
+            erfasst |= {x.dokument_id for x in g.dokumente}
         # Die Chronologie wird fortgeschrieben, nicht ersetzt: Der zweite
         # Durchgang nach drei Wochen ergaenzt die neuen Ereignisse, statt den
         # Zeitstrahl von vorn zu bauen. Zurueck geht der vollstaendige Stand -
@@ -726,7 +734,33 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         antwort["chronologie"] = [
             x.model_dump() for x in d.gedaechtnis.chronologie_fortschreiben(sitzung, ergebnis)
         ]
+        # Die Analyse kostet einen Modellaufruf ueber die ganze Akte und war
+        # bis zum 05.10.2026 weg, sobald das Programm geschlossen wurde.
+        # Mitgeschrieben wird auch, was die Akte in jurnodes gerade enthaelt -
+        # nur daran laesst sich spaeter erkennen, ob etwas NEU dazugekommen ist.
+        # Einmal abgefragt, zweimal gebraucht: Die Dokumentliste kommt ueber die
+        # Schnittstelle von jurnodes, und zwei Abrufe waeren zwei Netzaufrufe
+        # mit der Moeglichkeit, zwei verschiedene Antworten zu bekommen.
+        in_der_akte = d.sitzungen.dokumente(sitzung)
+        d.gedaechtnis.analyse_merken(
+            sitzung, ergebnis,
+            erfasste_dokumente=sorted(erfasst),
+            akte_dokumente=[x.id for x in in_der_akte])
+        antwort["stand"] = d.gedaechtnis.analyse_stand(sitzung.akte_id, in_der_akte)
         return antwort
+
+    @app.get("/api/sitzungen/{sitzung_id}/analyse")
+    def analyse_stand(sitzung_id: str, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Die zuletzt gelaufene Analyse - und ob sie noch zur Akte passt.
+
+        Kostet nichts: kein Modellaufruf, nur ein Vergleich im Programm. Genau
+        deshalb darf die Oberflaeche das bei jedem Oeffnen der Akte abrufen.
+        """
+        sitzung = d.sitzungen.laden(ident, sitzung_id)
+        g = d.gedaechtnis.lesen(sitzung.akte_id)
+        stand = d.gedaechtnis.analyse_stand(sitzung.akte_id, d.sitzungen.dokumente(sitzung))
+        return {"stand": stand,
+                "analyse": g.analyse.model_dump() if (g and g.analyse) else None}
 
     @app.post("/api/sitzungen/{sitzung_id}/chronologie/aktualisieren")
     def chronologie_aktualisieren(sitzung_id: str, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:

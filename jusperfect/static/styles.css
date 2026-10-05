@@ -991,3 +991,13 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .explorer-zeile.ged-eintrag { flex-wrap: wrap; row-gap: 2px; }
 .explorer-zeile.ged-eintrag .explorer-titelzeile { flex: 1 0 100%; }
 .explorer-zeile.ged-eintrag .explorer-marke { margin-right: auto; }
+
+/* Die Analyse ist aelter als die Akte: Was fehlt, steht ueber dem Ergebnis
+   und nicht darunter. Eine Analyse, der drei Schriftstuecke fehlen, sieht
+   genauso vollstaendig aus wie eine vollstaendige. */
+.analyse-veraltet { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
+  border-left: 3px solid var(--amber); background: var(--amber-hell);
+  border-radius: 0 8px 8px 0; padding: 9px 12px; margin: 0 0 10px;
+  font-size: 12.5px; line-height: 1.5; }
+.analyse-veraltet > div { flex: 1 1 14rem; min-width: 0; }
+.analyse-veraltet .mini { flex: none; }

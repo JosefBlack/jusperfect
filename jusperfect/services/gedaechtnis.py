@@ -484,6 +484,70 @@ class Gedaechtnisdienst:
                  neu=len(g.chronologie) - vorher, gesamt=len(g.chronologie))
         return g.chronologie
 
+    def analyse_merken(self, sitzung: Sitzung, analyse: Aktenanalyse,
+                       erfasste_dokumente: list[str], akte_dokumente: list[str]) -> None:
+        """Legt die zuletzt gelaufene Aktenanalyse ab.
+
+        Sie kostet einen Modellaufruf ueber die ganze Akte - an der echten
+        Akte der Kanzlei rund 28 Cent - und war bis zum 05.10.2026 weg, sobald
+        das Programm geschlossen wurde. Von allem, was ein Durchgang erzeugt,
+        war sie das Teuerste und das Einzige, das niemand aufbewahrt hat.
+
+        Zwei Listen werden mitgeschrieben, weil sie zwei verschiedene Fragen
+        beantworten: welche Dokumente in die Analyse eingegangen SIND, und
+        welche die Akte zu dem Zeitpunkt ueberhaupt ENTHIELT. Nur an der
+        zweiten laesst sich spaeter erkennen, ob seitdem etwas neu
+        dazugekommen ist.
+        """
+        if self._speicher is None:
+            return
+        g = self._gelesen(sitzung.akte_id) or self._neu(sitzung)
+        g.analyse = analyse
+        g.analyse_am = datetime.now(timezone.utc)
+        g.analyse_dokumente = sorted(set(erfasste_dokumente))
+        # Alles drei zusammen: was jurnodes jetzt fuehrt, was im Gedaechtnis
+        # liegt und was gerade mitging. Die Vereinigung ist die sichere
+        # Richtung - ein Dokument, das hier fehlt, meldet sich spaeter als
+        # "neu", und ein Hinweis zu viel ist billiger als ein uebersehenes
+        # Schriftstueck.
+        g.analyse_akte_dokumente = sorted(set(akte_dokumente)
+                                          | {d.dokument_id for d in g.dokumente}
+                                          | set(erfasste_dokumente))
+        g.aktualisiert_am = g.analyse_am
+        self._nachtragen(g, "analyse")
+        ereignis(_log, "gedaechtnis_analyse", akte=sitzung.akte_id,
+                 erfasst=len(g.analyse_dokumente), in_der_akte=len(g.analyse_akte_dokumente))
+
+    def analyse_stand(self, akte_id: str, dokumente_jetzt: list[Dokument] | None = None) -> dict:
+        """Liegt eine Analyse vor, von wann - und was ist seitdem dazugekommen?
+
+        Kostet nichts: Der Vergleich laeuft im Programm, ohne Modellaufruf.
+        Genau deshalb darf er bei jedem Oeffnen der Akte laufen. Die Kanzlei am
+        05.10.2026: "Wichtig ist, dass das Programm vielleicht selber erkennt,
+        wenn neue Dokumente in der Akte sind."
+
+        Verglichen wird gegen das, was die Akte DAMALS enthielt - nicht gegen
+        das, was in die Analyse eingegangen ist. Sonst zaehlte jedes bewusst
+        nicht vorgewaehlte Dokument - eine Rechnung etwa - bei jedem Oeffnen
+        wieder als neu, und die Warnung waere nach einer Woche nichts mehr wert.
+        """
+        g = self._gelesen(akte_id)
+        if g is None or g.analyse is None:
+            return {"vorhanden": False, "am": None, "erfasst": 0, "neu": [], "entfallen": 0}
+        damals = set(g.analyse_akte_dokumente)
+        heute = {d.id: d.titel for d in (dokumente_jetzt or [])}
+        neu = [{"dokument_id": kennung, "titel": titel}
+               for kennung, titel in heute.items() if kennung not in damals]
+        return {
+            "vorhanden": True,
+            "am": g.analyse_am,
+            "erfasst": len(g.analyse_dokumente),
+            # Nach Titel sortiert, damit zweimal dieselbe Liste auch zweimal
+            # gleich aussieht - sonst sieht ein zweiter Blick nach Bewegung aus.
+            "neu": sorted(neu, key=lambda x: x["titel"]),
+            "entfallen": len([k for k in damals if dokumente_jetzt is not None and k not in heute]),
+        }
+
     def dokument_vergessen(self, akte_id: str, dokument_id: str) -> Aktengedaechtnis:
         """Entfernt einen Dokumentauszug samt allem, was aus ihm abgeleitet wurde.
 
@@ -621,6 +685,7 @@ class Gedaechtnisdienst:
         if g is None:
             return {"vorhanden": False, "dokumente": 0, "fragen": 0, "lebenssachverhalt": "",
                     "quellen": [], "chronologie": [], "zeichen": 0, "eintraege": [],
+                    "analyse": None, "analyse_am": None, "analyse_dokumente": [],
                     "arbeitsstand": Gedaechtnisdienst.arbeitsstand(None)}
         return {
             "vorhanden": True,
@@ -638,6 +703,12 @@ class Gedaechtnisdienst:
                  "zeichen": d.zeichen, "ocr": d.ocr, "hinzugefuegt_am": d.hinzugefuegt_am}
                 for d in g.dokumente
             ],
+            # Die zuletzt gelaufene Analyse, so wie sie gespeichert ist. Ob sie
+            # noch zur Akte passt, beantwortet analyse_stand() - dafuer braucht
+            # es die heutige Dokumentliste, die hier nicht vorliegt.
+            "analyse": g.analyse.model_dump() if g.analyse else None,
+            "analyse_am": g.analyse_am,
+            "analyse_dokumente": list(g.analyse_dokumente),
             "offene_dokumente": Gedaechtnisdienst._offene_dokumente(g),
             "aktualisiert_am": g.aktualisiert_am,
             "aktenstatus": g.aktenstatus,

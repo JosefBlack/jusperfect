@@ -1198,6 +1198,7 @@ async function arbeitsflaecheOeffnen() {
   gedaechtnisFensterZeigen();
   threadWillkommen();
   gedaechtnisImThreadZeigen();
+  await gespeicherteAnalyseZeigen();
   zeigeBelege();
 }
 
@@ -3248,8 +3249,65 @@ async function eingangVerwerfen(id, dateiname) {
   });
 }
 
+/** Was die Oberflaeche ueber die gespeicherte Analyse weiss. */
+let analyseStand = { vorhanden: false, am: null, erfasst: 0, neu: [] };
+
+/** Die gespeicherte Analyse beim Oeffnen der Akte - ohne Modellaufruf.
+ *
+ * Aus der Kanzlei am 05.10.2026: "Wichtig ist, dass das Programm vielleicht
+ * selber erkennt, wenn neue Dokumente in der Akte sind."
+ *
+ * Der Abruf kostet nichts: Er liest, was gespeichert ist, und vergleicht die
+ * Dokumentliste der Akte mit der von damals. Genau deshalb darf er bei jedem
+ * Oeffnen laufen.
+ */
+async function gespeicherteAnalyseZeigen() {
+  // Zuerst zuruecksetzen. Ohne diese Zeile stuende beim Wechsel auf eine Akte
+  // ohne Analyse noch der Stand der vorigen da - und der Knopf fragte nach
+  // einer Analyse, die es fuer diese Akte nie gab.
+  analyseStand = { vorhanden: false, am: null, erfasst: 0, neu: [] };
+  let daten;
+  // Eine fehlende Analyse darf das Oeffnen der Akte nicht aufhalten. Sie ist
+  // eine Arbeitshilfe, keine Bedingung.
+  try { daten = await api("GET", `/api/sitzungen/${sitzung.sitzung.id}/analyse`); }
+  catch (e) { return; }
+  analyseStand = daten.stand || analyseStand;
+  if (!daten.analyse) return;
+  analyseKarte(daten.analyse, analyseStand);
+}
+
+/** Der Satz ueber die Dokumente, die seit der Analyse dazugekommen sind. */
+function analyseNachzuglerText(stand) {
+  const neu = (stand && stand.neu) || [];
+  if (!neu.length) return "";
+  const namen = neu.slice(0, 5).map((d) => d.titel).join(", ");
+  const rest = neu.length > 5 ? ` und ${neu.length - 5} weitere` : "";
+  // Die Titel stehen am SCHLUSS und ohne Punkt dahinter. Ein Dokumenttitel
+  // endet oft selbst auf einen Punkt - "Schriftsatz vom 02.10." - und mit
+  // einem Satzzeichen dahinter stand da "02.10..".
+  return neu.length === 1
+    ? "Seit dieser Analyse ist ein Dokument in die Akte gekommen; es ist darin "
+      + `nicht enthalten: ${namen}`
+    : `Seit dieser Analyse sind ${neu.length} Dokumente in die Akte gekommen; `
+      + `sie sind darin nicht enthalten: ${namen}${rest}`;
+}
+
 async function analyseStarten() {
+  // Liegt schon eine Analyse vor, ist der Knopf eine Geldausgabe und keine
+  // Auskunft. Was sie zeigen wuerde, steht bereits auf dem Schirm.
+  if (analyseStand.vorhanden) {
+    const nachzuegler = analyseNachzuglerText(analyseStand);
+    const teile = [
+      `Es liegt eine Analyse vom ${datumKurz(analyseStand.am)} vor.`,
+      "",
+      nachzuegler || "Seitdem ist kein Dokument in die Akte gekommen.",
+      "",
+      "Neu rechnen kostet einen Modellaufruf über die ganze Akte.",
+      "", "Trotzdem neu rechnen?"];
+    if (!confirm(teile.join("\n"))) return;
+  }
   const a = await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/analyse`);
+  analyseStand = a.stand || { vorhanden: true, am: null, erfasst: 0, neu: [] };
   for (const liste of ["chronologie", "beteiligte", "forderungen", "beweismittel", "offene_punkte", "widersprueche"])
     for (const e of a[liste]) belegeMerken(e.quellen);
   // Was die Analyse an Ereignissen fand, gehört in das Chronologie-Fenster –
@@ -3261,9 +3319,37 @@ async function analyseStarten() {
   if (sitzung.gedaechtnis) sitzung.gedaechtnis.chronologie = a.chronologie || [];
   chronologieZeigen();
   gedaechtnisFensterZeigen();
+  analyseKarte(a, null);
+  ladeStatus();
+}
+
+/** Zeichnet eine Analyse in den Verlauf - frisch gerechnet oder gespeichert.
+ *
+ * Eine Funktion fuer beide Wege. Zwei waeren mit der Zeit zwei verschiedene
+ * Darstellungen, und dann sagte dieselbe Analyse an zwei Stellen Verschiedenes.
+ */
+function analyseKarte(a, stand) {
   const karte = threadKarte("ai");
-  const titel = document.createElement("div"); titel.className = "titelzeile"; titel.textContent = "Aktenanalyse"; karte.appendChild(titel);
+  const titel = document.createElement("div"); titel.className = "titelzeile";
+  titel.textContent = stand && stand.am
+    ? `Aktenanalyse · Stand vom ${datumKurz(stand.am)}`
+    : "Aktenanalyse";
+  karte.appendChild(titel);
   const inhalt = document.createElement("div"); inhalt.className = "inhalt";
+  // Zuerst, was nicht darin steht. Eine Analyse, der drei Schriftstuecke
+  // fehlen, sieht genauso vollstaendig aus wie eine vollstaendige - und das
+  // ist der Zustand, den dieses Programm gerade verhindern soll.
+  const nachzuegler = analyseNachzuglerText(stand);
+  if (nachzuegler) {
+    const warn = document.createElement("div"); warn.className = "analyse-veraltet";
+    const satz = document.createElement("div"); satz.textContent = nachzuegler;
+    const knopf = document.createElement("button");
+    knopf.type = "button"; knopf.className = "mini";
+    knopf.textContent = "neu rechnen";
+    knopf.addEventListener("click", (ev) => mitKnopf(ev.target, analyseStarten));
+    warn.append(satz, knopf);
+    inhalt.appendChild(warn);
+  }
   const hb = hinweiseBlock(a.hinweise); if (hb) inhalt.appendChild(hb);
   const forderungenMitGrundlage = (a.forderungen || []).some((z) => (z.status || "").trim());
   const gruppen = [
@@ -3289,7 +3375,6 @@ async function analyseStarten() {
     inhalt.appendChild(tabelle(kopf, zeilen, fn));
   }
   karte.appendChild(inhalt); karte.appendChild(fusszeile(a));
-  ladeStatus();
 }
 
 async function triageStarten() {
