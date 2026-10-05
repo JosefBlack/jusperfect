@@ -1,8 +1,8 @@
 # Was als Nächstes zu tun ist
 
 Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1562 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `fafd15f`.
+1583 Prüfungen grün (`.venv/bin/python -m pytest -q`).
+Jüngster Programmstand: `ece65d2`.
 
 ---
 
@@ -61,6 +61,67 @@ dem 05.10.2026, und die 17 fremden Dokumente würden dauerhaft abgelegt.
 Dreimal dasselbe: **Eine Probe, die anders misst als der Betrieb, misst etwas
 anderes als den Betrieb.** Der dritte Fehler hat sich selbst gefangen, weil
 seit dem zweiten gilt: kein Urteil ohne verstandenen Maßstab.
+
+---
+
+## Die E-Akte — der Hinweis aus der Kanzlei vom 05.10.2026
+
+**„Die Korrespondenz bei jurnodes und die Vermerke finden sich in der E-Akte.
+Vielleicht ist das die Lösung."**
+
+Das ist sie vermutlich — und zwar für **beides**. Bisher standen zwei Dinge
+getrennt offen:
+
+| Offen seit | Was |
+|---|---|
+| 28.09.2026 | Wo liegen die **Vermerke**? (Aufgabe 2) |
+| 05.10.2026 | Warum führt der **Korrespondenzordner** fremde Schriftstücke? |
+
+**Liegen beide in der E-Akte, ist es eine Frage.** Und der zweite Punkt erklärt
+sich mit: Liegt die Korrespondenz gar nicht im Dateisystem, dann zeigt
+`correspondenceFolderId` auf etwas anderes — einen Ordner an einer Adresse,
+einen Altbestand oder ein nicht mehr benutztes Feld. Das passt zu dem, was
+gemessen wurde: niedrige Nummer, befüllt 2022/23, unabhängig vom Anlagedatum
+der Akte, und in der Oberfläche unter dieser Akte nicht zu finden.
+
+**Geraten wird trotzdem nicht.** 16 Pfadnamen für die E-Akte sind geprüft, alle
+404; 36 Pfade für eine Beschreibung ebenso. Regel 10 gilt: bei Dritten warten,
+nicht raten.
+
+### Der Weg, der ohne den Hersteller auskommt
+
+**Die Kanzlei hat die Beschreibung.** Am 23.09.2026 hat sie die
+OpenAPI-Beschreibung ihres Servers geliefert; daraus sind die Pfade
+abgeschrieben, mit denen das Programm heute arbeitet. Der Server selbst gibt
+sie nicht heraus — die Datei gibt es aber.
+
+Die Probe liest sie jetzt **von der Festplatte**, ohne Netz und ohne Zugang:
+
+```
+JURNODES-PRUEFEN.bat → bei „Datei mit der Schnittstellenbeschreibung"
+                        den Pfad eintragen
+```
+
+Sie druckt **jeden** Pfad, der darin steht, und hebt die hervor, die nach
+E-Akte, Korrespondenz oder Vermerk klingen. Ein Lauf, und die Frage ist
+beantwortet — falls die Datei noch da ist.
+
+**Dabei gleich ein eigener Fehler gefangen:** Der Hersteller schreibt
+`electronic-file`, die Wortliste hieß `electronicfile` — und damit ging beim
+ersten Versuch genau der Pfad durch, auf den es ankommt. Verglichen wird
+seitdem ohne Trennzeichen. **Zum vierten Mal an einem Tag dieselbe Form:** Eine
+Prüfung, die anders schreibt als der Gegenstand, prüft etwas anderes als den
+Gegenstand.
+
+### Zu tun
+
+1. **Kanzlei:** Die OpenAPI-Datei vom 23.09.2026 suchen und der Probe geben.
+   Sie beantwortet die Frage womöglich sofort.
+2. **Kanzlei:** Die Anfrage an den Hersteller abschicken — sie ist neu
+   geschrieben und führt jetzt mit der E-Akte; der Korrespondenzordner steht
+   darin als Beleg, nicht als zweite Frage.
+3. Mit der Antwort: den Weg in die E-Akte einbauen. Dann kommen Korrespondenz
+   **und** Vermerke dazu, und `correspondenceFolderId` bleibt aus.
 
 ---
 
