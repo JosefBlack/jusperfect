@@ -111,3 +111,63 @@ def test_die_suche_findet_die_offene_405(quelle: str) -> None:
     abschnitt = quelle.split('id="stoerungen"', 1)[-1].split('id="dateien"', 1)[0]
     assert "405" in abschnitt
     assert "JURNODES-PRUEFEN.bat" in abschnitt
+
+
+def test_die_nummern_laufen_lueckenlos_durch(quelle: str) -> None:
+    """Am 05.10.2026 kamen drei Abschnitte dazu, und alles Spätere musste
+    umnummeriert werden. Eine übersprungene Zahl sieht aus wie ein verlorener
+    Abschnitt."""
+    nummern = [int(n) for n in re.findall(r'<h2><span class="nr">(\d+)</span>', quelle)]
+    assert nummern == list(range(1, len(nummern) + 1)), nummern
+
+
+def test_die_leiste_zeigt_jeden_abschnitt_und_keinen_zu_viel(quelle: str) -> None:
+    leiste = re.findall(r'<nav class="seitlich".*?</nav>', quelle, re.S)[0]
+    verwiesen = re.findall(r'href="#([^"]+)"', leiste)
+    vorhanden = re.findall(r'<section id="([^"]+)"', quelle)
+    assert verwiesen == vorhanden, (verwiesen, vorhanden)
+
+
+def test_auch_die_verweise_im_text_treffen_einen_abschnitt(quelle: str) -> None:
+    """Abschnitt 4 verweist weiter auf 5, 6 und 9 – die sind neu."""
+    ziele = set(re.findall(r'<section id="([^"]+)"', quelle))
+    im_text = set(re.findall(r'<a href="#([^"]+)">', quelle))
+    assert im_text <= ziele, im_text - ziele
+
+
+def test_sie_beschreibt_die_liste_mit_haken_und_nicht_mehr_das_ziehen(quelle: str) -> None:
+    """Den Zwei-Fenster-Explorer zum Ziehen gibt es seit Wochen nicht mehr.
+
+    Eine Anleitung, die eine Bedienung beschreibt, die es nicht gibt, kostet
+    erst Zeit und dann Vertrauen – genau wie eine Datei, die es nicht gibt.
+    """
+    assert "Zwei-Fenster-Explorer" not in quelle
+    assert "alle anhaken" in quelle
+    assert "Angehakt heißt" in quelle
+
+
+def test_sie_sagt_was_wie_lange_bleibt(quelle: str) -> None:
+    """Die Frage, die bei einem KI-Programm zuerst zu stellen ist."""
+    assert 'id="speicherung"' in quelle
+    abschnitt = quelle.split('<section id="speicherung">')[1].split("</section>")[0]
+    for muss in ("Aktengedächtnis", "Entwürfe", "jur|nodes",
+                 "weg, sobald das schwarze Serverfenster zugeht",
+                 "nur ein Vermerk"):
+        assert muss in abschnitt, muss
+
+
+def test_sie_sagt_dass_vergessen_nicht_rueckgaengig_zu_machen_ist(quelle: str) -> None:
+    abschnitt = quelle.split('<section id="gedaechtnis">')[1].split("</section>")[0]
+    # Ohne Zeilenumbrueche vergleichen: Wo im Quelltext umgebrochen wird, ist
+    # eine Frage der Spaltenbreite und keine Aussage ueber den Text.
+    fliess = " ".join(abschnitt.split())
+    assert "Es gibt kein Rückgängig" in fliess
+    assert "kostet aber ein neues Einlesen" in fliess
+    assert "holt die gelöschten Antworten und Zeitstrahleinträge nicht wieder" in fliess
+
+
+def test_sie_erklaert_den_gelben_hinweis_ueber_der_analyse(quelle: str) -> None:
+    """Er sieht aus wie ein Fehler und ist keiner."""
+    stoerungen = quelle.split('<section id="stoerungen">')[1].split("</section>")[0]
+    assert "gelben Hinweis" in stoerungen
+    assert "Kein Fehler" in stoerungen

@@ -166,8 +166,11 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
     <li><a href="#einrichten">Einrichten</a></li>
     <li><a href="#starter">Welcher Starter</a></li>
     <li><a href="#arbeiten">Mit einer Akte arbeiten</a></li>
+    <li><a href="#gedaechtnis">Das Aktengedächtnis</a></li>
+    <li><a href="#analyse">Die Aktenanalyse</a></li>
     <li><a href="#knoepfe">Die Knöpfe</a></li>
     <li><a href="#kosten">Was es kostet</a></li>
+    <li><a href="#speicherung">Was wie lange bleibt</a></li>
     <li><a href="#stoerungen">Wenn etwas klemmt</a></li>
     <li><a href="#dateien">Die Dateien im Ordner</a></li>
     <li><a href="#sicherheit">Sicherheit</a></li>
@@ -359,7 +362,8 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
 <!-- ================= 4 ================= -->
 <section id="arbeiten">
   <h2><span class="nr">4</span>Mit einer Akte arbeiten</h2>
-  <p class="vorspann">Vier Handgriffe, immer dieselben.</p>
+  <p class="vorspann">Sechs Handgriffe, immer dieselben. Die ersten vier braucht jede Akte,
+  die beiden letzten lohnen sich, sobald Sie mehr als eine Frage haben.</p>
 
   <div class="stufe">
     <div class="zahl">1</div>
@@ -369,50 +373,257 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
       Ein leeres Suchfeld und <strong>Suchen</strong> zeigt, was da ist.</p>
     </div>
   </div>
+
   <div class="stufe">
     <div class="zahl">2</div>
     <div class="inhalt">
-      <h3>Dokumente auswählen</h3>
-      <p>Es öffnet sich der Zwei-Fenster-Explorer: links die Akte, rechts Ihre Arbeitsakte.
-      Ziehen Sie hinüber, was zur Frage gehört – oder nehmen Sie „alle →". Dann
-      <strong>Übernehmen</strong>.</p>
-      <p><strong>Weniger ist oft besser.</strong> Was Sie hinüberziehen, geht an das Modell
-      und wird bezahlt. Für eine Frage zur Unfallschilderung braucht es nicht die gesamte
-      Korrespondenz. Ändern lässt sich die Auswahl jederzeit über <strong>Dokumente</strong>.</p>
+      <h3>Dokumente anhaken</h3>
+      <p>Es öffnet sich das Fenster <strong>„Dokumente der Akte"</strong> – eine Liste mit
+      Häkchen. <strong>Angehakt heißt: liegt in der Arbeitsakte und geht bei Fragen mit.</strong></p>
+      <table>
+        <tr><th>Womit</th><th>Was es tut</th></tr>
+        <tr><td><strong>alle anhaken</strong></td><td>hakt alles an, was gerade sichtbar ist</td></tr>
+        <tr><td><strong>Haken entfernen</strong></td><td>nimmt bei allen Sichtbaren den Haken weg</td></tr>
+        <tr><td>die Felder oben<br><em>Gegner (6) · Mandant (2)</em></td><td>hakt eine ganze Kategorie an oder ab</td></tr>
+        <tr><td>das Suchfeld</td><td>filtert nach Titel, Datum oder Kategorie – <code>gegner 2026-05</code> findet die gegnerischen Schriftsätze aus dem Mai</td></tr>
+      </table>
+      <p><strong>Weniger ist oft besser.</strong> Was Sie anhaken, geht an das Modell und
+      wird bezahlt. Für eine Frage zur Unfallschilderung braucht es nicht die gesamte
+      Korrespondenz. Ändern lässt sich die Auswahl jederzeit über
+      <strong>‹ Dokumente</strong>.</p>
+
+      <h3>Was nicht von selbst angehakt wird<span class="marke fertig">seit 05.10.2026</span></h3>
+      <p>Trägt der <strong>Titel</strong> eines dieser Wörter, kommt das Dokument
+      <strong>ohne Haken</strong> in die Liste:</p>
+      <p><code>Rechnung</code> · <code>Kostennote</code> · <code>Gebühren</code> ·
+      <code>Vorschuss</code> · <code>Honorar</code> · <code>RSV</code> ·
+      <code>Rechtsschutz</code> · <code>Deckungszusage</code> ·
+      <code>Deckungsanfrage</code></p>
+      <p>Es steht weiter da, nur blasser, und daneben steht der Grund –
+      <em>nicht vorgewählt: Rechnung</em>. Wer es doch braucht, hakt es an.
+      <strong>alle anhaken</strong> lässt es aus und sagt das; ein zweiter Klick auf
+      denselben Knopf holt es dazu.</p>
+      <ul>
+        <li><strong>Geprüft wird der Titel, nicht der Inhalt.</strong> Eine Rechnung, die
+        „Schreiben vom 14.03." heißt, geht durch. Eine Hilfe, keine Gewähr.</li>
+        <li><strong>Es verschwindet nichts.</strong> Das Dokument bleibt sichtbar; nur der
+        Haken fehlt.</li>
+      </ul>
+      <p>Eigene Wortliste: in <code>START-JURNODES.bat</code>, Abschnitt
+      <em>„Was nicht von selbst angehakt wird"</em>. Dort steht auch, warum in diese Zeile
+      keine Umlaute gehören.</p>
     </div>
   </div>
+
   <div class="stufe">
     <div class="zahl">3</div>
     <div class="inhalt">
-      <h3>Fragen</h3>
-      <p>Frage eintippen, Eingabetaste. Die Antwort erscheint, während sie entsteht.</p>
-      <p>Steht dort <em>„kein belastbarer Beleg"</em>, hat das Programm zu Ihrer Frage
-      nichts Belegbares gefunden. Das ist eine ehrliche Antwort, kein Fehler.</p>
+      <h3>Warten, bis gelesen ist</h3>
+      <p>Nach <strong>Arbeitsfläche öffnen</strong> werden die Dokumente geholt und in
+      lesbare Abschnitte zerlegt. Bei fünfzig Dokumenten dauert das. Ein Balken zeigt, wie
+      weit es ist.</p>
+      <p>Solange er läuft, sind die Wege gesperrt, die mitten in das Lesen hineinführen
+      würden – das Programm sagt das auch. <strong>Anhalten</strong> geht jederzeit, und
+      was gelesen ist, bleibt gelesen.</p>
+
+      <h3>Gescannte Blätter</h3>
+      <p>Rückscheine, Einschreiben, Vollmachten: Darin steht kein Text, sondern ein Bild
+      vom Text. Das Programm erkennt das und schickt die Seite an die Texterkennung von AWS
+      (Textract, Frankfurt – derselbe Auftragsverarbeiter wie für die Texte).</p>
+      <ul>
+        <li>Die Seiten werden <strong>auf Ihrem Rechner</strong> zu Bildern gemacht. Es
+        wird nichts bei AWS abgelegt.</li>
+        <li>Kosten: rund <strong>1,50 € je 1000 Seiten</strong> – für eine Akte Bruchteile
+        eines Cents.</li>
+        <li>Ob es überhaupt arbeitet, sagt <code>TEXTERKENNUNG-PRUEFEN.bat</code> in
+        zwanzig Sekunden, ohne Akte und ohne Modellaufruf.</li>
+      </ul>
     </div>
   </div>
+
   <div class="stufe">
     <div class="zahl">4</div>
     <div class="inhalt">
-      <h3>Belege prüfen</h3>
+      <h3>Fragen – und die Belege lesen</h3>
+      <p>Frage eintippen, Eingabetaste. Die Antwort erscheint, während sie entsteht.</p>
       <p>Rechts steht die Spalte <strong>Belege</strong>. Eine Kennung wie
       <code>D2-S1-P3</code> heißt: zweites Dokument, erste Seite, dritter Abschnitt. Ein
-      Klick zeigt die Originalstelle.</p>
+      Klick zeigt die Originalstelle; die tragende Stelle ist darin hervorgehoben.</p>
+      <p>Steht unter einem Beleg <em>„Die Stelle ließ sich im Absatz nicht zuordnen – oben
+      steht sein Anfang. Bitte nachlesen."</em>, zeigt die Karte den ganzen Absatz statt des
+      Satzes. Kein Fehler, sondern der Hinweis, dass hier Ihr Auge gebraucht wird.</p>
+      <p>Steht <em>„kein belastbarer Beleg"</em>, hat das Programm zu Ihrer Frage nichts
+      Belegbares gefunden. Das ist eine ehrliche Antwort, kein Fehler.</p>
     </div>
   </div>
 
-  <h3>Zurückschreiben und abschließen</h3>
-  <p>In die Akte zurück geht nur, was Sie über <strong>Entwurf → Freigabe</strong>
-  bestätigen. Sie sehen vorher genau den Text, der geschrieben wird.</p>
-  <p>Ist eine Akte in jur|nodes archiviert, bietet <strong>Abschluss</strong> an,
-  vorzumerken; erst dann beginnt die Übergangsfrist. Nach ihrem Ablauf wird der
-  Arbeitsstand <strong>im Wortlaut angezeigt</strong>, geht nach Ihrem Häkchen als Vermerk
-  in die Akte, und <em>erst danach</em> wird gelöscht. Sie erhalten einen Nachweis: wann,
-  durch wen, was.</p>
+  <div class="stufe">
+    <div class="zahl">5</div>
+    <div class="inhalt">
+      <h3>Wenn es sich lohnt: einlesen und analysieren</h3>
+      <p>Für eine einzelne Frage genügen die ersten vier Schritte. Wer länger an einer Akte
+      arbeitet, liest sie einmal ganz ein und lässt sie analysieren – beides bleibt dann
+      gespeichert. Die beiden nächsten Abschnitte erklären es:
+      <a href="#gedaechtnis">Das Aktengedächtnis</a> und
+      <a href="#analyse">Die Aktenanalyse</a>.</p>
+    </div>
+  </div>
+
+  <div class="stufe">
+    <div class="zahl">6</div>
+    <div class="inhalt">
+      <h3>Zurückschreiben oder einfach schließen</h3>
+      <p>In die Akte zurück geht nur, was Sie über <strong>Entwurf → Freigabe</strong>
+      bestätigen. Sie sehen vorher genau den Text, der geschrieben wird.</p>
+      <p>Ist eine Akte in jur|nodes archiviert, bietet <strong>Akte abschließen</strong> an,
+      vorzumerken; erst dann beginnt die Übergangsfrist (Vorgabe 30 Tage). Nach ihrem Ablauf
+      wird der Arbeitsstand <strong>im Wortlaut angezeigt</strong>, geht nach Ihrem Häkchen
+      als Vermerk in die Akte, und <em>erst danach</em> wird gelöscht. Sie erhalten einen
+      Nachweis: wann, durch wen, was.</p>
+      <p>Schließen Sie einfach den Tab, bleibt das Aktengedächtnis bestehen. Der
+      Gesprächsverlauf und die Entwürfe nicht – siehe
+      <a href="#speicherung">Was wie lange bleibt</a>.</p>
+    </div>
+  </div>
+
+  <h3>Zwei Bildschirme: Fenster abtrennen</h3>
+  <p>Neben <strong>Chronologie</strong>, <strong>Aktengedächtnis</strong> und
+  <strong>Belege</strong> steht oben rechts das Zeichen <strong>⧉</strong>. Ein Klick
+  stellt das Fenster auf einen eigenen Browser-Tab, den Sie auf den zweiten Bildschirm
+  ziehen können.</p>
+  <ul>
+    <li>Beide Fenster bleiben im Gleichschritt. Was im Hauptfenster geschieht, steht sofort
+    auch nebenan.</li>
+    <li><strong>Schließen verliert nichts.</strong> Das abgetrennte Fenster zeigt nur an;
+    der Stand liegt im Hauptfenster. Jederzeit wieder aufmachbar über dasselbe Zeichen.</li>
+    <li>Der Abgleich läuft <strong>innerhalb des Browsers</strong>, nicht über das Netz.</li>
+  </ul>
+
+  <h3>Versehentliches Schließen</h3>
+  <p>Schließen Sie den Tab des <strong>Hauptfensters</strong>, während etwas läuft oder
+  etwas Ungesichertes dasteht, fragt der Browser nach. Den Wortlaut bestimmt der Browser,
+  nicht das Programm. Im <strong>abgetrennten</strong> Fenster fragt nichts – dort geht
+  nichts verloren.</p>
 </section>
 
 <!-- ================= 5 ================= -->
+<section id="gedaechtnis">
+  <h2><span class="nr">5</span>Das Aktengedächtnis</h2>
+  <p class="vorspann">Ohne Gedächtnis fängt jede Akte bei jedem Öffnen von vorn an – und
+  wird jedes Mal neu bezahlt. Mit Gedächtnis kostet das zweite Öffnen einer gelesenen Akte
+  rund 5 Cent statt 28 Cent.</p>
+
+  <div class="raster">
+    <div class="karte">
+      <h3>Was darin liegt</h3>
+      <ul>
+        <li>die <strong>Dokumentauszüge</strong>, bei Scans der erkannte Text</li>
+        <li>der <strong>Lebenssachverhalt</strong> – ein belegter Fließtext über die ganze
+        Akte</li>
+        <li>der <strong>Zeitstrahl</strong>, fortgeschrieben statt neu gebaut</li>
+        <li>die <strong>letzten 100 Fragen und Antworten</strong></li>
+        <li>die <strong>letzte Aktenanalyse</strong>, mit Datum</li>
+      </ul>
+    </div>
+    <div class="karte">
+      <h3>Wo es liegt</h3>
+      <p>In der Kanzlei: im <strong>eigenen AWS-Konto, Frankfurt, verschlüsselt</strong> –
+      <strong>nicht</strong> in jur|nodes.</p>
+      <p>In die jur|nodes-Akte geht nur ein <strong>Vermerk</strong>, und nur, wenn Sie ihn
+      freigeben.</p>
+      <p>Wo es im Einzelfall liegt, steht unten im Gedächtnisfenster und im Selbsttest.</p>
+    </div>
+  </div>
+
+  <h3>Die Knöpfe</h3>
+  <p>Rechts <strong>Gedächtnis ›</strong>, dann:</p>
+  <table>
+    <tr><th>Knopf</th><th>Was er tut</th><th>Kostet</th></tr>
+    <tr><td><strong>Akte einlesen</strong></td><td>liest die ganze Akte Portion für Portion ein und bildet daraus Lebenssachverhalt und Zeitstrahl</td><td>mehrere Modellaufrufe – es wird vorher gefragt</td></tr>
+    <tr><td><strong>Auswahl</strong></td><td>öffnet das Fenster: links die Akte, rechts was im Gedächtnis liegt</td><td>nichts</td></tr>
+    <tr><td><strong>Anhalten</strong></td><td>bricht das Einlesen ab; Gelesenes bleibt</td><td>–</td></tr>
+  </table>
+  <p>Vor dem Einlesen sagt das Programm, wie viele Dokumente noch fehlen, wie viele Zeichen
+  das sind und mit wie vielen Aufrufen zu rechnen ist. <strong>Erst dann wird gerechnet.</strong></p>
+
+  <h3>Nachlesen, was im Gedächtnis steht</h3>
+  <p>Im Fenster <strong>Auswahl</strong> unten: <strong>„Was das Programm sich gemerkt
+  hat"</strong>. Dort stehen Lebenssachverhalt, Zeitstrahl und die früheren Fragen – im
+  Wortlaut, mit den Fundstellen, so wie sie gespeichert sind.</p>
+  <div class="merksatz">
+    <p><strong>Warum das überhaupt zu sehen ist:</strong> Ein dauerhafter Speicher, den
+    niemand einsehen kann, wäre eine Zusage ohne Nachweis.</p>
+  </div>
+
+  <h3>Einzelnes wieder herausnehmen<span class="marke fertig">seit 05.10.2026</span></h3>
+  <p>Neben jedem Eintrag steht <strong>„vergessen"</strong>:</p>
+  <table>
+    <tr><th>Wo</th><th>Was es entfernt</th></tr>
+    <tr><td>rechts in der Spalte <strong>Im Gedächtnis</strong></td><td>ein <strong>Dokument</strong> – samt den gespeicherten Fragen und Zeitstrahleinträgen, die es zitieren (die fallen <strong>ganz</strong>), und den Sätzen des Lebenssachverhalts, die nur darauf beruhen</td></tr>
+    <tr><td>in der Liste <strong>Frühere Fragen und Antworten</strong></td><td><strong>eine Frage samt Antwort</strong>. Dokumente, Lebenssachverhalt und Zeitstrahl bleiben stehen</td></tr>
+  </table>
+  <p>Die Rückfrage zählt vorher ab, was mit herausfällt – sie schätzt nicht.</p>
+  <div class="merksatz">
+    <p><strong>Es gibt kein Rückgängig.</strong> Zurücklegen ist möglich, kostet aber ein
+    neues Einlesen – bei einem Scan mit Texterkennung – und holt die gelöschten Antworten
+    und Zeitstrahleinträge nicht wieder. Lesen Sie die Rückfrage.</p>
+  </div>
+  <p>Die Akte in jur|nodes bleibt dabei unberührt. Entfernt wird nur, was sich jusperfect
+  gemerkt hat. Alles auf einmal wegwerfen geht nur bei den <strong>erfundenen</strong>
+  Testakten, mit <code>GEDAECHTNIS-LEEREN.bat</code>.</p>
+
+  <h3>Der Zeitstrahl</h3>
+  <p>Rechts <strong>Chronologie ›</strong>. Er ist <strong>ohne Modellaufruf gefüllt</strong>:
+  Dokumentdaten und Fristen stehen in den Stammdaten aus jur|nodes. Eine Analyse reichert
+  ihn an; was sie gefunden hat, bleibt im Gedächtnis stehen.</p>
+  <p><strong>aktualisieren</strong> trägt nach, was seit dem letzten Lauf dazugekommen ist –
+  nur über die neuen Abschnitte und nur nach Ereignissen. Ist nichts Neues da, kostet der
+  Knopfdruck nichts.</p>
+</section>
+
+<!-- ================= 6 ================= -->
+<section id="analyse">
+  <h2><span class="nr">6</span>Die Aktenanalyse</h2>
+  <p class="vorspann">Ein Durchgang über die ganze Arbeitsakte: Chronologie, Beteiligte,
+  Forderungen, Beweismittel, offene Punkte, Widersprüche. Jede Zeile trägt ihren Beleg.</p>
+
+  <p>Passt die Akte nicht in einen Aufruf, rechnet das Programm über den
+  <strong>Lebenssachverhalt</strong> aus dem Gedächtnis – der ist aus allen Dokumenten
+  entstanden und ein Bruchteil so lang. Erst dadurch findet sich ein Widerspruch, der
+  zwischen Dokument 8 und Dokument 44 liegt. Der erste Hinweis der Analyse sagt, worauf sie
+  beruht.</p>
+  <p>Ist die Akte nur <strong>teilweise</strong> eingelesen, verweigert das Programm: Eine
+  Analyse über zwei Drittel sähe aus wie eine über die ganze Akte.</p>
+
+  <h3>Sie bleibt stehen<span class="marke fertig">seit 05.10.2026</span></h3>
+  <p>Die Analyse liegt im Aktengedächtnis. Beim nächsten Öffnen der Akte steht sie wieder
+  da, überschrieben mit <strong>„Aktenanalyse · Stand vom 05.10.26"</strong>. Das kostet
+  nichts – es wird nichts neu gerechnet.</p>
+
+  <h3>Das Programm merkt, wenn sie veraltet ist</h3>
+  <p>Kommen später Dokumente in die Akte, steht <strong>über</strong> dem Ergebnis ein
+  gelber Hinweis:</p>
+  <div class="merksatz">
+    <p>Seit dieser Analyse ist ein Dokument in die Akte gekommen; es ist darin nicht
+    enthalten: Schriftsatz der Gegenseite vom 02.10. &nbsp; <strong>[neu rechnen]</strong></p>
+  </div>
+  <p>Die Dokumente werden <strong>beim Namen genannt</strong>, damit Sie selbst beurteilen
+  können, ob es sich lohnt. Das Programm vergleicht dafür die heutige Dokumentliste der
+  Akte mit der von damals – das kostet keinen Modellaufruf und geschieht bei jedem Öffnen.</p>
+  <p>Ein bewusst nicht vorgewähltes Dokument – eine Rechnung etwa, die schon damals in der
+  Akte lag – gilt dabei <strong>nicht</strong> als neu. Sonst stünde der Hinweis bei jedem
+  Öffnen da und wäre nach einer Woche nichts mehr wert.</p>
+
+  <h3>Der Knopf fragt nach</h3>
+  <p>Liegt schon eine Analyse vor, fragt <strong>Analyse</strong> vorher: mit dem Datum,
+  mit dem, was seitdem dazugekommen ist, und mit dem Hinweis, dass neu rechnen einen
+  Modellaufruf über die ganze Akte kostet. Beim ersten Mal fragt er nicht – da gibt es
+  nichts zu verlieren.</p>
+</section>
+
+<!-- ================= 7 ================= -->
 <section id="knoepfe">
-  <h2><span class="nr">5</span>Die Knöpfe</h2>
+  <h2><span class="nr">7</span>Die Knöpfe</h2>
   <table>
     <tr><th>Knopf</th><th>Wofür</th></tr>
     <tr><td><strong>Analyse</strong></td><td>Chronologie, Beteiligte, Forderungen, Beweismittel, offene Punkte, Widersprüche – jede Zeile mit Beleg</td></tr>
@@ -435,9 +646,9 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
   Strich heißt: trifft hier nicht zu.</p>
 </section>
 
-<!-- ================= 6 ================= -->
+<!-- ================= 8 ================= -->
 <section id="kosten">
-  <h2><span class="nr">6</span>Was es kostet</h2>
+  <h2><span class="nr">8</span>Was es kostet</h2>
   <p class="vorspann">Bezahlt wird nach Textmenge, die an das Modell geht. Zwei Posten,
   die sich sehr unterschiedlich verhalten.</p>
 
@@ -454,7 +665,19 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
       <p>Arbeitet auf dem Gemerkten. Bei derselben Akte: <strong>rund 4 Cent</strong> je
       Frage.</p>
     </div>
+    <div class="karte">
+      <h3>Das zweite Öffnen</h3>
+      <p>Liegt die Akte im Aktengedächtnis, muss sie nicht noch einmal gelesen werden:
+      <strong>rund 5 Cent statt 28 Cent.</strong> Das ist der ganze Zweck des
+      Gedächtnisses.</p>
+    </div>
   </div>
+
+  <p>Zwei Posten, die kaum ins Gewicht fallen und trotzdem genannt gehören: Die
+  <strong>Texterkennung</strong> für gescannte Blätter kostet rund 1,50 € je 1000 Seiten –
+  für eine Akte Bruchteile eines Cents. Die <strong>Aktenanalyse</strong> über eine große
+  Akte kostet rund 28 Cent; sie bleibt gespeichert und wird nur auf Ihren Klick neu
+  gerechnet.</p>
 
   <p>Das Programm zeigt beides vor dem ersten Aufruf an – Dokumentzahl, Zeichenzahl und
   den geschätzten Betrag. Zusätzlich liegt bei AWS eine <strong>Monatsgrenze</strong>; ist
@@ -468,9 +691,53 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
   </div>
 </section>
 
-<!-- ================= 7 ================= -->
+<!-- ================= 9 ================= -->
+<section id="speicherung">
+  <h2><span class="nr">9</span>Was wie lange bleibt</h2>
+  <p class="vorspann">Die Frage, die bei einem KI-Programm zuerst zu stellen ist. Hier die
+  Antwort in einer Tabelle.</p>
+
+  <table>
+    <tr><th>Was</th><th>Wo</th><th>Wie lange</th></tr>
+    <tr><td><strong>Dokumentauszüge</strong><br>bei Scans der erkannte Text</td><td>Aktengedächtnis – AWS-Konto der Kanzlei, Frankfurt, verschlüsselt</td><td>dauerhaft, bis zum Abschluss der Akte</td></tr>
+    <tr><td><strong>Lebenssachverhalt</strong></td><td>ebenda</td><td>dauerhaft</td></tr>
+    <tr><td><strong>Zeitstrahl</strong></td><td>ebenda</td><td>dauerhaft, höchstens 500 Einträge</td></tr>
+    <tr><td><strong>Fragen und Antworten</strong></td><td>ebenda</td><td>die letzten 100</td></tr>
+    <tr><td><strong>Die letzte Aktenanalyse</strong></td><td>ebenda</td><td>dauerhaft, bis sie neu gerechnet wird</td></tr>
+    <tr><td><strong>Der Gesprächsverlauf im Fenster</strong></td><td>Arbeitsspeicher des Programms</td><td><strong>weg, sobald das schwarze Serverfenster zugeht</strong></td></tr>
+    <tr><td><strong>Entwürfe</strong></td><td>ebenda</td><td>ebenso</td></tr>
+    <tr><td><strong>Der Nachweis</strong><br>wer, wann, welches Modell, wie viel</td><td>Arbeitsspeicher; beim AWS-Betrieb im AWS-Konto</td><td>ohne Aktentext</td></tr>
+    <tr><td><strong>Die Akte in jur|nodes</strong></td><td>jur|nodes</td><td><strong>nur ein Vermerk, und nur nach Ihrer Freigabe</strong></td></tr>
+  </table>
+
+  <div class="raster">
+    <div class="karte">
+      <h3>Was dauerhaft bleibt</h3>
+      <p>Das <strong>Aktengedächtnis</strong> – sonst nichts. Darauf baut das zweite Öffnen
+      auf, und nur deshalb kostet es 5 statt 28 Cent.</p>
+    </div>
+    <div class="karte">
+      <h3>Was nur in der Sitzung lebt</h3>
+      <p>Verlauf und <strong>Entwürfe</strong>. Ein Entwurf, den Sie brauchen, gehört
+      vorher herauskopiert oder freigegeben.</p>
+    </div>
+    <div class="karte">
+      <h3>Was in die Akte geht</h3>
+      <p>Nur, was Sie über <strong>Entwurf → Freigabe</strong> bestätigen. Von selbst
+      schreibt das Programm nichts nach jur|nodes.</p>
+    </div>
+  </div>
+
+  <div class="merksatz">
+    <p><strong>Gelöscht wird das Gedächtnis nur über den Abschluss der Akte</strong> – oder
+    von Hand, einzeln, über „vergessen". Eine Bearbeitungspause löscht nie etwas, auch nach
+    neun Monaten nicht. Maßgeblich ist allein der Aktenstatus in jur|nodes.</p>
+  </div>
+</section>
+
+<!-- ================= 10 ================= -->
 <section id="stoerungen">
-  <h2><span class="nr">7</span>Wenn etwas klemmt</h2>
+  <h2><span class="nr">10</span>Wenn etwas klemmt</h2>
   <p class="vorspann">Suchen Sie nach einem Wort aus der Meldung, die auf dem Bildschirm
   steht. Groß- und Kleinschreibung spielt keine Rolle.</p>
 
@@ -497,6 +764,56 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
       <strong>Drücken Sie F5.</strong> Danach ist es weg und die Aktensuche steht da.</p>
       <p>Bleibt es auch nach zwei F5 stehen, sehen Sie in das schwarze Fenster, aus dem das
       Programm gestartet wurde – dort steht der eigentliche Grund.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„jusperfect läuft schon" · Errno 10048</summary>
+    <div class="koerper">
+      <p>Das Programm läuft bereits, nur ohne sichtbares Fenster. Es startet kein zweites
+      Mal, weil sonst zwei Programme auf dieselbe Ablage schrieben.</p>
+      <p>Rufen Sie <code>http://127.0.0.1:8765</code> im Browser auf – das ist das laufende
+      Programm. Ist kein Fenster mehr zu sehen und soll es wirklich neu starten:
+      Task-Manager öffnen (Strg+Umschalt+Esc), unter „Details" den Eintrag
+      <code>python.exe</code> beenden, dann neu starten.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Das AWS-Aktengedächtnis ist nicht erreichbar"</summary>
+    <div class="koerper">
+      <p>Der Satz dahinter sagt, woran es liegt: kein Netz, der Eimer fehlt, die
+      Berechtigung fehlt oder er liegt in einer anderen Region.</p>
+      <p><strong>Das Programm arbeitet ohne Gedächtnis weiter.</strong> Die Akte wird beim
+      nächsten Mal eben neu eingelesen – das kostet Geld und keine Arbeit. Es wartet dabei
+      nicht mehr minutenlang: Nach fünf Sekunden ohne Verbindung gibt es auf und sagt es.</p>
+      <p>Prüfen lässt sich der Zugang einzeln mit
+      <code>GEDAECHTNIS-AWS-PRUEFEN.bat</code>.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>„Es fehlt: bedrock:…" oder „textract:…"</summary>
+    <div class="koerper">
+      <p>In der AWS-Zugriffsrichtlinie fehlt genau diese Berechtigung. Der Name steht in
+      der Meldung; einzutragen ist er in <code>infra/iam-nur-claude.json</code> (siehe
+      <code>infra/IAM.md</code>), dann in der AWS-Konsole unter IAM → Richtlinien
+      einsetzen.</p>
+      <p><strong>Warum nur der Name und nicht der Wortlaut von AWS?</strong> Eine Abweisung
+      von AWS kann ein Stück der Anfrage enthalten – und die Anfrage ist Aktentext. Das
+      Programm holt deshalb nur den Namen der fehlenden Handlung heraus.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>Die Analyse zeigt einen gelben Hinweis über dem Ergebnis</summary>
+    <div class="koerper">
+      <p>Kein Fehler. Die Analyse ist gespeichert und älter als die Akte: Seit sie gerechnet
+      wurde, sind Dokumente dazugekommen, die nicht darin enthalten sind. Der Hinweis nennt
+      sie beim Namen.</p>
+      <p>Daneben steht <strong>neu rechnen</strong>. Ob sich das lohnt, entscheiden Sie –
+      es kostet einen Modellaufruf über die ganze Akte.</p>
+    </div></details>
+
+  <details class="stoerung"><summary>Ein Dokument steht blass in der Liste und hat keinen Haken</summary>
+    <div class="koerper">
+      <p>Kein Fehler, sondern die Ausschlussliste: Im Titel steht eines der Wörter
+      <em>Rechnung, Kostennote, Gebühren, Vorschuss, Honorar, RSV, Rechtsschutz,
+      Deckungszusage, Deckungsanfrage</em>. Daneben steht der Grund.</p>
+      <p>Wer es doch braucht, hakt es einzeln an. <strong>alle anhaken</strong> lässt es
+      aus; ein zweiter Klick auf denselben Knopf holt es dazu.</p>
     </div></details>
 
   <details class="stoerung"><summary>„Bitte Nutzerkennung eingeben"</summary>
@@ -672,9 +989,9 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
   </div>
 </section>
 
-<!-- ================= 8 ================= -->
+<!-- ================= 11 ================= -->
 <section id="dateien">
-  <h2><span class="nr">8</span>Die Dateien im Programmordner</h2>
+  <h2><span class="nr">11</span>Die Dateien im Programmordner</h2>
   <p class="vorspann">Alles zum Doppelklicken. Keine davon verändert eine Akte.</p>
 
   <h3>Starten</h3>
@@ -714,9 +1031,9 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
   </div>
 </section>
 
-<!-- ================= 9 ================= -->
+<!-- ================= 12 ================= -->
 <section id="sicherheit">
-  <h2><span class="nr">9</span>Sicherheit – was gilt und was nicht</h2>
+  <h2><span class="nr">12</span>Sicherheit – was gilt und was nicht</h2>
   <p class="vorspann">Kurzfassung. Die vollständige Darstellung steht in
   <code>SICHERHEIT.md</code>, die technischen Werte für die Datenschutz-Folgenabschätzung
   in <code>DSFA-ANGABEN.md</code>.</p>
@@ -757,9 +1074,9 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
   </div>
 </section>
 
-<!-- ================= 10 ================= -->
+<!-- ================= 13 ================= -->
 <section id="nachlesen">
-  <h2><span class="nr">10</span>Wo Sie was nachlesen</h2>
+  <h2><span class="nr">13</span>Wo Sie was nachlesen</h2>
   <table>
     <tr><th>Datei</th><th>Inhalt</th></tr>
     <tr><td><code>ANLEITUNG.md</code></td><td>Die ausführliche Anleitung für den Anwender</td></tr>
