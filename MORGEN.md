@@ -415,6 +415,40 @@ und 11 rot. **1758 Prüfungen grün.** Im Browser nachgesehen: Der
 Verarbeitungsnachweis zeigt den Regelfall wie bisher und den Fehlerfall mit
 einer bernsteinfarbenen Marke daneben.
 
+### F11 — der Vorschlag liegt der Kanzlei vor
+
+`F11-VORSCHLAG.md`, geschrieben am 05.10.2026. Gebaut ist nichts; die
+Entscheidung gehört der Kanzlei (`[KANZLEI 18]`).
+
+**Was die Messung ergeben hat und vorher niemand wusste:**
+
+* Alles außer dem Dokumenttext macht **15,4 %** des Materials aus (gemessen an
+  vier Testakten): Passagenkopfzeilen 1.685, Beteiligte 990, Fristen 459,
+  Aktenkopf 398 Zeichen.
+* Bei **13 von 21** Dokumenten trägt der Titel Wörter, die im Text fehlen —
+  und das ist fast immer die **Art des Schriftstücks**, nicht eine Person.
+  „Kündigungsschreiben", „Polizeiliche Unfallmitteilung", „Mietvertrag". Wo ein
+  Name im Titel stand, stand er auch im Text.
+* **Die Belege kosten eine Ersetzung nichts.** Der Dokumenttitel in der
+  rechten Spalte kommt aus der Passage, die das Programm selbst baut — er geht
+  nie durch das Modell. Verloren ginge nur, dass das Modell das Schriftstück
+  im Fließtext benennen kann.
+* **Gegen den echten Server gibt es kein Titelfeld.** Die Beschreibung des
+  Herstellers (API 1.0.2) führt an einer Datei nur `fileName`. Der Titel *ist*
+  dort der Dateiname — also geht hinaus, was jemand hineinschreibt.
+
+**Vorgeschlagen:** nur die Art des Schriftstücks statt des ganzen Titels, über
+die Liste, die der Zeitstrahl ohnehin führt (`SCHRIFTSTUECKARTEN`). **Die
+Richtung des Irrtums stimmt dort**: Was die Liste nicht kennt, geht nicht
+hinaus. Das ist das Gegenteil der Fristenwortlisten, die am Vormittag desselben
+Tages genau deshalb aufgegeben wurden.
+
+Dazu: Das Aktenzeichen fällt weg — außer beim Entwurf, der „Unser Zeichen"
+braucht. Nicht vorgeschlagen ist, Beteiligte und Kurzrubrum herauszunehmen:
+Das Modell braucht die Rollen, der Dokumenttext enthält dieselben Namen
+ohnehin, und ein Material ohne Rollen hat im September die gegnerische Kanzlei
+zur Rechtsschutzversicherung gemacht.
+
 ### Was in den Unterlagen berichtigt ist
 
 | Befund | Was falsch war |
