@@ -1,5 +1,17 @@
 # Sicherheits- und Berufsgeheimnis-Modell
 
+> **Berichtigt am 06.10.2026 nach der Zweitprüfung vom 05.10.2026.** Eine
+> zweite KI hat dieses Projekt geprüft und dreizehn Befunde erhoben
+> (`zweitpruefung/`). Mehrere Zusagen dieser Datei waren **zu weit gefasst** –
+> sie galten für den gewollten Weg und nicht für den zweiten. Die betroffenen
+> Stellen stehen unten durchgestrichen und berichtigt daneben; gelöscht wird
+> nichts, denn eine Zusage, die stillschweigend verschwindet, sah nie falsch
+> aus.
+>
+> **Der eigentliche Befund der Prüfung steht in keiner der dreizehn Zeilen:**
+> Alle 1625 damals vorhandenen Prüfungen waren grün. Eine Prüfung, die den
+> gewollten Weg misst, misst nicht den Fehlerweg.
+
 ## Grundsätze
 
 1. **jurnodes bleibt die führende Akte; das optionale Fallgedächtnis ist die zweite
@@ -26,6 +38,18 @@
      Die Datei ist nicht zusätzlich verschlüsselt – sie liegt so geschützt wie die Akte, in der
      sie steht. Ein Gedächtnis, das zu einer anderen Akte gehört, wird beim Lesen abgewiesen;
      kopierte Aktenordner sind sonst der übliche Weg zu fremdem Aktentext.
+
+     **Für die Akte selbst galt das bis zum 05.10.2026 nicht (Befund F08).** Der
+     Client fragte eine Akte ab, und die Antwort durfte eine **andere** nennen –
+     geprüft wurde nichts. Die Dokumentliste dieser fremden Akte wurde geladen
+     und unter der eigenen Aktennummer eingetragen; jede spätere Prüfung sah
+     eine in sich stimmige Liste. Die zurückgegebene Kennung muss seitdem die
+     angefragte sein, sonst bricht der Vorgang ab, und eine Datei muss in dem
+     Ordner liegen, dessen Inhalt gefragt war. Die fremde Aktenkennung geht
+     dabei **nicht** in die Fehlermeldung: Sie gehört zu einer anderen Akte.
+     **Was diese Prüfung nicht kann:** Ein Server, der eine falsche
+     Zugehörigkeit durchweg stimmig ausgibt, lässt sich damit nicht entlarven.
+     Sie fängt die Antwort, die sich selbst widerspricht.
    - `aws` – eigener S3-Bucket im Kanzlei-Konto. Objektnamen enthalten nur eine
      SHA-256-Ableitung der internen Aktenkennung; die Inhalte liegen KMS-verschlüsselt in einem
      nicht öffentlichen Bucket.
@@ -41,11 +65,53 @@
 2. **Nur berechtigte Nutzer, nur berechtigte Akten.** Cognito mit MFA stellt die Identität fest,
    der JWT-Authorizer von API Gateway prüft sie vor der Funktion, die Berechtigungstabelle
    entscheidet je Akte. Fremde Sitzungen und Entwürfe sind unsichtbar (404), nicht verboten (403).
+
+   **Berichtigt am 06.10.2026 (Befund F07).** Geprüft wurde beim Entwurf allein,
+   *wer* ihn angelegt hat. Wem die Akte entzogen worden war, der bekam auf die
+   Sitzung richtig 403 – und konnte denselben Entwurf weiter lesen **und
+   freigeben**, also in genau diese Akte schreiben. Die Aktenberechtigung wird
+   seitdem bei **jedem** Entwurfszugriff neu geprüft, nicht beim Anlegen; ein
+   Entzug wirkt damit sofort auch auf den vorbereiteten Schreibweg (403 statt
+   404, weil die Akte bekannt ist und nur der Zugriff fehlt). Dass in dieser
+   Kanzlei alle alle Akten sehen, ändert daran nichts – dann geht die Prüfung
+   eben immer durch.
 3. **Nur erforderliche Inhalte an das Modell.** Für Fragen eine Passagenauswahl, für Analysen
-   die Passagen bis zur Zeichenobergrenze. Nie Dateien, nie Dateinamen, nie Nutzer- oder
+   die Passagen bis zur Zeichenobergrenze. Nie Dateien, nie Nutzer- oder
    Sitzungskennungen, nie die ganze Kanzlei.
+
+   ~~Nie Dateinamen.~~ **Das war falsch (Befund F11), berichtigt am
+   06.10.2026.** Der Dateiname ging als **Dokumenttitel** in jeder
+   Passagenüberschrift mit, das **Aktenzeichen** in der ersten Materialzeile.
+   Gegen den echten jur|nodes-Server ist der Titel sogar immer der Dateiname:
+   Die Beschreibung des Herstellers (API 1.0.2) kennt für eine Datei kein
+   Titelfeld, nur `fileName`.
+
+   Seit dem 05.10.2026 gilt, von der Kanzlei entschieden (`F11-VORSCHLAG.md`,
+   `DSFA-ENTWURF.md` `[KANZLEI 18]`):
+
+   | Geht mit | Geht **nicht** mit |
+   |---|---|
+   | der Text der angehakten Passagen | der Dateiname |
+   | die **Art** des Schriftstücks, als Wort aus einer Liste im Programm (`Dokument 2 – Kündigung`) | der Dokumenttitel im Wortlaut |
+   | Kurzrubrum, Rechtsgebiet, Beteiligte mit Rolle | das Aktenzeichen – außer beim **Entwurf**, der „Unser Zeichen" trägt |
+
+   Erkennt die Liste nichts, heißt es nur `Dokument 2`: Die Richtung des
+   Irrtums stimmt, weniger Auskunft und nie mehr. **Anonym ist die
+   Übermittlung dadurch nicht** – im Text der Passagen stehen weiterhin Namen,
+   Beträge und Daten. Das ist der Gegenstand der Auswertung und in
+   `DSFA-ENTWURF.md`, Abschnitt 3.2, bewertet.
 4. **Zurückschreiben nur mit Freigabe – mit genau einer Ausnahme.** Eine Freigabe ist an Nutzer,
-   Akte, Textprüfsumme und Prozesslauf gebunden (HMAC). Der jur|nodes-Adapter prüft sie vor
+   Akte, ~~Textprüfsumme~~ **Freigabevorlage** und Prozesslauf gebunden (HMAC).
+
+   **Berichtigt am 06.10.2026 (Befund F06).** Bestätigt wurde die Prüfsumme des
+   **Textes**. Geschrieben werden aber vier Dinge: Akte, Art, Betreff und Text.
+   Fenster A lud den Entwurf, Fenster B änderte nur den Betreff, Fenster A gab
+   mit der alten Prüfsumme frei – und der neue, dort nie gesehene Betreff ging
+   in den Vermerktext **und** in den Titel nach jur|nodes. Die Kryptografie war
+   dabei nicht gebrochen; sie signierte nur das, was ihr gegeben wurde, und das
+   war zu wenig. Bestätigt wird seitdem eine **Freigabevorlage** über alle vier
+   Felder mit eigener Fassungsnummer (`services/entwuerfe.py::freigabevorlage`);
+   Prüfung, Statuswechsel und Schreiben stehen unter einem Schloss. Der jur|nodes-Adapter prüft sie vor
    jedem Schreibvorgang. Ohne Freigabeobjekt gibt es keinen Code-Pfad, der einen Vermerk oder
    Entwurf schreibt. Löschen gibt es dafür nicht.
 
@@ -77,17 +143,80 @@
    Hinweis. Dem Programmbenutzer ist das Ändern der Einstellung verboten (Deny auf
    `PutModelInvocationLoggingConfiguration`), das Lesen erlaubt. Der Befund steht im
    Verarbeitungsnachweis. Geprüft in `tests/test_modellprotokoll.py`.
+
+   **Berichtigt am 06.10.2026 (Befund F01).** Der Satz galt für den **eigenen**
+   Protokollkanal und nicht für die anderen. Eine abgelehnte Bedrock-Anfrage
+   trägt den Wortlaut von AWS, und darin steht mitunter ein Stück der Anfrage,
+   also Aktentext. Der Anbieter behielt die Ausnahme als Ursache, Starlette warf
+   sie nach der sauberen Antwort erneut, und Uvicorn schrieb den vollständigen
+   Traceback **samt Ursache** ins Serverprotokoll. `access_log=False` schaltet
+   diesen Kanal nicht ab, und die Feldsperren kamen auf diesem Weg nie zum
+   Einsatz. **Eine saubere HTTP-Antwort beweist kein sauberes Protokoll.**
+
+   Seitdem zwei Riegel (`jusperfect/fehlergrenze.py`): eine eigene ASGI-Grenze,
+   aus der keine Ausnahme nach außen tritt, und – an der einen Stelle, durch die
+   jeder Protokolleintrag geht – das Abnehmen der Ausnahme. An ihre Stelle
+   treten die **Namen** der Kette samt Code-Stelle; ein Wortlaut geht nie mit,
+   auch nicht der eigene. Das wirkt für jeden Kanal im Prozess. Geprüft in
+   `tests/test_fehlergrenze.py`.
 6. **Belegpflicht, maschinell geprüft.** Jede Aussage trägt eine Passagenkennung, die auf eine
-   tatsächlich mitgeschickte Passage zeigen muss. Sonst: „ohne Beleg“ plus Hinweis.
+   tatsächlich mitgeschickte Passage zeigen muss. ~~Sonst: „ohne Beleg“ plus Hinweis.~~
+   **Sonst wird sie entfernt**, und an ihrer Stelle steht eine sichtbare Marke.
+
+   **Berichtigt am 06.10.2026 (Befunde F04 und F05).** Zweierlei war zu weit:
+
+   * **Der Umfang.** Die Prüfung galt für die Antwort auf eine Frage und für
+     die strukturierten Listen – nicht für den **Entwurf**, nicht für die
+     **Kernaussage** der Eingangsprüfung und nicht für die **Hinweise des
+     Modells**. Ein vollständig erfundener Entwurf kam mit HTTP 201 und leerer
+     Quellenliste heraus. Heute geht jeder angezeigte Modelltext durch dieselbe
+     Prüfung; ein Entwurf ohne einen einzigen tragenden Beleg wird gar nicht
+     erst ausgegeben. Was das Programm selbst anfügt, entsteht getrennt davon.
+   * **Die Reichweite.** Ein Beleg trug alles seit dem vorigen Beleg – auch
+     einen Absatz, der Zeilen vorher stand. Er reicht jetzt bis zur nächsten
+     Einheitsgrenze zurück: Leerzeile, Aufzählungspunkt, Überschrift. Die
+     Grenze ist bewusst der Absatz und nicht der Satz; ein Satzmaßstab
+     zerschnitte fast jede richtige Antwort.
+
+   Dazu: **Im laufenden Text wird nichts Ungeprüftes mehr gezeigt.** Vorher
+   strömte der Rohtext und die Prüfung kam am Ende – der Bearbeiter sah also,
+   was gleich darauf zurückgehalten wurde. Bis zur ersten abgeschlossenen
+   Aussage steht jetzt nur da, *dass* gearbeitet wird. Geprüft in
+   `tests/test_ausgabepruefung.py`.
 7. **Dokumente sind Material, keine Anweisungen.** Die Systemanweisung sagt dem Modell, dass
    Aufforderungen in Passagen nicht befolgt werden. In Phase 1 und 2 gibt es keine Aktionen, die
    ein Dokument auslösen könnte; Phase 4 braucht dafür eigene Tests.
 8. **Fristen werden erkannt, nie berechnet.** Die Eingangsprüfung nennt Fristauslöser mit Beleg.
    Die Fristenkontrolle bleibt in jur|nodes.
-9. **Nur EU-Regionen.** Die Konfiguration verweigert andere Regionen; die Lambda-Rolle trägt eine
-   Deny-Regel für alles außerhalb `eu-*`. Neue Modelle laufen in Bedrock oft über
+
+   **Der Nachweis ist am 05.10.2026 ein anderer geworden (Befund F09).** Die
+   Zusage hing an zwei Wortlisten, und drei Schreibweisen kamen durch:
+   „endet am 26.05.**26**" (zweistelliges Jahr), „endet am 26. **Mai**"
+   (Monatsname ohne Jahr) und „muss **bis zum** 26.05.2026 eingereicht werden"
+   (kein Wort der Fristliste). Die Zusage blieb, der Nachweis wurde ersetzt:
+   **Jedes Datum muss sich auf eine Stelle zurückführen lassen, die das
+   Programm selbst mitgeschickt hat** – eine Passage, deren Kopfzeile oder den
+   Fristenkalender. Findet sich dort nichts, wird es ersetzt, ganz ohne
+   Wortliste. Denn woher sollte es sonst kommen. Geprüft in
+   `tests/test_fristen.py`.
+9. **Nur EU- und EWR-Regionen.** Die Konfiguration verweigert andere Regionen; die
+   Zugriffsrichtlinie trägt eine Deny-Regel für alles außerhalb der ~~`eu-*`~~
+   **namentlich aufgeführten sechs Regionen**. Neue Modelle laufen in Bedrock oft über
    EU-Inferenzprofile; diese verteilen auf mehrere EU-Regionen und gehören so in DSFA und
    Dokumentation.
+
+   **Zwei Berichtigungen, beide vom 05.10.2026:**
+
+   * ~~`eu-*`~~ **war der falsche Maßstab.** Der Vorsatz ist eine
+     Namenskonvention von AWS und keine Aussage über die EU: `eu-central-2`
+     liegt in **Zürich**, `eu-west-2` in **London**. Die Richtlinie und die
+     Konfiguration nennen die sechs Regionen seitdem beim Namen
+     (`config.py::EU_EWR_REGIONEN`, `infra/iam-nur-claude.json`).
+   * **Die Aufrufregion sagt nichts über das Inferenzprofil (Befund F13).** Ein
+     Profil ist keine Modellkennung, sondern eine Verteilregel: `global.…`
+     verteilt weltweit, gleich aus welcher Region es aufgerufen wird. Frankfurt
+     plus `global.anthropic.…` kam durch die Einstellungsprüfung. Geprüft wird
+     seitdem **jede** der sieben Modelleinstellungen, nicht nur die eine.
 10. **Zwei Kostenbremsen.** Der Kostenwächter in der Anwendung sperrt KI-Aufrufe oberhalb des
     Monatsbudgets; AWS Budgets warnt bei 50, 80 und 100 Prozent des tatsächlichen Kontostands.
 11. **Ein geprüfter Ausgang, mit Nachweis.** Jeder Weg zum Modell läuft über den `Ausgang`
@@ -99,6 +228,17 @@
     ein zweites Mal neben der Akte abzulegen (Grundsatz 1). `GET /api/nachweis` zeigt die eigenen
     Vorgänge; ein vollständiger Export für die Datenschutzbeauftragte ist ein eigener, verwalteter
     Weg, keine offene Schnittstelle.
+
+    **Berichtigt am 06.10.2026 (Befund F10).** Der Nachweis entstand erst
+    **nach** einer erfolgreichen Antwort. Warf der Anbieter, nachdem er das
+    Material längst empfangen hatte, blieb das Nachweisfenster leer – und
+    „keine Zeile" liest sich wie „nichts hinausgegangen". Kosten und
+    Übermittlung sind im Fehlerfall eben nicht beide null. Die Zeile entsteht
+    seitdem **vor** der Übergabe; der Ausgang wird danach angehängt
+    (beantwortet, ohne Antwort, abgebrochen) und beim Lesen mit ihr
+    zusammengelegt. Angehängt und nicht überschrieben: Ein Nachweis, den man
+    ändern kann, ist ein schwächerer Nachweis. Steht nur die Versuchszeile da,
+    heißt das **unbekannt** und nicht **nichts**.
 12. **Der Posteingang bereitet vor, der Mensch entscheidet.** Der optionale
     beobachtete Ordner (`services/watchfolder.py`, `services/posteingang.py`) liest
     eingehende Dokumente ein, sobald ihre Größe stabil ist – er verschiebt, benennt
@@ -197,10 +337,41 @@ nicht wiederherstellen, ein zu lange aufbewahrtes schon.
 
 Ein einzelner Dokumentauszug und eine einzelne Frage-Antwort-Runde lassen sich gezielt
 entfernen. Beim Dokument fällt mit, was aus ihm abgeleitet wurde – Antworten, die es
-zitieren, der Lebenssachverhalt und die Chronologie –, sonst bliebe ein Rest des
-gelöschten Dokuments stehen. Hinzu kommt ein technischer Grund: Die Fundstellenkennungen zählen die
-Dokumente durch; fällt eines weg, zeigen alle folgenden Kennungen auf das falsche
-Dokument. Der abgeleitete Teil wird deshalb verworfen und neu gebildet.
+zitieren, der Lebenssachverhalt, die Chronologie und die gespeicherte Analyse –, sonst
+bliebe ein Rest des gelöschten Dokuments stehen.
+
+~~Hinzu kommt ein technischer Grund: Die Fundstellenkennungen zählen die Dokumente
+durch; fällt eines weg, zeigen alle folgenden Kennungen auf das falsche Dokument. Der
+abgeleitete Teil wird deshalb verworfen und neu gebildet.~~ **Das stimmt seit den festen
+Dokumentnummern nicht mehr** (berichtigt am 06.10.2026): Eine einmal vergebene Nummer
+gehört diesem Auszug, nachgerückt wird nicht, und deshalb bleibt der Rest des
+Gedächtnisses stehen. Ein Lebenssachverhalt aus fünfzig Dokumenten war früher wegen
+eines einzigen dahin.
+
+**Vier Berichtigungen aus der Zweitprüfung, alle vom 05.10.2026 (Befunde F02 und F03):**
+
+* **Die gespeicherte Analyse** fiel durch das Netz und stand nach dem Entfernen
+  weiter da. Sie wird jetzt mitbereinigt; bleibt nichts Unberührtes übrig, fällt sie
+  ganz – eine Analyse ohne ihre Grundlage sieht genauso vollständig aus wie eine
+  vollständige.
+* **Eine gemischt belegte Aussage** des Lebenssachverhalts blieb stehen, wenn nur
+  einer ihrer beiden Belege wegfiel. Sie fällt jetzt ganz: Dass die verbliebene
+  Quelle den Text allein trägt, weiß niemand.
+* **Eine bereits geöffnete Sitzung** behielt den Auszug; die nächste Frage antwortete
+  darauf, und die Antwort wurde neu gespeichert. Das Dokument verschwindet jetzt aus
+  jeder offenen Sitzung, und ein Ergebnis, das beim Löschen noch unterwegs war, wird
+  an einer Grabmarke erkannt und abgewiesen. Die Sitzung selbst bleibt offen – sie zu
+  schließen wäre eine Strafe für eine Löschung, die der Bearbeiter selbst ausgelöst
+  hat.
+* **Zwei Vorgänge auf einem Speicher** konnten einander überschreiben: Die erwartete
+  Revision lag in einer Tabelle je Objektname, nicht am gelesenen Stand. Der ältere
+  Vorgang nahm beim Speichern die **neue** Revision und machte damit eine Löschung
+  rückgängig, die er nie gesehen hatte. Die Revision hängt jetzt am gelesenen Stand;
+  wer nicht gelesen hat, überschreibt nichts mehr.
+
+**Ein Löschverlangen, das nur gilt, solange niemand ein zweites Fenster offen hat,
+wäre keines.** Geprüft in `tests/test_vergessen_vollstaendig.py` und
+`tests/test_gedaechtnis_gemeinsam.py`.
 
 ### Aufsicht über die Ausnahmefälle
 
@@ -240,6 +411,18 @@ und verändert nichts.
   für die Sitzungsdaten startet die Anwendung nicht. Eine halb eingerichtete Umgebung
   soll ausfallen, nicht unbemerkt ungeschützt laufen.
 - CloudTrail bleibt an; Zugriffs- und Funktionsprotokolle 30 Tage.
+- **Texterkennung (Amazon Textract), seit dem 02.10.2026 – hier bisher nicht
+  genannt, ergänzt am 06.10.2026.** Sie ist eine **zweite** Übermittlung: ein
+  Bild je gescannter Seite, erzeugt auf dem Rechner der Kanzlei, an denselben
+  Auftragsverarbeiter in derselben Region. Abschalten: `JUSPERFECT_OCR=keine`.
+
+  **Offen, und das gehört hierher (Befund F12 der Zweitprüfung).** Die
+  Unterlagen schlossen aus dem Versand der Bildbytes ohne eigenen
+  S3-Zwischenspeicher, AWS speichere die Bilder nicht. **Dieser Schluss trägt
+  nicht.** Für die KI-Dienste von AWS gilt die Nicht-Speicherung nur mit einer
+  wirksamen **AI-services-Opt-out-Richtlinie** des Kontos. Solange sie nicht
+  nachgewiesen und datiert abgelegt ist (`DSFA-ENTWURF.md` `[KANZLEI 19]`),
+  darf keine Unterlage eine Nicht-Speicherung behaupten – diese auch nicht.
 
 ## Rechtliches Paket vor der ersten echten Akte (Phase 0)
 
@@ -272,8 +455,9 @@ und verändert nichts.
 ## Nachweise in den Tests
 
 `tests/test_sicherheitsgrenze.py`: Der Anbieter sieht keine Nutzer-, Sitzungs- oder
-Dokumentkennungen und keine Dateinamen; das Protokoll enthält keinen Dokumenttext; ohne
-Freigabeobjekt schreibt der Adapter nicht; Fehlertexte enthalten keine Stapelspuren.
+Dokumentkennungen, keine Dateinamen und kein Aktenzeichen (außer beim Entwurf); das
+Protokoll enthält keinen Dokumenttext; ohne Freigabeobjekt schreibt der Adapter nicht;
+Fehlertexte enthalten keine Stapelspuren.
 `tests/test_freigabe.py`: geänderter Text, fremde Akte, nachgebaute Signatur und fremder
 Prozesslauf werden abgewiesen. `tests/test_web_ablauf.py`: Berechtigungen, Unsichtbarkeit
 fremder Sitzungen, Budgetsperre, Prüfsummenbindung der Freigabe.
@@ -291,3 +475,17 @@ vollständig; der Nachweis trägt Zahlen und Zeitpunkte, keine Inhalte.
 Status werden gemeldet; die Übersicht ist der Verwaltung vorbehalten und enthält keine
 Akteninhalte.
 `tests/test_config.py`: Die Produktivkonfiguration ist fail closed.
+
+**Aus der Zweitprüfung vom 05.10.2026 hinzugekommen** – jede dieser Dateien gehört zu
+einem Befund, der vorher von keiner Prüfung gesehen wurde:
+`tests/test_fehlergrenze.py` (F01, kein Traceback in irgendein Protokoll),
+`tests/test_vergessen_vollstaendig.py` (F02, F03),
+`tests/test_ausgabepruefung.py` (F04, F05),
+`tests/test_freigabe_umfang.py` (F06, F07),
+`tests/test_herkunft_und_nachweis.py` (F08, F10, F13),
+`tests/test_fristen.py` (F09),
+`tests/test_metadaten_im_material.py` (F11).
+
+Die siebzehn Gegenproben der Zweitprüfung liegen unverändert in
+`zweitpruefung/gegenproben.py`. **Dort ist die Polarität umgekehrt: Grün heißt, die
+Lücke besteht noch.** Alle siebzehn sind rot.
