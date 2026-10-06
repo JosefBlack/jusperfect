@@ -1688,3 +1688,27 @@ weg.
 
 Am Programm ist nichts offen, was das Arbeiten mit einer echten Akte
 verhindert.
+
+---
+
+## Nachtrag 06.10.2026 — anderer Rechner
+
+Herr Dortschy arbeitet seit dem 06.10.2026 an einem **anderen Rechner**. Das
+ändert nichts am Programm und nichts am Aktengedächtnis: `START-JURNODES.bat`
+setzt `JUSPERFECT_GEDAECHTNIS=aws`, die Erinnerungen liegen also im
+AWS-Ablageort `dortschy-thunert-jusperfect-aktengedaechtnis` und nicht auf dem
+alten Rechner. Seit der Berichtigung F03 kann auch kein zweiter Rechner mehr
+überschreiben, was ein erster zur selben Akte geschrieben hat — der zweite
+Schreibversuch wird abgewiesen.
+
+Was der neue Rechner braucht, steht in `EINRICHTUNGSBOGEN.md`, Teil 4: die
+neun Schritte vom Auspacken der ZIP bis `START-JURNODES.bat`. Die
+Zugangswerte liegen im Windows-Konto, nicht im Programmordner
+(`EINRICHTUNGSBOGEN.md`, Teil 5) — der neue Rechner hat sie deshalb nicht und
+bekommt sie über `JURNODES-ZUGANG.bat` und `ZUGANG-EINTRAGEN.bat`.
+
+**Folge für Schritt 1 der Reihenfolge oben:** „Den Zugang auf diesem Rechner
+hinterlegen" meint jetzt den neuen Rechner. Der offene Lauf von
+`JURNODES-PRUEFEN.bat` an `X-100-2026` ist davon nicht aufgehoben, sondern
+nur verschoben: Er kann vom neuen Rechner aus laufen, sobald dort die
+Zugangswerte eingetragen sind.
