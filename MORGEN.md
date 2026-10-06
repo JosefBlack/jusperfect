@@ -520,9 +520,16 @@ Weg ist **ausgebaut** und kommt auch mit der Einstellung nicht zurück.
 **Was übernommen wird — und was nicht.** Ein Korrespondenzeintrag ist eine
 Hülle: Betreff, Art, Richtung, Datum und ein Verweis darauf, wo der Inhalt
 liegt. Von den neun Arten sagt die Beschreibung nur für den **Vermerk** zu, was
-zurückkommt (`RecordNote.content`, html oder text). Mail, beA und Post haben
-einen Download, aber die Beschreibung schweigt über die Antwort — dafür braucht
-es einen Lauf am Server der Kanzlei, und bis dahin wird nicht geraten.
+als *Text* zurückkommt (`RecordNote.content`, html oder text).
+
+> **Berichtigt am 06.10.2026, noch am selben Tag.** Hier stand: „die
+> Beschreibung schweigt über die Antwort". **Das war ungenau.** Sie nennt den
+> Download sehr wohl — `POST /mail/download` mit `{mailIdentifier}` gibt
+> `application/octet-stream`. Offen sind zwei kleinere Dinge: **welche
+> Dateiart** diese Bytes sind (.eml, .msg, PDF — die Texterkennung kann alle
+> drei, sie muss nur wissen, welche) und **woher die zweite Pflichtnummer
+> kommt**, die beA und Post brauchen (`attachmentId`, `postFileUniqueKey`).
+> Beides misst der Prüfbogen jetzt am Server, ohne Inhalt auszugeben.
 
 | | |
 |---|---|
@@ -562,6 +569,33 @@ Schritte.
 gegen einen nachgebauten Server nachgesehen: Die beiden Vermerke stehen mit
 Betreff und Datum in der Liste, der Hinweis nennt die zwei übrigen, und nach
 dem Übernehmen steht der Vermerktext wirklich in der linken Spalte.
+
+### Stehende Anweisung der Kanzlei, 06.10.2026
+
+> *„Sollte es Probleme mit jurnodes geben, frage erneut nach den
+> Herstellerangaben, die ich vielleicht direkt liefern kann."*
+
+**Das gilt ab jetzt immer und ist keine einmalige Bitte.** Die Lehre vom
+05.10.2026 steht dahinter: Vier Wochen lang wurde nach den Vermerken geraten —
+zwanzig Parameternamen, jeder mit einem Wert —, und die Beschreibung des
+Herstellers hat es in einem Lauf beantwortet. *Die Kanzlei hatte sie die ganze
+Zeit.*
+
+Fest eingerichtet, damit es nicht am Gedächtnis hängt:
+
+* `schnittstelle/ANFRAGE-HERSTELLER.md` — die offenen Fragen zum Weiterleiten,
+  jederzeit aktuell zu halten. Nur was wirklich fehlt; alles andere steht in
+  der Beschreibung.
+* Der Prüfbogen verweist bei der E-Akte auf diese Datei und bittet darum, seine
+  Ausgabe mitzuschicken.
+* **Vor jeder Frage an den Hersteller: erst messen.** Was der Prüfbogen selbst
+  beantworten kann, wird nicht gefragt — die Anfrage vom 05.10. hätte dem
+  Hersteller einen Fehler vorgehalten, den es nicht gab.
+
+**Offen und beim Hersteller erfragt** (oder durch einen Prüfbogenlauf zu
+klären): die Dateiart hinter `/mail/download`, die Herkunft von `attachmentId`
+und `postFileUniqueKey`, ob `referenceMail` gleich `mailIdentifier` ist, die
+Bedeutung von `isInbox` — und ob es eine Fassung neuer als 1.0.2 gibt.
 
 ### Was in den Unterlagen berichtigt ist
 

@@ -19,11 +19,15 @@ vorkommen – gefragt wird nach der Akte, nicht nach einer Ordnernummer.
 **Was übernommen wird, und was nicht.** Ein Korrespondenzeintrag ist eine
 Hülle: Betreff, Art, Richtung, Datum und ein Verweis darauf, wo der Inhalt
 liegt. Von den neun Arten (mail, bea, post, fax, webnodes, sms, eda, note,
-file) sagt die Beschreibung nur für den **Vermerk** zu, was zurückkommt:
-`RecordNote.content`, als html oder text. Mail, beA und Post haben zwar einen
-Download, aber die Beschreibung schweigt über die Antwort. Dafür braucht es
-einen Lauf am Server der Kanzlei – bis dahin wird nicht geraten (Regel: bei
-Dritten warten). Was nicht übernommen wird, wird **gezählt**, damit nichts
+file) sagt die Beschreibung nur für den **Vermerk** zu, was als *Text*
+zurückkommt: `RecordNote.content`, als html oder text.
+
+Bei Mail, beA und Post fehlt weniger, als es zuerst aussah (nachgesehen am
+06.10.2026): Den Download gibt es und er ist beschrieben – er liefert
+`application/octet-stream`. Offen sind die **Dateiart** dieser Bytes und, bei
+beA und Post, **woher die zweite Pflichtnummer kommt** (`attachmentId`,
+`postFileUniqueKey`). Beides beantwortet ein Lauf am Server; bis dahin wird
+nicht geraten. Was nicht übernommen wird, wird **gezählt**, damit nichts
 lautlos fehlt.
 """
 

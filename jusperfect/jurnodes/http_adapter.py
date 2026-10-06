@@ -922,11 +922,26 @@ class HttpJurNodesAdapter:
         Vermerke finden sich in der E-Akte." Von allem, was dort liegt, ist der
         **Vermerk** der einzige, dessen Inhalt die Beschreibung des Herstellers
         als Text zusagt (``GET /record/note`` -> ``RecordNote.content``, mit
-        ``contentType`` html oder text). Mail, beA und Post haben zwar einen
-        Download, aber die Beschreibung sagt nicht, was zurueckkommt; dafuer
-        braucht es einen Lauf am Server der Kanzlei. Bis dahin wird nicht
-        geraten - sie stehen im Pruefbogen und in der Zahl unten, damit nichts
-        lautlos fehlt.
+        ``contentType`` html oder text).
+
+        **Was bei Mail, beA und Post fehlt, ist weniger, als es zuerst
+        aussah** (nachgesehen am 06.10.2026). Die Beschreibung nennt den
+        Download sehr wohl: ``POST /mail/download`` mit ``{mailIdentifier}``
+        gibt ``application/octet-stream`` zurueck. Offen sind zwei kleinere
+        Dinge, und beide lassen sich nicht herbeidenken:
+
+        1. **Welche Dateiart** diese Bytes sind - .eml, .msg, PDF. Ohne sie
+           weiss die Texterkennung nicht, womit sie lesen soll. (Am Inhalt
+           erkennbar, aber erst, wenn einer vorliegt.)
+        2. **Woher die zweite Nummer kommt**, die beA und Post brauchen:
+           ``attachmentId`` beim beA, ``postFileUniqueKey`` bei der Post. Die
+           Beschreibung nennt sie als Pflicht und sagt nicht, welcher Aufruf
+           sie liefert.
+
+        Beides beantwortet ein Lauf am Server der Kanzlei; der Pruefbogen misst
+        es und gibt dabei **keinen Inhalt** aus, nur Status, Laenge und die
+        Signatur der ersten Bytes. Bis dahin wird nicht geraten - die Eintraege
+        stehen in der Zahl unten, damit nichts lautlos fehlt.
         """
         self.letzte_korrespondenz_ohne_inhalt = 0
         try:

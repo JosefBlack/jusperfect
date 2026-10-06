@@ -129,7 +129,17 @@ class EsLiestNur(unittest.TestCase):
 
     #: Pfade, die POST verlangen und trotzdem nur lesen - so gebaut vom
     #: Hersteller, nachzulesen in schnittstelle/jurnodes-api-1.0.2.json.
-    LESENDE_POSTS = ("/correspondence/search",)
+    #:
+    #: Das Verfahren macht einen Aufruf nicht schreibend. Entscheidend ist,
+    #: was er bewirkt: Die Korrespondenzsuche holt ein Verzeichnis, der
+    #: Mail-Download holt eine Datei. Beide legen nichts an und aendern nichts.
+    LESENDE_POSTS = ("/correspondence/search", "/mail/download")
+
+    #: Pfade, die etwas ANLEGEN. Auf sie darf die Probe nie zeigen - weder mit
+    #: POST noch sonstwie. Sie stehen hier beim Namen, weil eine Liste des
+    #: Erlaubten allein nicht sagt, was verboten ist.
+    SCHREIBENDE_PFADE = ("/record/note", "/correspondence/add", "/correspondence",
+                         "/file-system/add-file", "/lead-notes")
 
     def _quelle(self) -> str:
         return (Path(__file__).resolve().parent.parent
@@ -141,15 +151,30 @@ class EsLiestNur(unittest.TestCase):
         self.assertNotIn(".delete(", quelle)
         self.assertNotIn(".patch(", quelle)
 
-    def test_post_nur_auf_pfade_die_suchen(self):
-        """Jeder POST in der Probe muss auf einen Suchpfad zeigen."""
+    def test_post_nur_auf_pfade_die_nichts_anlegen(self):
+        """Jeder POST in der Probe muss auf einen Pfad zeigen, der nur liest."""
         quelle = self._quelle()
         for stelle in re.finditer(r"\.post\(\s*([^,\n]+)", quelle):
             ziel = stelle.group(1).strip()
             self.assertTrue(
                 any(p.rsplit("/", 1)[-1] in ziel or "korrespondenz_suche" in ziel
                     for p in self.LESENDE_POSTS),
-                f"POST auf {ziel} - das ist kein Suchpfad.")
+                f"POST auf {ziel} - dieser Pfad legt etwas an oder ist unbekannt.")
+
+    def test_kein_aufruf_zeigt_auf_einen_anlegenden_pfad(self):
+        """Die Gegenprobe zur Liste des Erlaubten.
+
+        Eine Liste dessen, was gehen darf, sagt nicht, was nicht gehen darf.
+        `/record/note` steht in der Probe - aber nur mit GET, zum Lesen.
+        """
+        quelle = self._quelle()
+        for stelle in re.finditer(r"\.post\(\s*([^,\n]+)", quelle):
+            ziel = stelle.group(1).strip()
+            for pfad in ("add-file", "correspondence/add", "lead-notes"):
+                self.assertNotIn(pfad, ziel, f"POST auf {ziel} legt etwas an.")
+            # /record/note legt einen Vermerk an - nur GET ist erlaubt.
+            self.assertNotIn("endpunkte.vermerke", ziel,
+                             "POST /record/note wuerde einen Vermerk anlegen.")
 
     def test_der_schreibende_vermerkpfad_wird_nicht_beschrieben(self):
         """`POST /record/note` legt einen Vermerk an. Die Probe liest ihn nur —

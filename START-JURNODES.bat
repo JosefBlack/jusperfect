@@ -162,10 +162,15 @@ REM kann dort nicht mehr vorkommen. Der alte Weg ist ausgebaut; die
 REM Einstellung unten schaltet ihn NICHT wieder ein.
 REM
 REM Was dann dazukommt: die VERMERKE der Akte (Aktenvermerke,
-REM Telefonnotizen) als Dokumente in der Liste. Mail, beA und Post bleiben
-REM vorerst draussen - die Beschreibung des Herstellers sagt nicht, was
-REM ihr Download zurueckgibt, und geraten wird nicht. Wie viele das sind,
-REM steht im Dokumentfenster, damit nichts lautlos fehlt.
+REM Telefonnotizen) als Dokumente in der Liste.
+REM
+REM Mail, beA und Post bleiben vorerst draussen. Nicht, weil der Weg
+REM fehlte - den gibt es -, sondern weil zwei Kleinigkeiten offen sind:
+REM welche Dateiart der Download liefert, und woher beA und Post ihre
+REM zweite Pflichtnummer bekommen. JURNODES-PRUEFEN.bat misst beides am
+REM Server und gibt dabei KEINEN Inhalt aus, nur Status und Laenge.
+REM Wie viele Eintraege das sind, steht im Dokumentfenster - damit
+REM nichts lautlos fehlt.
 REM
 REM SO SCHALTEN SIE SIE EIN:
 REM   1. JURNODES-PRUEFEN.bat laufen lassen, an einer Akte MIT Vermerken.

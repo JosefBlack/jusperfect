@@ -1129,7 +1129,74 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
         _sagen(" ", f"Noch ohne Inhalt im Programm: {len(ohne_inhalt)} "
                     f"({', '.join(arten)}). Sie stehen nicht in der Dokumentliste.")
     gelungen = _vermerke_lesen(client, endpunkte, kennung, vermerke)
+    _download_messen(client, eintraege)
     _eakte_urteil(len(eintraege), len(vermerke), gelungen)
+
+
+#: Woran eine Datei an ihren ersten Bytes zu erkennen ist.
+#:
+#: Kein Inhalt - eine Signatur ist der Fingerabdruck des FORMATS, nicht des
+#: Textes. "%PDF" steht in jeder PDF-Datei dieser Welt.
+_SIGNATUREN = (
+    (b"%PDF", "PDF"),
+    (b"\xd0\xcf\x11\xe0", "Outlook-Nachricht (.msg) oder altes Office"),
+    (b"PK\x03\x04", "ZIP-Behaelter (.docx, .zip)"),
+    (b"Received:", "E-Mail (.eml)"),
+    (b"Return-Path:", "E-Mail (.eml)"),
+    (b"From:", "E-Mail (.eml)"),
+    (b"Delivered-To:", "E-Mail (.eml)"),
+    (b"{", "JSON"),
+    (b"<", "HTML oder XML"),
+)
+
+
+def _dateiart(roh: bytes) -> str:
+    """Welche Dateiart diese Bytes sind - oder „unbekannt"."""
+    for muster, name in _SIGNATUREN:
+        if roh.startswith(muster):
+            return name
+    return "unbekannt"
+
+
+def _download_messen(client: Any, eintraege: list) -> None:
+    """Was ``/mail/download`` zurueckgibt - gemessen, nicht geraten.
+
+    **Die eine Frage, die das Programm nicht selbst beantworten kann.** Die
+    Beschreibung des Herstellers sagt, dass hier ``application/octet-stream``
+    zurueckkommt. Sie sagt nicht, WELCHE Dateiart - und ohne die weiss die
+    Texterkennung nicht, womit sie lesen soll. Sie kann .eml, .msg und PDF;
+    sie muss nur wissen, welches davon.
+
+    **Ausgegeben wird kein Inhalt.** Status, Laenge und die Signatur der
+    ersten Bytes, mehr nicht. Eine Signatur ist der Fingerabdruck des Formats,
+    nicht des Textes.
+    """
+    mails = [e for e in eintraege if isinstance(e, Mapping)
+             and str(e.get("type", "")).lower() == "mail" and e.get("referenceMail")]
+    if not mails:
+        _sagen(" ", "Keine Mail in dieser Akte - /mail/download bleibt ungeprueft.")
+        return
+    kennung = mails[0].get("referenceMail")
+    _sagen(" ", "POST /mail/download mit referenceMail aus dem Verzeichnis:")
+    try:
+        antwort = client.post("/mail/download", json={"mailIdentifier": kennung})
+    except Exception as fehler:
+        _sagen("✗", f"/mail/download: {type(fehler).__name__}")
+        return
+    if antwort.status_code >= 400:
+        _sagen("✗", f"/mail/download: Status {antwort.status_code}")
+        if antwort.status_code in (400, 405):
+            _sagen(" ", "   Dann ist referenceMail nicht die Nummer, die dort "
+                        "hineingehoert. Das waere eine Frage an den Hersteller.")
+        return
+    roh = antwort.content[:64]
+    _sagen("✓", f"/mail/download: Status 200, {len(antwort.content)} Bytes, "
+                f"Dateiart: {_dateiart(roh)}")
+    _sagen(" ", f"   Content-Type laut Server: "
+                f"{antwort.headers.get('content-type', '(keiner)')}")
+    name = antwort.headers.get("content-disposition", "")
+    _sagen(" ", f"   Dateiname laut Server: {name or '(keiner)'}")
+    _sagen(" ", "   (Kein Inhalt ausgegeben - nur Format und Laenge.)")
 
 
 def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int) -> None:
@@ -1156,8 +1223,10 @@ def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int) -> None:
                     f"wurden abgerufen.")
         _sagen(" ", "   In START-JURNODES.bat eintragen:  set JUSPERFECT_KORRESPONDENZ=ein")
         _sagen(" ", "   Danach stehen die Vermerke als Dokumente in der Aktenliste.")
-        _sagen(" ", "   Mail, beA und Post bleiben vorerst draussen - was ihr")
-        _sagen(" ", "   Download zurueckgibt, sagt die Beschreibung nicht.")
+        _sagen(" ", "   Mail, beA und Post bleiben vorerst draussen. Was dafuer")
+        _sagen(" ", "   noch fehlt, steht in schnittstelle/ANFRAGE-HERSTELLER.md -")
+        _sagen(" ", "   und die Zeilen zu /mail/download oben beantworten davon")
+        _sagen(" ", "   schon einen Teil. Bitte diese Ausgabe mitschicken.")
         return
     _sagen("✗", "NEIN. Das Verzeichnis ist lesbar, aber kein Vermerk liess sich "
                 "abrufen. Die Zeilen darueber nennen den Status; meist fehlt dem "
