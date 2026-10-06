@@ -164,7 +164,7 @@ Dokument 44 — Stellen, die beim Lesen übersehen werden.
 | Objektnamen ohne Aktenzeichen | nur SHA-256-Ableitung |
 | Auswahl der Passagen durch den Bearbeiter | zwei Fenster, Haken je Dokument |
 | Vorauswahl schließt Rechnungen und RSV aus | seit 05.10.2026, `JUSPERFECT_NICHT_VORWAEHLEN` |
-| Der Korrespondenzordner wird nicht gelesen | seit 05.10.2026, siehe Risiko R1 |
+| Der Korrespondenzordner wird nicht gelesen | seit 05.10.2026, seit dem 06.10.2026 ganz ausgebaut; an seiner Stelle der aktenbezogene Weg des Herstellers, noch nicht eingeschaltet. Siehe Risiko R1 |
 
 ---
 

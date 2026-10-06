@@ -267,8 +267,10 @@ ist berichtigt.**
 |---|---|
 | Was geschehen ist | Akteninhalt eines fremden Mandats wurde in die Arbeitsakte eines anderen Mandats gelesen |
 | Wohin | in den Arbeitsspeicher der Sitzung und an das Modell; **nicht** in das Aktengedächtnis (das war damals aus) |
-| Was seitdem gilt | Der Korrespondenzordner wird **nicht mehr gelesen**. Damit fehlt die Korrespondenz — die sichere Richtung |
-| Der richtige Weg | `POST /correspondence/search` — seit dem 05.10.2026 belegt, in der Probe gemessen, noch nicht im Betrieb |
+| Was seitdem gilt | Der Korrespondenzordner wird **nicht mehr gelesen** und ist seit dem 06.10.2026 ganz ausgebaut |
+| Der richtige Weg | `POST /correspondence/search` — gefragt wird nach der **Akte**, nicht nach einer Ordnernummer; eine Verwechslung der Nummernkreise kann dort nicht mehr vorkommen. Seit dem 06.10.2026 gebaut und geprüft |
+| Was damit in die Akte kommt | die **Vermerke** (Aktenvermerke, Telefonnotizen). Mail, beA und Post bleiben draußen, weil die Beschreibung des Herstellers nicht sagt, was ihr Download zurückgibt; ihre Zahl wird im Dokumentfenster angezeigt |
+| Eingeschaltet? | **Nein.** `JUSPERFECT_KORRESPONDENZ` steht auf aus, bis ein Lauf am Server der Kanzlei den Weg bestätigt. Der Prüfbogen beantwortet die Frage ausdrücklich |
 
 **[KANZLEI]** — zu bewerten: ob eine kanzleiinterne Vermengung von Mandaten
 eine Verletzung im Sinne des Art. 4 Nr. 12 DSGVO ist und ob Art. 33 greift. Aus

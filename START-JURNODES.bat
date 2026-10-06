@@ -140,7 +140,7 @@ REM TexterkennungFuerScans tragen. Fehlt sie, sagt das Programm beim ersten
 REM Scan genau das - der Rest der Akte wird trotzdem gelesen.
 set JUSPERFECT_OCR=textract
 
-REM --- Der Korrespondenzordner: AUS -----------------------------------
+REM --- Die E-Akte: AUS, bis die Probe JA sagt -------------------------
 REM
 REM Am 02.10.2026 fielen in der Bausache X-100-2026 drei Schriftstuecke
 REM aus einer fremden Verkehrsunfallsache auf. Drei Laeufe an drei Akten
@@ -155,12 +155,23 @@ REM Korrespondenzordners am Pfad des Dateisystems abgefragt. Dort gibt es
 REM die Nummer auch, sie gehoert nur zu einem anderen Ordner - dem einer
 REM fremden Akte.
 REM
-REM Der richtige Weg steht fest: POST /correspondence/search. Er ist in der
-REM Probe gemessen, aber noch nicht im Betrieb - erst ein Lauf an einer
-REM echten Akte zeigt, was der Server wirklich liefert.
+REM SEIT DEM 06.10.2026 geht das Programm den Weg, den der Hersteller
+REM beschreibt: POST /correspondence/search, gefragt wird nach der AKTE
+REM und nicht nach einer Ordnernummer. Eine Verwechslung der Nummernkreise
+REM kann dort nicht mehr vorkommen. Der alte Weg ist ausgebaut; die
+REM Einstellung unten schaltet ihn NICHT wieder ein.
 REM
-REM Diese Zeile bleibt deshalb aus. Sie einzuschalten wuerde den FALSCHEN
-REM Weg wieder gehen.
+REM Was dann dazukommt: die VERMERKE der Akte (Aktenvermerke,
+REM Telefonnotizen) als Dokumente in der Liste. Mail, beA und Post bleiben
+REM vorerst draussen - die Beschreibung des Herstellers sagt nicht, was
+REM ihr Download zurueckgibt, und geraten wird nicht. Wie viele das sind,
+REM steht im Dokumentfenster, damit nichts lautlos fehlt.
+REM
+REM SO SCHALTEN SIE SIE EIN:
+REM   1. JURNODES-PRUEFEN.bat laufen lassen, an einer Akte MIT Vermerken.
+REM   2. Ganz unten steht: "Kann die E-Akte eingeschaltet werden?"
+REM   3. Steht dort JA, das REM vor der naechsten Zeile entfernen.
+REM
 REM set JUSPERFECT_KORRESPONDENZ=ein
 
 REM --- Was nicht von selbst angehakt wird ------------------------------

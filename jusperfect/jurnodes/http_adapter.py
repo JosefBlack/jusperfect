@@ -241,6 +241,50 @@ def _identitaet_pruefen(angefragt: str, daten: Mapping[str, Any]) -> None:
         "wurde nichts geladen. Bitte die Kanzleiverwaltung verständigen.")
 
 
+#: Woran eine Vermerkkennung zu erkennen ist.
+#:
+#: Die Vermerke zaehlen in jur|nodes in einem EIGENEN Nummernkreis: Ein
+#: Vermerk 17 und eine Datei 17 haben nichts miteinander zu tun. Ohne diesen
+#: Vorsatz waere das Laden eine Verwechslung, die niemandem auffiele - genau
+#: die Art Fehler, die am 02.10.2026 fremde Schriftstuecke in eine Bausache
+#: gebracht hat.
+VERMERK_VORSATZ = "vermerk:"
+
+#: Wie ein Vermerk heisst, wenn er keinen Betreff traegt.
+#:
+#: Aus der Huelle kommt immer "note" - ob es eine Telefonnotiz ist, steht erst
+#: im Vermerk selbst (``RecordNote.type``), und der wird fuer die Liste nicht
+#: geladen. Hundert Vermerke zu laden, um drei anzuhaken, waeren hundert
+#: Anfragen fuer nichts. In der Liste heisst deshalb jeder "Vermerk"; die
+#: Unterscheidung steht dem offen, der ihn uebernimmt.
+_VERMERKARTEN = {"phonecall": "Telefonnotiz", "note": "Vermerk"}
+
+
+def vermerk_als_dokument(akte_id: str, nummer: Any, huelle: Mapping[str, Any]) -> Dokument:
+    """Aus einem Korrespondenzeintrag der Art „note" ein Dokument machen.
+
+    Der Betreff und das Datum stehen in der Huelle; der Inhalt wird erst beim
+    Laden geholt (``GET /record/note``). Die Endung entscheidet, womit die
+    Texterkennung ihn liest - der Hersteller fuehrt ``contentType`` html oder
+    text, und beides kann ``services/extraktion.py`` bereits.
+
+    Weil die Huelle den ``contentType`` nicht nennt, steht hier ``.html``:
+    Ein HTML-Leser kommt mit reinem Text zurecht, umgekehrt stuenden die
+    Markierungen im Aktentext.
+    """
+    betreff = str(_erstes(huelle, "subject", "betreff", standard="")).strip()
+    art = _VERMERKARTEN.get(str(huelle.get("type", "")).lower(), "Vermerk")
+    return Dokument(
+        id=f"{VERMERK_VORSATZ}{nummer}",
+        akte_id=akte_id,
+        titel=betreff or f"{art} {nummer}",
+        dateiname=f"vermerk-{nummer}.html",
+        mime_typ="text/html",
+        datum=_datum(_erstes(huelle, "created", "postmark", standard=None)),
+        kategorie=art,
+    )
+
+
 def dokument_aus_json(akte_id: str, d: Mapping[str, Any]) -> Dokument:
     """Ein Dokument aus einem ``file``-Eintrag von ``/file-system/folder/content``.
 
@@ -506,6 +550,65 @@ class HttpJurNodesAdapter:
             seite += 1
         return alle
 
+    def _lesen_per_post(self, pfad: str, nicht_gefunden: type[JurNodesFehler],
+                        **koerper: Any) -> httpx.Response:
+        """Eine **lesende** Abfrage, die der Hersteller als POST führt.
+
+        Das Korrespondenzverzeichnis ist eine Suche und holt nichts als Daten –
+        der Hersteller verlangt dafür trotzdem POST mit einem JSON-Körper
+        (API 1.0.2, ``CorrespondenceSearchRequest``). Das Verfahren macht den
+        Aufruf nicht schreibend, und deshalb steht diese Stelle hier getrennt
+        von ``vermerk_schreiben``: **Welche POST-Aufrufe lesend sind, soll man
+        an einer Hand abzählen können.** Es sind diese Suche und sonst keine.
+        """
+        try:
+            with self._nacheinander:
+                antwort = self._client.post(pfad, json=koerper, headers=self._kopf(pfad))
+        except httpx.HTTPError as e:
+            raise JurNodesFehler(f"jur|nodes nicht erreichbar ({type(e).__name__}).") from e
+        if antwort.status_code == 404:
+            raise nicht_gefunden(f"In jur|nodes nicht gefunden (POST {pfad}).")
+        if antwort.status_code in (401, 403):
+            raise JurNodesFehler(
+                f"jur|nodes hat den Zugriff abgelehnt (POST {pfad}, Status "
+                f"{antwort.status_code}). Dem Schlüssel fehlt der Bereich "
+                f"{bereich_von(pfad) or pfad} oder ein Recht darin.")
+        if antwort.status_code >= 400:
+            raise JurNodesFehler(
+                f"jur|nodes antwortete auf POST {pfad} mit Status {antwort.status_code}.")
+        return antwort
+
+    def _alle_seiten_post(self, pfad: str, nicht_gefunden: type[JurNodesFehler],
+                          *schluessel: str, **koerper: Any) -> list[Mapping[str, Any]]:
+        """Wie ``_alle_seiten``, nur mit dem Körper statt der Abfrageparameter.
+
+        Die Seitenzählung ist dieselbe, aus demselben Grund: Wer nur die erste
+        Seite holt, bekommt bei einer Akte mit 120 Schriftstücken 100 davon –
+        und die übrigen 20 fehlen lautlos.
+        """
+        seite = erste_seite(pfad)
+        alle: list[Mapping[str, Any]] = []
+        erste_anfrage = True
+        while seite - erste_seite(pfad) < SEITEN_GRENZE:
+            seitenangabe: dict[str, Any] = {} if erste_anfrage else {"page": seite}
+            erste_anfrage = False
+            daten = self._lesen_per_post(pfad, nicht_gefunden, **seitenangabe, **koerper).json()
+            teil = self._liste(daten, *schluessel)
+            alle.extend(teil)
+            if not teil:
+                break
+            seiten = 0
+            if isinstance(daten, Mapping):
+                try:
+                    seiten = int(daten.get("pagesTotal") or 0)
+                except (TypeError, ValueError):
+                    seiten = 0
+            gelesen = seite - erste_seite(pfad) + 1
+            if seiten and gelesen >= seiten:
+                break
+            seite += 1
+        return alle
+
     @staticmethod
     def _liste(daten: Any, *schluessel: str) -> list[Mapping[str, Any]]:
         if isinstance(daten, list):
@@ -671,6 +774,11 @@ class HttpJurNodesAdapter:
     #: abgefragt wurde. Siehe _fremde_dateien_aussondern (Befund F08).
     letzte_dateien_aussortiert: int = 0
 
+    #: Korrespondenzeintraege, deren Inhalt noch nicht angebunden ist - Mail,
+    #: beA, Post, Fax, SMS. -1 heisst: Das Verzeichnis war nicht zu lesen.
+    #: Was fehlt, soll sichtbar fehlen.
+    letzte_korrespondenz_ohne_inhalt: int = 0
+
     def _ordner_durchgehen(self, wurzel: Any) -> list[Mapping[str, Any]]:
         """Alle Eintraege einer Akte - auch die in Unterordnern.
 
@@ -756,12 +864,12 @@ class HttpJurNodesAdapter:
         # Faellt der Ordner aus - es gibt ihn nicht, oder der Schluessel darf
         # ihn nicht lesen -, kostet das nicht die uebrigen Dokumente. Er ist
         # eine Ergaenzung, keine Bedingung.
-        korrespondenz = roh.get("correspondenceFolderId") if self._korrespondenz else None
-        if korrespondenz and str(korrespondenz) != str(ordner_id):
-            try:
-                eintraege = eintraege + self._ordner_durchgehen(korrespondenz)
-            except JurNodesFehler:
-                self.letzte_ordner_uebersprungen += 1
+        # ~~correspondenceFolderId~~ war der falsche Weg, und zwar unser eigener
+        # Fehler: Die Nummer gehoert in den Ordnerbaum der KORRESPONDENZ und
+        # wurde gegen den Baum des DATEISYSTEMS abgefragt. Zwei Nummernkreise,
+        # dieselbe Zahl, fremde Akte. Der Hersteller hat einen eigenen Weg je
+        # Akte, und den nimmt das Programm seit dem 06.10.2026:
+        # POST /correspondence/search mit recordIdentifier.
         dokumente: list[Dokument] = []
         for eintrag in eintraege:
             datei = eintrag.get("file") if isinstance(eintrag, Mapping) else None
@@ -781,7 +889,90 @@ class HttpJurNodesAdapter:
             if isinstance(roh, Mapping) and ist_gedaechtnis_datei(self._ganzer_name(roh)):
                 continue
             dokumente.append(dokument_aus_json(akte_id, roh))
+        if self._korrespondenz:
+            dokumente += self._vermerke(akte_id)
         return dokumente
+
+    # ── Die E-Akte: Korrespondenz und Vermerke ─────────────────────────────
+
+    def korrespondenz(self, akte_id: str) -> list[Mapping[str, Any]]:
+        """Das Korrespondenzverzeichnis dieser Akte.
+
+        Der Hersteller fuehrt die Korrespondenz in einem **eigenen** Baum mit
+        eigenen Nummern - Mails, beA, Post, Fax, SMS, Dateien und Vermerke
+        (API 1.0.2, ``CorrespondenceModel``). Abgefragt wird sie je Akte ueber
+        ``recordIdentifier``, nicht ueber eine Ordnernummer. Genau das war der
+        Fehler vom 02.10.2026: ``correspondenceFolderId`` zeigt in den anderen
+        Baum, und gegen das Dateisystem abgefragt kam eine fremde Akte heraus.
+
+        Ein Eintrag ist eine **Huelle**: Betreff, Art, Richtung, Datum und ein
+        Verweis darauf, wo der Inhalt liegt. Die Huelle allein ist kein
+        Dokument - deshalb wird sie hier zurueckgegeben und nicht in die
+        Dokumentliste gestellt.
+        """
+        return self._alle_seiten_post(
+            self._endpunkte.korrespondenz_suche, AkteNichtGefunden,
+            "elements", "korrespondenz", "items", "data",
+            **{self._endpunkte.akteparameter: akte_id})
+
+    def _vermerke(self, akte_id: str) -> list[Dokument]:
+        """Die Vermerke der Akte als Dokumente - und nur sie.
+
+        Aus der Kanzlei am 05.10.2026: „Die Korrespondenz bei jurnodes und die
+        Vermerke finden sich in der E-Akte." Von allem, was dort liegt, ist der
+        **Vermerk** der einzige, dessen Inhalt die Beschreibung des Herstellers
+        als Text zusagt (``GET /record/note`` -> ``RecordNote.content``, mit
+        ``contentType`` html oder text). Mail, beA und Post haben zwar einen
+        Download, aber die Beschreibung sagt nicht, was zurueckkommt; dafuer
+        braucht es einen Lauf am Server der Kanzlei. Bis dahin wird nicht
+        geraten - sie stehen im Pruefbogen und in der Zahl unten, damit nichts
+        lautlos fehlt.
+        """
+        self.letzte_korrespondenz_ohne_inhalt = 0
+        try:
+            eintraege = self.korrespondenz(akte_id)
+        except JurNodesFehler:
+            # Die Korrespondenz ist eine Ergaenzung, keine Bedingung. Faellt
+            # sie aus, kostet das nicht die Dokumente des Dateisystems.
+            self.letzte_korrespondenz_ohne_inhalt = -1
+            return []
+        dokumente: list[Dokument] = []
+        for eintrag in eintraege:
+            if not isinstance(eintrag, Mapping):
+                continue
+            art = str(eintrag.get("type", "")).lower()
+            nummer = eintrag.get("referenceNote")
+            if art != "note" or nummer is None:
+                # Dateien der Korrespondenz liegen im Dateisystem und sind
+                # oben schon dabei; alles uebrige hat hier noch keinen Inhalt.
+                if art not in ("file", ""):
+                    self.letzte_korrespondenz_ohne_inhalt += 1
+                continue
+            dokumente.append(vermerk_als_dokument(akte_id, nummer, eintrag))
+        return dokumente
+
+    def _vermerk_laden(self, akte_id: str, nummer: str) -> tuple[Mapping[str, Any], bytes]:
+        """Einen Vermerk samt Inhalt - mit der Pruefung aus Befund F08.
+
+        ``RecordNote`` traegt das Feld ``record``. Anders als bei einer Datei
+        laesst sich hier also nachsehen, ob die Antwort zur angefragten Akte
+        gehoert; genau das wird getan.
+        """
+        antwort = self._get(self._endpunkte.vermerke, DokumentNichtGefunden,
+                            **{self._endpunkte.vermerkparameter: nummer,
+                               self._endpunkte.vermerkakteparameter: akte_id})
+        daten = antwort.json()
+        if isinstance(daten, Mapping) and isinstance(daten.get("model"), Mapping):
+            daten = daten["model"]
+        if not isinstance(daten, Mapping):
+            raise JurNodesFehler("Unerwartetes Antwortformat von jur|nodes.")
+        zurueck = str(daten.get("record", "")).strip()
+        if zurueck and zurueck.casefold() != str(akte_id).strip().casefold():
+            raise JurNodesFehler(
+                "jur|nodes hat auf die Anfrage nach einem Vermerk dieser Akte einen "
+                "Vermerk einer anderen Akte geantwortet. Der Vorgang wurde abgebrochen.")
+        inhalt = str(daten.get("content", "") or "")
+        return daten, inhalt.encode("utf-8")
 
     #: Wie lange die Dokumentliste einer Akte wiederverwendet wird.
     #:
@@ -816,6 +1007,11 @@ class HttpJurNodesAdapter:
         dokument = next((d for d in self._dokumente_gepuffert(akte_id) if d.id == dokument_id), None)
         if dokument is None:
             raise DokumentNichtGefunden(f"Dokument {dokument_id} nicht in Akte {akte_id}.")
+        # Ein Vermerk kommt nicht aus dem Dateisystem. Die Kennung sagt es:
+        # "vermerk:17" statt einer Dateikennung - siehe vermerk_als_dokument.
+        if dokument_id.startswith(VERMERK_VORSATZ):
+            _, inhalt = self._vermerk_laden(akte_id, dokument_id[len(VERMERK_VORSATZ):])
+            return dokument, inhalt
         antwort = self._get(self._endpunkte.datei_download, DokumentNichtGefunden,
                             **{self._endpunkte.kennungparameter: dokument_id})
         return dokument, antwort.content

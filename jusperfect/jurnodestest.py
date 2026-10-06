@@ -1122,11 +1122,50 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
                 if isinstance(e, Mapping) and e.get("type") == "note"]
     _sagen("✓" if vermerke else " ",
            f"Davon Vermerke (type=note): {len(vermerke)}")
-    _vermerke_lesen(client, endpunkte, kennung, vermerke)
+    ohne_inhalt = [e for e in eintraege if isinstance(e, Mapping)
+                   and str(e.get("type", "")).lower() not in ("note", "file", "")]
+    if ohne_inhalt:
+        arten = sorted({str(e.get("type")) for e in ohne_inhalt})
+        _sagen(" ", f"Noch ohne Inhalt im Programm: {len(ohne_inhalt)} "
+                    f"({', '.join(arten)}). Sie stehen nicht in der Dokumentliste.")
+    gelungen = _vermerke_lesen(client, endpunkte, kennung, vermerke)
+    _eakte_urteil(len(eintraege), len(vermerke), gelungen)
+
+
+def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int) -> None:
+    """Der Satz, auf den es ankommt: Kann die E-Akte eingeschaltet werden?
+
+    Ein Pruefbogen, der zwanzig Zeilen Befund ausgibt und die Frage nicht
+    beantwortet, laesst den Leser dieselbe Arbeit noch einmal machen. Hier
+    steht sie beantwortet - und zwar aus dem, was in diesem Lauf wirklich
+    geschehen ist, nicht aus einer Erwartung.
+    """
+    _sagen(" ", "")
+    _sagen(" ", "--- Kann die E-Akte eingeschaltet werden? ---")
+    if not eintraege:
+        _sagen("!", "Unentschieden: Diese Akte hat keine Korrespondenz. Bitte den "
+                    "Lauf an einer Akte mit Schriftverkehr wiederholen.")
+        return
+    if not vermerke:
+        _sagen("!", "Unentschieden: Korrespondenz gelesen, aber kein Vermerk darin. "
+                    "Der Weg steht; ob /record/note traegt, zeigt erst eine Akte "
+                    "mit Vermerk.")
+        return
+    if gelungen:
+        _sagen("✓", f"JA. Das Verzeichnis ist lesbar und {gelungen} Vermerk(e) "
+                    f"wurden abgerufen.")
+        _sagen(" ", "   In START-JURNODES.bat eintragen:  set JUSPERFECT_KORRESPONDENZ=ein")
+        _sagen(" ", "   Danach stehen die Vermerke als Dokumente in der Aktenliste.")
+        _sagen(" ", "   Mail, beA und Post bleiben vorerst draussen - was ihr")
+        _sagen(" ", "   Download zurueckgibt, sagt die Beschreibung nicht.")
+        return
+    _sagen("✗", "NEIN. Das Verzeichnis ist lesbar, aber kein Vermerk liess sich "
+                "abrufen. Die Zeilen darueber nennen den Status; meist fehlt dem "
+                "Schluessel das Recht auf /record/note.")
 
 
 def _vermerke_lesen(client: Any, endpunkte: Any, kennung: str,
-                    vermerke: list) -> None:
+                    vermerke: list) -> int:
     """Hoechstens drei Vermerke abrufen - zum Nachweis, nicht zum Auslesen.
 
     GET /record/note braucht ZWEI Pflichtparameter: die Nummer des Vermerks
@@ -1137,7 +1176,8 @@ def _vermerke_lesen(client: Any, endpunkte: Any, kennung: str,
     """
     if not vermerke:
         _sagen(" ", "Ohne Vermerk in dieser Akte bleibt /record/note ungeprueft.")
-        return
+        return 0
+    gelungen = 0
     _sagen(" ", f"{endpunkte.vermerke} mit BEIDEN Pflichtparametern "
                 f"({endpunkte.vermerkparameter} + {endpunkte.vermerkakteparameter}):")
     for eintrag in vermerke[:3]:
@@ -1166,9 +1206,18 @@ def _vermerke_lesen(client: Any, endpunkte: Any, kennung: str,
             continue
         art = vermerk.get("type")
         laenge = len(str(vermerk.get("content") or ""))
+        gelungen += 1
         _sagen("✓", f"Vermerk {nummer}: type={art}, contentType="
                     f"{vermerk.get('contentType')}, {laenge} Zeichen Inhalt")
         _sagen(" ", f"     Felder: {', '.join(sorted(vermerk))}")
+        # Die Pruefung aus Befund F08, hier am echten Server: Gehoert der
+        # Vermerk zu der Akte, nach der gefragt wurde? RecordNote traegt das
+        # Feld, also laesst es sich nachsehen.
+        zurueck = str(vermerk.get("record", "")).strip()
+        if zurueck and zurueck.casefold() != str(kennung).strip().casefold():
+            _sagen("✗", f"Vermerk {nummer} gehoert zu einer ANDEREN Akte. "
+                        f"Das Programm wuerde ihn abweisen.")
+    return gelungen
 
 
 def _eakte_suchen(client: Any, endpunkte: Any, kennung: str) -> None:

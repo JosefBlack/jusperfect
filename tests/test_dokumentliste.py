@@ -216,84 +216,8 @@ class UnterordnerWerdenMitgelesen(unittest.TestCase):
         self.assertLessEqual(len(set(gefragt)), a.ORDNER_TIEFE + 1)
 
 
-class DieKorrespondenzGehoertDazu(unittest.TestCase):
-    """Wie es aussieht, WENN der Korrespondenzordner gelesen wird.
-
-    Eingebaut am 25.09.2026. Aus der Kanzlei: "er muss auch die Mails
-    berücksichtigen, die verfasst wurden." Die Akte nennt zwei Ordner:
-    ``fileFolderId`` für die Dokumente und ``correspondenceFolderId`` für die
-    Korrespondenz.
-
-    **Seit dem 05.10.2026 steht das aus**, und diese Prüfungen laufen deshalb
-    mit ``korrespondenz=True``. Sie bleiben stehen, weil die Frage an den
-    Hersteller offen ist: Kommt die Entwarnung, ist der Weg belegt und muss
-    nicht neu gebaut werden. Was er aus dem Betrieb heraushält, steht in
-    ``DerKorrespondenzordnerBleibtDraussen``.
-    """
-
-    def _adapter(self, datei_ordner, korrespondenz_ordner, gefragt=None):
-        def antworten(anfrage):
-            if "folder/content" in anfrage.url.path:
-                nummer = str(anfrage.url.params.get("folderId"))
-                if gefragt is not None:
-                    gefragt.append(nummer)
-                if "page=" in str(anfrage.url):
-                    return httpx.Response(200, json={"elements": []})
-                inhalt = {"7": datei_ordner, "9": korrespondenz_ordner}.get(nummer)
-                if inhalt is None:
-                    return httpx.Response(404, json={})
-                return httpx.Response(200, json={"elements": inhalt})
-            if "/record" in anfrage.url.path and "search" not in anfrage.url.path:
-                return httpx.Response(200, json={
-                    "identifier": "rec-1", "fileFolderId": 7,
-                    "correspondenceFolderId": 9})
-            return httpx.Response(200, json={})
-
-        return HttpJurNodesAdapter("https://beispiel.invalid", "k", Freigabestelle(),
-                                   transport=httpx.MockTransport(antworten), benutzer="u",
-                                   korrespondenz=True)
-
-    def test_verfasste_schreiben_kommen_mit(self):
-        a = self._adapter([_datei("Klageschrift.pdf", "f-1")],
-                          [_datei("Schreiben an Gegenseite.msg", "k-1"),
-                           _datei("Mahnung.pdf", "k-2")])
-        namen = [d.dateiname for d in a.dokumente("rec-1")]
-        self.assertEqual(3, len(namen), namen)
-        self.assertIn("Schreiben an Gegenseite.msg", namen)
-
-    def test_beide_ordner_werden_gefragt(self):
-        gefragt = []
-        a = self._adapter([], [], gefragt)
-        a.dokumente("rec-1")
-        self.assertIn("7", gefragt)
-        self.assertIn("9", gefragt)
-
-    def test_ein_fehlender_korrespondenzordner_kostet_nichts(self):
-        """Er ist eine Ergänzung, keine Bedingung."""
-        def antworten(anfrage):
-            if "folder/content" in anfrage.url.path:
-                nummer = str(anfrage.url.params.get("folderId"))
-                if "page=" in str(anfrage.url):
-                    return httpx.Response(200, json={"elements": []})
-                if nummer == "7":
-                    return httpx.Response(200, json={
-                        "elements": [_datei("Klageschrift.pdf", "f-1")]})
-                return httpx.Response(403, json={})     # nicht lesbar
-            if "/record" in anfrage.url.path:
-                return httpx.Response(200, json={
-                    "identifier": "rec-1", "fileFolderId": 7,
-                    "correspondenceFolderId": 9})
-            return httpx.Response(200, json={})
-
-        a = HttpJurNodesAdapter("https://beispiel.invalid", "k", Freigabestelle(),
-                                transport=httpx.MockTransport(antworten), benutzer="u",
-                                korrespondenz=True)
-        self.assertEqual(1, len(a.dokumente("rec-1")))
-        self.assertEqual(1, a.letzte_ordner_uebersprungen)
-
-
 class DerKorrespondenzordnerBleibtDraussen(unittest.TestCase):
-    """Seit dem 05.10.2026, auf ausdrückliche Anweisung der Kanzlei.
+    """Er war nie der richtige Weg – und das wussten wir am 05.10.2026 noch nicht.
 
     Am 02.10. fielen in einer Bausache drei Schriftstücke aus einer fremden
     Verkehrsunfallsache auf. Drei Läufe an drei Akten zeigten am 05.10.
@@ -303,10 +227,16 @@ class DerKorrespondenzordnerBleibtDraussen(unittest.TestCase):
         X-103-2026  angelegt 23.02.2026  Ordner 2616, befüllt 2022/23
         X-104-2023  angelegt 28.12.2023  Ordner 1478, befüllt 2022/23
 
-    Der Dateiordner passt jedesmal zur Akte, der Korrespondenzordner nie:
-    niedrige Nummer, befüllt stets 2022/23, unabhängig vom Alter der Akte.
-    Dreimal hintereinander ist das kein Versehen beim Anlegen – das Feld zeigt
-    offenbar nicht auf die Korrespondenz **dieser** Akte.
+    Damals stand die Frage an den Hersteller offen, und der Ordner wurde
+    abgeschaltet. **Die Beschreibung des Herstellers (API 1.0.2) hat sie dann
+    beantwortet, und die Antwort war unangenehm: Es war unser eigener Fehler.**
+    `correspondenceFolderId` gehört in den Ordnerbaum der **Korrespondenz** und
+    wurde gegen den Baum des **Dateisystems** abgefragt. Zwei Nummernkreise,
+    dieselbe Zahl, fremde Akte.
+
+    Deshalb kommt dieser Weg nicht zurück – auch nicht mit der Einstellung.
+    Die Korrespondenz hat einen eigenen, aktenbezogenen Weg; er steht in
+    `DieEAkteWirdUeberIhrenEigenenWegGelesen`.
 
     **Fremde Schriftstücke in einer Arbeitsakte sind teurer als fehlende.**
     Was fehlt, fällt auf; was zu viel ist, wird mitanalysiert, zitiert und ins
@@ -325,6 +255,8 @@ class DerKorrespondenzordnerBleibtDraussen(unittest.TestCase):
                         "elements": [_datei("Klageschrift.pdf", "f-1")]})
                 return httpx.Response(200, json={
                     "elements": [_datei("Fremdes Schreiben.pdf", "k-1")]})
+            if "correspondence/search" in anfrage.url.path:
+                return httpx.Response(200, json={"elements": [], "pagesTotal": 1})
             if "/record" in anfrage.url.path and "search" not in anfrage.url.path:
                 return httpx.Response(200, json={
                     "identifier": "rec-1", "fileFolderId": 7,
@@ -347,13 +279,18 @@ class DerKorrespondenzordnerBleibtDraussen(unittest.TestCase):
         namen = [d.dateiname for d in a.dokumente("rec-1")]
         self.assertEqual(["Klageschrift.pdf"], namen)
 
-    def test_mit_der_einstellung_geht_es_wieder(self):
-        """Der Weg zurück, falls der Hersteller Entwarnung gibt."""
+    def test_auch_mit_der_einstellung_bleibt_er_draussen(self):
+        """Die Einstellung schaltet die **E-Akte** ein, nicht den Ordner.
+
+        Hier stand bis zum 06.10.2026 das Gegenteil: „Der Weg zurück, falls
+        der Hersteller Entwarnung gibt." Es gab keine Entwarnung zu geben –
+        der Weg war von Anfang an der falsche.
+        """
         gefragt = []
         a = self._adapter(gefragt, korrespondenz=True)
         namen = [d.dateiname for d in a.dokumente("rec-1")]
-        self.assertIn("9", gefragt)
-        self.assertIn("Fremdes Schreiben.pdf", namen)
+        self.assertNotIn("9", gefragt, "Der Korrespondenzordner wurde gelesen.")
+        self.assertNotIn("Fremdes Schreiben.pdf", namen)
 
     def test_die_einstellung_steht_von_haus_aus_auf_aus(self):
         from jusperfect.config import Einstellungen

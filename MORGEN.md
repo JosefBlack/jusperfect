@@ -486,6 +486,83 @@ rot — damit sind alle siebzehn Gegenproben rot.** 1779 Prüfungen grün.
 jetzt *fast* richtig und bleibt trotzdem falsch: Die Art des Schriftstücks geht
 mit. **Die Datei ist geschützt und wartet auf eine ausdrückliche Anweisung.**
 
+### SICHERHEIT.md berichtigt, 06.10.2026
+
+Auf ausdrückliche Anweisung. Zehn Zusagen waren zu weit gefasst — Grundsatz 1
+(fremde `/record`-Antwort), 2 (Rechteentzug), 3 (Dateinamen), 4 (Freigabe
+ohne Betreff), 5 (Protokoll nur im eigenen Kanal), 6 (Belegpflicht, Umfang und
+Reichweite), 8 (Fristensperre), 9 (`eu-*` und das Modellprofil), 11 (Nachweis
+erst nach Erfolg) und der technische Grund im Löschkonzept, der seit den festen
+Dokumentnummern nicht mehr stimmt. Alles durchgestrichen und berichtigt
+daneben; gelöscht ist nichts.
+
+Dazu **Textract ergänzt** — es stand in dieser Datei überhaupt nicht, obwohl es
+seit dem 02.10.2026 läuft und eine zweite Übermittlung ist. Mit dem offenen
+Nachweis F12.
+
+---
+
+## Die E-Akte, 06.10.2026 — gebaut, aber noch nicht eingeschaltet
+
+**Was die Beschreibung des Herstellers geklärt hat, und es war unangenehm.**
+Der Befund vom 02.10.2026 — drei fremde Schriftstücke in einer Bausache — war
+**unser eigener Fehler**. jur|nodes führt zwei getrennte Ordnerbäume mit je
+eigenen Nummern: das Dateisystem und die Korrespondenz. Das Programm hat die
+Nummer aus `correspondenceFolderId` am Pfad des **Dateisystems** abgefragt.
+Dort gibt es die Nummer auch — sie gehört nur zu einem anderen Ordner, dem
+einer fremden Akte.
+
+**Der richtige Weg ist aktenbezogen:** `POST /correspondence/search` mit
+`recordIdentifier`. Eine Verwechslung der Nummernkreise kann dort nicht mehr
+vorkommen; gefragt wird nach der Akte, nicht nach einer Ordnernummer. Der alte
+Weg ist **ausgebaut** und kommt auch mit der Einstellung nicht zurück.
+
+**Was übernommen wird — und was nicht.** Ein Korrespondenzeintrag ist eine
+Hülle: Betreff, Art, Richtung, Datum und ein Verweis darauf, wo der Inhalt
+liegt. Von den neun Arten sagt die Beschreibung nur für den **Vermerk** zu, was
+zurückkommt (`RecordNote.content`, html oder text). Mail, beA und Post haben
+einen Download, aber die Beschreibung schweigt über die Antwort — dafür braucht
+es einen Lauf am Server der Kanzlei, und bis dahin wird nicht geraten.
+
+| | |
+|---|---|
+| **Vermerke** (Aktenvermerke, Telefonnotizen) | werden Dokumente der Akte |
+| **Dateien** der Korrespondenz | liegen im Dateisystem und sind längst dabei |
+| **Mail, beA, Post, Fax, SMS, eDA** | werden **gezählt und angezeigt**, nicht übernommen |
+
+**Was fehlt, fehlt sichtbar:** Im Dokumentfenster steht jetzt eine Zeile
+„2 Eintrag/Einträge der E-Akte (Mail, beA, Post) stehen hier nicht". Eine
+unvollständige Liste sieht sonst aus wie eine vollständige.
+
+**Zwei Dinge aus der Zweitprüfung sind hier eingebaut:**
+
+* **Die Prüfung aus Befund F08, und hier geht sie wirklich.** `RecordNote`
+  trägt das Feld `record` — anders als eine Datei lässt sich also nachsehen, ob
+  die Antwort zur angefragten Akte gehört. Sie tut es, im Programm und im
+  Prüfbogen. Die fremde Aktenkennung geht nicht in die Fehlermeldung.
+* **Ein eigener Nummernkreis bekommt einen eigenen Vorsatz.** Eine
+  Vermerkkennung heißt `vermerk:17`. Vermerk 17 und Datei 17 haben nichts
+  miteinander zu tun; ohne den Vorsatz wäre das Laden eine Verwechslung, die
+  niemandem auffiele — genau die Art Fehler, die am 02.10. passiert ist.
+
+**Ein lesender POST-Aufruf ist dazugekommen**, und das gehört begründet: Das
+Korrespondenzverzeichnis holt nichts als Daten, der Hersteller verlangt dafür
+trotzdem POST. Das Verfahren macht einen Aufruf nicht schreibend. Er steht
+getrennt von `vermerk_schreiben` in `_lesen_per_post`, und eine Prüfung zählt
+nach: **drei** `self._client.post(` im Adapter — zwei schreibende, ein
+lesender. Kommt einer dazu, fällt es auf.
+
+**Eingeschaltet ist nichts.** `JUSPERFECT_KORRESPONDENZ` steht auf aus, bis ein
+Lauf am Server der Kanzlei es bestätigt. Der Prüfbogen beantwortet die Frage
+jetzt ausdrücklich — ganz unten steht „Kann die E-Akte eingeschaltet werden?"
+mit JA, NEIN oder unentschieden und dem Grund. Die Startdatei erklärt die drei
+Schritte.
+
+14 Prüfungen in `tests/test_eakte.py`. **1790 Prüfungen grün.** Im Browser
+gegen einen nachgebauten Server nachgesehen: Die beiden Vermerke stehen mit
+Betreff und Datum in der Liste, der Hinweis nennt die zwei übrigen, und nach
+dem Übernehmen steht der Vermerktext wirklich in der linken Spalte.
+
 ### Was in den Unterlagen berichtigt ist
 
 | Befund | Was falsch war |

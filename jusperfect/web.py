@@ -916,9 +916,14 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
 
 
 def _sitzung_antwort(d: Dienste, sitzung: Any) -> dict[str, Any]:
+    dokumente = d.sitzungen.dokumente(sitzung)
     return {
         "sitzung": sitzung.model_dump(),
-        "dokumente": [x.model_dump() for x in d.sitzungen.dokumente(sitzung)],
+        "dokumente": [x.model_dump() for x in dokumente],
+        # Was in der E-Akte liegt und noch keinen Inhalt hat: Mail, beA, Post.
+        # Was fehlt, soll sichtbar fehlen - sonst sieht eine unvollstaendige
+        # Liste aus wie eine vollstaendige.
+        "korrespondenz_ohne_inhalt": getattr(d.adapter, "letzte_korrespondenz_ohne_inhalt", 0),
         "beteiligte": [x.model_dump() for x in d.sitzungen.beteiligte(sitzung)],
         "fristen": [x.model_dump() for x in d.sitzungen.fristen(sitzung)],
         "gedaechtnis": d.gedaechtnis.uebersicht(d.gedaechtnis.lesen(sitzung.akte_id)),

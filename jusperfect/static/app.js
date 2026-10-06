@@ -730,6 +730,19 @@ function explorerStarten(initial) {
   explorer = { karte, gewaehlt: new Set(geladen), geladen, initial };
   const a = sitzung.sitzung.akte;
   $("explorer-titel").textContent = `${a.aktenzeichen} · ${a.bezeichnung}`;
+  // Was in der E-Akte liegt und noch keinen Inhalt hat. Eine unvollstaendige
+  // Liste sieht sonst aus wie eine vollstaendige - und was fehlt, faellt in
+  // einer Akte erst auf, wenn es darauf ankommt.
+  const eakteHinweis = $("explorer-eakte");
+  if (eakteHinweis) {
+    const offen = sitzung.korrespondenz_ohne_inhalt || 0;
+    eakteHinweis.hidden = !offen;
+    if (offen > 0) eakteHinweis.textContent =
+      `${offen} Eintrag/Einträge der E-Akte (Mail, beA, Post) stehen hier nicht: `
+      + `Ihr Inhalt ist noch nicht angebunden. Vermerke sind dabei.`;
+    else if (offen < 0) { eakteHinweis.hidden = false;
+      eakteHinweis.textContent = "Die E-Akte war nicht zu lesen; die Vermerke fehlen in dieser Liste."; }
+  }
   $("explorer-uebernehmen").textContent = initial ? "Arbeitsfläche öffnen" : "Übernehmen";
   // Erst leeren, dann zeichnen. Umgekehrt zeigte der Explorer die Liste noch
   // nach dem Filter der VORIGEN Akte, waehrend das Suchfeld daneben schon leer
