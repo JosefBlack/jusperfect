@@ -551,7 +551,19 @@ def test_beide_kennungen_werden_durchprobiert(monkeypatch) -> None:
 
 
 def test_der_satz_fuer_den_hersteller_steht_am_ende(capsys) -> None:
-    """Nimmt keine Form etwas an, hilft nur noch er - dann fertig formuliert."""
+    """Der Satz zum Abschicken - und nur das, was wirklich offen ist.
+
+    Bis zum 07.10.2026 fragte er: „Über welchen Pfad liefert die Schnittstelle
+    die Einträge der E-Akte?" Seit der Beschreibung 1.0.2 ist das beantwortet
+    (`POST /correspondence/search`), und am 06.10.2026 steht es sogar als
+    beantwortet in `ANFRAGE-HERSTELLER.md` — gedruckt wurde die Frage
+    trotzdem weiter.
+
+    Eine Anfrage, die Beantwortetes noch einmal fragt, kostet zweierlei: die
+    Zeit des Lesers beim Hersteller und die Glaubwürdigkeit der Zeilen
+    daneben, die wirklich offen sind. Dieser Test hält beides fest — dass der
+    bekannte Weg genannt, aber nicht mehr erfragt wird.
+    """
     p = _probe()
 
     class _Client:
@@ -579,8 +591,17 @@ def test_der_satz_fuer_den_hersteller_steht_am_ende(capsys) -> None:
 
     p._vermerke_suchen(_Client(), _Endpunkte(), "FL6B", "X-100-2026")
     ausgabe = capsys.readouterr().out
-    assert "Mit welchem Parameter" in ausgabe
-    assert "GET /record/note" in ausgabe
+    # Der bekannte Weg wird genannt, damit der Leser ihn vor sich hat.
+    assert "POST /correspondence/search" in ausgabe
+    assert "GET /record/note?id=..&record=.." in ausgabe
+    assert "BEIDEN Pflichtparametern" in ausgabe
+    # Aber er wird nicht mehr erfragt.
+    assert "Mit welchem Parameter" not in ausgabe, "Das ist beantwortet."
+    assert "Ueber welchen Pfad" not in ausgabe, "Das ist beantwortet."
+    # Und das, was offen ist, steht da.
+    assert "ANFRAGE-HERSTELLER.md" in ausgabe
+    assert "fehlt ein Recht" in ausgabe
+    assert "correspondenceFolderId" in ausgabe
 
 
 # ---------------------------------------------------------------------------
@@ -983,16 +1004,31 @@ def test_die_frage_an_den_hersteller_nennt_die_eakte(capsys) -> None:
 
     p._vermerke_suchen(_Client(), Endpunkte(), "FL6B", "X-100-2026")
     ausgabe = capsys.readouterr().out
-    assert "E-AKTE" in ausgabe
-    assert "Mails" in ausgabe
+    # Die E-Akte heisst in der Schnittstelle Korrespondenz - und der Pfad
+    # dorthin ist bekannt. Was dasteht, ist der Pfad, nicht die Frage danach.
+    assert "POST /correspondence/search" in ausgabe
+    assert "mail/download" in ausgabe, "Die offene Dateiart gehoert dazu."
+    assert "attachmentId" in ausgabe and "postFileUniqueKey" in ausgabe
 
 
 def test_der_probelauf_fuer_ziffer_6_2(capsys) -> None:
     """Welche Wörter führt der Aktenstatus im Bestand?
 
-    Daran hängt die Aufbewahrung: Das Programm kennt „archiviert" und
-    „archived"; jedes andere Wort gilt still als „laufend". Eine Akte, die in
-    jur|nodes anders abgeschlossen heißt, wird damit nie abschlussreif.
+    Daran hängt die Aufbewahrung. Welche Wörter das Programm kennt, steht an
+    **einer** Stelle: ``_STATUS`` im Adapter. Die Probe fragt jene Tabelle,
+    statt eine zweite zu führen.
+
+    **Warum das geprüft wird.** Bis zum 07.10.2026 hatte die Probe eine
+    eigene Liste, und zwar eine veraltete: Sie kannte nur „archiviert" und
+    „archived". Der Lauf vom 07.10.2026 meldete deshalb bei zehn Akten
+    ``active <- kennt das Programm NICHT``, obwohl ``_STATUS`` „active"
+    führt. Dieser Test hielt den Fehler fest, weil er die veraltete Liste
+    nachbaute: Er verlangte, dass „open" als unbekannt gilt - und „open"
+    steht in ``_STATUS``. Eine Kopie veraltet, und ein Test, der die Kopie
+    nachbaut, veraltet mit ihr.
+
+    Hier liegt jetzt beides richtig: „open" und „archiviert" sind bekannt und
+    werden mit ihrer Übersetzung gezeigt, „closed" ist es nicht.
 
     Gefragt wird die Aktenliste, nicht eine einzelne Akte - hundert Akten je
     Seite statt einer Stichprobe von eins. Gezählt wird Wort und Anzahl; kein
@@ -1027,11 +1063,142 @@ def test_der_probelauf_fuer_ziffer_6_2(capsys) -> None:
     ausgabe = capsys.readouterr().out
 
     assert "open: 2" in ausgabe and "closed: 2" in ausgabe and "archiviert: 2" in ausgabe
-    assert ausgabe.count("kennt das Programm NICHT") == 2, "open und closed sind unbekannt"
+    assert ausgabe.count("kennt das Programm NICHT") == 1, "allein closed ist unbekannt"
+    assert "closed: 2   <- kennt das Programm NICHT" in ausgabe
     assert "archiviert: 2   <-" not in ausgabe, "archiviert kennt es sehr wohl"
+    # Die Uebersetzung muss dastehen, sonst ist nicht nachzulesen, was das
+    # Programm aus dem Wort macht - und genau daran haengt die Aufbewahrung.
+    assert "open: 2   -> laufend" in ausgabe
+    assert "archiviert: 2   -> archiviert" in ausgabe
+    # Ein unbekanntes Wort wird "unbekannt", NICHT "laufend". Stand hier das
+    # Falsche, haette der Leser einen gefaehrlichen Satz geglaubt.
+    assert "laufend\"" not in ausgabe, "unbekannt heisst nicht laufend"
     assert "Ziffer 6.2" in ausgabe
 
     for geheim in ("Meier", "Schulz", "D-1", "D-2"):
         assert geheim not in ausgabe, f"Akteninhalt in der Ausgabe: {geheim}"
 
     assert all(params.get("page") for params in gefragt), "Seite 0 weist der Server ab."
+
+
+def test_eine_abweisung_beantwortet_die_frage_trotzdem(capsys) -> None:
+    """Status 401 auf die E-Akte ist eine Antwort, kein Abbruch.
+
+    **Der Lauf vom 07.10.2026.** `/correspondence/search` kam mit Status 401
+    zurück, während jeder andere Pfad desselben Laufs mit 200 antwortete.
+    Der Abschnitt endete danach still: Der Satz „Kann die E-Akte eingeschaltet
+    werden?" wurde nie gedruckt, weil er erst nach dem gelungenen Lesen stand.
+
+    Damit ließ der Prüfbogen den Leser mit zwanzig Zeilen Befund allein und
+    beantwortete genau die Frage nicht, für die er gebaut ist. Ein Status 401
+    sagt etwas Klares: Der Zugang steht, dieser eine Pfad wird abgewiesen -
+    das ist ein Recht, kein Programmfehler. Genau das muss dastehen.
+    """
+    p = _probe()
+
+    class _Antwort:
+        status_code = 401
+        text = "{}"
+
+        def json(self):
+            return {}
+
+    class _Client:
+        def post(self, pfad, json=None, **rest):
+            return _Antwort()
+
+    p._korrespondenz_lesen(_Client(), Endpunkte(), "FL6BDPWJ940ALEY4BVP0")
+    ausgabe = capsys.readouterr().out
+
+    assert "Kann die E-Akte eingeschaltet werden?" in ausgabe, \
+        "Die Frage muss auch bei einer Abweisung beantwortet werden."
+    assert "NEIN" in ausgabe
+    assert "401" in ausgabe
+    assert "Recht" in ausgabe, "Der Leser muss erfahren, woran es liegt."
+    assert "ANFRAGE-HERSTELLER.md" in ausgabe, "Und wo die Frage steht."
+    assert "Am Programm ist dafuer nichts zu tun" in ausgabe
+
+
+def test_vermerke_werden_mit_id_UND_record_probiert(capsys) -> None:
+    """Die Beschreibung verlangt zwei Pflichtparameter - also beide zusammen.
+
+    GET /record/note führt `id` (Zahl) **und** `record` (Zeichenkette), beide
+    Pflicht. Bis zum 07.10.2026 probierte diese Suche jeden Namen EINZELN;
+    zwanzig Formen, jede mit einem Wert. Der Server antwortete jedes Mal mit
+    405 und „Bitte Daten angeben" - und das war keine Klage über den Namen,
+    sondern die zutreffende Auskunft, dass der zweite Wert fehlt.
+
+    Geprüft wird hier zweierlei: dass die Form überhaupt vorkommt, und dass
+    dabei **nur** Zahlen verwendet werden, die der Server selbst zu dieser
+    Akte herausgibt. Jede andere Nummer gehört einer fremden Akte.
+    """
+    p = _probe()
+    gefragt: list[dict] = []
+
+    class _Antwort:
+        status_code = 405
+        text = "Bitte Daten angeben"
+
+        def json(self):
+            return {}
+
+    class _Client:
+        def get(self, pfad, params=None, **rest):
+            gefragt.append({"pfad": pfad, **(params or {})})
+            if pfad == Endpunkte().akte:
+                class _Akte:
+                    status_code = 200
+                    text = ""
+
+                    def json(self):
+                        # Flach, so wie GET /record wirklich antwortet -
+                        # gemessen im Lauf vom 07.10.2026.
+                        return {"identifier": "FL6B",
+                                "fileFolderId": 11142,
+                                "correspondenceFolderId": 2871}
+                return _Akte()
+            return _Antwort()
+
+        def options(self, pfad, **rest):
+            return _Antwort()
+
+    p._vermerke_suchen(_Client(), Endpunkte(), "FL6BDPWJ940ALEY4BVP0", "X-100-2026")
+    ausgabe = capsys.readouterr().out
+
+    assert "id UND record" in ausgabe, "Die Form muss angekündigt werden."
+    zusammen = [g for g in gefragt
+                if g.get("pfad") == Endpunkte().vermerke
+                and "id" in g and "record" in g]
+    assert zusammen, "Keine einzige Anfrage trug beide Pflichtparameter."
+    erlaubt = {11142, 2871}
+    for g in zusammen:
+        assert g["record"] == "FL6BDPWJ940ALEY4BVP0"
+        assert g["id"] in erlaubt, \
+            f"id={g['id']} gibt die Akte nicht selbst heraus - fremde Nummer."
+
+
+def test_aus_dem_korrespondenzbaum_wird_nichts_geholt() -> None:
+    """Dort liegen fremde Dateien - gemessen, nicht vermutet.
+
+    Dreimal geprüft, dreimal derselbe Befund: Die Ordner hinter
+    `correspondenceFolderId` tragen Ablagen, die älter sind als die Akte
+    selbst. Im Lauf vom 07.10.2026 war die Akte am 30.07.2026 angelegt und
+    fünf Ordner ab Dezember 2022 befüllt. Eine Datei kann nicht in eine Akte
+    gelegt worden sein, die es noch nicht gab.
+
+    Die Leseprobe holte aus diesem Baum eine Datei - 44763 Bytes, Status 200.
+    Kein Inhalt stand im Bericht, aber geholt war sie. Das ist der Blick in
+    eine fremde Handakte, und er beantwortet seit dem 05.10.2026 keine Frage
+    mehr: Der Betrieb liest diesen Baum nicht.
+    """
+    quelle = Path("jusperfect/jurnodestest.py").read_text(encoding="utf-8")
+    stelle = quelle.index("korrespondenz = _ordner_der_akte")
+    bis = quelle.index("ordner = _ordner_der_akte", stelle)
+    abschnitt = quelle[stelle:bis]
+
+    assert "_herunterladen_proben(" not in abschnitt, \
+        "Aus dem Korrespondenzbaum darf keine Datei geholt werden."
+    assert "fremde" in abschnitt, "Und der Bericht muss sagen, warum nicht."
+    # Im Dateibaum bleibt die Probe - dort gehören die Dateien zur Akte.
+    assert "_herunterladen_proben(" in quelle[bis:bis + 1200], \
+        "Im Dateiordner ist die Leseprobe richtig und muss bleiben."

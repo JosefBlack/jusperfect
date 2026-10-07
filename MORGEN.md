@@ -1676,11 +1676,14 @@ weg.
 
 ## Die Reihenfolge, die ich vorschlage
 
-1. **Den Zugang auf diesem Rechner hinterlegen** (Aufgabe 10). Ohne ihn
-   erreicht keine der folgenden Proben eine echte Akte.
-2. **`JURNODES-PRUEFEN.bat` einmal laufen lassen** (Akte `X-100-2026`). Sie
-   beantwortet in einem Lauf zwei offene Fragen: den Weg zu den Vermerken
-   (Aufgabe 2) und ob das Herunterladen aus beiden Ordnern geht.
+1. ~~**Den Zugang auf diesem Rechner hinterlegen** (Aufgabe 10)~~ —
+   erledigt am 07.10.2026 auf dem neuen Rechner. `ZUGANG-PRUEFEN.bat` sagt
+   „Der Zugang steht."; einzutragen war nichts, der Schlüssel lag schon im
+   Windows-Konto.
+2. ~~**`JURNODES-PRUEFEN.bat` einmal laufen lassen** (Akte `X-100-2026`)~~ —
+   gelaufen am 07.10.2026. Ergebnis unten im Nachtrag: Der Weg zu den
+   Vermerken steht, das Herunterladen aus dem Dateiordner geht — aber
+   `POST /correspondence/search` antwortet **401**. Der Rest hängt daran.
 3. **Texterkennung** (Aufgabe 1) — das Einzige, was noch Akteninhalt kostet.
 4. **Prüfbogenlauf Chronologie** (Aufgabe 6) — der zweite Lauf, jetzt mit
    Opus, zum Nachweis der Änderungen vom 28.09.
@@ -1738,3 +1741,84 @@ nur, *wie die E-Akte* die abgelegte Fassung herausgibt (Dateiart hinter
 `/mail/download`, Herkunft von `attachmentId` und `postFileUniqueKey`), nicht
 den Zugang zu einem Postfach. Ein Postfachzugriff wird auch künftig nicht
 gebaut.
+
+
+---
+
+## Nachtrag 07.10.2026 — der Lauf am neuen Rechner
+
+Zwei Berichte aus der Kanzlei: `zugangstest.txt` und `jurnodestest.txt`,
+beide vom neuen Rechner (`C:\Users\elmar\jusperfect-06.10.2026`).
+
+### Der Zugang zu AWS steht
+
+`AKIA…27UA`, angemeldet als `arn:aws:iam::579138738703:user/jusperfect-test`,
+Region `eu-central-1`, Modell antwortet, Strom läuft, und: *„AWS schreibt die
+Modellaufrufe nicht mit."* Eingetragen werden musste nichts — der Schlüssel
+lag schon im Windows-Konto des Rechners.
+
+### Der Befund, auf den es ankommt: Status 401
+
+`POST /correspondence/search` wird mit **401** und leerem Antwortkörper
+abgewiesen. Im **selben Lauf**, mit **demselben** Zugang, antworteten
+`/record/search`, `/record`, `/relation/search`, `/todo/search`,
+`/file-system/folder/content` und `/file-system/file/download` jeweils mit
+200. Der Zugang steht also; abgewiesen wird dieser eine Pfad.
+
+Das ist **keine Frage an das Programm**. Der Pfad ist der richtige, die
+Parameter sind die beschriebenen. Es fehlt ein Recht am Schnittstellen-
+benutzer `user_2` — oder dieser Pfad verlangt eine andere Anmeldung. Die
+Frage dazu steht jetzt als **erste** in `schnittstelle/ANFRAGE-HERSTELLER.md`.
+
+Weil die Korrespondenz der einzige beschriebene Weg zu den Vermerken ist
+(`referenceNote`), bleibt die E-Akte abgeschaltet. Sobald der Pfad antwortet,
+genügt ein weiterer Lauf.
+
+### `correspondenceFolderId` — zum dritten Mal derselbe Befund
+
+Die Akte ist am 30.07.2026 angelegt. Die Ordner hinter ihrem
+`correspondenceFolderId` tragen Ablagen ab dem 15.12.2022: fünf Ordner,
+siebzehn Dateien, alle älter als die Akte. Eine Datei kann nicht in eine
+Akte gelegt worden sein, die es noch nicht gab.
+
+Damit ist die Entscheidung vom 05.10.2026, diesen Baum im Betrieb **nicht**
+mehr zu lesen, bestätigt. Sie bleibt.
+
+### Vier Fehler in der eigenen Probe — berichtigt am 07.10.2026
+
+Alle vier waren Fehler im Prüfbogen, nicht im Betrieb.
+
+1. **Falscher Alarm beim Aktenstatus.** Der Bericht meldete
+   `active: 10  <- kennt das Programm NICHT`. Falsch: `_STATUS` im Adapter
+   führt „active" seit dem 02.10.2026. Die Probe hatte eine **zweite,
+   veraltete** Liste. Sie fragt jetzt die Tabelle des Programms und zeigt zu
+   jedem Wort die Übersetzung. Der erklärende Satz war ebenfalls falsch — ein
+   unbekanntes Wort wird „unbekannt", nicht „laufend", und die Aufsicht legt
+   die Akte einem Menschen vor.
+2. **Die Frage blieb unbeantwortet.** Bei Status 401 brach der Abschnitt ab,
+   ohne den Satz „Kann die E-Akte eingeschaltet werden?" zu drucken — also
+   genau dort, wo er gebraucht wurde. Jetzt antwortet jeder Ausweg: bei 401
+   oder 403 mit **NEIN — noch nicht**, samt Grund und dem Hinweis, dass am
+   Programm nichts zu tun ist.
+3. **Eine fremde Datei wurde geholt.** Die Leseprobe zog aus dem
+   Korrespondenzbaum eine PDF (44 763 Bytes). Kein Inhalt stand im Bericht,
+   aber geholt war sie — aus einem Baum, der nachweislich fremde Dateien
+   trägt. Dort wird jetzt nur noch gezählt. Im Dateiordner bleibt die
+   Leseprobe, dort gehören die Dateien zur Akte.
+4. **Die naheliegende Form war nie probiert.** `GET /record/note` führt
+   `id` **und** `record` als Pflicht. Probiert wurde jeder Name einzeln —
+   zwanzig Formen, jede mit einem Wert. „Bitte Daten angeben" war deshalb
+   kein Rätsel, sondern die zutreffende Auskunft: Es fehlte jedes Mal der
+   zweite Wert. Jetzt wird die Form `id` + `record` mitprobiert, und zwar
+   nur mit Zahlen, die der Server selbst zu dieser Akte herausgibt.
+
+Dazu kommt: Der gedruckte „Satz zum Abschicken" fragte noch nach dem **Pfad**
+zur E-Akte — seit 1.0.2 beantwortet. Er nennt den bekannten Weg jetzt und
+fragt nur noch das Offene.
+
+### Nebenbei: ein Schreibfehler in der Beschreibung
+
+In `jurnodes-api-1.0.2.json` fehlt bei einem von 85 Pfaden der führende
+Schrägstrich: `correspondence/get-by-reference`. Die übrigen 84 beginnen mit
+`/`. Als Frage in `ANFRAGE-HERSTELLER.md` aufgenommen — der Pfad könnte
+zugleich die Fragen zu `referenceMail` beantworten.

@@ -602,11 +602,22 @@ def _statuswoerter(client: Any, endpunkte: Any, seiten: int = 3) -> None:
 
     **Das ist der Probelauf fuer Ziffer 6.2 des Verarbeitungsverzeichnisses.**
 
-    Die Aufbewahrung folgt dem Aktenstatus: ``_status_uebersetzen`` macht aus
-    "archiviert" und "archived" den Wert "archiviert", und JEDES andere Wort
-    still zu "laufend". Eine Akte, die in jur|nodes anders abgeschlossen
-    heisst, wird damit nie abschlussreif - und der Befund "status_unbekannt",
-    der einen Menschen einschalten soll, kann auf diesem Weg nicht entstehen.
+    Die Aufbewahrung folgt dem Aktenstatus. Welche Woerter das Programm kennt,
+    steht an genau einer Stelle: ``_STATUS`` in
+    ``jusperfect/jurnodes/http_adapter.py``. Diese Probe fragt **jene** Tabelle
+    und fuehrt keine eigene Liste mehr.
+
+    **Warum nicht mehr.** Bis zum 07.10.2026 stand hier die Liste doppelt, und
+    zwar in der alten Fassung: Sie kannte nur "archiviert" und "archived".
+    Der Lauf vom 07.10.2026 meldete deshalb ``active: 10  <- kennt das
+    Programm NICHT`` - obwohl ``_STATUS`` "active" seit dem 02.10.2026 fuehrt.
+    Ein falscher Alarm in einem Bericht, der zur Entscheidung vorgelegt wird,
+    ist schlimmer als keiner: Er kostet Vertrauen in die richtigen Zeilen
+    daneben. Eine Kopie einer Tabelle veraltet; eine Abfrage nicht.
+
+    Ein Wort, das ``_STATUS`` nicht kennt, wird im Programm "unbekannt" - nicht
+    "laufend". Dann wird nichts geloescht, und ``services/aufsicht.py`` legt
+    die Akte einem Menschen vor. Das ist der gewollte Weg, kein Mangel.
 
     Welche Woerter der Server wirklich fuehrt, stand in keinem Bericht: Die
     Probe zeigte den Feldnamen, nicht den Wert. Gefragt wird deshalb die
@@ -644,16 +655,22 @@ def _statuswoerter(client: Any, endpunkte: Any, seiten: int = 3) -> None:
     if not gezaehlt:
         _sagen("!", "Der Bestand gab keinen Status heraus.")
         return
+    # Die Tabelle des Programms, nicht eine Kopie davon.
+    from jusperfect.jurnodes.http_adapter import _STATUS
+
     _sagen("✓", f"{gesehen} Akten angesehen:")
     for wort, anzahl in sorted(gezaehlt.items(), key=lambda p: -p[1]):
-        bekannt = wort.lower() in ("archiviert", "archived")
-        _sagen("✓" if bekannt else "!",
-               f"     {wort}: {anzahl}" + ("" if bekannt else "   <- kennt das Programm NICHT"))
-    unbekannt = [w for w in gezaehlt if w.lower() not in ("archiviert", "archived")]
+        uebersetzt = _STATUS.get(wort.lower())
+        _sagen("✓" if uebersetzt else "!",
+               f"     {wort}: {anzahl}"
+               + (f"   -> {uebersetzt}" if uebersetzt
+                  else "   <- kennt das Programm NICHT"))
+    unbekannt = [w for w in gezaehlt if w.lower() not in _STATUS]
     if unbekannt:
-        _sagen(" ", "Woerter mit Pfeil gelten im Programm heute als „laufend\". Ist eines")
-        _sagen(" ", "davon ein abgeschlossener Zustand, laeuft fuer diese Akten keine")
-        _sagen(" ", "Aufbewahrung an - das gehoert in Ziffer 6.2, bevor dort etwas steht.")
+        _sagen(" ", "Woerter mit Pfeil werden im Programm „unbekannt\": Eine solche")
+        _sagen(" ", "Akte wird NICHT geloescht, und die Aufsicht legt sie einem")
+        _sagen(" ", "Menschen vor. Ist ein Wort ein abgeschlossener Zustand, gehoert")
+        _sagen(" ", "es in _STATUS und in Ziffer 6.2 - sonst bleibt es beim Vorlegen.")
 
 
 def _zahlen_der_akte(client: Any, endpunkte: Any, kennung: str) -> list[tuple[str, int]]:
@@ -1081,16 +1098,19 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
     if antwort.status_code >= 400:
         _sagen("✗", f"Korrespondenz: Status {antwort.status_code}")
         _wortlaut(antwort)
+        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code)
         return
     try:
         daten = antwort.json()
     except ValueError:
         _sagen("!", "Korrespondenz: keine JSON-Antwort")
+        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code)
         return
 
     eintraege = daten.get("elements") if isinstance(daten, Mapping) else None
     if not isinstance(eintraege, list):
         _sagen("!", "Korrespondenz: keine Liste „elements“ in der Antwort.")
+        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code)
         return
     gesamt = daten.get("amountTotal")
     seiten = daten.get("pagesTotal")
@@ -1098,6 +1118,7 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
                 f"amountTotal {gesamt}, pagesTotal {seiten}")
     if not eintraege:
         _sagen(" ", "Diese Akte hat keine Korrespondenz - oder das Recht fehlt.")
+        _eakte_urteil(0, 0, 0)
         return
 
     _sagen(" ", "Die Feldnamen des ersten Eintrags:")
@@ -1199,16 +1220,46 @@ def _download_messen(client: Any, eintraege: list) -> None:
     _sagen(" ", "   (Kein Inhalt ausgegeben - nur Format und Laenge.)")
 
 
-def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int) -> None:
+def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int,
+                  abweisung: int | None = None) -> None:
     """Der Satz, auf den es ankommt: Kann die E-Akte eingeschaltet werden?
 
     Ein Pruefbogen, der zwanzig Zeilen Befund ausgibt und die Frage nicht
     beantwortet, laesst den Leser dieselbe Arbeit noch einmal machen. Hier
     steht sie beantwortet - und zwar aus dem, was in diesem Lauf wirklich
     geschehen ist, nicht aus einer Erwartung.
+
+    **Auch eine Abweisung ist eine Antwort** (nachgetragen am 07.10.2026).
+    Der Lauf vom selben Tag bekam auf ``/correspondence/search`` ein Status
+    401 - und damit endete der Abschnitt, ohne die Frage zu beantworten. Der
+    Leser musste aus zwanzig Zeilen selbst schliessen, was das heisst. Genau
+    das sollte dieser Satz ihm abnehmen. ``abweisung`` traegt deshalb den
+    Status, mit dem der Server abgewiesen hat.
     """
     _sagen(" ", "")
     _sagen(" ", "--- Kann die E-Akte eingeschaltet werden? ---")
+    if abweisung is not None:
+        if abweisung in (401, 403):
+            _sagen("✗", f"NEIN - noch nicht. Der Server weist das Verzeichnis "
+                        f"mit Status {abweisung} ab, waehrend er auf jeden "
+                        f"anderen Pfad in diesem Lauf geantwortet hat.")
+            _sagen(" ", "   Der Zugang als solcher steht also; abgewiesen wird")
+            _sagen(" ", "   dieser eine Pfad. Das liest sich wie ein fehlendes")
+            _sagen(" ", "   Recht am Schluessel - sicher sagen kann es nur der")
+            _sagen(" ", "   Hersteller. Die Frage dafuer steht in")
+            _sagen(" ", "   schnittstelle/ANFRAGE-HERSTELLER.md.")
+            _sagen(" ", "   Am Programm ist dafuer nichts zu tun: Sobald das Recht")
+            _sagen(" ", "   steht, genuegt dieser Lauf noch einmal.")
+            return
+        if abweisung == 404:
+            _sagen("✗", "NEIN. Diese Einrichtung kennt den Pfad nicht (404), "
+                        "obwohl die Beschreibung 1.0.2 ihn fuehrt. Das ist eine "
+                        "Frage nach der Fassung des Servers.")
+            return
+        _sagen("!", f"Unentschieden: Der Server antwortete mit Status "
+                    f"{abweisung}. Der Wortlaut steht darueber; er kommt von "
+                    f"ihm, nicht von hier.")
+        return
     if not eintraege:
         _sagen("!", "Unentschieden: Diese Akte hat keine Korrespondenz. Bitte den "
                     "Lauf an einer Akte mit Schriftverkehr wiederholen.")
@@ -1374,6 +1425,26 @@ def _vermerke_suchen(client: Any, endpunkte: Any, kennung: str,
         for feld, zahl in zahlen:
             _zaehlen(client, f"id={zahl} (aus {feld})", endpunkte.vermerke,
                      zeige_felder=True, **{"id": zahl})
+
+        # Und nun die Form, die die Beschreibung wirklich verlangt.
+        #
+        # Nachgetragen am 07.10.2026. GET /record/note fuehrt ZWEI
+        # Pflichtparameter, "id" (Zahl) UND "record" (Zeichenkette) - so
+        # steht es in 1.0.2, und der Lauf vom 07.10.2026 hat es oben selbst
+        # ausgegeben. Probiert wurde bis dahin jeder Name EINZELN. "Bitte
+        # Daten angeben" war damit kein Raetsel, sondern die zutreffende
+        # Klage des Servers: Es fehlte jedes Mal der zweite Wert.
+        #
+        # Geraten wird dabei nicht: Es werden ausschliesslich die Zahlen
+        # genommen, die der Server selbst zu DIESER Akte herausgibt. Jede
+        # andere Nummer gehoert einer fremden Akte; sie zu probieren waere
+        # ein Blick in die Unterlagen eines anderen Mandanten.
+        _sagen(" ", "Und die Form, die die Beschreibung verlangt: id UND record")
+        _sagen(" ", "zusammen (beide Pflicht). Nur die Zahlen dieser Akte:")
+        for feld, zahl in zahlen:
+            _zaehlen(client, f"id={zahl} (aus {feld}) + record",
+                     endpunkte.vermerke, zeige_felder=True,
+                     **{"id": zahl, "record": kennung})
     else:
         _sagen("!", "Die Akte gibt keine einzige Zahl heraus - dann steht die")
         _sagen(" ", "Zahl für „id“ woanders. Die Frage unten geht an den Hersteller.")
@@ -1403,39 +1474,33 @@ def _vermerke_suchen(client: Any, endpunkte: Any, kennung: str,
     _eakte_suchen(client, endpunkte, kennung)
     _beschreibung_suchen(client, endpunkte)
 
-    _sagen(" ", "Nimmt keine Form etwas an, hilft nur noch der Hersteller.")
-    _sagen(" ", "Der Satz dafuer, fertig zum Abschicken:")
+    # Der Satz zum Abschicken - nur noch das, was WIRKLICH offen ist.
+    #
+    # Bis zum 07.10.2026 stand hier die Frage "Ueber welchen Pfad liefert die
+    # Schnittstelle die Eintraege der E-Akte?". Die ist seit der Beschreibung
+    # 1.0.2 beantwortet: POST /correspondence/search. Eine Anfrage, die
+    # Beantwortetes noch einmal fragt, kostet den Leser beim Hersteller Zeit
+    # und die eigene Glaubwuerdigkeit bei den Zeilen, die zaehlen.
+    _sagen(" ", "Was davon offen BLEIBT, steht fertig formuliert in")
+    _sagen(" ", "schnittstelle/ANFRAGE-HERSTELLER.md - mit Stand und Begruendung.")
+    _sagen(" ", "Der Kern, zum Mitlesen:")
     print()
-    print("      In der Oberflaeche von jur|nodes liegen die KORRESPONDENZ und")
-    print("      die VERMERKE einer Akte in der E-AKTE. Ueber welchen Pfad")
-    print("      liefert die REST-Schnittstelle die Eintraege der E-Akte zu")
-    print("      einer Akte - Korrespondenz, Vermerke und Mails?")
+    print("      Der Pfad zur E-Akte steht und wird nicht mehr gefragt:")
+    print("      POST /correspondence/search mit recordIdentifier, und die")
+    print("      Vermerke darin mit GET /record/note?id=..&record=.. - mit")
+    print("      BEIDEN Pflichtparametern.")
     print()
-    print("      Daran haengt vermutlich auch correspondenceFolderId: Liegt die")
-    print("      Korrespondenz gar nicht im Dateisystem, waere jenes Feld etwas")
-    print("      anderes. Das wuerde erklaeren, warum der Ordner dahinter in")
-    print("      drei geprueften Akten nie zur Akte passte.")
+    print("      Offen ist, warum der Server genau diesen Pfad abweist.")
+    print("      Die Zeilen oben nennen den Status. Antwortet er 401 oder")
+    print("      403, waehrend jeder andere Pfad im selben Lauf 200 gibt,")
+    print("      dann steht der Zugang und es fehlt ein Recht - die Frage")
+    print("      dazu ist die erste in ANFRAGE-HERSTELLER.md.")
     print()
-    print("      Und, falls es derselbe ist: Mit welchem Parameter liefert")
-    print("      GET /record/note die Vermerke")
-    print("      einer Akte? Probiert wurden " + ", ".join(_VERMERK_NAMEN) + ",")
-    print("      je mit Aktenkennung und Aktenzeichen, auch mit page=1. Jede")
-    print("      Form wird mit 405 und „Bitte Daten angeben\" abgewiesen.")
-    print("      /record/note/search und /note/search antworten mit 404.")
-    print("      Allein „id\" antwortet anders: Mit einer Zeichenkette 400,")
-    print("      \"cannot be parsed into number\" - mit einer ZAHL dagegen")
-    print("      wieder 405 „Bitte Daten angeben\". Die Zahl wird also")
-    print("      angenommen und genuegt trotzdem nicht. Probiert wurden alle")
-    print("      Zahlen, die die Akte selbst herausgibt (lawCategory,")
-    print("      recordSchema, fileFolderId, correspondenceFolderId,")
-    print("      firstProcessState).")
-    print()
-    print("      Zwei Fragen daher: Welche Zahl ist mit „id\" gemeint - die")
-    print("      eines einzelnen Vermerks? Und wie bekommt man die Liste der")
-    print("      Vermerke einer Akte, wenn es sie nicht ueber /record/note")
-    print("      gibt? /todo/search wurde mit frist, task und resubmit")
-    print("      ebenfalls gefragt.")
-    print()
+    print("      Offen bleiben ausserdem: die Dateiart hinter")
+    print("      POST /mail/download, die Herkunft von attachmentId (beA)")
+    print("      und postFileUniqueKey (Post), und wofuer")
+    print("      correspondenceFolderId steht - der Ordner dahinter trug in")
+    print("      drei geprueften Akten Ablagen, die aelter sind als die Akte.")
 
 
 def _ordner_aufteilen(client: Any, endpunkte: Any, ordner_id: str,
@@ -1566,6 +1631,21 @@ def _herunterladen_proben(client: Any, endpunkte: Any,
     Hier wird je Ordner **eine** Datei geholt. Angezeigt werden Status,
     Byteanzahl und der Wortlaut des Servers - kein Name, kein Inhalt. Die
     Bytes werden nicht gespeichert und nicht ausgegeben.
+
+    **Nicht mehr im Korrespondenzbaum** (07.10.2026). Dort wird seitdem nur
+    noch gezaehlt, nie gelesen. Der Grund steht im Lauf vom 07.10.2026:
+    Die Akte war am 30.07.2026 angelegt, die Ordner hinter
+    ``correspondenceFolderId`` tragen Ablagen von Dezember 2022. Eine Datei
+    kann nicht in eine Akte gelegt worden sein, die es noch nicht gab - das
+    sind fremde Dateien, und es ist die dritte geprueft Akte mit demselben
+    Befund.
+
+    Damit beantwortet diese Leseprobe dort keine Frage mehr: Der Betrieb
+    liest den Baum seit dem 05.10.2026 ohnehin nicht, und die Vermutung von
+    der Kanzlei (ein fehlendes Recht auf die 17 Dateien) hat sich in etwas
+    anderes aufgeloest - es waren nie 17 Dateien dieser Akte. Was bleibt,
+    ist der Preis: eine geholte Datei aus einer fremden Handakte. Den zahlt
+    diese Probe nicht.
     """
     if probe is None:
         _sagen(" ", f"     {woher}: keine Datei zum Pruefen vorhanden.")
@@ -1879,9 +1959,14 @@ def _ablauf(argv: list[str] | None = None) -> int:
                 _pruefen(client, "Korrespondenz (eigener Ordner)",
                          endpunkte.ordner_inhalt,
                          **{endpunkte.ordnerparameter: korrespondenz})
-                befund = _ordner_aufteilen(client, endpunkte, korrespondenz)
-                _herunterladen_proben(client, endpunkte, "Korrespondenz",
-                                      befund.get("probe"))
+                _ordner_aufteilen(client, endpunkte, korrespondenz)
+                # KEINE Leseprobe in diesem Baum - siehe
+                # _herunterladen_proben, Absatz vom 07.10.2026.
+                _sagen(" ", "     Korrespondenz: aus diesem Baum wird NICHTS")
+                _sagen(" ", "     geholt. Er traegt in jeder bisher geprueften")
+                _sagen(" ", "     Akte Dateien, die aelter sind als die Akte -")
+                _sagen(" ", "     also fremde. Eine Leseprobe daraus waere ein")
+                _sagen(" ", "     Blick in die Unterlagen eines anderen Mandanten.")
             ordner = _ordner_der_akte(client, endpunkte, kennung)
             if ordner:
                 _pruefen(client, "Dokumente (Dateiordner)", endpunkte.ordner_inhalt,
