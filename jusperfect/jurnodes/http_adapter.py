@@ -942,6 +942,15 @@ class HttpJurNodesAdapter:
         es und gibt dabei **keinen Inhalt** aus, nur Status, Laenge und die
         Signatur der ersten Bytes. Bis dahin wird nicht geraten - die Eintraege
         stehen in der Zahl unten, damit nichts lautlos fehlt.
+
+        **Kein Postfach.** Aus der Kanzlei am 07.10.2026: Ein Zugriff auf das
+        E-Mail-Postfach und auf das beA-Postfach ist nicht erforderlich, weil
+        alles in der E-Akte abgelegt wird. Das Programm hat auch keinen: es
+        spricht ausschliesslich die jur|nodes-Schnittstelle an
+        (``JUSPERFECT_JURNODES_URL``). Auch ``POST /mail/download`` ist ein
+        Aufruf an jur|nodes und holt die dort abgelegte Fassung - kein
+        IMAP, kein SMTP, kein beA-Zugang. Die offenen Fragen 1 und 2 betreffen
+        nur, wie die E-Akte diese Fassung herausgibt.
         """
         self.letzte_korrespondenz_ohne_inhalt = 0
         try:

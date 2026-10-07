@@ -1712,3 +1712,29 @@ hinterlegen" meint jetzt den neuen Rechner. Der offene Lauf von
 `JURNODES-PRUEFEN.bat` an `X-100-2026` ist davon nicht aufgehoben, sondern
 nur verschoben: Er kann vom neuen Rechner aus laufen, sobald dort die
 Zugangswerte eingetragen sind.
+
+---
+
+## Feste Vorgabe 07.10.2026 — kein Postfachzugriff
+
+Aus der Kanzlei: **„Zugriff auf E-Mail-Postfach und beA-Postfach ist nicht
+erforderlich, da alles in der E-Akte abgespeichert wird."**
+
+Das ist keine Einschränkung, die etwas kostet, sondern die Bestätigung des
+gebauten Weges. Nachgesehen am 07.10.2026:
+
+- Im Programm gibt es keinen Postfachzugriff. Weder `imaplib`, `smtplib`,
+  `poplib`, `exchangelib` noch ein beA-Zugang kommen vor.
+- Alle Aufrufe gehen gegen `JUSPERFECT_JURNODES_URL`, also gegen die
+  jur|nodes-Schnittstelle. Auch `POST /mail/download` ist ein Aufruf an
+  jur|nodes und holt die **dort** abgelegte Fassung.
+- `jusperfect/services/extraktion.py` erkennt `.msg` und `.eml` bereits als
+  Dateiart. Gibt die E-Akte eine E-Mail als solche Datei heraus, lässt sie
+  sich lesen, ohne Outlook und ohne Postfach.
+
+**Folge:** Die beiden offenen Fragen in
+`schnittstelle/ANFRAGE-HERSTELLER.md` bleiben unverändert — sie betreffen
+nur, *wie die E-Akte* die abgelegte Fassung herausgibt (Dateiart hinter
+`/mail/download`, Herkunft von `attachmentId` und `postFileUniqueKey`), nicht
+den Zugang zu einem Postfach. Ein Postfachzugriff wird auch künftig nicht
+gebaut.
