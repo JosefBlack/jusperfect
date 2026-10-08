@@ -2172,3 +2172,25 @@ Schirm steht, nicht, was es bedeutet. Eine Liste grüner Felder kann „gesetzt"
 heißen oder „zur Auswahl". Ich habe das eine gelesen und das andere gemeint,
 und daraus eine Aufgabe für die Kanzlei gemacht, die keine war — zum zweiten
 Mal in dieser Woche nach dem 401.
+
+### Nachtrag 08.10.2026 — Handgriff 1 in AWS war längst erledigt
+
+Die Kanzlei hat die eingesetzte Zugriffsrichtlinie gezeigt. Verglichen mit
+`infra/iam-nur-claude.json`, Anweisung für Anweisung: **alle sieben
+identisch.** `NurEuUndEwr` nennt die sechs Regionen namentlich,
+`SchutzgelaenderAnwenden` führt `guardrail-profile` neben `guardrail`. Die
+neue Fassung ist also drin.
+
+Der einzige Unterschied: Die Datei im Programmordner trägt den Platzhalter
+`AWS-KONTONUMMER`, die eingesetzte Fassung die richtige Nummer. So soll es
+sein — die Datei ist eine Vorlage.
+
+**Damit ist F13 vollständig geschlossen**, nicht nur zur Hälfte. In der
+Aufgabenliste stand der Handgriff bis heute als offen; er war es nicht.
+
+**Und ein Mangel in meiner eigenen Anleitung vom selben Tag:** Sie sagte
+nicht, dass `AWS-KONTONUMMER` zu ersetzen ist. Wer die Datei unverändert
+eingesetzt hätte, hätte das Inferenzprofil ausgesperrt — den Weg, über den
+jede Analyse läuft —, und der Fehler wäre erst beim nächsten Aufruf
+aufgefallen, aussehend wie ein Modellproblem. Nachgetragen als Schritt 10,
+mit dem Hinweis, dass die Zeichenfolge zweimal vorkommt.

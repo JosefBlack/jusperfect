@@ -1,9 +1,26 @@
 # Die beiden Handgriffe in AWS
 
-**Stand 08.10.2026.** Zwei Dinge sind in der AWS-Konsole zu tun. Der erste
-dauert fünf Minuten. Der zweite kann fünf Minuten dauern oder eine
-Vormittagsstunde — das hängt davon ab, ob das AWS-Konto zu einer
-*Organisation* gehört. Schritt 1 des zweiten Handgriffs klärt das.
+**Stand 08.10.2026.**
+
+> ## Handgriff 1 ist bereits erledigt
+>
+> Die Kanzlei hat am 08.10.2026 die eingesetzte Richtlinie gezeigt. Ich habe
+> sie Anweisung für Anweisung mit `infra/iam-nur-claude.json` verglichen:
+> **Alle sieben stimmen überein.** Die neue Fassung ist drin — `NurEuUndEwr`
+> mit den sechs namentlich genannten Regionen und `guardrail-profile` neben
+> `guardrail`.
+>
+> Der einzige Unterschied ist, dass in der Datei im Programmordner der
+> Platzhalter `AWS-KONTONUMMER` steht und in der eingesetzten Fassung die
+> richtige Kontonummer. **So soll es sein.**
+>
+> Teil 1 dieser Anleitung bleibt stehen — für einen neuen Rechner, ein
+> zweites Konto oder die nächste Änderung. **Offen ist nur noch Handgriff 2.**
+
+Zwei Dinge waren in der AWS-Konsole zu tun. Der erste dauert fünf Minuten und
+ist getan. Der zweite kann fünf Minuten dauern oder eine Vormittagsstunde —
+das hängt davon ab, ob das AWS-Konto zu einer *Organisation* gehört.
+Schritt 1 des zweiten Handgriffs klärt das.
 
 Beides betrifft das Konto **579138738703**, Region **eu-central-1**
 (Frankfurt).
@@ -45,8 +62,18 @@ Programmordner schließt zwei Lücken, die am 05.10.2026 gefunden wurden:
 9. Im Programmordner die Datei **`infra\iam-nur-claude.json`** mit dem
    Editor öffnen, alles markieren, kopieren — und in das leere Feld
    einfügen.
-10. Unten auf **Weiter** (*Next*), dann auf **Änderungen speichern**
+10. **Im eingefügten Text `AWS-KONTONUMMER` suchen** und durch die
+    zwölfstellige Kontonummer **579138738703** ersetzen. Die Zeichenfolge
+    kommt **zweimal** vor — in `ClaudeAufrufen` und in `KeinAnderesModell`.
+11. Unten auf **Weiter** (*Next*), dann auf **Änderungen speichern**
     (*Save changes*).
+
+> **Schritt 10 ist der, den man übersieht.** Die Datei im Programmordner ist
+> eine Vorlage; sie trägt dort einen Platzhalter, damit sie auch für ein
+> anderes Konto taugt. Wer sie unverändert einsetzt, sperrt das
+> Inferenzprofil aus — und das ist genau der Weg, über den jede Analyse
+> läuft. Der Fehler fällt erst beim nächsten Aufruf auf, und dann sieht er
+> aus wie ein Modellproblem.
 
 ### Zwei Dinge, die an dieser Stelle schiefgehen können
 
