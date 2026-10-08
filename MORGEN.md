@@ -1945,3 +1945,50 @@ sucht.
 Auch der Antwortkörper passt: Für 400 und 405 ist
 `{"message", "errorStrings"}` beschrieben, für **401 kein Körper** — und genau
 leer (`{}`) kam er im Lauf zurück.
+
+### Nachtrag 08.10.2026, vierter — der 401 war unser eigener Fehler
+
+Herr Dortschy: *„search:correspondence war von mir freigegeben."* Damit war
+die Erklärung von gestern hinfällig, und die Nachschau fand den wahren Grund
+innerhalb einer Minute — in unserem eigenen Prüfbogen.
+
+**`jusperfect/jurnodestest.py` hängte den Schlüssel `X-Auth-Key` nur an
+`client.get` an.** Die Grundkopfzeilen des Clients tragen `X-Auth-User`, aber
+nicht den Schlüssel; den setzte allein dieser eine Wrapper. **Jeder POST ging
+ohne Schlüssel hinaus.**
+
+Im Lauf vom 07.10.2026 war genau **ein** POST dabei:
+`/correspondence/search`. Alle sechs Aufrufe, die mit 200 antworteten, waren
+GET. Deshalb sah es nach einem Rechteproblem an genau diesem einen Pfad aus —
+und die Erklärung war in sich stimmig, sogar mit Tabelle. Sie war trotzdem
+falsch. Der Server hatte recht: Ohne Schlüssel ist die Authentifizierung
+ungültig, und genau das heißt 401.
+
+**Der Betrieb war nie betroffen.** `http_adapter.py` gibt `self._kopf(pfad)`
+bei GET wie bei POST mit (Zeile 483 und 566). Der Fehler lag allein im
+Werkzeug, das Vertrauen schaffen soll — und er hat der Kanzlei eine Aufgabe
+gemacht, die keine war.
+
+**Was daraus folgt, über diesen Fehler hinaus:** Eine Erklärung, die alle
+beobachteten Daten erklärt, ist noch keine richtige. Alle sechs gelungenen
+Aufrufe waren GET, der eine gescheiterte war POST — dieser Unterschied stand
+in meiner eigenen Tabelle und wurde nicht gesehen, weil die Rechte-Erklärung
+schon passte. Die Spalte „Verfahren" fehlte in der Tabelle; sie hätte es
+gezeigt.
+
+**Berichtigt.** `_schluessel_anhaengen()` schleift den Schlüssel über
+`VERFAHREN = ("get", "post")`. Zwei Prüfungen sichern es: eine misst, dass
+jedes Verfahren den Schlüssel trägt, die andere liest die Quelle und lässt
+keinen zweiten, nicht umhüllten Client zu.
+
+**`ANFRAGE-HERSTELLER.md`** führt die 401-Frage jetzt unter „Zurückgezogen"
+und an ihrer Stelle die Liste der wirklich benötigten Rechte — nur lesende.
+
+### Zur Frage, ob man für einen Test alles freischalten soll: nein
+
+Dass jusperfect eine Akte nicht verändern *kann*, ist heute keine Zusage des
+Programms, sondern eine Eigenschaft des Schlüssels. Ein Schlüssel mit allen
+Rechten nähme dieses Netz weg und ließe nur das Versprechen übrig — und der
+Oktober hat gezeigt, was Versprechen wert sind: drei Fehler, die als
+Herstellerproblem aussahen und keines waren. Die lesenden Rechte oben
+genügen; die schreibenden und die `:postbox`-Rechte bitte zurücknehmen.

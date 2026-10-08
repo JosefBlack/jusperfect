@@ -806,6 +806,52 @@ def _rechte_sammeln(pfade: Mapping) -> None:
                 _RECHTE[(str(pfad), str(art).lower())] = recht
 
 
+#: Die Verfahren, mit denen diese Probe fragt. Beide brauchen den Schluessel.
+VERFAHREN = ("get", "post")
+
+
+def _schluessel_anhaengen(client: Any, token: str,
+                          eigene: Mapping[str, str] | None = None) -> None:
+    """Jeder Anfrage den Schluessel mitgeben - GET **und** POST.
+
+    **Der Fehler vom 07.10.2026.** Hier stand nur ``client.get`` gewrappt. Die
+    Grundkopfzeilen des Clients tragen ``X-Auth-User``, aber nicht
+    ``X-Auth-Key``; den hing allein dieser Wrapper an. Jeder ``client.post``
+    ging damit **ohne Schluessel** hinaus, und der Server antwortete, voellig
+    zu Recht, mit **401 „Authentifizierung ungueltig"**.
+
+    Im Lauf vom 07.10.2026 war genau ein POST dabei:
+    ``/correspondence/search``. Er bekam 401, alle sechs uebrigen Aufrufe
+    waren GET und antworteten mit 200. Daraus wurde geschlossen, dem
+    Schluessel fehle das Recht ``search:correspondence`` - und die Kanzlei
+    bekam eine Aufgabe, die keine war. Es fehlte nicht das Recht, sondern die
+    Kopfzeile.
+
+    **Der Betrieb war nie betroffen.** ``http_adapter.py`` gibt den Kopf bei
+    jedem Aufruf mit, bei GET und bei POST (``self._kopf(pfad)``). Der Fehler
+    lag allein im Pruefbogen - also in dem Werkzeug, das Vertrauen schaffen
+    soll.
+
+    Deshalb wird jetzt ueber ``VERFAHREN`` geschleift statt eine Zeile je
+    Verfahren zu schreiben: Ein drittes Verfahren kann dann nicht mehr
+    stillschweigend ohne Schluessel hinausgehen.
+    """
+    from jusperfect.jurnodes.http_adapter import bereich_von
+
+    eigene = dict(eigene or {})
+
+    def _bauen(echtes):
+        def _mit_schluessel(pfad, **kw):
+            kw.setdefault("headers", {})
+            kw["headers"] = {**kw["headers"],
+                             "X-Auth-Key": eigene.get(bereich_von(pfad), token)}
+            return echtes(pfad, **kw)
+        return _mit_schluessel
+
+    for verfahren in VERFAHREN:
+        setattr(client, verfahren, _bauen(getattr(client, verfahren)))
+
+
 def _rechte_zeigen(endpunkte: Any) -> None:
     """Welches Recht jeder Aufruf braucht, den diese Probe benutzt.
 
@@ -1935,8 +1981,6 @@ def _ablauf(argv: list[str] | None = None) -> int:
     # jur|nodes vergibt je Bereich einen eigenen Schluessel. Wer erst einen
     # hat, kommt damit durch - die uebrigen Bereiche antworten dann mit einer
     # Ablehnung, und genau das soll die Probe zeigen, statt es zu verschweigen.
-    from jusperfect.jurnodes.http_adapter import bereich_von
-
     schluessel = {
         bereich: os.environ.get(f"JURNODES_API_KEY_{bereich.upper()}", "").strip()
         for _, bereich in __import__("jusperfect.jurnodes.http_adapter",
@@ -1951,15 +1995,7 @@ def _ablauf(argv: list[str] | None = None) -> int:
         headers={"X-Auth-User": benutzer, "Accept": "application/json"},
         timeout=e.jurnodes_timeout_sekunden,
     )
-    _echtes_get = client.get
-
-    def _get_mit_schluessel(pfad, **kw):
-        kw.setdefault("headers", {})
-        kw["headers"] = {**kw["headers"],
-                         "X-Auth-Key": eigene.get(bereich_von(pfad), token)}
-        return _echtes_get(pfad, **kw)
-
-    client.get = _get_mit_schluessel  # type: ignore[method-assign]
+    _schluessel_anhaengen(client, token, eigene)
 
     print()
     for zeile in _umbrechen(

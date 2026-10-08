@@ -1267,3 +1267,63 @@ def test_die_rechte_der_benutzten_aufrufe_stehen_im_bericht(capsys) -> None:
                   "read:folder", "download:file", "search:todo"):
         assert recht in ausgabe, f"{recht} fehlt in der Übersicht."
     assert "401" in ausgabe, "Der Leser muss den Bezug zum Status sehen."
+
+
+def test_jede_anfrage_traegt_den_schluessel_auch_POST() -> None:
+    """GET **und** POST — sonst antwortet der Server zu Recht mit 401.
+
+    **Der Fehler vom 07.10.2026, und was er gekostet hat.** Die Probe hing den
+    Schlüssel `X-Auth-Key` nur an `client.get` an; die Grundkopfzeilen des
+    Clients tragen ihn nicht. Jeder `client.post` ging damit ohne Schlüssel
+    hinaus.
+
+    Im Lauf vom 07.10.2026 war genau ein POST dabei:
+    `/correspondence/search`. Er bekam 401 „Authentifizierung ungültig", die
+    sechs übrigen Aufrufe waren GET und antworteten mit 200. Daraus wurde
+    geschlossen, dem Schlüssel fehle das Recht `search:correspondence` — und
+    die Kanzlei bekam eine Aufgabe, die keine war. Der Server hatte die ganze
+    Zeit recht: Ohne Schlüssel ist die Authentifizierung ungültig.
+
+    Der Betrieb war nie betroffen: `http_adapter.py` gibt den Kopf bei GET und
+    POST mit. Der Fehler lag allein im Prüfbogen — in dem Werkzeug, das
+    Vertrauen schaffen soll.
+
+    Geprüft wird über `VERFAHREN`, nicht über eine Liste in diesem Test: Kommt
+    ein drittes Verfahren hinzu, fällt dieser Test, statt es durchzulassen.
+    """
+    p = _probe()
+    gesehen: list[tuple[str, dict]] = []
+
+    class _Client:
+        def get(self, pfad, **kw):
+            gesehen.append(("get", kw.get("headers") or {}))
+
+        def post(self, pfad, **kw):
+            gesehen.append(("post", kw.get("headers") or {}))
+
+    client = _Client()
+    p._schluessel_anhaengen(client, "DER-SCHLUESSEL")
+
+    for verfahren in p.VERFAHREN:
+        getattr(client, verfahren)("/correspondence/search", json={"a": 1})
+
+    assert len(gesehen) == len(p.VERFAHREN), "Jedes Verfahren muss durchlaufen."
+    for verfahren, kopf in gesehen:
+        assert kopf.get("X-Auth-Key") == "DER-SCHLUESSEL", \
+            f"{verfahren.upper()} ging ohne Schlüssel hinaus — das gibt 401."
+
+
+def test_kein_post_umgeht_den_schluessel() -> None:
+    """Jeder POST im Prüfbogen muss über den umhüllten Client laufen.
+
+    Ein zweiter Client, direkt gebaut, oder ein `httpx.post(...)` am Modul
+    vorbei hätte denselben stillen 401 zur Folge. Deshalb wird hier die
+    Quelle gelesen, nicht nur das Verhalten.
+    """
+    quelle = Path("jusperfect/jurnodestest.py").read_text(encoding="utf-8")
+    # Erlaubt ist allein client.post(...) - der Client, der umhüllt wurde.
+    assert "httpx.post(" not in quelle, "Am umhüllten Client vorbei."
+    assert "httpx.request(" not in quelle, "Am umhüllten Client vorbei."
+    # Und es darf nur EINEN Client geben, der gebaut wird.
+    assert quelle.count("httpx.Client(") == 1, \
+        "Ein zweiter Client bekäme die Umhüllung nicht."

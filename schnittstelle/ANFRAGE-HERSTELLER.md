@@ -1,4 +1,4 @@
-# Was von jur|nodes noch fehlt — Stand 08.10.2026 (zweite Fassung)
+# Was von jur|nodes noch fehlt — Stand 08.10.2026 (dritte Fassung)
 
 **Das Meiste ist beantwortet, und zwar aus der Beschreibung selbst.** Diese
 Datei nennt nur noch, was wirklich offen ist.
@@ -13,79 +13,80 @@ Datei nennt nur noch, was wirklich offen ist.
 
 ---
 
-## Das ist keine Frage an den Hersteller, sondern eine Aufgabe
+## Zurückgezogen: der Status 401 war unser eigener Fehler
 
-### Dem Schnittstellenbenutzer fehlt ein Recht: `search:correspondence`
+**Bitte diese Frage nicht stellen.** Die Fassungen vom 07. und 08.10.2026
+führten hier, als erste und dringlichste Frage, den Status 401 auf
+`POST /correspondence/search` und schlossen daraus, dem Schnittstellen-
+benutzer fehle das Recht `search:correspondence`.
 
-Die Beschreibung sagt es wörtlich:
+**Das war falsch, und der Fehler lag im Prüfbogen.** Gefunden am 08.10.2026:
 
-> `POST /correspondence/search` — *„Listet alle Korrespondenzen (derzeit einer
-> Akte) auf. **Benötigte Rechte: search:correspondence**"*
+Der Prüfbogen hängte den Schlüssel `X-Auth-Key` nur an GET-Anfragen an; die
+Grundkopfzeilen des Clients tragen `X-Auth-User`, aber nicht den Schlüssel.
+**Jeder POST ging damit ohne Schlüssel hinaus.** Im Lauf vom 07.10.2026 war
+genau ein POST dabei — `/correspondence/search` —, und alle sechs übrigen
+Aufrufe waren GET. Deshalb sah es aus wie ein Rechteproblem an genau diesem
+einen Pfad.
 
-und zu Status 401: *„Authentifizierung ungültig"*.
+Der Server hatte die ganze Zeit recht: Ohne Schlüssel ist die
+Authentifizierung ungültig. Genau das sagt er mit 401.
 
-Der Lauf vom 07.10.2026 passt genau darauf. Was mit demselben Zugang
-**funktioniert** hat, und welches Recht dahintersteht:
+**Der Betrieb war nie betroffen.** `jusperfect/jurnodes/http_adapter.py` gibt
+den Kopf bei jedem Aufruf mit, bei GET wie bei POST. Der Fehler lag allein im
+Werkzeug, das Vertrauen schaffen soll.
 
-| Aufruf | Benötigtes Recht | Ergebnis |
-|---|---|---|
-| `GET /record/search` | `search:records` | 200 |
-| `GET /record` | `read:records` | 200 |
-| `GET /relation/search` | `search:relation` | 200 |
-| `GET /todo/search` | `search:todo` | 200 |
-| `GET /file-system/folder/content` | `read:folder` | 200 |
-| `GET /file-system/file/download` | `download:file` | 200 |
-| **`POST /correspondence/search`** | **`search:correspondence`** | **401** |
+Berichtigt und durch zwei Prüfungen abgesichert: Der Schlüssel wird jetzt über
+alle benutzten Verfahren geschleift, und ein zweiter, nicht umhüllter Client
+lässt die Prüfung fallen.
 
-Sechs Rechte sind gesetzt, eines fehlt — und genau dessen Aufruf wird
-abgewiesen. Das ist kein Zufall und keine Vermutung mehr.
+> **An den Hersteller ist dazu nichts zu schreiben.** Die Antwort, welche
+> Rechte welcher Aufruf braucht, steht ohnehin in der Beschreibung — zu jedem
+> der 94 Aufrufe, im Feld `description` hinter „Benötigte Rechte:".
 
-**Eine andere Anmeldung ist es nicht.** Nachgezählt am 08.10.2026: Alle 94
-Aufrufe der Beschreibung tragen **denselben** Sicherheitsblock, nämlich
-`X-Auth-User` und `X-Auth-Key` — ohne eine einzige Ausnahme. Es gibt in dieser
-Schnittstelle kein zweites Anmeldeverfahren, auf das `/correspondence/search`
-ausweichen könnte. Es bleibt das Recht.
+---
 
-Auch der Antwortkörper passt: Für 400 und 405 beschreibt der Hersteller
-`{"message", "errorStrings"}`, für **401 keinen Körper** — und genau leer
-(`{}`) kam er im Lauf zurück.
+## Welche Rechte der Schnittstellenbenutzer wirklich braucht
 
-> **Frage:** Wo wird `search:correspondence` am Schnittstellenbenutzer
-> gesetzt — in jur|nodes selbst, oder muss der Hersteller es freischalten?
+Aus der Beschreibung ausgelesen, nicht geraten. **Nur lesende Rechte** — das
+Programm schreibt grundsätzlich nicht.
 
-> **Zu tun:** In jur|nodes dem Schnittstellenbenutzer `user_2` das Recht
-> **`search:correspondence`** geben. Danach genügt ein weiterer Lauf von
-> `JURNODES-PRUEFEN.bat`.
+### Jetzt
 
-*Ein Hinweis zur Adresse, damit niemand danach sucht:* Die Oberfläche der
-Dokumentation zeigt unter einzelnen Aufrufen eine Adresse ohne Vorsatz, etwa
-`https://dortschy-thunert.jur-nodes.net/post/download`. Das ist eine Vorgabe
-des Anzeigewerkzeugs — die Beschreibung selbst führt **keinen** Abschnitt
-`servers`. Die benutzte Adresse mit `/api/extern/v1/<Kennung>` ist richtig:
-Mit ihr haben am 07.10.2026 sechs andere Aufrufe mit 200 geantwortet.
-
-### Die Vermerke selbst brauchen kein weiteres Recht
-
-`GET /record/note` verlangt `read:records` — dasselbe Recht wie `GET /record`,
-und das antwortet bereits mit 200. Sobald die Liste da ist, sind die Vermerke
-lesbar.
+| Zweck | Recht |
+|---|---|
+| Akte suchen | `search:records` |
+| Akte und Vermerk lesen | `read:records` |
+| Beteiligte | `search:relation` |
+| Fristen und Aufgaben | `search:todo` |
+| Ordner und Inhalt | `read:folder` |
+| Datei herunterladen | `download:file` |
+| **Korrespondenzliste (E-Akte)** | **`search:correspondence`** |
 
 ### Später, für den Inhalt von Mail, beA und Post
 
-Der Hersteller trennt die Rechte sauber nach **Postfach** und **Akte**. Für
-jusperfect wird ausschließlich die Akte gebraucht, nie ein Postfach:
+Der Hersteller trennt die Rechte nach **Postfach** und **Akte**. Gebraucht
+wird ausschließlich die Akte:
 
-| Zweck | Benötigtes Recht | **Nicht** nötig |
+| Zweck | Recht | **Nicht** setzen |
 |---|---|---|
 | E-Mail aus der Akte | `download:mail:record` | ~~`download:mail:postbox`~~ |
-| beA-Nachricht aus der Akte | `read:bea:record`, `download:bea:record` | ~~`:postbox`~~ |
+| beA aus der Akte | `read:bea:record`, `download:bea:record` | ~~`…:postbox`~~ |
 | Post | `read:post`, `download:post` | — |
 
-Das deckt sich mit der Vorgabe der Kanzlei vom 07.10.2026: kein Zugriff auf
-E-Mail-Postfach und beA-Postfach. Die Rechte mit `:postbox` bitte **nicht**
-setzen.
+### Was ausdrücklich **nicht** gesetzt werden soll
 
----
+Alles Schreibende: `write:records`, `write:correspondence`, `write:file`,
+`write:folder`, `delete:file`, `delete:folder`, `update:…`, `create:…`,
+`generate:documents`, `file_upload` und die übrigen.
+
+**Warum das zählt.** Dass jusperfect eine Akte nicht verändern *kann*, ist
+heute keine Zusage des Programms, sondern eine Eigenschaft des Schlüssels.
+Ein Fehler im Programm — und es gab im Oktober mehrere — kann dann nichts
+anrichten. Ein Schlüssel mit allen Rechten nähme dieses Netz weg und ließe
+nur das Versprechen übrig. Dasselbe gilt für die `:postbox`-Rechte: Ein
+Postfachzugriff ist nach Vorgabe der Kanzlei vom 07.10.2026 nicht
+erforderlich, weil alles in der E-Akte liegt.
 
 ## Was wirklich offen bleibt
 
