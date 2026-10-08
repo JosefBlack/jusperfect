@@ -951,6 +951,15 @@ BEILIEGENDE_BESCHREIBUNG = (Path(__file__).resolve().parent.parent
                             / "schnittstelle" / "jurnodes-api-1.0.2.json")
 
 
+#: Sieht die Eingabe nach einem Aktenzeichen der Kanzlei aus? X-100-2026.
+_AKTENZEICHEN = re.compile(r"^[A-Za-z]{1,3}[-/ ]?\d{1,5}[-/ ]?\d{2,4}$")
+
+
+def _wie_ein_aktenzeichen(text: str) -> bool:
+    """Damit die Probe sagen kann, WARUM die Datei fehlt."""
+    return bool(_AKTENZEICHEN.match(text.strip()))
+
+
 def _beschreibung_aus_datei(pfad: str, endpunkte: Any) -> bool:
     """Die Beschreibung von der Festplatte lesen - ohne Netz, ohne Raten.
 
@@ -969,6 +978,25 @@ def _beschreibung_aus_datei(pfad: str, endpunkte: Any) -> bool:
     _sagen(" ", f"Beschreibung aus der Datei: {datei}")
     if not datei.is_file():
         _sagen("✗", "Die Datei gibt es nicht.")
+        # **Der Lauf vom 08.10.2026.** Die Startdatei fragt zweimal
+        # hintereinander: erst nach dem Aktenzeichen, dann nach einer anderen
+        # Beschreibung. In die zweite Zeile wurde ein Aktenzeichen getippt -
+        # was naheliegt, wenn zwei Eingabezeilen untereinander stehen.
+        #
+        # Die Folge war still und teuer: Die Probe lief ohne Beschreibung
+        # weiter. Es fehlten die 85 Pfade, die Rechteuebersicht und die Namen
+        # der Pflichtparameter - also gerade das, wofuer der Lauf gemacht
+        # wird. Im Bericht stand davon nur eine Zeile, drei Seiten weiter oben.
+        #
+        # Jetzt wird zurueckgefallen auf die beiliegende Datei, statt ohne
+        # weiterzulaufen. Eine Tippfehlerzeile darf keinen Lauf entwerten.
+        if _wie_ein_aktenzeichen(pfad):
+            _sagen("!", "Das sieht nach einem Aktenzeichen aus, nicht nach einem")
+            _sagen(" ", "Dateipfad. Das Aktenzeichen gehoert in die Zeile DAVOR.")
+        if BEILIEGENDE_BESCHREIBUNG.is_file() and datei != BEILIEGENDE_BESCHREIBUNG:
+            _sagen("✓", "Es wird die beiliegende Beschreibung genommen:")
+            _sagen(" ", f"   {BEILIEGENDE_BESCHREIBUNG.name}")
+            return _beschreibung_aus_datei(str(BEILIEGENDE_BESCHREIBUNG), endpunkte)
         return False
     try:
         daten = json.loads(datei.read_text(encoding="utf-8"))

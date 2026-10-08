@@ -1327,3 +1327,52 @@ def test_kein_post_umgeht_den_schluessel() -> None:
     # Und es darf nur EINEN Client geben, der gebaut wird.
     assert quelle.count("httpx.Client(") == 1, \
         "Ein zweiter Client bekäme die Umhüllung nicht."
+
+
+def test_ein_aktenzeichen_in_der_dateizeile_entwertet_den_lauf_nicht(capsys) -> None:
+    """Eine Tippfehlerzeile darf keinen Lauf kosten.
+
+    **Der Lauf vom 08.10.2026.** `JURNODES-PRUEFEN.bat` fragt zweimal
+    hintereinander: erst nach dem Aktenzeichen, dann nach einer anderen
+    Beschreibung. In die zweite Zeile wurde ein Aktenzeichen getippt — was
+    naheliegt, wenn zwei Eingabezeilen untereinander stehen.
+
+    Die Folge war still und teuer: Die Probe lief ohne Beschreibung weiter. Es
+    fehlten die 85 Pfade, die Rechteübersicht und die Namen der
+    Pflichtparameter — also gerade das, wofür der Lauf gemacht wird. Im
+    Bericht stand davon eine einzige Zeile, drei Seiten weiter oben.
+
+    Jetzt wird auf die beiliegende Datei zurückgefallen, und es steht dabei,
+    warum.
+    """
+    p = _probe()
+    p._beschreibung_aus_datei("X-102-2026", Endpunkte())
+    ausgabe = capsys.readouterr().out
+
+    assert "Die Datei gibt es nicht" in ausgabe
+    assert "sieht nach einem Aktenzeichen aus" in ausgabe, \
+        "Der Leser muss erfahren, WARUM die Datei fehlt."
+    assert "Zeile DAVOR" in ausgabe, "Und wo das Aktenzeichen hingehört."
+    # Und der Lauf hat die Beschreibung trotzdem.
+    assert "85 Pfade stehen darin" in ausgabe, \
+        "Ohne Rückfall verliert der Lauf seinen Zweck."
+    assert "search:correspondence" in ausgabe, "Auch die Rechteübersicht."
+
+
+def test_die_startdatei_trennt_die_beiden_fragen() -> None:
+    """Zwei Eingabezeilen untereinander sind eine Falle — also nicht so.
+
+    Die Startdatei nummeriert die Fragen und sagt bei der zweiten ausdrücklich,
+    dass dort kein Aktenzeichen hingehört.
+    """
+    bat = (Path(__file__).resolve().parent.parent / "JURNODES-PRUEFEN.bat"
+           ).read_bytes().decode("cp1252")
+
+    assert "FRAGE 1 von 2" in bat and "FRAGE 2 von 2" in bat
+    assert "HIER GEHOERT KEIN AKTENZEICHEN HIN" in bat
+    # Und die Zeilenenden bleiben, wie cmd sie braucht: JEDES \n mit \r davor.
+    # Ein nacktes \n laesst cmd ueber die Sprungmarken stolpern.
+    assert "\n" in bat
+    assert all(bat[i - 1] == "\r"
+               for i, zeichen in enumerate(bat) if zeichen == "\n" and i), \
+        "Eine Zeile endet ohne CRLF."

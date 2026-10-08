@@ -121,12 +121,24 @@ class TestSieBrauchtWederNetzNochZugang:
         assert _beschreibung_aus_datei(pfad, ENDPUNKTE) is True
         assert "/electronic-file/search" in capsys.readouterr().out
 
-    def test_eine_fehlende_datei_sagt_das_und_bricht_nicht_ab(
+    def test_eine_fehlende_datei_sagt_das_und_nimmt_die_beiliegende(
         self, tmp_path: Path, capsys
     ) -> None:
-        assert _beschreibung_aus_datei(str(tmp_path / "gibtsnicht.json"),
-                                       ENDPUNKTE) is False
-        assert "Die Datei gibt es nicht." in capsys.readouterr().out
+        """Seit dem 08.10.2026 bricht sie nicht nur nicht ab — sie fällt zurück.
+
+        Vorher lief die Probe ohne Beschreibung weiter. Das kostete die 85
+        Pfade, die Rechteübersicht und die Pflichtparameter — also gerade das,
+        wofür der Lauf gemacht wird —, und im Bericht stand davon eine Zeile
+        drei Seiten weiter oben. Am 08.10.2026 ist genau das passiert, weil in
+        die Dateizeile ein Aktenzeichen getippt wurde.
+        """
+        gelungen = _beschreibung_aus_datei(str(tmp_path / "gibtsnicht.json"),
+                                           ENDPUNKTE)
+        ausgabe = capsys.readouterr().out
+        assert "Die Datei gibt es nicht." in ausgabe
+        assert gelungen is True, "Die beiliegende Beschreibung muss einspringen."
+        assert "beiliegende Beschreibung" in ausgabe, "Und es muss dastehen."
+        assert "85 Pfade stehen darin" in ausgabe
 
     def test_eine_datei_die_kein_json_ist_sagt_was_zu_tun_ist(
         self, tmp_path: Path, capsys

@@ -2102,3 +2102,49 @@ keine Programmierfragen:
 2. **Was hineingehört.** Eine `.eml` trägt Anhänge, Signaturbilder und oft den
    ganzen Verlauf doppelt. Ob der Anhang mit hineinsoll, ist eine Frage an die
    Kanzlei, keine ans Programm.
+
+### Nachtrag 08.10.2026, später — zwei Eingabezeilen untereinander sind eine Falle
+
+Der Lauf an `X-101-2026` zeigt es in der ersten Zeile des Berichts:
+
+```
+Beschreibung aus der Datei: X-102-2026
+✗  Die Datei gibt es nicht.
+```
+
+In **beide** Eingabezeilen von `JURNODES-PRUEFEN.bat` wurde ein Aktenzeichen
+getippt — in die erste `X-101-2026`, in die zweite `X-102-2026`. Die zweite
+will einen **Dateipfad**.
+
+**Die Folge war still und teuer.** Die Probe lief ohne die
+Schnittstellenbeschreibung weiter. Es fehlten die 85 Pfade, die
+Rechteübersicht und die Namen der Pflichtparameter — also gerade das, wofür
+der Lauf gemacht wird. Im Bericht stand davon eine einzige Zeile, drei Seiten
+weiter oben, mit einem Haken daneben, der kein Haken war.
+
+Und vermutlich ist das auch die Antwort auf *„X-100-2026 nimmt er nicht mehr
+an"*: Wer das Aktenzeichen in die zweite Zeile tippt, bekommt „Die Datei gibt
+es nicht." zu lesen. Das sieht aus wie eine Abweisung der Akte und ist eine
+Abweisung eines Dateinamens.
+
+**Berichtigt:**
+
+* `_beschreibung_aus_datei()` fällt auf die beiliegende Datei zurück, statt
+  ohne weiterzulaufen, und sagt dabei, wenn die Eingabe nach einem
+  Aktenzeichen aussieht und in welche Zeile es gehört.
+* `JURNODES-PRUEFEN.bat` nummeriert die beiden Fragen („FRAGE 1 von 2"),
+  erklärt jede und schreibt bei der zweiten ausdrücklich: *HIER GEHOERT KEIN
+  AKTENZEICHEN HIN.*
+
+### Was der Lauf trotzdem gezeigt hat
+
+* **`X-101-2026`: 9 Einträge, alle `mail`, kein Vermerk.** Das Urteil lautet
+  richtig *unentschieden* — nicht JA und nicht NEIN. Der Weg steht, aber diese
+  Akte kann über `/record/note` nichts aussagen.
+* **`/mail/download` ein zweites Mal: `.eml`**, Status 200 — diesmal aber nur
+  **5 426 Bytes** statt 8 753 880. Die 8,7 MB vom ersten Lauf waren also ein
+  Ausreißer, vermutlich eine Mail mit großem Anhang. Für die Frage nach der
+  Obergrenze heißt das: Die meisten Mails sind klein; eine Grenze träfe
+  wenige.
+* Die Aktensuche arbeitet einwandfrei (`X-101-2026` → 1 Eintrag, Status 200).
+  An der Schnittstelle liegt es nicht.

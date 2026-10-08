@@ -32,8 +32,13 @@ if errorlevel 1 exit /b 1
 rem Ein Aktenzeichen als Beispiel macht die Probe erst vollstaendig: Ohne
 rem eines wird nur die Aktensuche gefragt, mit einem auch Akte, Dokumente,
 rem Beteiligte und Fristen. Es steht nur in der eigenen Ausgabe.
+echo.
+echo --- FRAGE 1 von 2 -------------------------------------------
+echo Welche Akte soll geprueft werden? Zum Beispiel  X-100-2026
+echo Leer lassen geht auch - dann wird nur die Schnittstelle gefragt.
+echo.
 set "AKTE="
-set /p AKTE=Aktenzeichen fuer die Probe (leer lassen geht auch): 
+set /p AKTE=Aktenzeichen: 
 
 rem Die Beschreibung der Schnittstelle.
 rem
@@ -54,9 +59,17 @@ set /p BESCHREIBUNG=Pfad zu einer Beschreibung (leer lassen geht auch):
 goto beschreibung_fertig
 
 :beschreibung_da
-echo Beschreibung der Schnittstelle: schnittstelle\jurnodes-api-1.0.2.json
-echo Eine andere Datei? Dann hier den Pfad eintragen, sonst einfach Eingabe.
-set /p BESCHREIBUNG=Andere Beschreibung (Eingabe = die obige nehmen): 
+echo.
+echo --- FRAGE 2 von 2 -------------------------------------------
+echo Die Beschreibung der Schnittstelle liegt schon bereit:
+echo    schnittstelle\jurnodes-api-1.0.2.json
+echo.
+echo HIER GEHOERT KEIN AKTENZEICHEN HIN. Diese Zeile will einen
+echo DATEIPFAD - und fast immer ist die Antwort: einfach Eingabe
+echo druecken. Nur wer eine neuere Beschreibung bekommen hat,
+echo traegt hier deren Pfad ein.
+echo.
+set /p BESCHREIBUNG=Andere Datei (einfach Eingabe = die obige nehmen): 
 if not defined BESCHREIBUNG set "BESCHREIBUNG=%~dp0schnittstelle\jurnodes-api-1.0.2.json"
 
 :beschreibung_fertig
