@@ -2148,3 +2148,27 @@ Abweisung eines Dateinamens.
   wenige.
 * Die Aktensuche arbeitet einwandfrei (`X-101-2026` → 1 Eintrag, Status 200).
   An der Schnittstelle liegt es nicht.
+
+### Berichtigung 08.10.2026 — die beiden schreibenden Rechte sind nicht gesetzt
+
+Aus der Kanzlei: *„Rechte gar nicht bei jurnodes ausgewählt — generate
+documents und update correspondence folder — und somit gar nicht
+eingeschaltet."*
+
+Damit ist meine Lesart des Bildschirmfotos falsch gewesen. Ich hatte die
+grünen Felder für die **vergebenen** Rechte gehalten; offenbar zeigen sie die
+**verfügbaren**. Die Aufgabe „zwei schreibende Rechte zurücknehmen" ist
+hinfällig und aus der Aufgabenliste entfernt.
+
+**Was davon bleibt, ist die Regel, nicht die Aufgabe:** Dass jusperfect eine
+Akte nicht verändern kann, soll eine Eigenschaft des Schlüssels bleiben und
+keine Zusage des Programms. Die Rechte mit `write:`, `delete:`, `update:`,
+`create:`, dazu `generate:documents` und `file_upload`, gehören weiterhin
+nicht an den Schnittstellenbenutzer. Nach dem heutigen Stand sind sie es auch
+nicht.
+
+**Und eine Lehre über den Fall hinaus:** Ein Bildschirmfoto zeigt, was auf dem
+Schirm steht, nicht, was es bedeutet. Eine Liste grüner Felder kann „gesetzt"
+heißen oder „zur Auswahl". Ich habe das eine gelesen und das andere gemeint,
+und daraus eine Aufgabe für die Kanzlei gemacht, die keine war — zum zweiten
+Mal in dieser Woche nach dem 401.
