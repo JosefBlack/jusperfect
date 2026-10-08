@@ -40,9 +40,29 @@ Der Lauf vom 07.10.2026 passt genau darauf. Was mit demselben Zugang
 Sechs Rechte sind gesetzt, eines fehlt — und genau dessen Aufruf wird
 abgewiesen. Das ist kein Zufall und keine Vermutung mehr.
 
+**Eine andere Anmeldung ist es nicht.** Nachgezählt am 08.10.2026: Alle 94
+Aufrufe der Beschreibung tragen **denselben** Sicherheitsblock, nämlich
+`X-Auth-User` und `X-Auth-Key` — ohne eine einzige Ausnahme. Es gibt in dieser
+Schnittstelle kein zweites Anmeldeverfahren, auf das `/correspondence/search`
+ausweichen könnte. Es bleibt das Recht.
+
+Auch der Antwortkörper passt: Für 400 und 405 beschreibt der Hersteller
+`{"message", "errorStrings"}`, für **401 keinen Körper** — und genau leer
+(`{}`) kam er im Lauf zurück.
+
+> **Frage:** Wo wird `search:correspondence` am Schnittstellenbenutzer
+> gesetzt — in jur|nodes selbst, oder muss der Hersteller es freischalten?
+
 > **Zu tun:** In jur|nodes dem Schnittstellenbenutzer `user_2` das Recht
 > **`search:correspondence`** geben. Danach genügt ein weiterer Lauf von
 > `JURNODES-PRUEFEN.bat`.
+
+*Ein Hinweis zur Adresse, damit niemand danach sucht:* Die Oberfläche der
+Dokumentation zeigt unter einzelnen Aufrufen eine Adresse ohne Vorsatz, etwa
+`https://dortschy-thunert.jur-nodes.net/post/download`. Das ist eine Vorgabe
+des Anzeigewerkzeugs — die Beschreibung selbst führt **keinen** Abschnitt
+`servers`. Die benutzte Adresse mit `/api/extern/v1/<Kennung>` ist richtig:
+Mit ihr haben am 07.10.2026 sechs andere Aufrufe mit 200 geantwortet.
 
 ### Die Vermerke selbst brauchen kein weiteres Recht
 
