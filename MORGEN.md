@@ -2026,3 +2026,79 @@ kommt in 1.0.2 an keinem einzigen Aufruf vor.
 `/file-system/add-file` steht zwar in der Endpunktliste des Programms, wird
 aber nie gerufen — und das zugehörige Recht `write:file` ist nicht gesetzt.
 Richtig so.
+
+---
+
+## 08.10.2026 — der Lauf ist durch: **JA**
+
+`JURNODES-PRUEFEN.bat` an `X-100-2026`, mit dem berichtigten Prüfbogen und
+den freigegebenen Rechten. Alles antwortet.
+
+### Die E-Akte ist lesbar
+
+`POST /correspondence/search` → **Status 200, 26 Einträge**, eine Seite.
+Davon **22 `mail`** und **4 `note`**. Poststempel vom 30.07. bis 25.09.2026 —
+also innerhalb der Lebenszeit der Akte.
+
+**Drei Vermerke wurden wirklich geholt**, über
+`GET /record/note?id=…&record=…` mit beiden Pflichtparametern: 1589, 1590,
+1600, je `type=phonecall`, `contentType=html`, 31 / 71 / 388 Zeichen. Die
+Probe holt höchstens drei — zum Nachweis, nicht zum Auslesen.
+
+Beim Versuch mit einer Nummer, die kein Vermerk ist, sagt der Server
+**„Notiz nicht gefunden"** statt „Bitte Daten angeben". Auch das passt: Die
+Form war richtig, nur die Zahl nicht.
+
+### Die Dateiart hinter dem E-Mail-Download ist `.eml`
+
+Gemessen: Status 200, **8 753 880 Bytes**, `Content-Type:
+application/octet-stream`, `Content-Disposition: inline; filename="Mail.eml"`.
+Die Texterkennung liest `.eml` bereits (`services/extraktion.py`).
+
+Und: **`referenceMail` ist `mailIdentifier`.** Der Wert aus dem Verzeichnis
+wurde unverändert eingesetzt und hat funktioniert. Keine Ableitung mehr.
+
+### `correspondenceFolderId` — der Befund löst sich auf, und zwar zu unseren Lasten
+
+Die Nummer gehört in den Ordnerbaum der **Korrespondenz**. Abgefragt wurde sie
+gegen den Baum des **Dateisystems**. Beide führen eine Nummer 2871, und sie
+haben nichts miteinander zu tun.
+
+Der Beleg steht in diesem Lauf: Alle 26 Einträge der E-Akte nennen als
+`folderId` genau jene 2871, und ihre Poststempel liegen zwischen dem 30.07.
+und dem 25.09.2026. Die „Dateien aus 2022/23, älter als die Akte" lagen im
+falschen Baum.
+
+**Das ist derselbe Fehler wie am 02.10.2026, nur an einer zweiten Stelle.**
+Beim ersten Mal kostete er drei fremde Schriftstücke in einer Bausache; beim
+zweiten Mal eine Woche Arbeit an einer Frage an den Hersteller, die keine war.
+`tests/test_dokumentliste.py` hatte die Erklärung seit dem 05.10.2026 im
+Klartext stehen — in `config.py` stand sie nicht, und der Prüfbogen fragte
+weiter am falschen Pfad.
+
+### Gebaut
+
+* **Die E-Akte ist eingeschaltet.** `Einstellungen.korrespondenz = True` in
+  `jusperfect/config.py`, Vorgabe auch aus der Umgebung. `START-JURNODES.bat`
+  erklärt jetzt das Ausschalten statt das Einschalten. Damit stehen die
+  Vermerke als Dokumente in der Aktenliste.
+* **Der Prüfbogen fragt `correspondenceFolderId` nicht mehr am Dateipfad.**
+  Eine Prüfung hält fest, dass die Zeichenkette `feld="correspondenceFolderId"`
+  in der Quelle nicht wieder auftaucht.
+* `schnittstelle/ANFRAGE-HERSTELLER.md` ist auf **drei Kleinigkeiten**
+  geschrumpft: `isInbox`, der fehlende Schrägstrich, und ob es eine neuere
+  Fassung als 1.0.2 gibt.
+
+### Was als Nächstes ansteht
+
+**Der Inhalt der 22 E-Mails.** Alles dafür ist jetzt belegt: der Weg, die
+Nummer, die Dateiart. Zwei Dinge sind vorher zu entscheiden, und beide sind
+keine Programmierfragen:
+
+1. **Die Größe.** Eine einzige Mail wog 8,7 MB. 22 davon wären rund 190 MB je
+   Akte, dazu Texterkennung. Vorschlag: eine Obergrenze je Mail, darüber wird
+   der Eintrag mit Betreff und Datum gezeigt und der Inhalt erst auf Klick
+   geholt.
+2. **Was hineingehört.** Eine `.eml` trägt Anhänge, Signaturbilder und oft den
+   ganzen Verlauf doppelt. Ob der Anhang mit hineinsoll, ist eine Frage an die
+   Kanzlei, keine ans Programm.

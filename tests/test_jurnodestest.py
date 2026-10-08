@@ -1192,15 +1192,15 @@ def test_aus_dem_korrespondenzbaum_wird_nichts_geholt() -> None:
     mehr: Der Betrieb liest diesen Baum nicht.
     """
     quelle = Path("jusperfect/jurnodestest.py").read_text(encoding="utf-8")
-    stelle = quelle.index("korrespondenz = _ordner_der_akte")
-    bis = quelle.index("ordner = _ordner_der_akte", stelle)
-    abschnitt = quelle[stelle:bis]
 
-    assert "_herunterladen_proben(" not in abschnitt, \
-        "Aus dem Korrespondenzbaum darf keine Datei geholt werden."
-    assert "fremde" in abschnitt, "Und der Bericht muss sagen, warum nicht."
-    # Im Dateibaum bleibt die Probe - dort gehören die Dateien zur Akte.
-    assert "_herunterladen_proben(" in quelle[bis:bis + 1200], \
+    # Der Korrespondenzordner darf gar nicht mehr geholt werden - weder
+    # gelistet noch heruntergeladen. Seine Nummer gehört in den anderen Baum.
+    assert 'feld="correspondenceFolderId"' not in quelle, \
+        "Die Nummer wurde wieder am Dateipfad gefragt - das ist der falsche Baum."
+
+    # Im Dateibaum bleibt die Leseprobe - dort gehören die Dateien zur Akte.
+    stelle = quelle.index("ordner = _ordner_der_akte")
+    assert "_herunterladen_proben(" in quelle[stelle:stelle + 1200], \
         "Im Dateiordner ist die Leseprobe richtig und muss bleiben."
 
 

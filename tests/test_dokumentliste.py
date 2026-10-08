@@ -292,10 +292,18 @@ class DerKorrespondenzordnerBleibtDraussen(unittest.TestCase):
         self.assertNotIn("9", gefragt, "Der Korrespondenzordner wurde gelesen.")
         self.assertNotIn("Fremdes Schreiben.pdf", namen)
 
-    def test_die_einstellung_steht_von_haus_aus_auf_aus(self):
+    def test_die_einstellung_schaltet_die_eakte_ein_nicht_diesen_ordner(self):
+        """Seit dem 08.10.2026 steht sie auf **ein** — und meint den anderen Weg.
+
+        Das ist der Punkt, auf den es hier ankommt: Die Einstellung schaltet
+        `POST /correspondence/search` ein, den aktenbezogenen Weg des
+        Herstellers. Sie bringt den Ordner am Dateipfad **nicht** zurück. Der
+        Test darüber (`test_er_wird_von_sich_aus_nicht_gefragt`) prüft genau
+        das und bleibt stehen.
+        """
         from jusperfect.config import Einstellungen
 
-        self.assertFalse(Einstellungen.korrespondenz)
+        self.assertTrue(Einstellungen.korrespondenz)
 
     def test_und_wird_aus_der_umgebung_gelesen(self):
         from jusperfect.config import Einstellungen

@@ -172,12 +172,15 @@ REM Server und gibt dabei KEINEN Inhalt aus, nur Status und Laenge.
 REM Wie viele Eintraege das sind, steht im Dokumentfenster - damit
 REM nichts lautlos fehlt.
 REM
-REM SO SCHALTEN SIE SIE EIN:
-REM   1. JURNODES-PRUEFEN.bat laufen lassen, an einer Akte MIT Vermerken.
-REM   2. Ganz unten steht: "Kann die E-Akte eingeschaltet werden?"
-REM   3. Steht dort JA, das REM vor der naechsten Zeile entfernen.
+REM SEIT DEM 08.10.2026 IST SIE EIN - von Haus aus, ohne Eintrag.
 REM
-REM set JUSPERFECT_KORRESPONDENZ=ein
+REM Der Lauf vom 08.10.2026 an X-100-2026 hat die Bedingung erfuellt:
+REM "Kann die E-Akte eingeschaltet werden?" -> JA. 26 Eintraege, davon
+REM 4 Vermerke, drei davon mit Inhalt geholt.
+REM
+REM AUSSCHALTEN, falls noetig: das REM vor der naechsten Zeile entfernen.
+REM
+REM set JUSPERFECT_KORRESPONDENZ=aus
 
 REM --- Was nicht von selbst angehakt wird ------------------------------
 REM

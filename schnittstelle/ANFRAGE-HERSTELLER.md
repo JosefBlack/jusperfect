@@ -1,7 +1,9 @@
-# Was von jur|nodes noch fehlt — Stand 08.10.2026 (dritte Fassung)
+# Was von jur|nodes noch fehlt — Stand 08.10.2026, nach dem Lauf
 
-**Das Meiste ist beantwortet, und zwar aus der Beschreibung selbst.** Diese
-Datei nennt nur noch, was wirklich offen ist.
+**Fast alles ist beantwortet.** Der Lauf vom 08.10.2026 am Server der Kanzlei
+hat die letzten Fragen gemessen statt gefragt. Offen sind drei Kleinigkeiten;
+sie stehen unten. Die lange Liste darunter ist Gedächtnisstütze — sie sagt,
+was **nicht** mehr zu fragen ist.
 
 > **Berichtigung vom 08.10.2026.** Die Fassungen vom 06. und 07.10.2026
 > fragten nach Dingen, die in `schnittstelle/jurnodes-api-1.0.2.json` längst
@@ -90,54 +92,57 @@ erforderlich, weil alles in der E-Akte liegt.
 
 ## Was wirklich offen bleibt
 
-### 1. Welche Dateiart gibt `POST /mail/download` zurück?
+Nach dem Lauf vom 08.10.2026 am Server der Kanzlei ist es **sehr wenig**.
 
-**Nur noch bei der E-Mail offen** — bei beA und Post nicht mehr, siehe unten.
-
-Die Beschreibung sagt `application/octet-stream` und nicht, welches Format
-diese Bytes haben. Anders als bei beA und Post gibt es zur E-Mail **keinen
-zweiten Aufruf**, der Dateiname oder Endung nennen würde: `POST /mail/download`
-nimmt allein `{mailIdentifier}` und gibt Bytes zurück.
-
-> **Frage:** Ist das eine `.eml`, eine Outlook-`.msg`, ein PDF — oder je nach
-> Herkunft verschieden? Setzt der Server einen `Content-Disposition`-Namen?
-
-*Die Frage erledigt sich womöglich von selbst:* `JURNODES-PRUEFEN.bat` misst
-die Signatur der ersten Bytes, sobald das Recht steht — ohne Inhalt. Die
-Texterkennung liest `.eml`, `.msg` und PDF bereits.
-
-### 2. Wofür steht `Record.correspondenceFolderId`?
-
-Dreimal geprüft, dreimal derselbe Befund. Zuletzt am 07.10.2026: Die Akte ist
-am **30.07.2026** angelegt, die Ordner hinter ihrem `correspondenceFolderId`
-tragen Ablagen ab dem **15.12.2022** — fünf Ordner, siebzehn Dateien, alle
-älter als die Akte.
-
-> **Frage:** Benennt das Feld einen Ordner *dieser* Akte — dann wäre der Wert
-> falsch — oder etwas anderes, etwa einen gemeinsamen Ablagebereich?
-
-*Warum das zählt:* Eine Kanzlei darf Unterlagen eines Mandats nicht in einem
-anderen zeigen. Das Programm liest diesen Ordner seit dem 05.10.2026 nicht
-mehr und holt seit dem 07.10.2026 auch keine Datei mehr daraus.
-
-### 3. Was bedeutet `isInbox`?
+### 1. Was bedeutet `isInbox`?
 
 `CorrespondenceModel.isInbox` ist eine Zahl.
 
 > **Frage:** Heißt `1` „eingegangen" und `0` „ausgegangen"?
 
-Für eine Akte ist die Richtung eines Schreibens wesentlich.
+Für eine Akte ist die Richtung eines Schreibens wesentlich. Das ist die
+einzige Frage, die ein Lauf nicht beantworten kann, ohne den Inhalt eines
+Schreibens anzusehen — und das tut die Probe nicht.
 
-### 4. Ein fehlender Schrägstrich in der Beschreibung
+### 2. Ein fehlender Schrägstrich in der Beschreibung
 
 Bei einem von 85 Pfaden fehlt der führende `/`:
 `correspondence/get-by-reference`. Die übrigen 84 beginnen mit `/`.
 
 > **Frage:** Lautet der Pfad `/correspondence/get-by-reference`?
 
-### 5. Gibt es eine neuere Fassung als 1.0.2?
+### 3. Gibt es eine neuere Fassung als 1.0.2?
 
 Falls ja, bitte diese.
+
+---
+
+
+## Durch den Lauf vom 08.10.2026 beantwortet
+
+`POST /correspondence/search` an `X-100-2026`: **Status 200, 26 Einträge**
+(22 `mail`, 4 `note`), eine Seite, Poststempel vom 30.07. bis 25.09.2026.
+
+**Die Vermerke sind lesbar.** Drei wurden über
+`GET /record/note?id=…&record=…` geholt — mit beiden Pflichtparametern, mit
+Inhalt, `type=phonecall`, `contentType=html`.
+
+**Die Dateiart hinter `POST /mail/download` ist `.eml`.** Gemessen: Status
+200, 8 753 880 Bytes, `Content-Type: application/octet-stream`, und
+`Content-Disposition: inline; filename="Mail.eml"`. Die Texterkennung des
+Programms liest `.eml` bereits.
+
+**`referenceMail` ist `mailIdentifier`.** Der Wert aus dem
+Korrespondenzverzeichnis wurde unverändert in `/mail/download` eingesetzt und
+hat funktioniert. Keine Ableitung mehr, sondern eine Messung.
+
+**Wofür `correspondenceFolderId` steht — und es war unser Fehler.** Die
+Nummer gehört in den Ordnerbaum der **Korrespondenz** und wurde gegen den Baum
+des **Dateisystems** abgefragt. Beide Bäume führen eine Nummer 2871, und sie
+haben nichts miteinander zu tun. Der Lauf zeigt es: Alle 26 Einträge der
+E-Akte nennen als `folderId` genau jene 2871, und ihre Poststempel liegen
+innerhalb der Lebenszeit der Akte. Die „Dateien älter als die Akte" lagen im
+falschen Baum. **Dazu ist nichts zu fragen.**
 
 ---
 

@@ -2080,22 +2080,38 @@ def _ablauf(argv: list[str] | None = None) -> int:
             # wird gefragt, nicht geraten.
             _vermerke_suchen(client, endpunkte, kennung, argumente.akte or "")
 
-            # Der zweite Ordner der Akte: die Korrespondenz. Dort liegt,
-            # was die Kanzlei selbst geschrieben hat.
-            korrespondenz = _ordner_der_akte(client, endpunkte, kennung,
-                                             feld="correspondenceFolderId")
-            if korrespondenz:
-                _pruefen(client, "Korrespondenz (eigener Ordner)",
-                         endpunkte.ordner_inhalt,
-                         **{endpunkte.ordnerparameter: korrespondenz})
-                _ordner_aufteilen(client, endpunkte, korrespondenz)
-                # KEINE Leseprobe in diesem Baum - siehe
-                # _herunterladen_proben, Absatz vom 07.10.2026.
-                _sagen(" ", "     Korrespondenz: aus diesem Baum wird NICHTS")
-                _sagen(" ", "     geholt. Er traegt in jeder bisher geprueften")
-                _sagen(" ", "     Akte Dateien, die aelter sind als die Akte -")
-                _sagen(" ", "     also fremde. Eine Leseprobe daraus waere ein")
-                _sagen(" ", "     Blick in die Unterlagen eines anderen Mandanten.")
+            # Der Korrespondenzordner wird hier NICHT mehr abgefragt.
+            #
+            # **Aufgeloest am 08.10.2026.** Dreimal trug der Ordner hinter
+            # correspondenceFolderId Dateien, die aelter waren als die Akte,
+            # und dreimal wurde daraus geschlossen, das Feld zeige nicht auf
+            # diese Akte. Das Feld war die ganze Zeit richtig.
+            #
+            # jur|nodes fuehrt ZWEI getrennte Ordnerbaeume mit je eigenen
+            # Nummern. Die 2871 aus correspondenceFolderId wurde an
+            # /file-system/folder/content gefragt - das ist der Pfad des
+            # DATEIbaums. Er liefert den Datei-Ordner Nr. 2871, nicht den
+            # Korrespondenz-Ordner Nr. 2871. Beide gibt es, beide tragen
+            # dieselbe Zahl, und sie haben nichts miteinander zu tun.
+            #
+            # Derselbe Fehler wie am 02.10.2026, nur an einer zweiten Stelle.
+            # Beim ersten Mal kostete er drei fremde Schriftstuecke in einer
+            # Bausache; beim zweiten Mal eine Woche Arbeit an einer Frage an
+            # den Hersteller, die keine war.
+            #
+            # Der Beleg steht im Lauf vom 08.10.2026: Alle 26 Eintraege der
+            # E-Akte nennen als folderId genau jene 2871, und ihre
+            # Poststempel liegen zwischen dem 30.07. und dem 25.09.2026 -
+            # innerhalb der Lebenszeit der Akte.
+            #
+            # Die E-Akte wird ueber POST /correspondence/search gelesen. Der
+            # Weg nennt die Akte in der Anfrage und kann sie deshalb gar
+            # nicht verwechseln.
+            _sagen(" ", "")
+            _sagen("✓", "Der Korrespondenzordner wird nicht mehr am Dateipfad")
+            _sagen(" ", "gefragt. Seine Nummer gehoert in den Korrespondenzbaum;")
+            _sagen(" ", "dieselbe Zahl benennt im Dateibaum einen voellig anderen")
+            _sagen(" ", "Ordner. Die E-Akte steht oben, ueber /correspondence/search.")
             ordner = _ordner_der_akte(client, endpunkte, kennung)
             if ordner:
                 _pruefen(client, "Dokumente (Dateiordner)", endpunkte.ordner_inhalt,

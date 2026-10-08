@@ -246,13 +246,24 @@ class DerLesendePostAufrufBleibtDieAusnahme(unittest.TestCase):
         self.assertIsNone(seiten[0], "Die erste Anfrage geht ohne Seitenangabe.")
 
 
-class DieEinstellungStehtVonHausAusAufAus(unittest.TestCase):
-    """Bis ein Lauf am Server der Kanzlei sie bestätigt hat."""
+class DieEinstellungStehtSeitDemLaufAufEin(unittest.TestCase):
+    """Seit dem 08.10.2026 ein — weil ein Lauf am Server sie bestätigt hat.
+
+    Sie stand aus, bis die Frage „Kann die E-Akte eingeschaltet werden?"
+    gemessen beantwortet war. Der Lauf vom 08.10.2026 an `X-100-2026`
+    antwortet **JA**: `POST /correspondence/search` gibt 26 Einträge (22 mail,
+    4 note), und drei Vermerke wurden über
+    `GET /record/note?id=…&record=…` wirklich geholt — mit Inhalt,
+    `type=phonecall`, `contentType=html`.
+
+    Damit ist die Bedingung erfüllt, unter der sie eingeschaltet werden
+    sollte. Nicht früher, und nicht aus Ungeduld.
+    """
 
     def test_vorgabe(self):
         from jusperfect.config import Einstellungen
 
-        self.assertFalse(Einstellungen.korrespondenz)
+        self.assertTrue(Einstellungen.korrespondenz)
 
     def test_die_startdatei_erklaert_sie(self):
         from pathlib import Path

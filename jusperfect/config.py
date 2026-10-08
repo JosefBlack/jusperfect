@@ -238,31 +238,43 @@ class Einstellungen:
     modell_triage: str = ""
     modell_entwurf: str = ""
     modell_gedaechtnis: str = ""             # leer = modell_id_klein, dann modell_id
-    #: Wird der Korrespondenzordner einer Akte mitgelesen?
+    #: Wird die E-Akte (Korrespondenz) einer Akte mitgelesen?
     #:
-    #: **Seit dem 05.10.2026 aus, auf ausdrueckliche Anweisung der Kanzlei.**
+    #: **Seit dem 08.10.2026 ein - gemessen am Server der Kanzlei.**
     #:
-    #: Eingebaut war er am 25.09.2026 - aus der Kanzlei: "er muss auch die
-    #: Mails beruecksichtigen, die verfasst wurden." Am 02.10. fielen in einer
-    #: Bausache drei Schriftstuecke aus einer fremden Verkehrsunfallsache auf,
-    #: und drei Laeufe an drei Akten zeigten am 05.10. dasselbe Muster:
+    #: Der Lauf vom 08.10.2026 an X-100-2026 beantwortet, worauf gewartet
+    #: wurde: ``POST /correspondence/search`` gibt 26 Eintraege (22 mail,
+    #: 4 note), und drei Vermerke wurden ueber
+    #: ``GET /record/note?id=..&record=..`` wirklich geholt - mit Inhalt,
+    #: ``type=phonecall``, ``contentType=html``. Damit ist der Weg belegt und
+    #: nicht mehr vermutet.
+    #:
+    #: **Was als Befund vom 02.10.2026 im Weg stand, hat sich aufgeloest.**
+    #: Dreimal trug der Ordner hinter ``correspondenceFolderId`` Dateien, die
+    #: aelter waren als die Akte:
     #:
     #:   X-100-2026  angelegt 30.07.2026  Korrespondenzordner 2871, befuellt 2022/23
     #:   X-103-2026  angelegt 23.02.2026  Korrespondenzordner 2616, befuellt 2022/23
     #:   X-104-2023  angelegt 28.12.2023  Korrespondenzordner 1478, befuellt 2022/23
     #:
-    #: Der Dateiordner passt jedesmal zur Akte, der Korrespondenzordner nie.
-    #: Seine Nummer ist niedrig und alt, unabhaengig vom Alter der Akte.
-    #: Dreimal hintereinander ist das kein Versehen beim Anlegen: Das Feld
-    #: zeigt offenbar nicht auf die Korrespondenz DIESER Akte.
+    #: Das Feld war die ganze Zeit richtig. jur|nodes fuehrt **zwei getrennte
+    #: Ordnerbaeume mit je eigenen Nummern**, und 2871 wurde am Pfad des
+    #: FALSCHEN gelesen: ``/file-system/folder/content`` liefert den
+    #: Datei-Ordner Nr. 2871, nicht den Korrespondenz-Ordner Nr. 2871. Beide
+    #: gibt es, beide tragen dieselbe Zahl, und sie haben nichts miteinander
+    #: zu tun. Der Lauf vom 08.10.2026 zeigt es: Alle 26 Eintraege der E-Akte
+    #: nennen als ``folderId`` genau die 2871 aus ``correspondenceFolderId``,
+    #: und ihre Poststempel liegen zwischen dem 30.07. und dem 25.09.2026 -
+    #: innerhalb der Lebenszeit der Akte.
     #:
-    #: Solange der Hersteller nicht gesagt hat, worauf es zeigt, wird es nicht
-    #: gelesen. Fremde Schriftstuecke in einer Arbeitsakte sind teurer als
-    #: fehlende: Was fehlt, faellt auf; was zu viel ist, wird mitanalysiert.
+    #: Es war also derselbe Fehler wie am 02.10.2026, nur an einer zweiten
+    #: Stelle: eine Nummer am Pfad des anderen Baumes. Gelesen wird die E-Akte
+    #: jetzt ueber ``POST /correspondence/search``, also ueber den Weg, den
+    #: der Hersteller dafuer nennt - und dieser Weg nennt die Akte in der
+    #: Anfrage, kann sie also gar nicht verwechseln.
     #:
-    #: Zurueck geht es mit JUSPERFECT_KORRESPONDENZ=ein - aber erst, wenn die
-    #: Antwort da ist.
-    korrespondenz: bool = False
+    #: Aus geht es mit JUSPERFECT_KORRESPONDENZ=aus.
+    korrespondenz: bool = True
 
     #: Woerter im Titel, die ein Dokument NICHT vorwaehlen.
     #:
@@ -449,7 +461,7 @@ class Einstellungen:
             modell_triage=_modellkennung(env.get("JUSPERFECT_MODELL_TRIAGE", ""), _region),
             modell_entwurf=_modellkennung(env.get("JUSPERFECT_MODELL_ENTWURF", ""), _region),
             modell_gedaechtnis=_modellkennung(env.get("JUSPERFECT_MODELL_GEDAECHTNIS", ""), _region),
-            korrespondenz=env.get("JUSPERFECT_KORRESPONDENZ", "aus").strip().lower()
+            korrespondenz=env.get("JUSPERFECT_KORRESPONDENZ", "ein").strip().lower()
                           in ("ein", "an", "1", "ja", "true"),
             nicht_vorwaehlen=_woerter(env.get("JUSPERFECT_NICHT_VORWAEHLEN"),
                                       cls.nicht_vorwaehlen),
