@@ -1992,3 +1992,37 @@ Rechten nähme dieses Netz weg und ließe nur das Versprechen übrig — und der
 Oktober hat gezeigt, was Versprechen wert sind: drei Fehler, die als
 Herstellerproblem aussahen und keines waren. Die lesenden Rechte oben
 genügen; die schreibenden und die `:postbox`-Rechte bitte zurücknehmen.
+
+### Nachtrag 08.10.2026, fünfter — die tatsächlich gesetzten Rechte, geprüft
+
+Die Kanzlei hat die Liste gezeigt. Geprüft gegen
+`schnittstelle/jurnodes-api-1.0.2.json`, Aufruf für Aufruf.
+
+**Alle sieben Rechte, die das Programm heute braucht, sind gesetzt:**
+`search:records`, `read:records`, `search:relation`, `search:todo`,
+`read:folder`, `download:file`, `search:correspondence`.
+
+Dazu `download:post`, `read:post` und `download:mail:record` — die werden für
+den Inhalt von Post und E-Mail gebraucht, sobald er gebaut ist. Richtig ist
+dabei besonders `download:mail:record`: die Variante für die **Akte**, nicht
+die für das Postfach.
+
+**Zwei Rechte sind schreibend und gehören zurückgenommen:**
+
+| Recht | Was es öffnet |
+|---|---|
+| `generate:documents` | `POST /documents/generate` — „Erzeugt ein Dokument (Beta)" |
+| `update:correspondence:folder` | `POST /correspondence/folder` — „Unterordner Erzeugen oder Bearbeiten" |
+
+Beide schreiben in die Akte. Das Programm ruft keinen von beiden auf und wird
+es nicht tun. Solange sie gesetzt sind, ist „jusperfect kann nichts
+verändern" wieder nur eine Zusage statt einer Eigenschaft des Schlüssels.
+
+**Ohne Wirkung, weil ungenutzt:** `read:file`, `read:relation`, `read:todo`,
+`read:correspondence`, `read:correspondence:folder`, `read:object`. Alle
+lesend; sie schaden nicht, werden aber auch nicht gebraucht. `search:object`
+kommt in 1.0.2 an keinem einzigen Aufruf vor.
+
+`/file-system/add-file` steht zwar in der Endpunktliste des Programms, wird
+aber nie gerufen — und das zugehörige Recht `write:file` ist nicht gesetzt.
+Richtig so.
