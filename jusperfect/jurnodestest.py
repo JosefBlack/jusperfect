@@ -751,6 +751,88 @@ def _ohne_trenner(text: str) -> str:
     return re.sub(r"[^a-z0-9]", "", text.lower())
 
 
+#: Welches Recht ein Aufruf braucht - aus der Beschreibung gelesen.
+#:
+#: Der Hersteller nennt es zu JEDEM der 94 Aufrufe, aber im Fliesstext des
+#: Feldes "description", hinter der Erlaeuterung:
+#:
+#:   "Listet alle Korrespondenzen (derzeit einer Akte) auf.
+#:    Benoetigte Rechte: search:correspondence"
+#:
+#: Dort stand es vier Wochen lang, und dort wurde nicht gesucht. Der Lauf vom
+#: 07.10.2026 bekam auf genau diesen Aufruf ein 401, und die Beschreibung
+#: sagt zu 401: "Authentifizierung ungueltig". Die Antwort lag die ganze Zeit
+#: in der Datei im Programmordner.
+#:
+#: Deshalb wird sie jetzt ausgelesen und mitgedruckt: Ein 401 soll nicht mehr
+#: nach einem Raetsel aussehen, sondern das Recht beim Namen nennen.
+_RECHTE: dict[tuple[str, str], str] = {}
+
+_RECHTEMUSTER = re.compile(r"Ben[oö]tigte\s+Rechte:\s*(.+)", re.IGNORECASE)
+
+
+def recht_fuer(pfad: str, art: str = "post") -> str:
+    """Das Recht, das die Beschreibung zu diesem Aufruf nennt - oder "".
+
+    Der Pfad wird auch ohne fuehrenden Schraegstrich gefunden: Bei einem von
+    85 Pfaden fehlt er in der Beschreibung des Herstellers selbst
+    (correspondence/get-by-reference).
+    """
+    for schluessel in ((pfad, art.lower()), (pfad.lstrip("/"), art.lower())):
+        if schluessel in _RECHTE:
+            return _RECHTE[schluessel]
+    return ""
+
+
+def _rechte_sammeln(pfade: Mapping) -> None:
+    """Die Rechte aus den Beschreibungstexten herausloesen."""
+    _RECHTE.clear()
+    for pfad, eintrag in pfade.items():
+        if not isinstance(eintrag, Mapping):
+            continue
+        for art, inhalt in eintrag.items():
+            if not isinstance(inhalt, Mapping):
+                continue
+            # Nur "description". Haengte man "summary" an, stuende hinter
+            # dem Recht noch die Ueberschrift des Aufrufs ("Korrespondenzen
+            # Suchen") und der Verwalter suchte in jur|nodes nach einem
+            # Rechtenamen, den es nicht gibt.
+            treffer = _RECHTEMUSTER.search(str(inhalt.get("description") or ""))
+            if not treffer:
+                treffer = _RECHTEMUSTER.search(str(inhalt.get("summary") or ""))
+            if treffer:
+                # Nur der erste Satz - dahinter steht oft noch Erlaeuterung.
+                recht = treffer.group(1).strip().split(". ")[0].strip()
+                _RECHTE[(str(pfad), str(art).lower())] = recht
+
+
+def _rechte_zeigen(endpunkte: Any) -> None:
+    """Welches Recht jeder Aufruf braucht, den diese Probe benutzt.
+
+    Damit ist ein 401 im Bericht kein Raetsel mehr, sondern eine Zeile mit
+    einem Namen, den der Verwalter in jur|nodes suchen kann.
+    """
+    gebraucht = [
+        ("GET", getattr(endpunkte, "akten_suche", "/record/search")),
+        ("GET", getattr(endpunkte, "akte", "/record")),
+        ("GET", getattr(endpunkte, "vermerke", "/record/note")),
+        ("POST", getattr(endpunkte, "korrespondenz_suche", "/correspondence/search")),
+        ("GET", getattr(endpunkte, "ordner_inhalt", "/file-system/folder/content")),
+        ("GET", getattr(endpunkte, "datei_download", "/file-system/file/download")),
+        ("GET", getattr(endpunkte, "fristen", "/todo/search")),
+    ]
+    zeilen = [(art, pfad, recht_fuer(pfad, art)) for art, pfad in gebraucht]
+    if not any(recht for _, _, recht in zeilen):
+        return
+    print()
+    _sagen("✓", "Welches Recht jeder benutzte Aufruf braucht (aus der")
+    _sagen(" ", "Beschreibung, Feld „description“):")
+    for art, pfad, recht in zeilen:
+        _sagen(" ", f"     {art:4} {pfad:38} {recht or '(nicht genannt)'}")
+    _sagen(" ", "Weist der Server einen davon mit 401 ab, waehrend die")
+    _sagen(" ", "uebrigen antworten, dann fehlt genau dieses Recht.")
+
+
 def _beschreibung_auswerten(daten: Mapping, endpunkte: Any) -> None:
     """Was in einer vorliegenden OpenAPI-Beschreibung steht.
 
@@ -763,6 +845,7 @@ def _beschreibung_auswerten(daten: Mapping, endpunkte: Any) -> None:
         _sagen("!", "Die Datei hat keinen Abschnitt „paths“.")
         return
 
+    _rechte_sammeln(pfade)
     namen = sorted(str(name) for name in pfade)
     _sagen("✓", f"{len(namen)} Pfade stehen darin. Alle, der Reihe nach:")
     for name in namen:
@@ -782,6 +865,7 @@ def _beschreibung_auswerten(daten: Mapping, endpunkte: Any) -> None:
         for name in treffer:
             print(f"        {name}")
         _sagen(" ", "Diese Pfade sind der naechste Schritt - mit der Akte gefragt.")
+        _rechte_zeigen(endpunkte)
     else:
         _sagen("!", "Kein Pfad traegt eines dieser Woerter im Namen:")
         _sagen(" ", "  " + ", ".join(_EAKTE_WOERTER))
@@ -1098,19 +1182,22 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
     if antwort.status_code >= 400:
         _sagen("✗", f"Korrespondenz: Status {antwort.status_code}")
         _wortlaut(antwort)
-        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code)
+        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code,
+                      pfad=endpunkte.korrespondenz_suche)
         return
     try:
         daten = antwort.json()
     except ValueError:
         _sagen("!", "Korrespondenz: keine JSON-Antwort")
-        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code)
+        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code,
+                      pfad=endpunkte.korrespondenz_suche)
         return
 
     eintraege = daten.get("elements") if isinstance(daten, Mapping) else None
     if not isinstance(eintraege, list):
         _sagen("!", "Korrespondenz: keine Liste „elements“ in der Antwort.")
-        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code)
+        _eakte_urteil(0, 0, 0, abweisung=antwort.status_code,
+                      pfad=endpunkte.korrespondenz_suche)
         return
     gesamt = daten.get("amountTotal")
     seiten = daten.get("pagesTotal")
@@ -1221,7 +1308,7 @@ def _download_messen(client: Any, eintraege: list) -> None:
 
 
 def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int,
-                  abweisung: int | None = None) -> None:
+                  abweisung: int | None = None, pfad: str = "") -> None:
     """Der Satz, auf den es ankommt: Kann die E-Akte eingeschaltet werden?
 
     Ein Pruefbogen, der zwanzig Zeilen Befund ausgibt und die Frage nicht
@@ -1240,16 +1327,22 @@ def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int,
     _sagen(" ", "--- Kann die E-Akte eingeschaltet werden? ---")
     if abweisung is not None:
         if abweisung in (401, 403):
+            recht = recht_fuer(pfad or "", "post")
             _sagen("✗", f"NEIN - noch nicht. Der Server weist das Verzeichnis "
                         f"mit Status {abweisung} ab, waehrend er auf jeden "
                         f"anderen Pfad in diesem Lauf geantwortet hat.")
             _sagen(" ", "   Der Zugang als solcher steht also; abgewiesen wird")
-            _sagen(" ", "   dieser eine Pfad. Das liest sich wie ein fehlendes")
-            _sagen(" ", "   Recht am Schluessel - sicher sagen kann es nur der")
-            _sagen(" ", "   Hersteller. Die Frage dafuer steht in")
-            _sagen(" ", "   schnittstelle/ANFRAGE-HERSTELLER.md.")
-            _sagen(" ", "   Am Programm ist dafuer nichts zu tun: Sobald das Recht")
-            _sagen(" ", "   steht, genuegt dieser Lauf noch einmal.")
+            _sagen(" ", "   dieser eine Pfad - es fehlt ein Recht am Schluessel.")
+            if recht:
+                _sagen(" ", "")
+                _sagen("✓", f"   Die Beschreibung nennt es: {recht}")
+                _sagen(" ", "   In jur|nodes dem Schnittstellenbenutzer genau")
+                _sagen(" ", "   dieses Recht geben. Danach diesen Lauf noch einmal.")
+            else:
+                _sagen(" ", "   Welches, sagt die Beschreibung zu diesem Pfad -")
+                _sagen(" ", "   im Feld „description“, hinter „Benoetigte Rechte:“.")
+            _sagen(" ", "   Am Programm ist dafuer nichts zu tun.")
+            _sagen(" ", "   Alles Weitere: schnittstelle/ANFRAGE-HERSTELLER.md")
             return
         if abweisung == 404:
             _sagen("✗", "NEIN. Diese Einrichtung kennt den Pfad nicht (404), "

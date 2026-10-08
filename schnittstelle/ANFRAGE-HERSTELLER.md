@@ -1,168 +1,155 @@
-# Was von jur|nodes noch fehlt — Stand 07.10.2026
+# Was von jur|nodes noch fehlt — Stand 08.10.2026
 
-Diese Datei ist zum **Weiterleiten** gedacht: an jur|nodes, oder als Suchliste
-für eine neuere Fassung der Schnittstellenbeschreibung. Sie nennt nur, was
-wirklich offen ist — alles andere steht in
-`schnittstelle/jurnodes-api-1.0.2.json` und ist eingebaut.
+**Das Meiste ist beantwortet, und zwar aus der Beschreibung selbst.** Diese
+Datei nennt nur noch, was wirklich offen ist.
 
-> **Was die Beschreibung 1.0.2 bereits beantwortet hat**, und zwar vollständig:
-> die E-Akte heißt dort *Korrespondenz* (`POST /correspondence/search` mit
-> `recordIdentifier`), die Vermerke sind Einträge vom Typ `note` und werden mit
-> `GET /record/note?id=…&record=…` gelesen — mit **beiden** Pflichtparametern.
-> Daran war die Suche vier Wochen gescheitert. **Dafür ist nichts mehr zu
-> fragen.**
-
----
-
-## Vorrangig: Status 401 auf `POST /correspondence/search`
-
-**Gemessen am 07.10.2026** am Server der Kanzlei, mit dem Benutzer `user_2`.
-Im selben Lauf, mit demselben Zugang, antworteten `GET /record/search`,
-`GET /record`, `GET /relation/search`, `GET /todo/search`,
-`GET /file-system/folder/content` und `GET /file-system/file/download`
-jeweils mit **Status 200**. Allein das Korrespondenzverzeichnis wurde
-abgewiesen:
-
-```
-POST /correspondence/search   {"recordIdentifier": "…", "page": 1}
-→ Status 401, Antwortkörper: {}
-```
-
-Der Zugang als solcher steht also. Abgewiesen wird dieser eine Pfad, und der
-Antwortkörper nennt keinen Grund.
-
-> **Frage:** Verlangt `POST /correspondence/search` ein eigenes Recht am
-> Schnittstellenbenutzer — und wenn ja, wie heißt es und wo wird es gesetzt?
-> Oder verlangt der Pfad eine andere Anmeldung als die übrigen?
-
-*Warum das zählt:* Das Korrespondenzverzeichnis ist der **einzige**
-beschriebene Weg zu den Vermerken einer Akte. Es liefert zu jedem Eintrag die
-Nummer in `referenceNote`, und erst mit ihr ist `GET /record/note` zu rufen.
-Solange der Pfad 401 antwortet, bleibt die E-Akte abgeschaltet — nicht weil
-etwas fehlt, sondern weil der Server nicht antwortet.
-
-*Was wir selbst tun:* Nichts weiter. Es ist am Programm nichts zu ändern;
-sobald der Pfad antwortet, genügt ein weiterer Lauf von
-`JURNODES-PRUEFEN.bat`.
+> **Berichtigung vom 08.10.2026.** Die Fassungen vom 06. und 07.10.2026
+> fragten nach Dingen, die in `schnittstelle/jurnodes-api-1.0.2.json` längst
+> stehen. Der Grund: Die Beschreibung nennt zu **jedem** der 94 Aufrufe das
+> benötigte Recht — aber im Fließtext des Feldes `description`, hinter der
+> Erläuterung, nicht als eigenes Feld. Dort wurde nicht gesucht. Die Fragen
+> 2 und 3 der alten Fassung waren damit überflüssig; sie stehen unten unter
+> „Was sich erledigt hat", damit niemand sie wieder stellt.
 
 ---
 
-## Offen: wofür steht `correspondenceFolderId`?
+## Das ist keine Frage an den Hersteller, sondern eine Aufgabe
 
-**Dreimal geprüft, dreimal derselbe Befund.** Zuletzt am 07.10.2026: Die
-geprüfte Akte wurde am **30.07.2026** angelegt. Die Ordner hinter ihrem
-`correspondenceFolderId` tragen Ablagen ab dem **15.12.2022** — fünf Ordner,
-siebzehn Dateien, alle älter als die Akte.
+### Dem Schnittstellenbenutzer fehlt ein Recht: `search:correspondence`
 
-Eine Datei kann nicht in eine Akte gelegt worden sein, die es noch nicht gab.
-Der Ordner hinter diesem Feld gehört also nicht dieser Akte.
+Die Beschreibung sagt es wörtlich:
 
-> **Frage:** Was benennt `Record.correspondenceFolderId`? Einen Ordner der
-> Akte — dann wäre der zurückgegebene Wert falsch — oder etwas anderes, etwa
-> einen gemeinsamen Ablagebereich oder eine Vorlage?
+> `POST /correspondence/search` — *„Listet alle Korrespondenzen (derzeit einer
+> Akte) auf. **Benötigte Rechte: search:correspondence**"*
 
-*Warum das zählt:* Eine Kanzlei darf Unterlagen eines Mandats nicht in einem
-anderen zeigen. Das Programm liest diesen Ordner seit dem 05.10.2026 **nicht
-mehr**; die Prüfung listet ihn nur noch und holt seit dem 07.10.2026 auch
-keine Datei mehr daraus. Die Frage bleibt, weil eine Antwort darauf eine
-Vermutung durch eine Auskunft ersetzt.
+und zu Status 401: *„Authentifizierung ungültig"*.
+
+Der Lauf vom 07.10.2026 passt genau darauf. Was mit demselben Zugang
+**funktioniert** hat, und welches Recht dahintersteht:
+
+| Aufruf | Benötigtes Recht | Ergebnis |
+|---|---|---|
+| `GET /record/search` | `search:records` | 200 |
+| `GET /record` | `read:records` | 200 |
+| `GET /relation/search` | `search:relation` | 200 |
+| `GET /todo/search` | `search:todo` | 200 |
+| `GET /file-system/folder/content` | `read:folder` | 200 |
+| `GET /file-system/file/download` | `download:file` | 200 |
+| **`POST /correspondence/search`** | **`search:correspondence`** | **401** |
+
+Sechs Rechte sind gesetzt, eines fehlt — und genau dessen Aufruf wird
+abgewiesen. Das ist kein Zufall und keine Vermutung mehr.
+
+> **Zu tun:** In jur|nodes dem Schnittstellenbenutzer `user_2` das Recht
+> **`search:correspondence`** geben. Danach genügt ein weiterer Lauf von
+> `JURNODES-PRUEFEN.bat`.
+
+### Die Vermerke selbst brauchen kein weiteres Recht
+
+`GET /record/note` verlangt `read:records` — dasselbe Recht wie `GET /record`,
+und das antwortet bereits mit 200. Sobald die Liste da ist, sind die Vermerke
+lesbar.
+
+### Später, für den Inhalt von Mail, beA und Post
+
+Der Hersteller trennt die Rechte sauber nach **Postfach** und **Akte**. Für
+jusperfect wird ausschließlich die Akte gebraucht, nie ein Postfach:
+
+| Zweck | Benötigtes Recht | **Nicht** nötig |
+|---|---|---|
+| E-Mail aus der Akte | `download:mail:record` | ~~`download:mail:postbox`~~ |
+| beA-Nachricht aus der Akte | `read:bea:record`, `download:bea:record` | ~~`:postbox`~~ |
+| Post | `read:post`, `download:post` | — |
+
+Das deckt sich mit der Vorgabe der Kanzlei vom 07.10.2026: kein Zugriff auf
+E-Mail-Postfach und beA-Postfach. Die Rechte mit `:postbox` bitte **nicht**
+setzen.
 
 ---
 
-## Ein Schreibfehler in der Beschreibung selbst
+## Was wirklich offen bleibt
 
-In `jurnodes-api-1.0.2.json` fehlt bei **einem** der 85 Pfade der führende
-Schrägstrich:
+### 1. Welche Dateiart gibt `POST /mail/download` zurück?
 
-```
-correspondence/get-by-reference      POST
-```
-
-Alle übrigen 84 beginnen mit `/`.
-
-> **Frage:** Lautet der Pfad `/correspondence/get-by-reference`? Und liefert
-> er zu einem `referenceMail`, `referenceBea` oder `referencePost` den
-> zugehörigen Eintrag? Dann beantwortet er womöglich die Fragen 2 und 3 unten
-> von selbst.
-
----
-
-## Offen: der Inhalt von Mail, beA und Post
-
-Die Korrespondenz einer Akte führt neun Arten (`mail`, `bea`, `post`, `fax`,
-`webnodes`, `sms`, `eda`, `note`, `file`). Übernommen werden heute die
-**Vermerke**; die übrigen stehen in der Liste der Akte **nicht**, weil zwei
-Angaben fehlen. Beide sind klein.
-
-### 1. Welche Dateiart gibt der Download zurück?
-
-`POST /mail/download` mit `{"mailIdentifier": "…"}` liefert laut Beschreibung
-`application/octet-stream`. Welches **Format** diese Bytes haben, steht nicht
-dabei.
+Die Beschreibung sagt `application/octet-stream` und nicht, welches Format
+diese Bytes haben.
 
 > **Frage:** Ist das eine `.eml`, eine Outlook-`.msg`, ein PDF — oder je nach
-> Herkunft verschieden? Setzt der Server einen `Content-Disposition`-Dateinamen?
+> Herkunft verschieden? Setzt der Server einen `Content-Disposition`-Namen?
 
-*Warum das zählt:* Die Texterkennung des Programms liest `.eml`, `.msg` und PDF
-bereits. Sie muss nur wissen, welches davon vorliegt.
+*Die Frage erledigt sich womöglich von selbst:* `JURNODES-PRUEFEN.bat` misst
+die Signatur der ersten Bytes, sobald das Recht steht — ohne Inhalt. Die
+Texterkennung liest `.eml`, `.msg` und PDF bereits.
 
-*Was wir selbst tun:* `JURNODES-PRUEFEN.bat` misst es inzwischen am Server und
-nennt Status, Länge und die Signatur der ersten Bytes — **ohne Inhalt**.
-Bringt der Lauf eine klare Antwort, erübrigt sich diese Frage.
+### 2. Wofür steht `Record.correspondenceFolderId`?
 
-### 2. Woher kommt die zweite Pflichtnummer bei beA und Post?
+Dreimal geprüft, dreimal derselbe Befund. Zuletzt am 07.10.2026: Die Akte ist
+am **30.07.2026** angelegt, die Ordner hinter ihrem `correspondenceFolderId`
+tragen Ablagen ab dem **15.12.2022** — fünf Ordner, siebzehn Dateien, alle
+älter als die Akte.
 
-| Aufruf | Pflichtangaben | Offen |
-|---|---|---|
-| `GET /bea/download` | `beaIdentifier`, **`attachmentId`** | Welcher Aufruf liefert `attachmentId`? |
-| `POST /post/download` | `correspondenceIdentifier`, `postId`, **`postFileUniqueKey`** | Kommt `postFileUniqueKey` aus `POST /post/get-files`? |
+> **Frage:** Benennt das Feld einen Ordner *dieser* Akte — dann wäre der Wert
+> falsch — oder etwas anderes, etwa einen gemeinsamen Ablagebereich?
 
-Aus dem Korrespondenzverzeichnis kommen `referenceBea` und `referencePost` —
-jeweils **eine** Nummer. Die zweite ist nicht erkennbar abgeleitet.
+*Warum das zählt:* Eine Kanzlei darf Unterlagen eines Mandats nicht in einem
+anderen zeigen. Das Programm liest diesen Ordner seit dem 05.10.2026 nicht
+mehr und holt seit dem 07.10.2026 auch keine Datei mehr daraus.
 
-> **Frage:** Welcher Aufruf liefert zu einem Korrespondenzeintrag die Liste
-> seiner Anhänge, und mit welchen Feldern?
+### 3. Was bedeutet `isInbox`?
 
-### 3. Ist `referenceMail` dasselbe wie `mailIdentifier`?
+`CorrespondenceModel.isInbox` ist eine Zahl.
 
-Das Verzeichnis nennt `referenceMail`, der Download verlangt `mailIdentifier`.
-Dass beides dasselbe ist, liegt nahe und steht nirgends.
+> **Frage:** Heißt `1` „eingegangen" und `0` „ausgegangen"?
 
-> **Frage:** Ist `CorrespondenceModel.referenceMail` der Wert, der in
-> `mailIdentifier` gehört?
+Für eine Akte ist die Richtung eines Schreibens wesentlich.
+
+### 4. Ein fehlender Schrägstrich in der Beschreibung
+
+Bei einem von 85 Pfaden fehlt der führende `/`:
+`correspondence/get-by-reference`. Die übrigen 84 beginnen mit `/`.
+
+> **Frage:** Lautet der Pfad `/correspondence/get-by-reference`?
+
+### 5. Gibt es eine neuere Fassung als 1.0.2?
+
+Falls ja, bitte diese.
 
 ---
 
-## Offen: zwei kleinere Punkte
+## Was sich erledigt hat — bitte nicht wieder fragen
 
-* **`isInbox`** ist eine Zahl. Heißt `1` „eingegangen" und `0` „ausgegangen"?
-  Für die Akte ist die Richtung eines Schreibens wesentlich.
-* **Gibt es eine neuere Fassung der Beschreibung als 1.0.2?** Falls ja, bitte
-  diese — sie beantwortet die Fragen oben womöglich von selbst.
+**Woher `attachmentId` beim beA kommt.** Aus `GET /bea?beaIdentifier=…`:
+Die Antwort `BeaMessage` führt `attachments`, eine Liste von
+`BeaMessageAttachment` mit dem Feld `id`.
 
----
+**Woher `postFileUniqueKey` bei der Post kommt.** Aus
+`POST /post/get-files` mit `{correspondenceIdentifier, postId}`: Die Antwort
+ist eine Liste von `PostFileModel` mit den Feldern `uniqueKey`, `postId`,
+`name`, `extension`, `size`.
 
-## Was nicht gefragt wird, und warum
+**Ob `referenceMail` dasselbe ist wie `mailIdentifier`.** Die Beschreibung
+führt `POST correspondence/get-by-reference` mit je einem Feld pro
+Verweisart — `mailIdentifier`, `beaIdentifier`, `postId`, `noteId` … —, und
+die Typen stimmen Feld für Feld mit den `reference…`-Feldern des
+Korrespondenzeintrags überein. Für `referenceNote` ist es bereits gemessen.
+Nachgemessen wird es trotzdem, sobald das Recht steht; geraten wird nicht.
+
+**Über welchen Pfad die E-Akte zu erreichen ist.**
+`POST /correspondence/search` mit `recordIdentifier`. Steht seit 1.0.2 fest.
 
 **Zum Befund vom 02.10.2026** — drei Schriftstücke einer fremden Akte in einer
-Bausache — ist **nichts zu fragen.** Es war ein Fehler im eigenen Programm:
-jur|nodes führt zwei getrennte Ordnerbäume mit je eigenen Nummern, und die
-Nummer des einen wurde am Pfad des anderen abgefragt. Eine frühere Fassung
-dieser Anfrage hätte dem Hersteller einen Fehler vorgehalten, den es nicht
-gibt; sie wurde zurückgezogen.
+Bausache — ist nichts zu fragen. Es war ein Fehler im eigenen Programm: zwei
+getrennte Ordnerbäume mit je eigenen Nummern, und die Nummer des einen wurde
+am Pfad des anderen abgefragt.
 
 ---
 
 ## Was beizulegen ist
 
-Wenn diese Anfrage hinausgeht:
-
 1. **Nichts aus einer Akte.** Keine Aktenkennung, kein Betreff, kein
    Dateiname — die Fragen oben brauchen nichts davon.
-2. Die **Ausgabe von `JURNODES-PRUEFEN.bat`** darf mit: Sie enthält
-   Feldnamen, Anzahlen, Statuswerte und Längen, aber keinen Akteninhalt. Eine
-   fremde Aktenkennung erscheint darin nur maskiert.
-   *Vor dem Abschicken ein Blick hinein* — der Wortlaut einer Abweisung kommt
-   vom Server, nicht vom Programm, und könnte im Einzelfall ein Stück der
-   Anfrage zurückgeben.
-3. Die **Fassungsnummer**, auf die sich die Fragen beziehen: **1.0.2**.
+2. Die **Ausgabe von `JURNODES-PRUEFEN.bat`** darf mit: Feldnamen, Anzahlen,
+   Statuswerte, Längen, kein Akteninhalt; eine fremde Aktenkennung nur
+   maskiert. Vor dem Abschicken ein Blick hinein — der Wortlaut einer
+   Abweisung kommt vom Server.
+3. Die **Fassungsnummer**: **1.0.2**.

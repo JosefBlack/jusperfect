@@ -1822,3 +1822,70 @@ In `jurnodes-api-1.0.2.json` fehlt bei einem von 85 Pfaden der führende
 Schrägstrich: `correspondence/get-by-reference`. Die übrigen 84 beginnen mit
 `/`. Als Frage in `ANFRAGE-HERSTELLER.md` aufgenommen — der Pfad könnte
 zugleich die Fragen zu `referenceMail` beantworten.
+
+---
+
+## Nachtrag 08.10.2026 — der Punkt lag in der Datei, die wir hatten
+
+Herr Dortschy hat die vollständige Herstellerdokumentation vor sich und
+gefragt, wo der Punkt liegen könnte. Er liegt in
+`schnittstelle/jurnodes-api-1.0.2.json` — seit dem 05.10.2026 im
+Programmordner.
+
+**Der Hersteller nennt zu jedem der 94 Aufrufe das benötigte Recht.** Aber im
+Fließtext des Feldes `description`, hinter der Erläuterung:
+
+> `POST /correspondence/search` — *„Listet alle Korrespondenzen (derzeit einer
+> Akte) auf. **Benötigte Rechte: search:correspondence**"*
+
+Gesucht wurde an den Feldnamen, am Antwortschema, an den Parametern. Nicht in
+den Sätzen. Vier Wochen lang.
+
+### Was damit feststeht
+
+| Aufruf | Recht | Lauf 07.10. |
+|---|---|---|
+| `GET /record/search` | `search:records` | 200 |
+| `GET /record` | `read:records` | 200 |
+| `GET /relation/search` | `search:relation` | 200 |
+| `GET /todo/search` | `search:todo` | 200 |
+| `GET /file-system/folder/content` | `read:folder` | 200 |
+| `GET /file-system/file/download` | `download:file` | 200 |
+| **`POST /correspondence/search`** | **`search:correspondence`** | **401** |
+
+Sechs Rechte gesetzt, eines fehlt — und genau dessen Aufruf wird abgewiesen.
+Die Beschreibung sagt zu 401 ausdrücklich: *„Authentifizierung ungültig."*
+
+**`GET /record/note` verlangt nur `read:records`** — dasselbe Recht wie
+`GET /record`, das bereits antwortet. Die Vermerke sind also lesbar, sobald
+die Liste da ist. Es fehlt ein einziges Recht.
+
+### Zwei offene Fragen haben sich erledigt
+
+* **`attachmentId` beim beA** kommt aus `GET /bea?beaIdentifier=…`: Die
+  Antwort `BeaMessage` führt `attachments`, eine Liste von
+  `BeaMessageAttachment` mit `id`.
+* **`postFileUniqueKey` bei der Post** kommt aus `POST /post/get-files` mit
+  `{correspondenceIdentifier, postId}`: eine Liste von `PostFileModel` mit
+  `uniqueKey`, `postId`, `name`, `extension`, `size`.
+
+Beides stand ebenfalls in der Datei.
+
+### Die Rechte für später — und welche ausdrücklich nicht
+
+Der Hersteller trennt die Rechte nach **Postfach** und **Akte**. Das deckt
+sich genau mit der Vorgabe vom 07.10.2026:
+
+| Zweck | Recht | Nicht setzen |
+|---|---|---|
+| E-Mail aus der Akte | `download:mail:record` | `download:mail:postbox` |
+| beA aus der Akte | `read:bea:record`, `download:bea:record` | `…:postbox` |
+| Post | `read:post`, `download:post` | — |
+
+### Gebaut
+
+Die Probe liest die Rechte jetzt selbst aus der Beschreibung aus
+(`_rechte_sammeln`, `recht_fuer`). Sie druckt zu jedem benutzten Aufruf das
+Recht, und bei einem 401 nennt das Urteil es beim Namen statt „das liest sich
+wie ein fehlendes Recht". Zwei Prüfungen messen das gegen die **echte**
+Beschreibungsdatei, nicht gegen einen Nachbau.

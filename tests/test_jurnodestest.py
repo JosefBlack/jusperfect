@@ -1202,3 +1202,68 @@ def test_aus_dem_korrespondenzbaum_wird_nichts_geholt() -> None:
     # Im Dateibaum bleibt die Probe - dort gehören die Dateien zur Akte.
     assert "_herunterladen_proben(" in quelle[bis:bis + 1200], \
         "Im Dateiordner ist die Leseprobe richtig und muss bleiben."
+
+
+def test_das_fehlende_recht_steht_in_der_beschreibung(capsys) -> None:
+    """Ein 401 ist kein Rätsel — die Beschreibung nennt das Recht beim Namen.
+
+    **Vier Wochen lang übersehen.** Der Hersteller nennt zu jedem der 94
+    Aufrufe das benötigte Recht, aber im Fließtext des Feldes `description`,
+    hinter der Erläuterung:
+
+        "Listet alle Korrespondenzen (derzeit einer Akte) auf.
+         Benötigte Rechte: search:correspondence"
+
+    Der Lauf vom 07.10.2026 bekam auf genau diesen Aufruf ein 401, und die
+    Beschreibung sagt zu 401: „Authentifizierung ungültig". Die Antwort lag
+    die ganze Zeit in der Datei im Programmordner — gesucht wurde an den
+    Feldnamen, nicht in den Sätzen.
+
+    Deshalb wird sie jetzt ausgelesen. Geprüft wird gegen die **echte** Datei,
+    nicht gegen einen Nachbau: Ein Nachbau könnte die Form bestätigen, die ich
+    erwarte, statt der, die der Hersteller liefert.
+    """
+    p = _probe()
+    daten = json.loads(
+        Path("schnittstelle/jurnodes-api-1.0.2.json").read_text(encoding="utf-8"))
+    p._rechte_sammeln(daten["paths"])
+
+    # Der Aufruf, an dem alles hängt.
+    assert p.recht_fuer("/correspondence/search", "post") == "search:correspondence"
+    # Die Vermerke brauchen kein weiteres Recht - dasselbe wie GET /record,
+    # und das antwortet bereits.
+    assert p.recht_fuer("/record/note", "get") == "read:records"
+    assert p.recht_fuer("/record", "get") == "read:records"
+    # Und die Aufrufe, die am 07.10.2026 mit 200 geantwortet haben.
+    assert p.recht_fuer("/record/search", "get") == "search:records"
+    assert p.recht_fuer("/file-system/file/download", "get") == "download:file"
+    # Auch der Pfad ohne führenden Schrägstrich - der Schreibfehler des
+    # Herstellers darf die Auskunft nicht kosten.
+    assert p.recht_fuer("/correspondence/get-by-reference", "post") == \
+        "search:correspondence"
+
+    # Und das Urteil nennt es, statt den Leser raten zu lassen.
+    p._eakte_urteil(0, 0, 0, abweisung=401, pfad="/correspondence/search")
+    ausgabe = capsys.readouterr().out
+    assert "search:correspondence" in ausgabe, "Das Recht muss dastehen."
+    assert "NEIN" in ausgabe
+    assert "Am Programm ist dafuer nichts zu tun" in ausgabe
+
+
+def test_die_rechte_der_benutzten_aufrufe_stehen_im_bericht(capsys) -> None:
+    """Welches Recht jeder benutzte Aufruf braucht — als Liste zum Nachsehen.
+
+    Damit der Verwalter in jur|nodes nicht sieben Beschreibungstexte
+    durchsuchen muss, sondern eine Spalte vor sich hat.
+    """
+    p = _probe()
+    daten = json.loads(
+        Path("schnittstelle/jurnodes-api-1.0.2.json").read_text(encoding="utf-8"))
+    p._rechte_sammeln(daten["paths"])
+    p._rechte_zeigen(Endpunkte())
+    ausgabe = capsys.readouterr().out
+
+    for recht in ("search:records", "read:records", "search:correspondence",
+                  "read:folder", "download:file", "search:todo"):
+        assert recht in ausgabe, f"{recht} fehlt in der Übersicht."
+    assert "401" in ausgabe, "Der Leser muss den Bezug zum Status sehen."
