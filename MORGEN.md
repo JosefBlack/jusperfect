@@ -1919,3 +1919,29 @@ sobald das Recht `search:correspondence` steht.
 
 Nichts davon ist zu bauen, bevor das Recht steht — und dann zuerst gemessen,
 nicht angenommen.
+
+### Nachtrag 08.10.2026, dritter — die Anmeldung ist ausgeschlossen
+
+Aus der Oberfläche der Herstellerdokumentation (Post-Abschnitt, geschickt am
+08.10.2026) ergeben sich zwei Dinge, die über den Dateiinhalt hinausgehen:
+
+**Alle 94 Aufrufe tragen denselben Sicherheitsblock** — `X-Auth-User` und
+`X-Auth-Key`, ohne eine einzige Ausnahme. Nachgezählt in
+`jurnodes-api-1.0.2.json`. Damit ist die zweite Erklärung für den 401
+erledigt: Es gibt in dieser Schnittstelle kein anderes Anmeldeverfahren, auf
+das `/correspondence/search` ausweichen könnte. Bleibt das Recht
+`search:correspondence`. Die Frage in `ANFRAGE-HERSTELLER.md` ist entsprechend
+verengt: nicht mehr „welches Recht oder welche Anmeldung", sondern nur noch
+„wo wird dieses Recht gesetzt".
+
+**Die Adresse in der Oberfläche ist keine.** Die Dokumentation zeigt unter den
+Aufrufen `https://dortschy-thunert.jur-nodes.net/post/download`, also ohne den
+Vorsatz `/api/extern/v1/<Kennung>`. Das ist eine Vorgabe des Anzeigewerkzeugs;
+die Beschreibung führt keinen Abschnitt `servers`. Die benutzte Adresse ist
+richtig — mit ihr haben am 07.10.2026 sechs andere Aufrufe mit 200
+geantwortet. In `ANFRAGE-HERSTELLER.md` steht der Hinweis, damit niemand dort
+sucht.
+
+Auch der Antwortkörper passt: Für 400 und 405 ist
+`{"message", "errorStrings"}` beschrieben, für **401 kein Körper** — und genau
+leer (`{}`) kam er im Lauf zurück.
