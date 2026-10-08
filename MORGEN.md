@@ -1889,3 +1889,33 @@ Die Probe liest die Rechte jetzt selbst aus der Beschreibung aus
 Recht, und bei einem 401 nennt das Urteil es beim Namen statt „das liest sich
 wie ein fehlendes Recht". Zwei Prüfungen messen das gegen die **echte**
 Beschreibungsdatei, nicht gegen einen Nachbau.
+
+### Nachtrag 08.10.2026, zweite Fassung — die Dateiart ist bei beA und Post geklärt
+
+Herr Dortschy hat die Beispielkörper aus der Oberfläche der
+Herstellerdokumentation geschickt (Post-Abschnitt). Sie sind Feld für Feld
+deckungsgleich mit `jurnodes-api-1.0.2.json` — neu war daran nichts. Aber sie
+haben ein Feld vor Augen geführt, das ich zwar gelesen, aber nicht verbunden
+hatte: **`PostFileModel.extension`**.
+
+Damit ist die Frage „welche Dateiart kommt zurück?" **bei beA und bei der
+Post beantwortet**, bevor überhaupt heruntergeladen wird:
+
+* **beA:** `BeaMessageAttachment` führt `fileName` und `type`.
+* **Post:** `PostFileModel` führt `name` und `extension`.
+
+Die Kette bei der Post ist vollständig und geschlossen:
+
+1. `POST /correspondence/search` → Eintrag mit `identifier` und `referencePost`
+2. `POST /post/get-files` mit `{correspondenceIdentifier, postId}` → Liste
+   `PostFileModel`
+3. `POST /post/download` mit `{correspondenceIdentifier, postId,
+   postFileUniqueKey}` → die Bytes
+
+**Offen bleibt die Dateiart allein bei der E-Mail.** Dort gibt es keinen
+zweiten Aufruf: `POST /mail/download` nimmt nur `{mailIdentifier}` und gibt
+Bytes zurück. Das misst der Prüfbogen an der Signatur der ersten Bytes,
+sobald das Recht `search:correspondence` steht.
+
+Nichts davon ist zu bauen, bevor das Recht steht — und dann zuerst gemessen,
+nicht angenommen.

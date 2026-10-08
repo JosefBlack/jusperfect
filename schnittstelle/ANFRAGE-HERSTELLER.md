@@ -1,4 +1,4 @@
-# Was von jur|nodes noch fehlt — Stand 08.10.2026
+# Was von jur|nodes noch fehlt — Stand 08.10.2026 (zweite Fassung)
 
 **Das Meiste ist beantwortet, und zwar aus der Beschreibung selbst.** Diese
 Datei nennt nur noch, was wirklich offen ist.
@@ -71,8 +71,12 @@ setzen.
 
 ### 1. Welche Dateiart gibt `POST /mail/download` zurück?
 
+**Nur noch bei der E-Mail offen** — bei beA und Post nicht mehr, siehe unten.
+
 Die Beschreibung sagt `application/octet-stream` und nicht, welches Format
-diese Bytes haben.
+diese Bytes haben. Anders als bei beA und Post gibt es zur E-Mail **keinen
+zweiten Aufruf**, der Dateiname oder Endung nennen würde: `POST /mail/download`
+nimmt allein `{mailIdentifier}` und gibt Bytes zurück.
 
 > **Frage:** Ist das eine `.eml`, eine Outlook-`.msg`, ein PDF — oder je nach
 > Herkunft verschieden? Setzt der Server einen `Content-Disposition`-Namen?
@@ -118,14 +122,27 @@ Falls ja, bitte diese.
 
 ## Was sich erledigt hat — bitte nicht wieder fragen
 
-**Woher `attachmentId` beim beA kommt.** Aus `GET /bea?beaIdentifier=…`:
-Die Antwort `BeaMessage` führt `attachments`, eine Liste von
-`BeaMessageAttachment` mit dem Feld `id`.
+**Woher `attachmentId` beim beA kommt — und welche Dateiart.** Aus
+`GET /bea?beaIdentifier=…`: Die Antwort `BeaMessage` führt `attachments`, eine
+Liste von `BeaMessageAttachment` mit `id`, **`fileName`**, `type`, `size`. Der
+Dateiname sagt die Art; sie muss nicht erfragt werden.
 
-**Woher `postFileUniqueKey` bei der Post kommt.** Aus
-`POST /post/get-files` mit `{correspondenceIdentifier, postId}`: Die Antwort
-ist eine Liste von `PostFileModel` mit den Feldern `uniqueKey`, `postId`,
-`name`, `extension`, `size`.
+**Woher `postFileUniqueKey` bei der Post kommt — und welche Dateiart.** Die
+Kette ist vollständig und geschlossen:
+
+| Schritt | Aufruf | Hinein | Heraus |
+|---|---|---|---|
+| 1 | `POST /correspondence/search` | `recordIdentifier` | Eintrag mit `identifier`, `referencePost` |
+| 2 | `POST /post/get-files` | `correspondenceIdentifier`, `postId` | Liste `PostFileModel` |
+| 3 | `POST /post/download` | `correspondenceIdentifier`, `postId`, `postFileUniqueKey` | die Bytes |
+
+`PostFileModel` führt `uniqueKey` (→ `postFileUniqueKey`), `name` und
+**`extension`**. Damit ist auch bei der Post die Dateiart bekannt, bevor
+heruntergeladen wird. Einzeln geht es auch: `POST /post-file/get` nimmt
+wahlweise `id` **oder** `uniqueKey`.
+
+*Bestätigt am 08.10.2026* an den Beispielkörpern aus der Oberfläche der
+Herstellerdokumentation — Feld für Feld deckungsgleich mit 1.0.2.
 
 **Ob `referenceMail` dasselbe ist wie `mailIdentifier`.** Die Beschreibung
 führt `POST correspondence/get-by-reference` mit je einem Feld pro
