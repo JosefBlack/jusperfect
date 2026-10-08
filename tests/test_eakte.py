@@ -40,11 +40,29 @@ import httpx
 
 from jusperfect.jurnodes.base import JurNodesFehler
 from jusperfect.jurnodes.http_adapter import (
-    VERMERK_VORSATZ, HttpJurNodesAdapter, vermerk_als_dokument,
+    ANHANG_TRENNER, MAIL_VORSATZ, VERMERK_VORSATZ, HttpJurNodesAdapter,
+    vermerk_als_dokument,
 )
 from jusperfect.security.approval import Freigabestelle
 
 AKTE = "rec-1"
+
+
+def _eml(text: str, anlagen: tuple[tuple[str, bytes], ...] = (),
+         betreff: str = "Ein Betreff") -> bytes:
+    """Die Bytes einer .eml - so, wie POST /mail/download sie liefert."""
+    from email.message import EmailMessage
+
+    m = EmailMessage()
+    m["Subject"] = betreff
+    m["From"] = "gegner@example.invalid"
+    m["To"] = "kanzlei@example.invalid"
+    m["Date"] = "Wed, 08 Oct 2026 09:14:00 +0200"
+    m.set_content(text)
+    for name, inhalt in anlagen:
+        m.add_attachment(inhalt, maintype="application", subtype="pdf",
+                         filename=name)
+    return m.as_bytes()
 
 
 def _eintrag(art: str, **extra):
@@ -57,9 +75,12 @@ def _eintrag(art: str, **extra):
 class _Server:
     """Ein erfundener jur|nodes-Server, der die Beschreibung 1.0.2 nachspielt."""
 
-    def __init__(self, korrespondenz=(), vermerke=None):
+    def __init__(self, korrespondenz=(), vermerke=None, mails=None):
         self.korrespondenz = list(korrespondenz)
         self.vermerke = vermerke or {}
+        #: mailIdentifier -> die Bytes der .eml, so wie POST /mail/download
+        #: sie am 08.10.2026 wirklich geliefert hat.
+        self.mails = dict(mails or {})
         self.gefragt: list[str] = []
         self.koerper: list[dict] = []
 
@@ -78,6 +99,15 @@ class _Server:
             if daten is None:
                 return httpx.Response(404, json={})
             return httpx.Response(200, json={**daten, "record": daten.get("record", akte)})
+        if pfad.endswith("/mail/download"):
+            kennung = json.loads(anfrage.content or b"{}").get("mailIdentifier")
+            roh = self.mails.get(kennung)
+            if roh is None:
+                return httpx.Response(404, json={})
+            return httpx.Response(
+                200, content=roh,
+                headers={"content-type": "application/octet-stream",
+                         "content-disposition": 'inline; filename="Mail.eml"'})
         if "folder/content" in pfad:
             return httpx.Response(200, json={"elements": [], "pagesTotal": 1})
         if pfad.endswith("/record"):
@@ -172,15 +202,24 @@ class EinFremderVermerkWirdAbgewiesen(unittest.TestCase):
 class WasNochKeinenInhaltHatWirdGezaehlt(unittest.TestCase):
     """Was fehlt, soll sichtbar fehlen – nicht lautlos."""
 
-    def test_mail_und_post_werden_gezaehlt_nicht_uebernommen(self):
+    def test_post_und_bea_werden_gezaehlt_die_mail_wird_uebernommen(self):
+        """Seit dem 08.10.2026 ist die Mail dabei - beA und Post noch nicht.
+
+        Für beide steht die Kette in der Beschreibung vollständig. Gebaut
+        wird sie erst, wenn es eine Akte gibt, an der sich das messen lässt:
+        In den beiden geprüften kam kein einziger Eintrag dieser Art vor.
+        """
         server = _Server([_eintrag("mail", referenceMail="m-1"),
                           _eintrag("post", referencePost=5),
                           _eintrag("bea", referenceBea="b-1"),
-                          _eintrag("note", referenceNote=17)])
+                          _eintrag("note", referenceNote=17)],
+                         mails={"m-1": _eml("Der Brieftext.")})
         a = _adapter(server)
-        dokumente = a.dokumente(AKTE)
-        self.assertEqual([d.id for d in dokumente], [f"{VERMERK_VORSATZ}17"])
-        self.assertEqual(a.letzte_korrespondenz_ohne_inhalt, 3)
+        ids = [d.id for d in a.dokumente(AKTE)]
+        self.assertIn(f"{VERMERK_VORSATZ}17", ids)
+        self.assertIn("mail:m-1", ids)
+        self.assertEqual(a.letzte_korrespondenz_ohne_inhalt, 2,
+                         "Post und beA - die Mail nicht mehr.")
 
     def test_eine_datei_der_korrespondenz_wird_nicht_doppelt_gezaehlt(self):
         """Sie liegt im Dateisystem und ist über den Dateiordner schon dabei."""
@@ -275,3 +314,161 @@ class DieEinstellungStehtSeitDemLaufAufEin(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DieMailWirdZerlegt(unittest.TestCase):
+    """Vorgabe der Kanzlei vom 08.10.2026, wörtlich.
+
+    „Text der Mail immer, Anhänge als eigene Dokumente daneben, jedes einzeln
+    abwählbar wie die Dateien aus dem Aktenordner."
+
+    Gebaut wurde das erst, nachdem der Lauf vom selben Tag den Weg vollständig
+    gemessen hatte: `referenceMail` geht unverändert in `/mail/download`, und
+    der Server nennt die Dateiart selbst — `filename="Mail.eml"`.
+    """
+
+    def _akte_mit_mail(self, text="Der Brieftext.", anlagen=(), **kw):
+        server = _Server([_eintrag("mail", referenceMail="m-1")],
+                         mails={"m-1": _eml(text, anlagen)})
+        return server, _adapter(server, **kw)
+
+    def test_der_text_wird_ein_dokument(self):
+        server, a = self._akte_mit_mail()
+        dokumente = a.dokumente(AKTE)
+        self.assertEqual([f"{MAIL_VORSATZ}m-1"], [d.id for d in dokumente])
+        self.assertEqual("Betreff mail", dokumente[0].titel)
+
+    def test_jede_anlage_wird_ein_eigenes_dokument(self):
+        server, a = self._akte_mit_mail(
+            anlagen=(("Klage.pdf", b"%PDF-1.4 eins"),
+                     ("Anlage K1.pdf", b"%PDF-1.4 zwei")))
+        dokumente = a.dokumente(AKTE)
+        self.assertEqual(
+            [f"{MAIL_VORSATZ}m-1",
+             f"{MAIL_VORSATZ}m-1{ANHANG_TRENNER}0",
+             f"{MAIL_VORSATZ}m-1{ANHANG_TRENNER}1"],
+            [d.id for d in dokumente])
+        self.assertEqual(2, a.letzte_mail_anhaenge)
+
+    def test_der_titel_einer_anlage_nennt_ihre_mail(self):
+        """Sonst stehen drei Zeilen „Anlage K1.pdf“ nebeneinander."""
+        server, a = self._akte_mit_mail(anlagen=(("Anlage K1.pdf", b"%PDF"),))
+        anlage = a.dokumente(AKTE)[1]
+        self.assertIn("Anlage K1.pdf", anlage.titel)
+        self.assertIn("Betreff mail", anlage.titel)
+        self.assertEqual("Anlage K1.pdf", anlage.dateiname)
+
+    def test_der_text_kommt_beim_laden_mit_den_kopfzeilen(self):
+        server, a = self._akte_mit_mail(text="Wir beantragen Fristverlängerung.")
+        a.dokumente(AKTE)
+        _, inhalt = a.dokument_laden(AKTE, f"{MAIL_VORSATZ}m-1")
+        text = inhalt.decode("utf-8")
+        self.assertIn("Wir beantragen Fristverlängerung.", text)
+        self.assertIn("gegner@example.invalid", text,
+                      "Ohne Absender ist eine Mail als Beleg wertlos.")
+
+    def test_die_anlage_kommt_beim_laden_im_original(self):
+        server, a = self._akte_mit_mail(anlagen=(("Klage.pdf", b"%PDF-1.4 echt"),))
+        a.dokumente(AKTE)
+        _, inhalt = a.dokument_laden(AKTE, f"{MAIL_VORSATZ}m-1{ANHANG_TRENNER}0")
+        self.assertEqual(b"%PDF-1.4 echt", inhalt)
+
+    def test_die_mail_wird_nur_einmal_geholt(self):
+        """Text und Anlagen kommen aus derselben .eml - ein Aufruf genügt."""
+        server, a = self._akte_mit_mail(anlagen=(("A.pdf", b"x"), ("B.pdf", b"y")))
+        a.dokumente(AKTE)
+        a.dokument_laden(AKTE, f"{MAIL_VORSATZ}m-1")
+        a.dokument_laden(AKTE, f"{MAIL_VORSATZ}m-1{ANHANG_TRENNER}0")
+        a.dokument_laden(AKTE, f"{MAIL_VORSATZ}m-1{ANHANG_TRENNER}1")
+        geholt = [g for g in server.gefragt if g.endswith("/mail/download")]
+        self.assertEqual(1, len(geholt), f"Mehrfach geholt: {geholt}")
+
+    def test_ohne_die_einstellung_wird_gar_nichts_geholt(self):
+        server, a = self._akte_mit_mail(korrespondenz=False)
+        a.dokumente(AKTE)
+        self.assertEqual([], [g for g in server.gefragt if "mail/download" in g])
+
+
+class DieObergrenzeWarntDenBearbeiter(unittest.TestCase):
+    """Vorgabe der Kanzlei vom 08.10.2026.
+
+    „Obergrenze sollte festgelegt werden, bei Überschreitung sollte der
+    Bearbeiter gewarnt werden und aufmerksam gemacht werden."
+
+    Eine Zahl in einer Fußzeile ist keine Warnung — sie wird übersehen.
+    Deshalb steht sie in der Zeile selbst, dort, wo der Haken gesetzt wird.
+    """
+
+    def test_eine_zu_grosse_mail_bleibt_in_der_liste_und_warnt(self):
+        gross = _eml("x" * 200_000)
+        server = _Server([_eintrag("mail", referenceMail="m-1")],
+                         mails={"m-1": gross})
+        a = HttpJurNodesAdapter("https://beispiel.invalid", "k", Freigabestelle(),
+                                transport=httpx.MockTransport(server), benutzer="u",
+                                korrespondenz=True, mail_grenze_mb=0)
+        dokumente = a.dokumente(AKTE)
+
+        self.assertEqual(1, len(dokumente), "Sie verschwindet nicht.")
+        self.assertIn("Betreff mail", dokumente[0].titel, "Der Betreff bleibt.")
+        self.assertIn("zu groß", dokumente[0].titel, "Und die Warnung steht daneben.")
+        self.assertIn("Inhalt fehlt", dokumente[0].kategorie)
+        self.assertEqual(1, a.letzte_mails_zu_gross)
+
+    def test_der_server_meldet_die_laenge_und_es_wird_abgebrochen(self):
+        """Dann gehen die Bytes gar nicht erst über die Leitung."""
+        gelesen = {"bytes": 0}
+
+        def server(anfrage: httpx.Request) -> httpx.Response:
+            pfad = anfrage.url.path
+            if pfad.endswith("/correspondence/search"):
+                if "page" in str(anfrage.content or b""):
+                    return httpx.Response(200, json={"elements": [], "pagesTotal": 1})
+                return httpx.Response(200, json={
+                    "elements": [_eintrag("mail", referenceMail="m-1")],
+                    "pagesTotal": 1})
+            if pfad.endswith("/mail/download"):
+                roh = _eml("y" * 100_000)
+                gelesen["bytes"] = len(roh)
+                return httpx.Response(200, content=roh,
+                                      headers={"content-length": str(len(roh))})
+            if "folder/content" in pfad:
+                return httpx.Response(200, json={"elements": [], "pagesTotal": 1})
+            if pfad.endswith("/record"):
+                return httpx.Response(200, json={"identifier": AKTE, "fileFolderId": 7})
+            return httpx.Response(200, json={})
+
+        a = HttpJurNodesAdapter("https://beispiel.invalid", "k", Freigabestelle(),
+                                transport=httpx.MockTransport(server), benutzer="u",
+                                korrespondenz=True, mail_grenze_mb=0)
+        dokumente = a.dokumente(AKTE)
+        self.assertEqual(1, a.letzte_mails_zu_gross)
+        self.assertIn("zu groß", dokumente[0].titel)
+
+    def test_eine_mail_die_der_server_nicht_herausgibt_warnt_anders(self):
+        """404 ist kein Größenproblem - und soll auch nicht so aussehen."""
+        server = _Server([_eintrag("mail", referenceMail="fehlt")])
+        a = _adapter(server)
+        dokumente = a.dokumente(AKTE)
+        self.assertEqual(1, len(dokumente))
+        self.assertIn("nicht herausgegeben", dokumente[0].titel)
+        self.assertEqual(1, a.letzte_mails_ohne_antwort)
+        self.assertEqual(0, a.letzte_mails_zu_gross)
+
+    def test_das_gesamtmass_der_akte_haelt_an(self):
+        """Zwanzig Mails zu je acht Megabyte sind kein Aktenaufruf mehr."""
+        server = _Server([_eintrag("mail", referenceMail=f"m-{i}") for i in range(4)],
+                         mails={f"m-{i}": _eml("z" * 30_000) for i in range(4)})
+        a = HttpJurNodesAdapter("https://beispiel.invalid", "k", Freigabestelle(),
+                                transport=httpx.MockTransport(server), benutzer="u",
+                                korrespondenz=True, mail_grenze_mb=1, mail_gesamt_mb=0)
+        dokumente = a.dokumente(AKTE)
+        self.assertEqual(4, len(dokumente), "Alle vier bleiben in der Liste.")
+        self.assertEqual(4, a.letzte_mails_ueber_budget)
+        for d in dokumente:
+            self.assertIn("Gesamtmaß", d.titel)
+
+    def test_eine_mail_ohne_kennung_wird_gezaehlt(self):
+        server = _Server([_eintrag("mail")])
+        a = _adapter(server)
+        a.dokumente(AKTE)
+        self.assertEqual(1, a.letzte_korrespondenz_ohne_inhalt)

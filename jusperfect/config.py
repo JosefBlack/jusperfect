@@ -276,6 +276,32 @@ class Einstellungen:
     #: Aus geht es mit JUSPERFECT_KORRESPONDENZ=aus.
     korrespondenz: bool = True
 
+    #: Wie gross eine einzelne E-Mail hoechstens sein darf (Megabyte).
+    #:
+    #: **Vorgabe der Kanzlei vom 08.10.2026:** „Obergrenze sollte festgelegt
+    #: werden, bei Überschreitung sollte der Bearbeiter gewarnt werden und
+    #: aufmerksam gemacht werden."
+    #:
+    #: Gemessen am selben Tag: In X-100-2026 wog eine Mail 8.753.880 Bytes,
+    #: in X-101-2026 die geoeffnete 5.426. Mails sind fast immer klein; gross
+    #: wird eine durch ihre Anlage. 20 MB laesst jede uebliche Anlage durch
+    #: und faengt den Ausreisser.
+    #:
+    #: **Was darueber liegt, verschwindet nicht.** Die Mail bleibt in der
+    #: Dokumentliste - mit Betreff, Datum und der Warnung im Titel. Ein
+    #: Programm, das Akteninhalt lautlos weglaesst, ist schlimmer als eines,
+    #: das zu viel zeigt.
+    mail_grenze_mb: int = 20
+
+    #: Wie viel eine ganze Akte an E-Mails hoechstens holen darf (Megabyte).
+    #:
+    #: Die zweite Grenze, und sie faengt etwas anderes: nicht die eine grosse
+    #: Mail, sondern die vielen. Zwanzig zu je acht Megabyte waeren beim
+    #: Oeffnen einer Akte 160 MB ueber eine Leitung, die der Hersteller auf
+    #: EINE Anfrage zugleich begrenzt. Auch hier wird gewarnt, nicht
+    #: verschwiegen.
+    mail_gesamt_mb: int = 100
+
     #: Woerter im Titel, die ein Dokument NICHT vorwaehlen.
     #:
     #: Aus der Kanzlei am 05.10.2026: "Grundsaetzlich gehoert die Rechnung
@@ -463,6 +489,8 @@ class Einstellungen:
             modell_gedaechtnis=_modellkennung(env.get("JUSPERFECT_MODELL_GEDAECHTNIS", ""), _region),
             korrespondenz=env.get("JUSPERFECT_KORRESPONDENZ", "ein").strip().lower()
                           in ("ein", "an", "1", "ja", "true"),
+            mail_grenze_mb=int(_zahl(env, "JUSPERFECT_MAIL_GRENZE", cls.mail_grenze_mb)),
+            mail_gesamt_mb=int(_zahl(env, "JUSPERFECT_MAIL_GESAMT", cls.mail_gesamt_mb)),
             nicht_vorwaehlen=_woerter(env.get("JUSPERFECT_NICHT_VORWAEHLEN"),
                                       cls.nicht_vorwaehlen),
             guardrail_id=env.get("JUSPERFECT_GUARDRAIL_ID", "").strip() or None,

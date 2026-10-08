@@ -742,6 +742,25 @@ function explorerStarten(initial) {
       + `Ihr Inhalt ist noch nicht angebunden. Vermerke sind dabei.`;
     else if (offen < 0) { eakteHinweis.hidden = false;
       eakteHinweis.textContent = "Die E-Akte war nicht zu lesen; die Vermerke fehlen in dieser Liste."; }
+
+    // E-Mails, deren Inhalt nicht geholt werden konnte. Aus der Kanzlei am
+    // 08.10.2026: "bei Ueberschreitung sollte der Bearbeiter gewarnt werden
+    // und aufmerksam gemacht werden." Die Zeile des Dokuments traegt die
+    // Warnung schon; hier steht die Zahl, damit niemand sie zusammensuchen
+    // muss. Sie wird AN den Hinweis gehaengt, nicht statt seiner - sonst
+    // verdraengt die eine Warnung die andere.
+    const m = sitzung.mails_ohne_inhalt || {};
+    const teile = [];
+    if (m.zu_gross) teile.push(`${m.zu_gross} über der Größengrenze`);
+    if (m.gesamtmass) teile.push(`${m.gesamtmass} über dem Gesamtmaß der Akte`);
+    if (m.ohne_antwort) teile.push(`${m.ohne_antwort} von jur|nodes nicht herausgegeben`);
+    if (teile.length) {
+      eakteHinweis.hidden = false;
+      const satz = `Bei ${teile.join(", ")} E-Mail(s) fehlt der Inhalt. `
+        + `Sie stehen in der Liste mit Betreff und Datum; der Vermerk steht in der Zeile.`;
+      eakteHinweis.textContent = eakteHinweis.textContent
+        ? eakteHinweis.textContent + " — " + satz : satz;
+    }
   }
   $("explorer-uebernehmen").textContent = initial ? "Arbeitsfläche öffnen" : "Übernehmen";
   // Erst leeren, dann zeichnen. Umgekehrt zeigte der Explorer die Liste noch

@@ -182,6 +182,26 @@ REM AUSSCHALTEN, falls noetig: das REM vor der naechsten Zeile entfernen.
 REM
 REM set JUSPERFECT_KORRESPONDENZ=aus
 
+REM --- Wie gross eine E-Mail sein darf ---------------------------------
+REM
+REM Seit dem 08.10.2026 kommen auch die E-Mails der E-Akte in die
+REM Dokumentliste: der Brieftext als ein Dokument, jede Anlage als ein
+REM eigenes daneben, jedes einzeln abwaehlbar.
+REM
+REM Zwei Grenzen halten das in Schach. Was darueber liegt, VERSCHWINDET
+REM NICHT - die Mail steht mit Betreff und Datum in der Liste, und in
+REM ihrer Zeile steht, warum der Inhalt fehlt.
+REM
+REM   JUSPERFECT_MAIL_GRENZE   je Mail, in Megabyte   (Vorgabe 20)
+REM   JUSPERFECT_MAIL_GESAMT   je Akte, in Megabyte   (Vorgabe 100)
+REM
+REM Gemessen am 08.10.2026: In X-100-2026 wog eine Mail 8,7 MB, in
+REM X-101-2026 die geoeffnete 5,4 KB. Mails sind fast immer klein; gross
+REM wird eine durch ihre Anlage.
+REM
+REM set JUSPERFECT_MAIL_GRENZE=20
+REM set JUSPERFECT_MAIL_GESAMT=100
+
 REM --- Was nicht von selbst angehakt wird ------------------------------
 REM
 REM Aus der Kanzlei am 05.10.2026: "Grundsaetzlich gehoert die Rechnung

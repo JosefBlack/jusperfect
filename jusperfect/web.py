@@ -924,6 +924,17 @@ def _sitzung_antwort(d: Dienste, sitzung: Any) -> dict[str, Any]:
         # Was fehlt, soll sichtbar fehlen - sonst sieht eine unvollstaendige
         # Liste aus wie eine vollstaendige.
         "korrespondenz_ohne_inhalt": getattr(d.adapter, "letzte_korrespondenz_ohne_inhalt", 0),
+        # E-Mails, deren Inhalt nicht geholt werden konnte. Aus der Kanzlei am
+        # 08.10.2026: „Obergrenze sollte festgelegt werden, bei Ueberschreitung
+        # sollte der Bearbeiter gewarnt werden und aufmerksam gemacht werden."
+        # Die Warnung steht auch in der Zeile des Dokuments selbst; hier steht
+        # die Zahl, damit sie niemand zaehlen muss.
+        "mails_ohne_inhalt": {
+            "zu_gross": getattr(d.adapter, "letzte_mails_zu_gross", 0),
+            "gesamtmass": getattr(d.adapter, "letzte_mails_ueber_budget", 0),
+            "ohne_antwort": getattr(d.adapter, "letzte_mails_ohne_antwort", 0),
+        },
+        "mail_anhaenge": getattr(d.adapter, "letzte_mail_anhaenge", 0),
         "beteiligte": [x.model_dump() for x in d.sitzungen.beteiligte(sitzung)],
         "fristen": [x.model_dump() for x in d.sitzungen.fristen(sitzung)],
         "gedaechtnis": d.gedaechtnis.uebersicht(d.gedaechtnis.lesen(sitzung.akte_id)),

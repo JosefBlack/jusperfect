@@ -24,6 +24,8 @@ from typing import Any
 import httpx
 
 from jusperfect.config import Einstellungen, KonfigurationsFehler
+from jusperfect.jurnodes.mail import Anhang as MailAnhang
+from jusperfect.jurnodes.mail import Zerlegt, zerlegen
 from jusperfect.domain.models import Akte, Beteiligter, Dokument, Frist
 from jusperfect.jurnodes.base import (GEDAECHTNIS_DATEI, AkteNichtGefunden,
                                        DokumentNichtGefunden, JurNodesFehler,
@@ -76,6 +78,15 @@ class Endpunkte:
     korrespondenz_suche: str = "/correspondence/search"   # POST {recordIdentifier, page}
     korrespondenz: str = "/correspondence"                # GET ?identifier=
     korrespondenz_ordner: str = "/correspondence/folder"  # GET ?id=
+    #: Die abgelegte Fassung einer E-Mail. POST {mailIdentifier} -> .eml
+    #:
+    #: Gemessen am 08.10.2026 an zwei Akten: Status 200, Content-Type
+    #: application/octet-stream, und der Server nennt den Namen selbst -
+    #: Content-Disposition: inline; filename="Mail.eml".
+    #:
+    #: Das ist ein Aufruf an jur|nodes und holt die DORT abgelegte Fassung.
+    #: Kein Postfachzugriff - Vorgabe der Kanzlei vom 07.10.2026.
+    mail_download: str = "/mail/download"                 # POST {mailIdentifier}
 
     #: Die Abfrageparameter. Auch sie stehen in der Beschreibung des Herstellers.
     suchparameter: str = "sign"           # Suche nach Aktenzeichen
@@ -285,6 +296,119 @@ def vermerk_als_dokument(akte_id: str, nummer: Any, huelle: Mapping[str, Any]) -
     )
 
 
+#: Kennung eines Mail-Dokuments: "mail:<mailIdentifier>".
+MAIL_VORSATZ = "mail:"
+
+#: Was die Mail von ihrer Anlage trennt: "mail:<kennung>::3".
+#:
+#: Zwei Doppelpunkte, weil der mailIdentifier des Herstellers eine
+#: Zeichenkette ist und einen einzelnen tragen koennte.
+ANHANG_TRENNER = "::"
+
+
+def _richtung(huelle: Mapping[str, Any]) -> str:
+    """Eingang oder Ausgang - soweit es sich sagen laesst.
+
+    ``isInbox`` ist eine Zahl, und was sie bedeutet, steht in der
+    Beschreibung des Herstellers nicht. Die Vermutung 1 = eingegangen liegt
+    nahe und ist die letzte offene Frage in ANFRAGE-HERSTELLER.md.
+
+    **Deshalb wird hier nicht behauptet, sondern benannt.** Solange die
+    Auskunft fehlt, steht im Dokument „E-Mail" ohne Richtung - ein falsch
+    herum beschriftetes Schreiben in einer Handakte ist teurer als ein gar
+    nicht beschriftetes.
+    """
+    return "E-Mail"
+
+
+#: Woran der Bearbeiter sieht, dass von dieser Mail nur die Huelle da ist.
+#:
+#: **Vorgabe der Kanzlei vom 08.10.2026:** „Obergrenze sollte festgelegt
+#: werden, bei Überschreitung sollte der Bearbeiter gewarnt werden und
+#: aufmerksam gemacht werden."
+#:
+#: Eine Zahl in einer Fusszeile ist keine Warnung - sie wird uebersehen.
+#: Deshalb steht es in der **Zeile selbst**, dort, wo der Bearbeiter den
+#: Haken setzt oder nicht.
+MAIL_OHNE_INHALT = {
+    "zu_gross": ("⚠ Inhalt nicht geladen: zu groß",
+                 "E-Mail – Inhalt fehlt (zu groß)"),
+    "budget": ("⚠ Inhalt nicht geladen: Gesamtmaß der Akte erreicht",
+               "E-Mail – Inhalt fehlt (Gesamtmaß)"),
+    "status": ("⚠ Inhalt nicht geladen: jur|nodes hat ihn nicht herausgegeben",
+               "E-Mail – Inhalt fehlt (abgewiesen)"),
+    "netz": ("⚠ Inhalt nicht geladen: die Schnittstelle war nicht erreichbar",
+             "E-Mail – Inhalt fehlt (kein Netz)"),
+}
+
+
+def mail_als_dokument(akte_id: str, kennung: str, huelle: Mapping[str, Any],
+                      mime_typ: str = "text/plain", grund: str = "") -> Dokument:
+    """Aus einem Korrespondenzeintrag der Art „mail" ein Dokument machen.
+
+    Der Betreff und der Poststempel stehen in der Huelle; der Text kommt aus
+    der ``.eml``, die ``POST /mail/download`` liefert (gemessen am
+    08.10.2026: Status 200, ``Content-Disposition: filename="Mail.eml"``).
+
+    ``grund`` ist gesetzt, wenn der Inhalt **nicht** geholt werden konnte.
+    Die Mail bleibt dann in der Liste - mit Betreff, Datum und einer Warnung
+    im Titel. Sie verschwinden zu lassen waere das Schlimmere: Was fehlt,
+    faellt nur auf, wenn es dasteht.
+    """
+    betreff = str(_erstes(huelle, "subject", "betreff", standard="")).strip()
+    endung = "txt" if mime_typ == "text/plain" else "html"
+    titel = betreff or "E-Mail ohne Betreff"
+    kategorie = _richtung(huelle)
+    if grund:
+        warnung, kategorie = MAIL_OHNE_INHALT.get(
+            grund, (f"⚠ Inhalt nicht geladen ({grund})", "E-Mail – Inhalt fehlt"))
+        titel = f"{titel}  [{warnung}]"
+    return Dokument(
+        id=f"{MAIL_VORSATZ}{kennung}",
+        akte_id=akte_id,
+        titel=titel,
+        dateiname=f"mail-{_dateiname_teil(kennung)}.{endung}",
+        mime_typ=mime_typ,
+        datum=_datum(_erstes(huelle, "postmark", "created", standard=None)),
+        kategorie=kategorie,
+    )
+
+
+def anhang_als_dokument(akte_id: str, kennung: str, nummer: int,
+                        anhang: "MailAnhang",
+                        huelle: Mapping[str, Any]) -> Dokument:
+    """Eine Anlage einer E-Mail als eigenes Dokument.
+
+    **Vorgabe der Kanzlei vom 08.10.2026:** „Anhänge als eigene Dokumente
+    daneben, jedes einzeln abwählbar wie die Dateien aus dem Aktenordner."
+    Genau das heisst eigenes Dokument: eigene Kennung, eigener Haken, eigene
+    Zeile in der Liste.
+
+    Der Titel traegt den Dateinamen und dahinter den Betreff der Mail. Ohne
+    ihn stuenden in der Liste drei Zeilen „Anlage 1.pdf" nebeneinander, und
+    keine sagte, wozu sie gehoert.
+    """
+    betreff = str(_erstes(huelle, "subject", "betreff", standard="")).strip()
+    titel = anhang.name
+    if betreff:
+        titel = f"{anhang.name} (aus: {betreff})"
+    return Dokument(
+        id=f"{MAIL_VORSATZ}{kennung}{ANHANG_TRENNER}{nummer}",
+        akte_id=akte_id,
+        titel=titel,
+        dateiname=anhang.name,
+        mime_typ=anhang.mime_typ,
+        datum=_datum(_erstes(huelle, "postmark", "created", standard=None)),
+        kategorie="Anlage zur E-Mail",
+    )
+
+
+def _dateiname_teil(kennung: str) -> str:
+    """Aus einer Kennung etwas machen, das als Dateiname taugt."""
+    sauber = "".join(z if z.isalnum() or z in "-_" else "-" for z in str(kennung))
+    return sauber[:40] or "ohne-kennung"
+
+
 def dokument_aus_json(akte_id: str, d: Mapping[str, Any]) -> Dokument:
     """Ein Dokument aus einem ``file``-Eintrag von ``/file-system/folder/content``.
 
@@ -414,6 +538,8 @@ class HttpJurNodesAdapter:
         benutzer: str = "",
         schluessel: "Mapping[str, str] | None" = None,
         korrespondenz: bool = False,
+        mail_grenze_mb: int = 20,
+        mail_gesamt_mb: int = 100,
     ) -> None:
         if not basis_url.startswith("https://") and not basis_url.startswith("http://localhost") \
                 and not basis_url.startswith("http://127.0.0.1"):
@@ -437,6 +563,16 @@ class HttpJurNodesAdapter:
         self._liste_puffer: tuple[str, float, list[Dokument]] = ("", 0.0, [])
         #: Akten und Ordnerinhalte, kurz gehalten - siehe PUFFER_SEKUNDEN.
         self._kurzpuffer: dict[tuple[str, str], tuple[float, Any]] = {}
+        #: Die zerlegten Mails dieser Akte, nach mailIdentifier.
+        #:
+        #: Eine Mail wird EINMAL geholt. Aus derselben ``.eml`` kommen der
+        #: Brieftext und jede Anlage; sie ein zweites Mal zu holen, waere ein
+        #: zweiter Aufruf fuer dasselbe Paket. Begrenzt durch
+        #: ``mail_grenze_bytes`` je Mail und ``mail_gesamt_bytes`` je Akte.
+        self._mails: dict[str, Zerlegt] = {}
+        self._mails_akte: str = ""
+        self._mail_grenze = int(mail_grenze_mb) * 1024 * 1024
+        self._mail_gesamt = int(mail_gesamt_mb) * 1024 * 1024
         self._client = httpx.Client(
             base_url=basis_url.rstrip("/"),
             headers={"X-Auth-User": benutzer, "Accept": "application/json"},
@@ -466,6 +602,8 @@ class HttpJurNodesAdapter:
             timeout_sekunden=einstellungen.jurnodes_timeout_sekunden, transport=transport,
             benutzer=benutzer, schluessel=schluessel,
             korrespondenz=einstellungen.korrespondenz,
+            mail_grenze_mb=einstellungen.mail_grenze_mb,
+            mail_gesamt_mb=einstellungen.mail_gesamt_mb,
         )
 
     # ── Hilfen ─────────────────────────────────────────────────────────────
@@ -774,10 +912,19 @@ class HttpJurNodesAdapter:
     #: abgefragt wurde. Siehe _fremde_dateien_aussondern (Befund F08).
     letzte_dateien_aussortiert: int = 0
 
-    #: Korrespondenzeintraege, deren Inhalt noch nicht angebunden ist - Mail,
-    #: beA, Post, Fax, SMS. -1 heisst: Das Verzeichnis war nicht zu lesen.
+    #: Korrespondenzeintraege, deren Inhalt noch nicht angebunden ist - beA,
+    #: Post, Fax, SMS. -1 heisst: Das Verzeichnis war nicht zu lesen.
     #: Was fehlt, soll sichtbar fehlen.
     letzte_korrespondenz_ohne_inhalt: int = 0
+
+    #: Mails, die groesser waren als die Grenze - gezaehlt, nicht verschwiegen.
+    letzte_mails_zu_gross: int = 0
+    #: Mails, die das Gesamtmass der Akte gesprengt haetten.
+    letzte_mails_ueber_budget: int = 0
+    #: Mails, die sich nicht holen liessen (Status, Netz).
+    letzte_mails_ohne_antwort: int = 0
+    #: Wie viele Anlagen aus den Mails dieser Akte dazugekommen sind.
+    letzte_mail_anhaenge: int = 0
 
     def _ordner_durchgehen(self, wurzel: Any) -> list[Mapping[str, Any]]:
         """Alle Eintraege einer Akte - auch die in Unterordnern.
@@ -968,12 +1115,120 @@ class HttpJurNodesAdapter:
             nummer = eintrag.get("referenceNote")
             if art != "note" or nummer is None:
                 # Dateien der Korrespondenz liegen im Dateisystem und sind
-                # oben schon dabei; alles uebrige hat hier noch keinen Inhalt.
-                if art not in ("file", ""):
+                # oben schon dabei; die Mails holt _mail_dokumente gleich
+                # darunter. Alles uebrige - beA, Post, Fax, SMS - hat hier
+                # noch keinen Inhalt und wird gezaehlt, damit es sichtbar
+                # fehlt statt lautlos.
+                if art not in ("file", "", "mail"):
                     self.letzte_korrespondenz_ohne_inhalt += 1
                 continue
             dokumente.append(vermerk_als_dokument(akte_id, nummer, eintrag))
+        dokumente += self._mail_dokumente(akte_id, eintraege)
         return dokumente
+
+    def _mail_dokumente(self, akte_id: str,
+                        eintraege: list[Mapping[str, Any]]) -> list[Dokument]:
+        """Die E-Mails der Akte als Dokumente - Text und Anlagen getrennt.
+
+        **Vorgabe der Kanzlei vom 08.10.2026, woertlich:** „Text der Mail
+        immer, Anhänge als eigene Dokumente daneben, jedes einzeln abwählbar
+        wie die Dateien aus dem Aktenordner."
+
+        **Warum hier schon geholt wird und nicht erst beim Lesen.** Welche
+        Anlagen eine Mail traegt, steht in keinem Verzeichnis des Herstellers.
+        Fuer die Post gibt es ``POST /post/get-files``, fuer das beA
+        ``GET /bea`` - fuer die Mail nichts dergleichen. Die Anlagen stehen
+        allein in der ``.eml``. Wer sie vor dem Herunterladen auflisten will,
+        muesste raten.
+
+        Also wird geholt - einmal je Mail, und das Ergebnis bleibt gepuffert.
+        Gemessen am 08.10.2026: 22 Mails in X-100-2026, davon eine mit
+        8,7 MB und der Rest klein; neun in X-101-2026, die geoeffnete 5,4 KB.
+
+        **Zwei Grenzen halten das in Schach**, und beide melden, was sie
+        weglassen: ``mail_grenze_mb`` je Mail und ``mail_gesamt_mb`` je Akte.
+        Was darueber liegt, steht trotzdem in der Liste - mit Betreff und
+        Datum, ohne Inhalt. Ein Programm, das Akteninhalt lautlos weglaesst,
+        ist schlimmer als eines, das zu viel zeigt.
+        """
+        self.letzte_mails_zu_gross = 0
+        self.letzte_mails_ueber_budget = 0
+        self.letzte_mails_ohne_antwort = 0
+        self.letzte_mail_anhaenge = 0
+        if self._mails_akte != akte_id:
+            self._mails.clear()
+            self._mails_akte = akte_id
+
+        dokumente: list[Dokument] = []
+        verbraucht = 0
+        for eintrag in eintraege:
+            if str(eintrag.get("type", "")).lower() != "mail":
+                continue
+            kennung = eintrag.get("referenceMail")
+            if not kennung:
+                self.letzte_korrespondenz_ohne_inhalt += 1
+                continue
+            kennung = str(kennung)
+            zerlegt = self._mails.get(kennung)
+            if zerlegt is None:
+                if verbraucht >= self._mail_gesamt:
+                    self.letzte_mails_ueber_budget += 1
+                    dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
+                                                       grund="budget"))
+                    continue
+                zerlegt, groesse, grund = self._mail_holen(kennung)
+                verbraucht += groesse
+                if zerlegt is None:
+                    if grund == "zu_gross":
+                        self.letzte_mails_zu_gross += 1
+                    else:
+                        self.letzte_mails_ohne_antwort += 1
+                    dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
+                                                       grund=grund))
+                    continue
+                self._mails[kennung] = zerlegt
+
+            dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
+                                               zerlegt.mime_typ))
+            for nr, anhang in enumerate(zerlegt.anhaenge):
+                dokumente.append(anhang_als_dokument(akte_id, kennung, nr,
+                                                     anhang, eintrag))
+                self.letzte_mail_anhaenge += 1
+        return dokumente
+
+    def _mail_holen(self, kennung: str) -> tuple[Zerlegt | None, int, str]:
+        """Eine ``.eml`` holen und zerlegen - mit der Groessengrenze davor.
+
+        Die Grenze wird an ``Content-Length`` geprueft, **bevor** die Bytes
+        ueber die Leitung gehen: ``httpx`` gibt die Kopfzeilen frei, sobald
+        sie da sind, und ein Abbruch an dieser Stelle kostet nur sie. Nennt
+        der Server keine Laenge, wird mitgezaehlt und bei Ueberschreitung
+        abgebrochen.
+        """
+        koerper = {"mailIdentifier": kennung}
+        try:
+            with self._nacheinander:
+                with self._client.stream("POST", self._endpunkte.mail_download,
+                                         json=koerper,
+                                         headers=self._kopf(self._endpunkte.mail_download)
+                                         ) as antwort:
+                    if antwort.status_code >= 400:
+                        return None, 0, "status"
+                    gemeldet = antwort.headers.get("content-length")
+                    if gemeldet and gemeldet.isdigit() and int(gemeldet) > self._mail_grenze:
+                        return None, 0, "zu_gross"
+                    teile: list[bytes] = []
+                    gelesen = 0
+                    for stueck in antwort.iter_bytes():
+                        gelesen += len(stueck)
+                        if gelesen > self._mail_grenze:
+                            return None, gelesen, "zu_gross"
+                        teile.append(stueck)
+        except httpx.HTTPError:
+            # Eine Mail, die nicht kommt, kostet nicht die uebrigen.
+            return None, 0, "netz"
+        roh = b"".join(teile)
+        return zerlegen(roh), len(roh), ""
 
     def _vermerk_laden(self, akte_id: str, nummer: str) -> tuple[Mapping[str, Any], bytes]:
         """Einen Vermerk samt Inhalt - mit der Pruefung aus Befund F08.
@@ -1036,9 +1291,43 @@ class HttpJurNodesAdapter:
         if dokument_id.startswith(VERMERK_VORSATZ):
             _, inhalt = self._vermerk_laden(akte_id, dokument_id[len(VERMERK_VORSATZ):])
             return dokument, inhalt
+        # Eine Mail und ihre Anlagen kommen aus EINER .eml - sie wurde beim
+        # Aufbau der Liste geholt und zerlegt. Hier wird nur noch
+        # herausgegriffen, ohne zweiten Aufruf an jur|nodes.
+        if dokument_id.startswith(MAIL_VORSATZ):
+            return dokument, self._mail_teil(akte_id, dokument_id)
         antwort = self._get(self._endpunkte.datei_download, DokumentNichtGefunden,
                             **{self._endpunkte.kennungparameter: dokument_id})
         return dokument, antwort.content
+
+    def _mail_teil(self, akte_id: str, dokument_id: str) -> bytes:
+        """Den Brieftext oder eine Anlage aus der gepufferten ``.eml`` holen.
+
+        **Kein zweiter Aufruf.** Die Mail wurde beim Aufbau der Dokumentliste
+        geholt; aus derselben Zerlegung kommen der Text und jede Anlage. Ist
+        der Puffer leer - etwa weil das Programm zwischendurch neu gestartet
+        wurde -, wird sie einmal nachgeholt.
+        """
+        rest = dokument_id[len(MAIL_VORSATZ):]
+        kennung, _, nummer = rest.partition(ANHANG_TRENNER)
+        zerlegt = self._mails.get(kennung) if self._mails_akte == akte_id else None
+        if zerlegt is None:
+            zerlegt, _, grund = self._mail_holen(kennung)
+            if zerlegt is None:
+                raise DokumentNichtGefunden(
+                    f"Der Inhalt dieser E-Mail ist nicht zu holen ({grund or 'unbekannt'}).")
+            if self._mails_akte != akte_id:
+                self._mails.clear()
+                self._mails_akte = akte_id
+            self._mails[kennung] = zerlegt
+
+        if not nummer:
+            return zerlegt.text.encode("utf-8")
+        try:
+            return zerlegt.anhaenge[int(nummer)].inhalt
+        except (ValueError, IndexError):
+            raise DokumentNichtGefunden(
+                f"Diese Anlage gibt es in der E-Mail nicht mehr ({dokument_id}).") from None
 
     def beteiligte(self, akte_id: str) -> list[Beteiligter]:
         # recordIdentifier ist hier kein Beiwerk: Ohne ihn liefert die Suche
