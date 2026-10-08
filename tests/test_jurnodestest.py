@@ -594,14 +594,17 @@ def test_der_satz_fuer_den_hersteller_steht_am_ende(capsys) -> None:
     # Der bekannte Weg wird genannt, damit der Leser ihn vor sich hat.
     assert "POST /correspondence/search" in ausgabe
     assert "GET /record/note?id=..&record=.." in ausgabe
-    assert "BEIDEN Pflichtparametern" in ausgabe
+    assert "BEIDEN Pflicht" in ausgabe
     # Aber er wird nicht mehr erfragt.
     assert "Mit welchem Parameter" not in ausgabe, "Das ist beantwortet."
     assert "Ueber welchen Pfad" not in ausgabe, "Das ist beantwortet."
-    # Und das, was offen ist, steht da.
+    # Und das, was offen ist, steht da - und zwar nur noch das.
     assert "ANFRAGE-HERSTELLER.md" in ausgabe
-    assert "fehlt ein Recht" in ausgabe
-    assert "correspondenceFolderId" in ausgabe
+    assert "isInbox" in ausgabe
+    assert "Offen sind nur noch drei Kleinigkeiten" in ausgabe
+    # Was beantwortet ist, wird nicht mehr als offen ausgegeben.
+    assert "Offen ist, warum der Server" not in ausgabe
+    assert "Offen bleiben ausserdem: die Dateiart" not in ausgabe
 
 
 # ---------------------------------------------------------------------------
@@ -1007,8 +1010,11 @@ def test_die_frage_an_den_hersteller_nennt_die_eakte(capsys) -> None:
     # Die E-Akte heisst in der Schnittstelle Korrespondenz - und der Pfad
     # dorthin ist bekannt. Was dasteht, ist der Pfad, nicht die Frage danach.
     assert "POST /correspondence/search" in ausgabe
-    assert "mail/download" in ausgabe, "Die offene Dateiart gehoert dazu."
+    # Und die drei Dinge, die der Lauf vom 08.10.2026 geklaert hat, stehen
+    # ausdruecklich als BEANTWORTET da - damit sie niemand wieder fragt.
+    assert "mail/download" in ausgabe and ".eml" in ausgabe
     assert "attachmentId" in ausgabe and "postFileUniqueKey" in ausgabe
+    assert "nicht mehr zu fragen" in ausgabe
 
 
 def test_der_probelauf_fuer_ziffer_6_2(capsys) -> None:

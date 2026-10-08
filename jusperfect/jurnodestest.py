@@ -1230,7 +1230,7 @@ _EAKTE_PFADE = (
 )
 
 
-def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
+def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> bool:
     """Die E-Akte - jetzt auf dem Weg, den der Hersteller beschreibt.
 
     **Seit dem 05.10.2026 wird hier nicht mehr geraten.** Die Kanzlei hat die
@@ -1258,21 +1258,21 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
         _wortlaut(antwort)
         _eakte_urteil(0, 0, 0, abweisung=antwort.status_code,
                       pfad=endpunkte.korrespondenz_suche)
-        return
+        return False
     try:
         daten = antwort.json()
     except ValueError:
         _sagen("!", "Korrespondenz: keine JSON-Antwort")
         _eakte_urteil(0, 0, 0, abweisung=antwort.status_code,
                       pfad=endpunkte.korrespondenz_suche)
-        return
+        return False
 
     eintraege = daten.get("elements") if isinstance(daten, Mapping) else None
     if not isinstance(eintraege, list):
         _sagen("!", "Korrespondenz: keine Liste „elements“ in der Antwort.")
         _eakte_urteil(0, 0, 0, abweisung=antwort.status_code,
                       pfad=endpunkte.korrespondenz_suche)
-        return
+        return False
     gesamt = daten.get("amountTotal")
     seiten = daten.get("pagesTotal")
     _sagen("✓", f"{len(eintraege)} Eintrag/Einträge auf Seite 1, "
@@ -1280,7 +1280,7 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
     if not eintraege:
         _sagen(" ", "Diese Akte hat keine Korrespondenz - oder das Recht fehlt.")
         _eakte_urteil(0, 0, 0)
-        return
+        return False
 
     _sagen(" ", "Die Feldnamen des ersten Eintrags:")
     for zeile in felder({"elements": eintraege}):
@@ -1313,6 +1313,7 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> None:
     gelungen = _vermerke_lesen(client, endpunkte, kennung, vermerke)
     _download_messen(client, eintraege)
     _eakte_urteil(len(eintraege), len(vermerke), gelungen)
+    return True
 
 
 #: Woran eine Datei an ihren ersten Bytes zu erkennen ist.
@@ -1439,12 +1440,13 @@ def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int,
     if gelungen:
         _sagen("✓", f"JA. Das Verzeichnis ist lesbar und {gelungen} Vermerk(e) "
                     f"wurden abgerufen.")
-        _sagen(" ", "   In START-JURNODES.bat eintragen:  set JUSPERFECT_KORRESPONDENZ=ein")
-        _sagen(" ", "   Danach stehen die Vermerke als Dokumente in der Aktenliste.")
-        _sagen(" ", "   Mail, beA und Post bleiben vorerst draussen. Was dafuer")
-        _sagen(" ", "   noch fehlt, steht in schnittstelle/ANFRAGE-HERSTELLER.md -")
-        _sagen(" ", "   und die Zeilen zu /mail/download oben beantworten davon")
-        _sagen(" ", "   schon einen Teil. Bitte diese Ausgabe mitschicken.")
+        _sagen(" ", "   Sie ist seit dem 08.10.2026 von Haus aus ein - es ist")
+        _sagen(" ", "   nichts einzutragen. Die Vermerke stehen als Dokumente in")
+        _sagen(" ", "   der Aktenliste.")
+        _sagen(" ", "   Mail, beA und Post bleiben vorerst draussen. Nicht mehr,")
+        _sagen(" ", "   weil etwas fehlt - der Weg ist gemessen -, sondern weil")
+        _sagen(" ", "   zwei Dinge zu entscheiden sind: eine Obergrenze je Mail")
+        _sagen(" ", "   und ob der Anhang mit ins Aktengedaechtnis soll.")
         return
     _sagen("✗", "NEIN. Das Verzeichnis ist lesbar, aber kein Vermerk liess sich "
                 "abrufen. Die Zeilen darueber nennen den Status; meist fehlt dem "
@@ -1567,6 +1569,71 @@ def _vermerke_suchen(client: Any, endpunkte: Any, kennung: str,
     auch nicht "zum Ausprobieren": Ein Vermerk in einer Mandatsakte ist nicht
     zurueckzunehmen.
     """
+    # **Seit dem 08.10.2026 zuerst der Weg, der steht.**
+    #
+    # Vier Wochen lang begann dieser Abschnitt mit dem Erraten: zwanzig
+    # Parameternamen, zehn Zahlen, sechzehn Pfade, sechs Beschreibungsorte.
+    # Das war richtig, solange niemand wusste, wo die Vermerke liegen.
+    #
+    # Jetzt steht es: POST /correspondence/search gibt die Liste, und
+    # GET /record/note?id=..&record=.. den Vermerk. Der Lauf vom 08.10.2026
+    # hat beides an X-100-2026 gemessen.
+    #
+    # Das Erraten laeuft deshalb nur noch, wenn der bekannte Weg NICHT
+    # traegt. Ein Bericht, der auf drei Seiten nach etwas sucht, das zwei
+    # Seiten weiter unten gefunden wird, laesst den Leser zweimal dasselbe
+    # pruefen - und am 08.10.2026 ist genau das passiert.
+    gelungen = _korrespondenz_lesen(client, endpunkte, kennung)
+    if gelungen:
+        _sagen(" ", "")
+        _sagen("✓", "Der Weg zu den Vermerken steht - es wird nicht mehr")
+        _sagen(" ", "danach gesucht. Was frueher hier an Namen, Zahlen und")
+        _sagen(" ", "Pfaden durchprobiert wurde, entfaellt.")
+        _was_offen_bleibt()
+        return
+
+    _sagen(" ", "")
+    _sagen("!", "Der bekannte Weg traegt in dieser Akte nicht. Deshalb wird")
+    _sagen(" ", "jetzt gesucht - so, wie es bis zum 08.10.2026 immer lief.")
+    _vermerke_erraten(client, endpunkte, kennung, aktenzeichen)
+    _vermerke_als_todo(client, endpunkte, kennung)
+    _eakte_suchen(client, endpunkte, kennung)
+    _beschreibung_suchen(client, endpunkte)
+    # Auch wer suchen musste, bekommt den Schlussatz - sonst endet der
+    # Bericht gerade dort ohne Auskunft, wo sie am noetigsten ist.
+    _was_offen_bleibt()
+
+
+def _was_offen_bleibt() -> None:
+    """Was offen BLEIBT - und das ist seit dem 08.10.2026 wenig."""
+    _sagen(" ", "")
+    _sagen(" ", "Was noch offen ist, steht fertig formuliert in")
+    _sagen(" ", "schnittstelle/ANFRAGE-HERSTELLER.md. Der Kern, zum Mitlesen:")
+    print()
+    print("      Beantwortet und nicht mehr zu fragen: der Weg zur E-Akte")
+    print("      (POST /correspondence/search), die Vermerke darin")
+    print("      (GET /record/note?id=..&record=.. mit BEIDEN Pflicht-")
+    print("      parametern), die Dateiart hinter POST /mail/download")
+    print("      (.eml, der Server nennt den Namen selbst), die Herkunft")
+    print("      von attachmentId (GET /bea) und postFileUniqueKey")
+    print("      (POST /post/get-files), und wofuer correspondenceFolderId")
+    print("      steht - jene Nummer gehoert in den Korrespondenzbaum.")
+    print()
+    print("      Offen sind nur noch drei Kleinigkeiten: was isInbox")
+    print("      bedeutet (1 = eingegangen?), ob der Pfad wirklich")
+    print("      correspondence/get-by-reference ohne fuehrenden Schraeg-")
+    print("      strich heisst, und ob es eine neuere Fassung als 1.0.2 gibt.")
+
+
+def _vermerke_erraten(client: Any, endpunkte: Any, kennung: str,
+                      aktenzeichen: str = "") -> None:
+    """Die Suche von Hand - nur noch als Rueckfall.
+
+    Dieser Abschnitt hat die Antwort gefunden und darf deshalb nicht
+    verschwinden: Antwortet ein Server nach einem Update anders, faengt die
+    Suche wieder von vorn an, und dann soll sie hier stehen.
+    """
+
     _sagen(" ", "Wie kommt man an die Vermerke? OPTIONS sagte GET,HEAD,POST -")
     _sagen(" ", "der Pfad ist da. Gesucht wird der Name des Parameters.")
 
@@ -1634,40 +1701,6 @@ def _vermerke_suchen(client: Any, endpunkte: Any, kennung: str,
         _zaehlen(client, f"{pfad} mit recordIdentifier", pfad,
                  **{"recordIdentifier": kennung})
 
-    # Zuerst der Weg, den die Beschreibung des Herstellers nennt. Was er
-    # beantwortet, muss niemand mehr erraten.
-    _korrespondenz_lesen(client, endpunkte, kennung)
-    _vermerke_als_todo(client, endpunkte, kennung)
-    _eakte_suchen(client, endpunkte, kennung)
-    _beschreibung_suchen(client, endpunkte)
-
-    # Der Satz zum Abschicken - nur noch das, was WIRKLICH offen ist.
-    #
-    # Bis zum 07.10.2026 stand hier die Frage "Ueber welchen Pfad liefert die
-    # Schnittstelle die Eintraege der E-Akte?". Die ist seit der Beschreibung
-    # 1.0.2 beantwortet: POST /correspondence/search. Eine Anfrage, die
-    # Beantwortetes noch einmal fragt, kostet den Leser beim Hersteller Zeit
-    # und die eigene Glaubwuerdigkeit bei den Zeilen, die zaehlen.
-    _sagen(" ", "Was davon offen BLEIBT, steht fertig formuliert in")
-    _sagen(" ", "schnittstelle/ANFRAGE-HERSTELLER.md - mit Stand und Begruendung.")
-    _sagen(" ", "Der Kern, zum Mitlesen:")
-    print()
-    print("      Der Pfad zur E-Akte steht und wird nicht mehr gefragt:")
-    print("      POST /correspondence/search mit recordIdentifier, und die")
-    print("      Vermerke darin mit GET /record/note?id=..&record=.. - mit")
-    print("      BEIDEN Pflichtparametern.")
-    print()
-    print("      Offen ist, warum der Server genau diesen Pfad abweist.")
-    print("      Die Zeilen oben nennen den Status. Antwortet er 401 oder")
-    print("      403, waehrend jeder andere Pfad im selben Lauf 200 gibt,")
-    print("      dann steht der Zugang und es fehlt ein Recht - die Frage")
-    print("      dazu ist die erste in ANFRAGE-HERSTELLER.md.")
-    print()
-    print("      Offen bleiben ausserdem: die Dateiart hinter")
-    print("      POST /mail/download, die Herkunft von attachmentId (beA)")
-    print("      und postFileUniqueKey (Post), und wofuer")
-    print("      correspondenceFolderId steht - der Ordner dahinter trug in")
-    print("      drei geprueften Akten Ablagen, die aelter sind als die Akte.")
 
 
 def _ordner_aufteilen(client: Any, endpunkte: Any, ordner_id: str,
