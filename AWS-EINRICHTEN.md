@@ -432,7 +432,7 @@ ihn erwartet?**
 <Wurzel>\<Anwalt>\<Jahr>\<Aktenzeichen Bezeichnung>\<Dokumente>
 ```
 
-Beispiel: `J:\Akten\Dortschy\2026\X-107-2026 Testmann ./. Musterhaft\`
+Beispiel: `J:\Akten\Dortschy\2026\X-001-2026 Testmann ./. Musterhaft\`
 
 Stimmt das nicht, findet jusperfect **null Akten** – und eine leere Liste sagt
 nicht, woran es liegt.

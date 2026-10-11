@@ -5,7 +5,7 @@ jur|nodes legt die Akten als Ordner ab, die über ein eingebundenes Laufwerk
 
     <Wurzel>/<Anwalt>/<Jahr>/<Aktenzeichen Bezeichnung>/<Dokumente>
 
-Beispiel: ``J:/Akten/Dortschy/2026/X-107-2026 ohne Name wer gegen wen``. Der
+Beispiel: ``J:/Akten/Dortschy/2026/X-001-2026 ohne Name wer gegen wen``. Der
 Ordnername einer Akte trägt vorn das Aktenzeichen (bis zum ersten Leerzeichen),
 dahinter die Bezeichnung. Der Anwalt ist der Sachbearbeiter, das Jahr steht im
 Aktenzeichen.
@@ -60,7 +60,7 @@ class WebDavJurNodesAdapter:
 
     @staticmethod
     def _teile(ordnername: str) -> tuple[str, str]:
-        """„X-107-2026 ohne Name wer gegen wen" -> ("X-107-2026", "ohne Name …")."""
+        """„X-001-2026 ohne Name wer gegen wen" -> ("X-001-2026", "ohne Name …")."""
         name = ordnername.strip()
         m = re.match(r"^(\S+)\s+(.*)$", name)
         if m:

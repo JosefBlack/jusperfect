@@ -45,7 +45,7 @@ class DerAufbauWirdBenannt(unittest.TestCase):
         return {z for z, _ in aufbau_pruefen(self.wurzel)}
 
     def test_ein_richtiger_baum_geht_durch(self):
-        _baum(self.wurzel, "Dortschy/2026/X-107-2026 Testmann", "Thunert/2025/X-109-2025 Beispiel")
+        _baum(self.wurzel, "Dortschy/2026/X-001-2026 Testmann", "Thunert/2025/X-003-2025 Beispiel")
         self.assertNotIn("✗", self._zeichen())
 
     def test_ein_leerer_ordner_wird_benannt(self):
@@ -62,7 +62,7 @@ class DerAufbauWirdBenannt(unittest.TestCase):
 
     def test_akten_ohne_jahresebene_werden_benannt(self):
         """Ein Anwalt hat Jahresordner, der andere nicht – der wird übersprungen."""
-        _baum(self.wurzel, "Dortschy/2026/X-107-2026 Testmann", "Thunert/Alte Akten/T-1")
+        _baum(self.wurzel, "Dortschy/2026/X-001-2026 Testmann", "Thunert/Alte Akten/T-1")
         saetze = self._saetze()
         self.assertNotIn("✗", self._zeichen(), "Ein Ordner mit Jahren genügt zum Weitermachen.")
         self.assertIn("!", self._zeichen())
@@ -74,7 +74,7 @@ class DieDokumenteWerdenGezaehlt(unittest.TestCase):
         self._ordner = TemporaryDirectory()
         self.wurzel = Path(self._ordner.name)
         self.addCleanup(self._ordner.cleanup)
-        akte = self.wurzel / "Dortschy" / "2026" / "X-107-2026 Testmann"
+        akte = self.wurzel / "Dortschy" / "2026" / "X-001-2026 Testmann"
         akte.mkdir(parents=True)
         for name in ("a.txt", "b.pdf", "c.docx", "d.msg", "e.zip"):
             (akte / name).write_text("x", encoding="utf-8")
@@ -206,8 +206,8 @@ class DieProbeSagtWasSieTut(unittest.TestCase):
         ordner = TemporaryDirectory()
         self.addCleanup(ordner.cleanup)
         wurzel = Path(ordner.name) / "Akten"
-        _baum(wurzel, "Dortschy/2026/X-107-2026 Testmann")
-        (wurzel / "Dortschy/2026/X-107-2026 Testmann/schriftsatz.txt").write_text(
+        _baum(wurzel, "Dortschy/2026/X-001-2026 Testmann")
+        (wurzel / "Dortschy/2026/X-001-2026 Testmann/schriftsatz.txt").write_text(
             "Etwas Text.", encoding="utf-8")
 
         vorher = Path.cwd()
@@ -230,7 +230,7 @@ class DieProbeSagtWasSieTut(unittest.TestCase):
         """
         ausgabe, _ = self._durchlauf()
         self.assertIn("Die Wurzel des Aktenordners", ausgabe)
-        self.assertIn("Der Aktenordner (Beispiel: X-107-2026)", ausgabe)
+        self.assertIn("Der Aktenordner (Beispiel: X-001-2026)", ausgabe)
 
     def test_das_aktengedaechtnis_wird_beim_namen_genannt(self):
         """Wer nur „Schreibrecht für Vermerke" liest, prüft die falsche Zusage."""
@@ -298,7 +298,7 @@ class DerPfadWirdBereinigt(unittest.TestCase):
         ordner = TemporaryDirectory()
         self.addCleanup(ordner.cleanup)
         wurzel = Path(ordner.name) / "Akten"
-        _baum(wurzel, "Dortschy/2026/X-107-2026 Testmann")
+        _baum(wurzel, "Dortschy/2026/X-001-2026 Testmann")
 
         vorher = Path.cwd()
         os.chdir(ordner.name)
@@ -368,7 +368,7 @@ class DoppelteAktenzeichen(unittest.TestCase):
 
         with TemporaryDirectory() as ordner:
             wurzel = Path(ordner)
-            _baum(wurzel, "Dortschy/2026/X-108-2026 Testmann", "Thunert/2026/0101")
+            _baum(wurzel, "Dortschy/2026/X-002-2026 Testmann", "Thunert/2026/0101")
             gesamt, doppelte = doppelte_aktenzeichen(wurzel, self._adapter(wurzel))
             self.assertEqual(2, gesamt)
             self.assertEqual({}, doppelte)
@@ -430,7 +430,7 @@ class DieKostenzahlDarfNichtTaeuschen(unittest.TestCase):
         ordner = TemporaryDirectory()
         self.addCleanup(ordner.cleanup)
         wurzel = Path(ordner.name) / "Akten"
-        akte = wurzel / "Dortschy/2026/X-107-2026 Testmann"
+        akte = wurzel / "Dortschy/2026/X-001-2026 Testmann"
         akte.mkdir(parents=True)
         for name in dateien:
             (akte / name).write_bytes(b"x" * 1000)

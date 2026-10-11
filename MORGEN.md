@@ -2351,3 +2351,73 @@ Prüfungen sei „eine Angabe aus dem Standbericht, kein von mir bestätigtes
 Ergebnis." Richtig. Ohne aktuellen Quelltext ist keine Sicherheitsprüfung
 möglich, und `PRUEFAUFTRAG.md` ist vom 05.10.2026 und nennt noch 1625
 Prüfungen.
+
+---
+
+## 11.10.2026 — ein echtes Rubrum lag im Programmbestand
+
+Aus der Kanzlei: *„X-107-2026 ist eine echte Akte."* Damit war
+`X-107-2026 Testmann ./. Musterhaft` kein Platzhalter, sondern Aktenzeichen, Mandant
+und Gegner einer laufenden Sache — in einem Bestand, der an Dritte geht.
+
+### Was gefunden wurde
+
+| Wo | Was |
+|---|---|
+| `AWS-EINRICHTEN.md` | `J:\Akten\Dortschy\2026\X-107-2026 Testmann ./. Musterhaft\` |
+| `UEBERGABE.md` | zweimal `Testmann ./. Musterhaft` |
+| `tests/test_laufwerksweg.py` | `X-107-2026 Testmann`, `X-108-2026 Testmann`, `X-109-2025 Beispiel` |
+| `tests/test_webdav_adapter.py` | `X-107-2026 Testmann gegen Musterhaft`, `X-107-2026 Testmann gegen Musterhaft`, `X-109-2025 Miete Beispiel` |
+| `tests/test_jurnodes_http.py` | `Testmann ./. Musterhaft` als Kurzrubrum, dazu die Suchprüfungen |
+| fünf weitere Prüfdateien | `Testmann` ohne Umlaut — in der ersten Suche übersehen |
+| `jusperfect/jurnodes/http_adapter.py` | `"Testmann ./. Musterhaft"` im Kommentar |
+
+**120 Stellen in 16 Dateien.** Alle ersetzt durch die erfundenen Namen, die
+der Bestand ohnehin führt: `Testmann`, `Musterhaft`, `Musterfrau`,
+`Beispiel`. Die Aktenzeichen der Beispiele sind jetzt `X-001-2026`,
+`X-002-2026`, `X-003-2025` — Nummern, die es nicht geben kann.
+
+`schnittstelle/jurnodes-api-1.0.2.json` blieb unberührt. Die Beispiele darin
+(`Testmann ./. Fischer`, `Autohaus Testmann`) sind die des Herstellers.
+
+**1837 Prüfungen grün** — der Austausch war durchgängig, keine Prüfung hat
+ihn bemerkt.
+
+### Dass es überhaupt auffiel, war ein Zufall
+
+`jusperfect/jurnodes/webdav_adapter.py` trug den Namen schon nicht mehr; dort
+steht seit längerem `X-107-2026 ohne Name wer gegen wen`. Jemand hat an einer
+Stelle hingesehen und an den übrigen sechzehn nicht. Dieser Unterschied —
+eine Datei bereinigt, der Rest nicht — war das Einzige, was den Verdacht
+getragen hat. Die Namen selbst sahen aus wie Platzhalter: Testmann, Meier,
+Schmidt, Beispiel sind die Namen, die man erfindet, wenn man einen erfinden will.
+
+> Ein erfundener Name und ein echter sehen gleich aus. Was sie unterscheidet,
+> weiß nur die Kanzlei — also ist zu fragen, nicht zu schließen.
+
+### Zwei Dinge, die damit **nicht** erledigt sind
+
+**1. Die Vorgeschichte.** Das Repository beginnt mit dem Commit `d145e3e` vom
+05.10.2026, 10:58 Uhr — 261 Dateien auf einmal, und die Namen waren von der
+ersten Zeile an dabei. Sie stehen damit in **allen 52 Commits**. Der heutige
+Austausch ändert den Arbeitsstand, nicht die Vorgeschichte. Wer `git log -p`
+liest, findet sie weiter.
+
+Das Repository ist **privat** (nachgesehen am 11.10.2026: `visibility:
+private`, keine Forks, keine Beobachter) — es liegt also bei einem Anbieter,
+nicht offen. Die Vorgeschichte zu bereinigen hieße, alle 52 Commits neu zu
+schreiben und überschreibend zu pushen. Das ist eine Entscheidung der
+Kanzlei, keine der Entwicklung.
+
+**2. Was bereits hinausgegangen ist.** Die Namen lagen seit dem ersten Commit
+im Bestand. Das **Prüfpaket vom 05.10.2026**, aus dem die Zweitprüfung
+gearbeitet hat, ist am selben Tag entstanden; der Bericht kam um 15:54 Uhr
+zurück, die Namen waren um 10:58 Uhr da. **Ob sie im Paket lagen, lässt sich
+hier nicht feststellen** — die ZIP liegt auf dem Rechner der Kanzlei. Ein
+Suchlauf nach „Musterhaft" in
+`jusperfect-pruefpaket-05.10.2026.zip` beantwortet es in einer Minute.
+Dasselbe gilt für den Bestand vom 16.09.2026, mit dem die jetzige zweite
+Meinung arbeitet.
+
+Gesagt, nicht vermutet: Wenn die Namen im Paket lagen, ist das eine
+Offenlegung, die bereits stattgefunden hat.
