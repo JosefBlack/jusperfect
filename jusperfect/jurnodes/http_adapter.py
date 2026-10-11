@@ -306,19 +306,37 @@ MAIL_VORSATZ = "mail:"
 ANHANG_TRENNER = "::"
 
 
+#: Was ``isInbox`` bedeutet - Wortlaut des Herstellers.
+#:
+#: ``CorrespondenceModel.isInbox`` in ``jurnodes-api-1.0.2.json``:
+#: *„1 = Eingang, 0 = Ausgang, -1 = Neutral/Unbekannt"*. Gleichlautend im
+#: Schreibschema ``Correspondence``.
+#:
+#: **Der dritte Wert ist der Grund, warum hier eine Tabelle steht und kein
+#: ``if``.** Die Vermutung bis zum 11.10.2026 lautete „1 heisst eingegangen,
+#: 0 ausgegangen" - richtig, aber unvollstaendig. Wer das Feld als Ja/Nein
+#: liest, schreibt ueber jedes neutrale Schreiben „Ausgang".
+_ISINBOX = {1: "Eingang", 0: "Ausgang", -1: ""}
+
+
 def _richtung(huelle: Mapping[str, Any]) -> str:
-    """Eingang oder Ausgang - soweit es sich sagen laesst.
+    """Die Kategorie einer Mail, mit der Richtung, soweit sie feststeht.
 
-    ``isInbox`` ist eine Zahl, und was sie bedeutet, steht in der
-    Beschreibung des Herstellers nicht. Die Vermutung 1 = eingegangen liegt
-    nahe und ist die letzte offene Frage in ANFRAGE-HERSTELLER.md.
+    Gibt „E-Mail (Eingang)", „E-Mail (Ausgang)" oder - bei ``-1``, bei einem
+    fehlenden und bei einem unbekannten Wert - „E-Mail" ohne Zusatz zurueck.
 
-    **Deshalb wird hier nicht behauptet, sondern benannt.** Solange die
-    Auskunft fehlt, steht im Dokument „E-Mail" ohne Richtung - ein falsch
-    herum beschriftetes Schreiben in einer Handakte ist teurer als ein gar
-    nicht beschriftetes.
+    **Was hier bewusst nicht geschieht: raten.** Ein falsch herum
+    beschriftetes Schreiben in einer Handakte ist teurer als ein gar nicht
+    beschriftetes. Jeder Wert ausser 1, 0 und -1 waere ein Wert, den der
+    Hersteller nicht beschrieben hat; er fuehrt deshalb auf denselben Weg wie
+    -1, naemlich auf keine Angabe.
     """
-    return "E-Mail"
+    roh = huelle.get("isInbox")
+    try:
+        richtung = _ISINBOX.get(int(roh))        # auch "1" aus einer JSON-Zeichenkette
+    except (TypeError, ValueError):
+        richtung = None
+    return f"E-Mail ({richtung})" if richtung else "E-Mail"
 
 
 #: Woran der Bearbeiter sieht, dass von dieser Mail nur die Huelle da ist.
@@ -330,15 +348,15 @@ def _richtung(huelle: Mapping[str, Any]) -> str:
 #: Eine Zahl in einer Fusszeile ist keine Warnung - sie wird uebersehen.
 #: Deshalb steht es in der **Zeile selbst**, dort, wo der Bearbeiter den
 #: Haken setzt oder nicht.
+#:
+#: Zweiter Wert ist der kurze Grund fuer die Kategorie. Die **Richtung steht
+#: davor** und faellt hier nicht weg: Wenn der Inhalt fehlt, ist sie das
+#: Einzige, woran der Bearbeiter das Schreiben noch einordnen kann.
 MAIL_OHNE_INHALT = {
-    "zu_gross": ("⚠ Inhalt nicht geladen: zu groß",
-                 "E-Mail – Inhalt fehlt (zu groß)"),
-    "budget": ("⚠ Inhalt nicht geladen: Gesamtmaß der Akte erreicht",
-               "E-Mail – Inhalt fehlt (Gesamtmaß)"),
-    "status": ("⚠ Inhalt nicht geladen: jur|nodes hat ihn nicht herausgegeben",
-               "E-Mail – Inhalt fehlt (abgewiesen)"),
-    "netz": ("⚠ Inhalt nicht geladen: die Schnittstelle war nicht erreichbar",
-             "E-Mail – Inhalt fehlt (kein Netz)"),
+    "zu_gross": ("⚠ Inhalt nicht geladen: zu groß", "zu groß"),
+    "budget": ("⚠ Inhalt nicht geladen: Gesamtmaß der Akte erreicht", "Gesamtmaß"),
+    "status": ("⚠ Inhalt nicht geladen: jur|nodes hat ihn nicht herausgegeben", "abgewiesen"),
+    "netz": ("⚠ Inhalt nicht geladen: die Schnittstelle war nicht erreichbar", "kein Netz"),
 }
 
 
@@ -360,8 +378,9 @@ def mail_als_dokument(akte_id: str, kennung: str, huelle: Mapping[str, Any],
     titel = betreff or "E-Mail ohne Betreff"
     kategorie = _richtung(huelle)
     if grund:
-        warnung, kategorie = MAIL_OHNE_INHALT.get(
-            grund, (f"⚠ Inhalt nicht geladen ({grund})", "E-Mail – Inhalt fehlt"))
+        warnung, kurz = MAIL_OHNE_INHALT.get(
+            grund, (f"⚠ Inhalt nicht geladen ({grund})", grund))
+        kategorie = f"{kategorie} – Inhalt fehlt ({kurz})"
         titel = f"{titel}  [{warnung}]"
     return Dokument(
         id=f"{MAIL_VORSATZ}{kennung}",
@@ -392,6 +411,10 @@ def anhang_als_dokument(akte_id: str, kennung: str, nummer: int,
     titel = anhang.name
     if betreff:
         titel = f"{anhang.name} (aus: {betreff})"
+    # Die Anlage erbt die Richtung ihrer Mail: Sie ist mit ihr gekommen oder
+    # mit ihr hinausgegangen. Wer "alles, was eingegangen ist" anhakt, meint
+    # die Anlagen mit.
+    richtung = _richtung(huelle).removeprefix("E-Mail")
     return Dokument(
         id=f"{MAIL_VORSATZ}{kennung}{ANHANG_TRENNER}{nummer}",
         akte_id=akte_id,
@@ -399,7 +422,7 @@ def anhang_als_dokument(akte_id: str, kennung: str, nummer: int,
         dateiname=anhang.name,
         mime_typ=anhang.mime_typ,
         datum=_datum(_erstes(huelle, "postmark", "created", standard=None)),
-        kategorie="Anlage zur E-Mail",
+        kategorie=f"Anlage zur E-Mail{richtung}",
     )
 
 

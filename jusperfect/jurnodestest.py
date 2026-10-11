@@ -1618,11 +1618,13 @@ def _was_offen_bleibt() -> None:
     print("      von attachmentId (GET /bea) und postFileUniqueKey")
     print("      (POST /post/get-files), und wofuer correspondenceFolderId")
     print("      steht - jene Nummer gehoert in den Korrespondenzbaum.")
+    print("      Seit dem 11.10.2026 auch, was isInbox bedeutet: die")
+    print("      Beschreibung sagt 1 = Eingang, 0 = Ausgang, -1 = Neutral.")
     print()
-    print("      Offen sind nur noch drei Kleinigkeiten: was isInbox")
-    print("      bedeutet (1 = eingegangen?), ob der Pfad wirklich")
-    print("      correspondence/get-by-reference ohne fuehrenden Schraeg-")
-    print("      strich heisst, und ob es eine neuere Fassung als 1.0.2 gibt.")
+    print("      Offen sind nur noch zwei Kleinigkeiten: ob der Pfad")
+    print("      wirklich correspondence/get-by-reference ohne fuehrenden")
+    print("      Schraegstrich heisst, und ob es eine neuere Fassung als")
+    print("      1.0.2 gibt.")
 
 
 def _vermerke_erraten(client: Any, endpunkte: Any, kennung: str,

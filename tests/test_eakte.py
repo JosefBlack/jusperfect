@@ -472,3 +472,121 @@ class DieObergrenzeWarntDenBearbeiter(unittest.TestCase):
         a = _adapter(server)
         a.dokumente(AKTE)
         self.assertEqual(1, a.letzte_korrespondenz_ohne_inhalt)
+
+
+class DieRichtungStehtAmSchriftstueck(unittest.TestCase):
+    """`isInbox` — seit dem 11.10.2026 benannt statt vermutet.
+
+    Der Hersteller sagt es in `CorrespondenceModel.isInbox` selbst:
+    *„1 = Eingang, 0 = Ausgang, -1 = Neutral/Unbekannt"*. Vier Wochen lang
+    stand im Programm nur „E-Mail" ohne Richtung, weil die Auskunft als
+    fehlend galt — sie stand die ganze Zeit in
+    `schnittstelle/jurnodes-api-1.0.2.json`.
+
+    **Der dritte Wert ist der Grund für diese Prüfklasse.** Die Vermutung
+    „1 = eingegangen, 0 = ausgegangen" war richtig und unvollständig. Wer das
+    Feld als Ja/Nein liest, schreibt über jedes neutrale Schreiben „Ausgang" —
+    und ein falsch herum beschriftetes Schriftstück in einer Handakte ist
+    teurer als ein gar nicht beschriftetes.
+    """
+
+    def test_eingang_und_ausgang_stehen_in_der_kategorie(self):
+        server = _Server([_eintrag("mail", referenceMail="m-ein", isInbox=1),
+                          _eintrag("mail", referenceMail="m-aus", isInbox=0)],
+                         mails={"m-ein": _eml("kam herein"), "m-aus": _eml("ging hinaus")})
+        nach_kennung = {d.id: d for d in _adapter(server).dokumente(AKTE)}
+        self.assertEqual("E-Mail (Eingang)", nach_kennung[MAIL_VORSATZ + "m-ein"].kategorie)
+        self.assertEqual("E-Mail (Ausgang)", nach_kennung[MAIL_VORSATZ + "m-aus"].kategorie)
+
+    def test_neutral_wird_nicht_zu_ausgang(self):
+        """-1 heißt *weder noch*. Das ist keine Null."""
+        server = _Server([_eintrag("mail", referenceMail="m", isInbox=-1)],
+                         mails={"m": _eml("weder noch")})
+        dokumente = _adapter(server).dokumente(AKTE)
+        self.assertEqual("E-Mail", dokumente[0].kategorie)
+        self.assertNotIn("Ausgang", dokumente[0].kategorie)
+
+    def test_ein_unbeschriebener_wert_wird_nicht_gedeutet(self):
+        """Was der Hersteller nicht beschrieben hat, wird nicht erfunden."""
+        for wert in (7, "ja", None, ""):
+            with self.subTest(isInbox=wert):
+                server = _Server([_eintrag("mail", referenceMail="m", isInbox=wert)],
+                                 mails={"m": _eml("unklar")})
+                self.assertEqual("E-Mail", _adapter(server).dokumente(AKTE)[0].kategorie)
+
+    def test_fehlt_das_feld_ganz_steht_keine_richtung_da(self):
+        eintrag = _eintrag("mail", referenceMail="m")
+        del eintrag["isInbox"]
+        server = _Server([eintrag], mails={"m": _eml("ohne Feld")})
+        self.assertEqual("E-Mail", _adapter(server).dokumente(AKTE)[0].kategorie)
+
+    def test_die_anlage_erbt_die_richtung_ihrer_mail(self):
+        """Wer „alles, was eingegangen ist" anhakt, meint die Anlagen mit."""
+        server = _Server([_eintrag("mail", referenceMail="m", isInbox=1)],
+                         mails={"m": _eml("mit Anlage", (("Vertrag.pdf", b"%PDF-1.4 x"),))})
+        anlagen = [d for d in _adapter(server).dokumente(AKTE)
+                   if ANHANG_TRENNER in d.id]
+        self.assertEqual(1, len(anlagen))
+        self.assertEqual("Anlage zur E-Mail (Eingang)", anlagen[0].kategorie)
+
+    def test_fehlt_der_inhalt_bleibt_die_richtung_erst_recht_stehen(self):
+        """Wenn der Text fehlt, ist die Richtung das Einzige, was bleibt.
+
+        Deshalb verdrängt die Warnung sie nicht, sondern steht hinter ihr.
+        """
+        server = _Server([_eintrag("mail", referenceMail="m", isInbox=1)],
+                         mails={"m": _eml("x" * 40_000)})
+        a = HttpJurNodesAdapter("https://beispiel.invalid", "k", Freigabestelle(),
+                                transport=httpx.MockTransport(server), benutzer="u",
+                                korrespondenz=True, mail_grenze_mb=0)
+        dokument = a.dokumente(AKTE)[0]
+        self.assertIn("Eingang", dokument.kategorie)
+        self.assertIn("Inhalt fehlt", dokument.kategorie)
+        self.assertIn("⚠", dokument.titel)
+
+
+class DieEAkteWirdUeberAlleSeitenGelesen(unittest.TestCase):
+    """Eine E-Akte, die auf der zweiten Seite aufhört, ist unvollständig.
+
+    Angemerkt am 11.10.2026 von einer zweiten Meinung: `POST
+    /correspondence/search` führt `page` und gibt `pagesTotal` zurück; wer nur
+    die erste Seite liest, bekommt eine Liste, die wie eine vollständige
+    aussieht. Der Einwand war berechtigt gestellt und ist hier gemessen
+    beantwortet — `_alle_seiten_post` gab es bereits, geprüft war es für die
+    E-Akte noch nicht.
+    """
+
+    class _SeitenServer(_Server):
+        """Gibt die Einträge seitenweise heraus, wie der Hersteller es tut."""
+
+        def __init__(self, seiten, **rest):
+            super().__init__([], **rest)
+            self.seiten = seiten          # Liste von Listen
+            self.gefragte_seiten: list[int] = []
+
+        def __call__(self, anfrage):
+            if anfrage.url.path.endswith("/correspondence/search"):
+                koerper = json.loads(anfrage.content or b"{}")
+                # Die erste Anfrage geht ohne "page" hinaus - gemessen am
+                # 07.10.2026: mit page=0 kam nichts zurueck.
+                nummer = int(koerper.get("page", 1))
+                self.gefragte_seiten.append(nummer)
+                teil = self.seiten[nummer - 1] if nummer <= len(self.seiten) else []
+                return httpx.Response(200, json={"elements": teil,
+                                                 "pagesTotal": len(self.seiten),
+                                                 "amountTotal": sum(map(len, self.seiten))})
+            return super().__call__(anfrage)
+
+    def test_drei_seiten_vermerke_kommen_vollstaendig_an(self):
+        seiten = [[_eintrag("note", referenceNote=n) for n in (1, 2)],
+                  [_eintrag("note", referenceNote=n) for n in (3, 4)],
+                  [_eintrag("note", referenceNote=5)]]
+        vermerke = {str(n): {"id": n, "content": f"Vermerk {n}", "contentType": "text",
+                             "record": AKTE} for n in range(1, 6)}
+        server = self._SeitenServer(seiten, vermerke=vermerke)
+        dokumente = _adapter(server).dokumente(AKTE)
+        self.assertEqual([1, 2, 3], server.gefragte_seiten,
+                         "Alle drei Seiten müssen abgefragt worden sein.")
+        self.assertEqual(5, len([d for d in dokumente
+                                 if d.id.startswith(VERMERK_VORSATZ)]),
+                         "Kein Vermerk darf auf einer späteren Seite liegen bleiben.")

@@ -2274,3 +2274,80 @@ Die Richtung anzuzeigen ist ein Eingriff in die Oberfläche und in das, was in
 einer echten Akte an einem Schriftstück steht. Er wartet auf das Wort der
 Kanzlei — zusammen mit der Berichtigung des Kommentars in `http_adapter.py`
 und des Satzes „drei Kleinigkeiten" in `jusperfect/jurnodestest.py`.
+
+### Nachtrag 11.10.2026 — die Richtung ist eingebaut
+
+`_richtung()` in `jusperfect/jurnodes/http_adapter.py` liest `isInbox` jetzt
+über eine Tabelle, nicht über ein `if`:
+
+| `isInbox` | Kategorie |
+|---|---|
+| 1 | `E-Mail (Eingang)` |
+| 0 | `E-Mail (Ausgang)` |
+| -1, fehlend, unbekannter Wert | `E-Mail` — ohne Zusatz |
+
+Eine Tabelle, weil der dritte Wert sonst durchfällt. Jeder Wert außer 1, 0
+und -1 geht denselben Weg wie -1: keine Angabe. Was der Hersteller nicht
+beschrieben hat, wird nicht gedeutet.
+
+**Zwei Entscheidungen dabei:**
+
+* **Die Anlage erbt die Richtung ihrer Mail** — `Anlage zur E-Mail
+  (Eingang)`. Wer „alles, was eingegangen ist" anhakt, meint die Anlagen mit.
+* **Bei fehlendem Inhalt bleibt die Richtung stehen**, die Warnung tritt
+  dahinter: `E-Mail (Eingang) – Inhalt fehlt (zu groß)`. Gerade dann ist die
+  Richtung das Einzige, woran sich das Schreiben noch einordnen lässt.
+
+**An der Oberfläche war nichts zu ändern.** Das Dokumentfenster zeigt die
+Kategorie ohnehin in jeder Zeile und macht aus jeder einen Knopf zur
+Stapelauswahl. Im echten Browser nachgesehen (Chromium, 1320 × 980, Demo mit
+umetikettierten Testdokumenten): Die Knopfreihe bricht sauber um, die Zeilen
+tragen die Richtung rechts neben dem Datum.
+
+Berichtigt sind außerdem der Satz „drei Kleinigkeiten" im Prüfbogen
+(`jusperfect/jurnodestest.py`) und der Kommentar in `_richtung`, der
+`isInbox` noch „die letzte offene Frage" nannte.
+
+**1837 Prüfungen grün** — sieben neue: fünf zur Richtung, eine dazu, dass
+eine Anlage sie erbt, und eine zur Seitenzählung (siehe unten).
+
+### Nachtrag 11.10.2026 — die zweite Meinung, und was davon zutraf
+
+Die Kanzlei hat die Schnittstellenfragen einer zweiten KI vorgelegt. Vier
+Punkte kamen zurück.
+
+**1. `isInbox`** — dasselbe Ergebnis, unabhängig gefunden, mit Verweis auf die
+Zeile in der Beschreibungsdatei. Bestätigt.
+
+**2. Der fehlende Schrägstrich** ist ein Verstoß gegen die OpenAPI-Regel, dass
+jeder Pfad mit `/` beginnt. Dazu kommt ein Beleg aus der Oberfläche selbst:
+Das Bildschirmfoto vom 11.10.2026 zeigt in der Adresszeile
+`https://dortschy-thunert.jur-nodes.net` **`correspondence`**`/get-by-reference`
+— ohne Trennzeichen. Die Dokumentation baut aus dem Pfad eine unbrauchbare
+Adresse. Dass `/correspondence/get-by-reference` richtig ist, bleibt
+trotzdem eine Vermutung; beweisen kann es nur ein Aufruf.
+
+**3. Die Seitenzählung — der Einwand war berechtigt gestellt und geprüft.**
+Die Warnung lautete: `POST /correspondence/search` führt `page` und gibt
+`pagesTotal` zurück; wer nur die erste Seite liest, bekommt eine Liste, die
+wie eine vollständige aussieht. **Nachgesehen: Das Programm liest alle
+Seiten** — `_alle_seiten_post` in `http_adapter.py` zählt hoch, bis
+`pagesTotal` erreicht ist, mit der gemessenen Eigenart, dass die erste
+Anfrage ohne `page` hinausgeht. Geprüft war das bisher nur für die
+GET-Aufrufe; für die E-Akte gab es keine Prüfung. **Jetzt gibt es eine:**
+drei Seiten Vermerke, fünf Einträge, und die Prüfung misst, dass alle drei
+Seiten abgefragt wurden.
+
+Das ist der Nutzen einer zweiten Meinung, auch wenn der Befund sich nicht
+bestätigt: Die Lücke war keine im Programm, sondern eine im Prüfnetz.
+
+**4. Der Ordnerbaum für die Gruppierung** — trifft die offene Aufgabe
+„Ordner im Dokumentfenster gruppieren". Festgehalten für den Einbau.
+
+**Was die zweite Meinung noch braucht:** Sie arbeitet mit dem Prüfbestand vom
+**16.09.2026**. Alles seither — die E-Akte, die Mails, die 1830 Prüfungen —
+hat sie nicht gesehen und sagt das auch deutlich: Die Zahl der grünen
+Prüfungen sei „eine Angabe aus dem Standbericht, kein von mir bestätigtes
+Ergebnis." Richtig. Ohne aktuellen Quelltext ist keine Sicherheitsprüfung
+möglich, und `PRUEFAUFTRAG.md` ist vom 05.10.2026 und nennt noch 1625
+Prüfungen.

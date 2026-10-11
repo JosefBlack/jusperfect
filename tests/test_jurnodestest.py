@@ -601,7 +601,10 @@ def test_der_satz_fuer_den_hersteller_steht_am_ende(capsys) -> None:
     # Und das, was offen ist, steht da - und zwar nur noch das.
     assert "ANFRAGE-HERSTELLER.md" in ausgabe
     assert "isInbox" in ausgabe
-    assert "Offen sind nur noch drei Kleinigkeiten" in ausgabe
+    assert "Offen sind nur noch zwei Kleinigkeiten" in ausgabe
+    # Seit dem 11.10.2026 wird isInbox nicht mehr gefragt, sondern genannt.
+    assert "1 = Eingang, 0 = Ausgang" in ausgabe
+    assert "1 = eingegangen?" not in ausgabe, "Das ist beantwortet."
     # Was beantwortet ist, wird nicht mehr als offen ausgegeben.
     assert "Offen ist, warum der Server" not in ausgabe
     assert "Offen bleiben ausserdem: die Dateiart" not in ausgabe
