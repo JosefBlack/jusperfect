@@ -1,8 +1,8 @@
-# Was von jur|nodes noch fehlt — Stand 08.10.2026, nach dem Lauf
+# Was von jur|nodes noch fehlt — Stand 11.10.2026
 
 **Fast alles ist beantwortet.** Der Lauf vom 08.10.2026 am Server der Kanzlei
-hat die letzten Fragen gemessen statt gefragt. Offen sind drei Kleinigkeiten;
-sie stehen unten. Die lange Liste darunter ist Gedächtnisstütze — sie sagt,
+hat die letzten Fragen gemessen statt gefragt. Offen sind **zwei**
+Kleinigkeiten; sie stehen unten. Die lange Liste darunter ist Gedächtnisstütze — sie sagt,
 was **nicht** mehr zu fragen ist.
 
 > **Berichtigung vom 08.10.2026.** Die Fassungen vom 06. und 07.10.2026
@@ -94,26 +94,25 @@ erforderlich, weil alles in der E-Akte liegt.
 
 Nach dem Lauf vom 08.10.2026 am Server der Kanzlei ist es **sehr wenig**.
 
-### 1. Was bedeutet `isInbox`?
-
-`CorrespondenceModel.isInbox` ist eine Zahl.
-
-> **Frage:** Heißt `1` „eingegangen" und `0` „ausgegangen"?
-
-Für eine Akte ist die Richtung eines Schreibens wesentlich. Das ist die
-einzige Frage, die ein Lauf nicht beantworten kann, ohne den Inhalt eines
-Schreibens anzusehen — und das tut die Probe nicht.
-
-### 2. Ein fehlender Schrägstrich in der Beschreibung
+### 1. Ein fehlender Schrägstrich in der Beschreibung
 
 Bei einem von 85 Pfaden fehlt der führende `/`:
 `correspondence/get-by-reference`. Die übrigen 84 beginnen mit `/`.
 
 > **Frage:** Lautet der Pfad `/correspondence/get-by-reference`?
 
-### 3. Gibt es eine neuere Fassung als 1.0.2?
+### 2. Gibt es eine neuere Fassung als 1.0.2?
 
 Falls ja, bitte diese.
+
+*Nachtrag 11.10.2026:* Vieles spricht dagegen, dass eine fehlt. Drei Aufrufe
+aus der Oberfläche der Herstellerdokumentation — `POST /correspondence/add`,
+`GET /correspondence`, `POST /correspondence` — wurden gegen
+`jurnodes-api-1.0.2.json` gehalten: Überschrift, Beschreibungssatz und
+benötigtes Recht wörtlich gleich, und `CorrespondenceModel` mit **22 Feldern
+in derselben Reihenfolge**, kein Feld zu viel, keines zu wenig. Was online
+steht, ist also die Fassung, die wir haben. Das beweist nicht, dass es keine
+neuere gibt — es heißt nur, dass die Oberfläche keine andere zeigt.
 
 ---
 
@@ -147,6 +146,30 @@ falschen Baum. **Dazu ist nichts zu fragen.**
 ---
 
 ## Was sich erledigt hat — bitte nicht wieder fragen
+
+**Was `isInbox` bedeutet — es stand in der Beschreibung.** Nicht im
+Beispielkörper, sondern in der Eigenschaft selbst:
+
+> `isInbox` · number · *„1 = Eingang, 0 = Ausgang, **-1 = Neutral/Unbekannt**"*
+
+So steht es in `schnittstelle/jurnodes-api-1.0.2.json`, gleichlautend in
+beiden Schemata — `Correspondence` (schreibend) und `CorrespondenceModel`
+(lesend). `POST /correspondence/search` gibt `CorrespondenceSearchResponse`
+zurück, dessen `elements` genau dieses `CorrespondenceModel` sind. Die
+Richtung ist also bei jedem Eintrag der E-Akte mitgeliefert, ohne einen
+zweiten Aufruf.
+
+**Der dritte Wert ist der Grund, warum Raten falsch gewesen wäre.** Die
+Vermutung lautete „1 heißt eingegangen, 0 ausgegangen". Sie ist richtig — aber
+unvollständig: `-1` heißt *weder noch*. Wer das Feld als Ja/Nein liest, schreibt
+über jedes neutrale Schreiben „Ausgang". Ein falsch herum beschriftetes
+Schriftstück in einer Handakte ist teurer als ein gar nicht beschriftetes.
+
+*Gefunden am 11.10.2026* an den Beispielkörpern aus der Oberfläche der
+Herstellerdokumentation. Die Beispiele selbst zeigen nur den Platzhalter
+`"isInbox": 0`; die Bedeutung steht im Schema dahinter, das die Oberfläche
+erst auf Aufklappen zeigt.
+
 
 **Woher `attachmentId` beim beA kommt — und welche Dateiart.** Aus
 `GET /bea?beaIdentifier=…`: Die Antwort `BeaMessage` führt `attachments`, eine

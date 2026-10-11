@@ -2194,3 +2194,83 @@ eingesetzt hätte, hätte das Inferenzprofil ausgesperrt — den Weg, über den
 jede Analyse läuft —, und der Fehler wäre erst beim nächsten Aufruf
 aufgefallen, aussehend wie ein Modellproblem. Nachgetragen als Schritt 10,
 mit dem Hinweis, dass die Zeichenfolge zweimal vorkommt.
+
+---
+
+## 11.10.2026 — `isInbox` ist beantwortet, und zwar aus unserer eigenen Datei
+
+Herr Dortschy hat drei Beispielkörper aus der Oberfläche der
+Herstellerdokumentation geschickt und in jedem `isInbox` markiert:
+`POST /correspondence/add` („Request samples"), `GET /correspondence`
+(„Korrespondenzen Laden") und `POST /correspondence` („Korrespondenzen
+Update").
+
+**Die Beispiele selbst sagen nichts.** In allen dreien steht nur der
+Platzhalter `"isInbox": 0` — so, wie die Oberfläche jede Zahl zeigt. Die
+Antwort steht eine Ebene darunter, im Schema, das die Oberfläche erst auf
+Aufklappen zeigt:
+
+> `isInbox` · number · *„1 = Eingang, 0 = Ausgang, -1 = Neutral/Unbekannt"*
+
+Das steht in `schnittstelle/jurnodes-api-1.0.2.json` — **seit dem 05.10.2026
+im Programmordner**, gleichlautend in `Correspondence` und
+`CorrespondenceModel`.
+
+### Der dritte Wert ist der Punkt
+
+Die Vermutung in `ANFRAGE-HERSTELLER.md` lautete: „Heißt 1 eingegangen und 0
+ausgegangen?" Sie war richtig — und unvollständig. `-1` heißt *weder noch*.
+Wer das Feld als Ja/Nein liest, schreibt über jedes neutrale Schreiben
+„Ausgang".
+
+Dass `_richtung()` in `jusperfect/jurnodes/http_adapter.py` bisher nur
+„E-Mail" zurückgibt und die Richtung weglässt, war deshalb richtig. Der
+Kommentar dort nennt es „die letzte offene Frage in ANFRAGE-HERSTELLER.md" —
+das stimmt seit heute nicht mehr und ist mit dem Einbau zu berichtigen.
+
+### Der Weg ist vollständig
+
+`POST /correspondence/search` gibt `CorrespondenceSearchResponse` zurück;
+deren `elements` sind `CorrespondenceModel`, und das führt `isInbox`. Die
+Richtung liegt also bei jedem Eintrag der E-Akte schon vor — ohne zweiten
+Aufruf, ohne in ein Schreiben hineinzusehen.
+
+### Nebenbei dreierlei
+
+* **Die Oberfläche zeigt 1.0.2.** Alle drei Aufrufe sind Feld für Feld und
+  Wort für Wort deckungsgleich mit unserer Datei: dieselbe Überschrift,
+  derselbe Beschreibungssatz, dasselbe benötigte Recht, und
+  `CorrespondenceModel` mit 22 Feldern in derselben Reihenfolge. Das beweist
+  nicht, dass es keine neuere Fassung gibt; es heißt, dass die Oberfläche
+  keine andere zeigt.
+* **`referencePost` ist zweierlei, und das ist kein Widerspruch.** Im
+  Schreibschema `Correspondence` ein Objekt (`CorrespondencePost` mit
+  `identifier` und `type`), im Lesemodell `CorrespondenceModel` eine Zahl.
+  Zwei Schemata, zwei Richtungen.
+* **Ein Warnhinweis, der die Rechtevorgabe bestätigt.** Die Beschreibung von
+  `POST /correspondence/add` sagt: *„beim Erzeugen einer Korrespondenz wird
+  die ursprüngliche beA-Nachricht aus dem eigentlichen beA-Ordner entfernt.
+  Bitte prüfen Sie sorgfältig, dass keine beA-Nachricht in Vergessenheit
+  gerät."* Ein schreibender Aufruf, der nebenbei etwas aus dem beA-Ordner
+  nimmt — genau dafür gehört `write:correspondence` nicht an den
+  Schnittstellenbenutzer.
+
+### Was daraus folgt — zum vierten Mal dieselbe Lehre
+
+Der 401 stand in unserer Tabelle. `correspondenceFolderId` stand in
+`tests/test_dokumentliste.py`. Die benötigten Rechte standen im Feld
+`description`. Und jetzt `isInbox`, in derselben Datei, eine Zeile neben dem
+Feldnamen, den wir vier Wochen lang gelesen haben.
+
+> Gesucht wurde immer dort, wo die Antwort stehen *sollte*. Nicht dort, wo
+> sie stand.
+
+Die Frage ist aus `ANFRAGE-HERSTELLER.md` heraus; offen sind dort noch
+**zwei** Kleinigkeiten statt drei.
+
+### Noch nicht gebaut
+
+Die Richtung anzuzeigen ist ein Eingriff in die Oberfläche und in das, was in
+einer echten Akte an einem Schriftstück steht. Er wartet auf das Wort der
+Kanzlei — zusammen mit der Berichtigung des Kommentars in `http_adapter.py`
+und des Satzes „drei Kleinigkeiten" in `jusperfect/jurnodestest.py`.
