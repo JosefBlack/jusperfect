@@ -1,4 +1,4 @@
-"""Kein echtes Aktenzeichen im Bestand — für den ganzen Programmordner.
+"""Kein echtes Aktenzeichen und kein echter Name im Bestand.
 
 **Entscheidung der Kanzlei vom 12.10.2026:** Die echten Aktenzeichen kommen
 heraus, auch aus `MORGEN.md`.
@@ -38,13 +38,74 @@ WURZEL = Path(__file__).resolve().parent.parent
 ECHT = re.compile(r"\b[DT]-\d{3}-\d{4}\b")
 
 #: Die Datei des Herstellers wird nicht angefasst - ihre Beispiele sind seine.
+#: Sie fuehrt selbst einen der Namen unten; deshalb steht sie hier.
 UNBERUEHRT = {"schnittstelle/jurnodes-api-1.0.2.json"}
+
+#: Das echte Rubrum, das am 11.10.2026 im Bestand gefunden wurde.
+#:
+#: **Zusammengesetzt, und das ist der Punkt.** Diese Datei wird von der
+#: Pruefung unten selbst gelesen; stuenden die Namen hier ausgeschrieben,
+#: fiele sie durch sich selbst. Genau das ist am 12.10.2026 dreimal passiert -
+#: einmal in der Pruefdatei und zweimal in der Chronik, jedesmal weil die
+#: Beschreibung eines Fundes den Fund wieder hergestellt hat.
+#:
+#: > Wer einen Fund beschreibt, schreibt ihn hin.
+#:
+#: Die Namen sind hier nicht verschluesselt und sollen es nicht sein - wer die
+#: Datei liest, soll sehen, worum es geht. Sie stehen nur nicht als ganze
+#: Zeichenkette darin.
+_RUBRUM = tuple("".join(teile) for teile in (
+    ("M", "üller"),     # Mandant, mit Umlaut
+    ("M", "ueller"),    # und ohne - fuenf Dateien trugen nur diese Form
+    ("H", "UK"),        # der Gegner
+    ("Sau", "er"),      # eine zweite Akte, gleiches Muster
+))
+
+#: Als ganzes Wort, Gross-/Kleinschreibung zaehlt: "sauer" ist ein Adjektiv.
+NAMEN = tuple(re.compile(rf"\b{re.escape(n)}\b") for n in _RUBRUM)
 
 
 def _dateien() -> list[str]:
     roh = subprocess.run(["git", "ls-files"], cwd=WURZEL, capture_output=True,
                          text=True, check=True).stdout.split()
     return [n for n in roh if n not in UNBERUEHRT]
+
+
+class KeinEchterNameImBestand(unittest.TestCase):
+    """Dasselbe fuer das Rubrum — und das hat laenger gefehlt als noetig.
+
+    Fuer die Aktenzeichen gab es seit dem 12.10.2026 eine Pruefung, fuer die
+    Namen nicht. Die Regel lebte allein in meiner Aufmerksamkeit, und
+    Aufmerksamkeit ist genau das, was bei der dritten Wiederholung nachlaesst:
+    Dreimal an einem Tag ist der Name zurueck in den Bestand gekommen, jedesmal
+    in der Beschreibung seiner eigenen Entfernung.
+
+    Eine Regel, die nur jemand im Kopf hat, ist keine Regel. Sie ist eine
+    Absicht.
+    """
+
+    def test_das_rubrum_steht_nirgends(self):
+        treffer: dict[str, list[str]] = {}
+        for name in _dateien():
+            try:
+                text = (WURZEL / name).read_text(encoding="utf-8")
+            except (UnicodeDecodeError, IsADirectoryError, FileNotFoundError):
+                continue
+            gefunden = [m.pattern for m in NAMEN if m.search(text)]
+            if gefunden:
+                treffer[name] = gefunden
+        self.assertEqual({}, treffer, "Das echte Rubrum ist zurueck im Bestand.")
+
+    def test_die_pruefung_kann_suchen(self):
+        """Sonst waere sie gruen, weil sie nichts findet — nicht, weil nichts da ist."""
+        probe = f"Akte {_RUBRUM[0]} gegen {_RUBRUM[2]}"
+        self.assertTrue(any(m.search(probe) for m in NAMEN))
+        self.assertFalse(any(m.search("Akte Testmann gegen Musterhaft") for m in NAMEN))
+
+    def test_ein_gewoehnliches_wort_wird_nicht_gefangen(self):
+        """„sauer" ist ein Adjektiv, „Sauerstoff" ein Gas."""
+        self.assertFalse(any(m.search("Die Milch ist sauer.") for m in NAMEN))
+        self.assertFalse(any(m.search("Sauerstoffgehalt") for m in NAMEN))
 
 
 class KeinEchtesAktenzeichenImBestand(unittest.TestCase):

@@ -2723,9 +2723,10 @@ Herstellerdatei war auf `main` noch gar nicht vorhanden; sie kam erst am
 
 ### Eine Regel hat gefehlt, und die Prüfungen haben es gesagt
 
-Der erste Durchgang ließ `tests/test_webdav_adapter.py` fallen: eine Zeile
-heißt *„… Meier **(ARCHIVIERT)** gegen Musterhaft"*, und mein Muster „Meier gegen
-Musterhaft" greift nicht über die Klammer hinweg. Dieselbe Stelle war mir am
+Der erste Durchgang ließ `tests/test_webdav_adapter.py` fallen: In einer Zeile
+stand zwischen dem Namen und dem Gegner ein Wort in Klammern, und mein Muster
+führte beide **unmittelbar nebeneinander**. Es griff deshalb nicht. Dieselbe
+Stelle war mir am
 11.10.2026 schon einmal entwischt; damals habe ich sie von Hand nachgezogen.
 
 **Diesmal nicht von Hand.** `main` wurde auf den Ausgangsstand zurückgesetzt,
@@ -2789,3 +2790,39 @@ keinem Verzeichnis mehr, der Zweig zeigt woanders hin, und das Repository ist
 privat, ohne Forks und ohne Beobachter. Das ist kein Schutz, auf den man sich
 verlässt — aber es ist der Unterschied zwischen „offen zugänglich" und „für
 den auffindbar, der die Nummer schon hat".
+
+### Nachtrag 12.10.2026 — zum dritten Mal derselbe Fehler, und jetzt eine Prüfung dagegen
+
+Beim Bündeln des bereinigten Standes zur Gegenprobe fiel auf: **Der Name des
+Gegners stand wieder in `MORGEN.md`.** In dem Absatz, der beschreibt, warum
+beim Umschreiben von `main` eine Ersetzungsregel gefehlt hat — ich hatte die
+Regel zitiert, und die Regel enthält den Namen.
+
+Das ist derselbe Vorgang wie zweimal vorher an diesem Tag:
+
+| Wo | Was |
+|---|---|
+| Chronik, 11.10. | Die Fundtabelle zitierte das Rubrum, um zu zeigen, wo es stand |
+| Prüfdatei, 12.10. | Die Gegenprobe trug echt aussehende Aktenzeichen ausgeschrieben |
+| Chronik, 12.10. | Der Bericht über die fehlende Regel zitierte die Regel |
+
+Dreimal dieselbe Bewegung: **Die Beschreibung eines Fundes stellt den Fund
+wieder her.**
+
+### Warum es dreimal passieren konnte
+
+Für die **Aktenzeichen** gab es seit heute Vormittag eine Prüfung. Für die
+**Namen** nicht — dort lebte die Regel allein in meiner Aufmerksamkeit. Und
+Aufmerksamkeit ist genau das, was bei der dritten Wiederholung nachlässt.
+
+> Eine Regel, die nur jemand im Kopf hat, ist keine Regel. Sie ist eine
+> Absicht.
+
+`tests/test_keine_echten_akten.py` prüft jetzt beides. Die Namen stehen darin
+**zusammengesetzt**, nicht ausgeschrieben — sonst fiele die Datei durch sich
+selbst, wie es der ersten Fassung heute Vormittag ergangen ist. Dazu zwei
+Gegenproben: dass das Muster überhaupt sucht, und dass es „sauer" und
+„Sauerstoff" in Ruhe lässt.
+
+**Gefunden hat es die Gegenprobe am Bündel**, nicht die Prüfungen — die
+suchten die Namen ja nicht. Das war Glück. Jetzt ist es keines mehr.
