@@ -292,6 +292,84 @@ class EinGlobalesProfilWirdAbgewiesen(unittest.TestCase):
         self.assertEqual(profil_befund(arn), "")
         self.assertEqual(self._bedrock(JUSPERFECT_MODELL_ID=arn).modell_id, arn)
 
+    # ── Befund N11 der dritten Zweitprüfung vom 12.10.2026 ──────────────────
+    #
+    # F13 war nur halb behoben. Geprüft wurde bei einer ARN allein deren
+    # Regionsfeld, und danach kehrte die Funktion zurück – bevor sie das
+    # Profil ansah, auf das die ARN zeigt. Eine Frankfurter ARN mit einem
+    # GLOBALEN Profil darin kam deshalb durch die ganze Prüfung. Der
+    # Kurzname wurde richtig abgewiesen; dieselbe Verteilregel in
+    # ARN-Schreibweise nicht.
+    #
+    # AWS beschreibt globale Profile als weltweite Verteilung. Die Region im
+    # Profil-ARN sagt, wo das Profil eingetragen ist – nicht, wo gerechnet
+    # wird.
+
+    def test_ein_globales_profil_in_einer_frankfurt_arn_wird_abgewiesen(self):
+        arn = ("arn:aws:bedrock:eu-central-1:123456789012:inference-profile/"
+               "global.anthropic.claude-opus-4-6-v1")
+        befund = profil_befund(arn)
+        self.assertIn("global.", befund)
+        with self.assertRaises(KonfigurationsFehler) as fehler:
+            self._bedrock(JUSPERFECT_MODELL_ID=arn)
+        self.assertIn("JUSPERFECT_MODELL_ID", str(fehler.exception))
+
+    def test_auch_us_und_apac_in_einer_frankfurt_arn(self):
+        """Nicht nur „global." – jeder fremde Vorsatz zählt auch in der ARN."""
+        for vorsatz in ("us.", "apac.", "jp."):
+            arn = (f"arn:aws:bedrock:eu-central-1:123456789012:inference-profile/"
+                   f"{vorsatz}anthropic.claude-opus-4-6-v1")
+            with self.subTest(vorsatz=vorsatz):
+                self.assertIn(vorsatz, profil_befund(arn))
+
+    def test_ein_eigenes_profil_wird_nicht_auf_zusage_hin_zugelassen(self):
+        """Bei „application-inference-profile" ist die Kennung eine Zufallsfolge.
+
+        Welche Regionen es bedient, steht nicht in der ARN – also ist es nicht
+        belegt. Der Befund nennt den Weg zum Nachweis mit.
+        """
+        arn = ("arn:aws:bedrock:eu-central-1:123456789012:"
+               "application-inference-profile/f8k2n4p9q1")
+        befund = profil_befund(arn)
+        self.assertIn("eigenes Inferenzprofil", befund)
+        self.assertIn("get-inference-profile", befund)
+
+    def test_ein_profil_ohne_eu_vorsatz_ist_nicht_belegt(self):
+        """Fail closed: Was nicht als EU-Profil erkennbar ist, gilt nicht als eines."""
+        arn = "arn:aws:bedrock:eu-central-1:123456789012:inference-profile/eigen"
+        self.assertIn("'eu.'", profil_befund(arn))
+
+    def test_ein_modell_in_frankfurt_bleibt_erlaubt(self):
+        """Ein Modell ist ortsfest: Es liegt, wo die ARN es hinschreibt.
+
+        Sonst wäre die Prüfung zu streng und würde die richtige Einstellung
+        abweisen – auch das ist ein Schaden.
+        """
+        for mittel in ("foundation-model/anthropic.claude-opus-4-6-v1",
+                       "provisioned-model/abc123",
+                       "custom-model/eigenes-modell"):
+            arn = f"arn:aws:bedrock:eu-central-1:123456789012:{mittel}"
+            with self.subTest(mittel=mittel):
+                self.assertEqual(profil_befund(arn), "")
+
+    def test_eine_arn_ohne_region_gilt_nicht_als_eu_ziel(self):
+        """Vorher kam „arn:aws:bedrock" mit leerer Region durch: region war ""
+        und die Prüfung gab „" zurück – also in Ordnung."""
+        for arn in ("arn:aws:bedrock",
+                    "arn:aws:bedrock:::inference-profile/eu.anthropic.x",
+                    "arn:aws:bedrock:   :123:inference-profile/eu.anthropic.x"):
+            with self.subTest(arn=arn):
+                self.assertNotEqual(profil_befund(arn), "")
+
+    def test_grossschreibung_hilft_nicht_daran_vorbei(self):
+        arn = ("ARN:AWS:BEDROCK:eu-central-1:123456789012:INFERENCE-PROFILE/"
+               "global.anthropic.claude-opus-4-6-v1")
+        self.assertIn("global.", profil_befund(arn))
+
+    def test_ein_unbekanntes_mittel_gilt_als_nicht_geprueft(self):
+        arn = "arn:aws:bedrock:eu-central-1:123456789012:etwas-neues/xyz"
+        self.assertIn("nicht bekannt", profil_befund(arn))
+
     def test_der_demo_anbieter_bleibt_unberuehrt(self):
         """Er ruft kein Modell auf; eine Kennung ist dort ein Name ohne Folge."""
         e = einstellungen(JUSPERFECT_MODELL_ID="global.anthropic.claude-opus-4-6-v1")

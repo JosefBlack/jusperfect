@@ -166,8 +166,9 @@ def profil_befund(kennung: str) -> str:
 
     * ``eu.anthropic.…`` – ein EU-Inferenzprofil. In Ordnung.
     * ``global.…``/``us.…`` – ein Profil, das anderswohin verteilt. Nicht.
-    * eine vollständige ARN – dann entscheidet die Region **in der ARN**,
-      nicht die Aufrufregion.
+    * eine vollständige ARN – dann entscheiden die Region **in der ARN** und
+      das Mittel, auf das sie zeigt (siehe ``_arn_befund``). Die Aufrufregion
+      entscheidet in keinem der drei Fälle.
 
     Eine Kennung ohne Vorsatz (``anthropic.…``) bekommt in Europa von
     ``_modellkennung`` das ``eu.`` vorangestellt und erreicht diese Prüfung gar
@@ -179,18 +180,85 @@ def profil_befund(kennung: str) -> str:
         return ""
     klein = kennung.lower()
     if klein.startswith("arn:"):
-        teile = kennung.split(":")
-        region = teile[3] if len(teile) > 4 else ""
-        if region and region not in EU_EWR_REGIONEN:
-            wo = _SCHEIN_EU_REGIONEN.get(region)
-            return (f"die ARN zeigt auf {region!r}"
-                    + (f" – das liegt in {wo}" if wo else " – das ist keine EU-/EWR-Region"))
-        return ""
+        return _arn_befund(kennung)
     for vorsatz in FREMDE_PROFILE:
         if klein.startswith(vorsatz):
             return (f"{vorsatz!r} ist ein Inferenzprofil, das außerhalb der EU "
                     f"verteilt – die Aufrufregion ändert daran nichts")
     return ""
+
+
+#: Was in einer ARN hinter dem Doppelpunkt stehen kann und an eine Region
+#: gebunden ist. Ein Modell, eine gebuchte Kapazitaet, ein eigenes oder
+#: eingefuehrtes Modell liegt dort, wo die ARN es hinschreibt.
+_ORTSFESTE_MITTEL = ("foundation-model", "provisioned-model", "custom-model",
+                     "imported-model", "custom-model-deployment")
+
+#: Ein Inferenzprofil ist das Gegenteil: eine Verteilregel ueber mehrere
+#: Regionen. Welche, sagt bei "application-inference-profile" nur AWS - die
+#: Kennung ist eine Zufallsfolge.
+_PROFIL_MITTEL = "inference-profile"
+_EIGENES_PROFIL_MITTEL = "application-inference-profile"
+
+
+def _arn_befund(arn: str) -> str:
+    """Warum diese ARN die EU verlassen würde – „" wenn nicht.
+
+    Befund N11 der dritten Zweitprüfung vom 12.10.2026: Hier wurde **nur** das
+    Regionsfeld der ARN geprüft und dann zurückgekehrt. Damit kam
+
+        arn:aws:bedrock:eu-central-1:…:inference-profile/global.anthropic.…
+
+    durch die ganze Prüfung — eine Frankfurter ARN, in der ein **globales**
+    Profil steht. Der Kurzname ``global.anthropic.…`` wurde richtig
+    abgewiesen; dieselbe Verteilregel in ARN-Schreibweise nicht. Das ist die
+    verschobene Lücke F13, nicht deren behobene Hälfte.
+
+    AWS beschreibt globale Profile ausdrücklich als weltweite Verteilung. Die
+    Region **im** Profil-ARN ist deshalb kein Nachweis, wohin gerechnet wird:
+    sie sagt, wo das Profil eingetragen ist, nicht, wo es verteilt.
+
+    Geprüft wird darum beides — die Region **und** das Mittel, auf das die ARN
+    zeigt. Fail closed: Was sich nicht lesen lässt, gilt als nicht belegt.
+    """
+    teile = arn.split(":")
+    # arn : partition : dienst : region : konto : mittel[/kennung]
+    if len(teile) < 6:
+        return ("die ARN ist unvollständig – Region und Ziel lassen sich nicht "
+                "ablesen, und ungeprüft gilt sie nicht als EU-Ziel")
+    region = teile[3].strip()
+    if not region:
+        return ("die ARN nennt keine Region – ohne Region ist nicht belegt, wo "
+                "gerechnet wird")
+    if region not in EU_EWR_REGIONEN:
+        wo = _SCHEIN_EU_REGIONEN.get(region)
+        return (f"die ARN zeigt auf {region!r}"
+                + (f" – das liegt in {wo}" if wo else " – das ist keine EU-/EWR-Region"))
+    rest = ":".join(teile[5:]).strip()
+    mittel, _, profil = rest.partition("/")
+    mittel = mittel.strip().lower()
+    profil = profil.strip()
+    if mittel in _ORTSFESTE_MITTEL:
+        # Ortsfest: Es liegt in der Region, die oben schon geprüft ist.
+        return ""
+    if mittel == _EIGENES_PROFIL_MITTEL:
+        return ("die ARN zeigt auf ein eigenes Inferenzprofil "
+                f"({_EIGENES_PROFIL_MITTEL!r}); welche Regionen es bedient, steht "
+                "nicht in der ARN. Nachweis: 'aws bedrock get-inference-profile' "
+                "aus der Aufrufregion, und dessen Modell-ARNs hier eintragen")
+    if mittel == _PROFIL_MITTEL:
+        klein = profil.lower()
+        for vorsatz in FREMDE_PROFILE:
+            if klein.startswith(vorsatz):
+                return (f"die ARN zeigt auf das Profil {profil!r} – {vorsatz!r} "
+                        f"verteilt außerhalb der EU, und die Region der ARN ändert "
+                        f"daran nichts")
+        if klein.startswith("eu."):
+            return ""
+        return (f"die ARN zeigt auf das Profil {profil!r}; ohne den Vorsatz 'eu.' "
+                f"ist nicht belegt, dass es nur in der EU verteilt")
+    return (f"die ARN zeigt auf {rest!r}; was das für eine Verteilung bedeutet, "
+            f"ist hier nicht bekannt, und ungeprüft gilt sie nicht als EU-Ziel")
 
 
 def _modellkennung(kennung: str, region: str) -> str:
