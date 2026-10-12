@@ -3082,3 +3082,64 @@ jetzt in `FASSUNGEN.md`; das Nachsehen kann er nicht ersetzen.
 
 Das ist dieselbe Art Rückstand wie die unerreichbaren git-Objekte heute Mittag:
 **Nicht der Ort, an dem man sucht, sondern der, an den man nicht denkt.**
+
+---
+
+## 12.10.2026 — die ZIP vom 06.10. trägt die Namen: 39 Dateien
+
+Die Kanzlei hat gesucht. **39 Treffer.** Damit ist belegt, was vorher eine
+Vermutung war: Pakete aus jener Woche trugen Aktenzeichen und Rubrum.
+
+### Was daraus für das Paket vom 05.10.2026 folgt
+
+Das ist das Paket, das an die **Zweitprüfung** ging — und es existiert nicht
+mehr bei der Kanzlei. Es lässt sich also nicht mehr durchsuchen. Was sich
+sagen lässt:
+
+* Die Namen standen in **Prüfdateien und Beispielen**, die lange vor dem
+  05.10.2026 geschrieben wurden — das Programm ist älter als sein
+  git-Verzeichnis, das erst am 05.10. um 10:58 Uhr angelegt wurde.
+* Die ZIP vom **06.10.** trägt sie, 39-mal.
+* Der Prüfbericht nennt für das Paket vom 05.10. **269 Dateien**; der erste
+  Commit hatte 261.
+
+**Daraus folgt mit hoher Wahrscheinlichkeit, aber nicht mit Gewissheit:** Auch
+das Paket vom 05.10.2026 trug sie. Beweisen lässt es sich nicht mehr — die
+Datei ist weg, und die Prüfsumme im Bericht nützt ohne die Datei nichts.
+
+**Dasselbe gilt für den Bestand vom 16.09.2026**, mit dem die *jetzige* zweite
+Meinung arbeitet. Auch er liegt vor jeder Bereinigung.
+
+### Was abgeflossen wäre, und was nicht
+
+Das ist für die Bewertung der Unterschied, auf den es ankommt:
+
+| | |
+|---|---|
+| **Enthalten** | Aktenzeichen, Mandantenname, Gegner — als Ordnername, Kurzrubrum und Laufwerkspfad in Prüfdateien und Anleitungen |
+| **Nicht enthalten** | Akteninhalt. Kein Schriftsatz, kein Sachverhalt, kein Betreff, kein Dokument aus der Akte |
+
+Die Namen standen dort als **Prüfmaterial**, nie neben einem Aktenstück. Wer
+das Paket las, erfuhr: *Diese Kanzlei führt unter dieser Nummer eine Sache
+dieses Mandanten gegen diesen Gegner.* Mehr nicht — und das ist immer noch
+genug, um eine Bewertung zu verlangen.
+
+**Die Bewertung ist Sache der Kanzlei.** Ob hier eine Meldepflicht besteht,
+ob der Prüfer um Löschung zu bitten ist, ob der Mandant zu unterrichten ist —
+das sind Rechtsfragen, und der Nutzer ist Rechtsanwalt. Die Entwicklung liefert
+die Tatsachen, nicht die Würdigung.
+
+### Was daraus für die Arbeitsweise folgt
+
+Der Fehler war nicht, dass die Namen hineingerieten — das passiert, wenn man
+Prüfdaten aus dem schreibt, was man vor Augen hat. Der Fehler war, dass es
+**vier Wochen lang niemandem auffiel**, und dass die einzige Stelle, an der
+jemand hingesehen hatte, nur **eine** Datei bereinigte.
+
+> Prüfdaten entstehen am Schreibtisch, an dem die echten Akten liegen. Dass sie
+> erfunden sind, ist kein Nebenprodukt der Sorgfalt — es muss geprüft werden
+> wie alles andere.
+
+Seit dem 12.10.2026 prüft `tests/test_keine_echten_akten.py` beides, Namen und
+Aktenzeichen, über jede Datei, die git kennt. Vier Rückfälle an einem Tag hat
+sie gefangen — drei in der Chronik, einen in sich selbst.
