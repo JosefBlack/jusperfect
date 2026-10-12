@@ -2682,11 +2682,8 @@ spät und einmal an sich selbst. Das ist kein Argument gegen sie.
 
 ### Was damit **nicht** erledigt ist
 
-**Der Zweig `main`.** Er trägt eine **eigene** Geschichte — 79 Commits, kein
-gemeinsamer Vorfahr mit `2.0`, Stand „Fassung 1.0" vom 15.09.2026 — und die
-Namen stehen dort nicht nur in der Vorgeschichte, sondern in den **heutigen
-Dateien**. Nach der Vorgabe der Kanzlei wird nur auf `2.0` geschrieben;
-`main` bleibt deshalb unberührt, bis die Kanzlei es ausdrücklich anweist.
+~~**Der Zweig `main`.**~~ **Erledigt am 12.10.2026** auf ausdrückliche
+Anweisung der Kanzlei — siehe den Nachtrag unten.
 
 **Und das Entscheidende, das keine Umschreibung leistet — am 12.10.2026
 gemessen, nicht vermutet:** Ein überschreibender Push nimmt die alten Commits
@@ -2707,3 +2704,48 @@ Entscheidung der Kanzlei.
 
 **Entlastend bleibt:** Das Repository ist privat, ohne Forks und ohne
 Beobachter (nachgesehen am 11.10.2026).
+
+
+### Nachtrag 12.10.2026 — `main` ist ebenfalls umgeschrieben
+
+Auf Anweisung der Kanzlei. Das ist die **eine** Abweichung von der festen
+Vorgabe „nur auf `2.0` schreiben"; danach gilt sie wieder.
+
+`main` trägt eine eigene Geschichte: **79 Commits**, kein gemeinsamer Vorfahr
+mit `2.0`, Stand „Fassung 1.0" vom 15.09.2026. Dort standen die Namen nicht
+nur in der Vorgeschichte, sondern in den heutigen Dateien — 30-mal die
+Aktennummer, 13-mal der Gegner.
+
+**Alle 79 Commits sind neu geschrieben**, Dateien und Texte, mit denselben
+Ersetzungen wie bei `2.0`, damit beide Zweige dieselbe Sprache sprechen. Die
+Herstellerdatei war auf `main` noch gar nicht vorhanden; sie kam erst am
+05.10.2026 dazu.
+
+### Eine Regel hat gefehlt, und die Prüfungen haben es gesagt
+
+Der erste Durchgang ließ `tests/test_webdav_adapter.py` fallen: eine Zeile
+heißt *„… Meier **(ARCHIVIERT)** gegen Musterhaft"*, und mein Muster „Meier gegen
+Musterhaft" greift nicht über die Klammer hinweg. Dieselbe Stelle war mir am
+11.10.2026 schon einmal entwischt; damals habe ich sie von Hand nachgezogen.
+
+**Diesmal nicht von Hand.** `main` wurde auf den Ausgangsstand zurückgesetzt,
+die fehlende Regel eingefügt und neu geschrieben — ein Flickcommit obendrauf
+hätte den Fehler verdeckt statt behoben. Danach **426 Prüfungen grün**.
+
+> Eine Ersetzung von Hand repariert eine Stelle. Eine Regel repariert alle,
+> die so aussehen — auch die, die man noch nicht gesehen hat.
+
+### Zwei Gegenproben, nicht eine
+
+1. **Kein Treffer** in einem der 79 Commits, weder in Dateien noch in Texten.
+2. **Nur ersetzt, nichts zerstört:** Alle 92 geänderten Zeilen (46 raus, 46
+   rein) tragen einen der ersetzten Begriffe. Eine Umschreibung, die eine
+   Datei beschädigt, fiele in Gegenprobe 1 nicht auf — dort wäre sie sogar
+   besonders sauber.
+
+**Stand jetzt:** `main` auf `1e538cd`, `2.0` auf `dd1074c`, beide entfernten
+Zweige geprüft und sauber.
+
+**Unverändert bleibt, was keine Umschreibung leistet:** Die alten Commits sind
+über ihre Prüfsumme weiter vom Server zu holen — am 12.10.2026 gemessen. Sicher
+weg sind sie erst, wenn das Repository gelöscht und neu angelegt wird.
