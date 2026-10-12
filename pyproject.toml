@@ -61,3 +61,9 @@ jusperfect = ["static/*", "packs/*.json"]
 # Bei ihnen bedeutet GRUEN: die Luecke besteht noch. Im taeglichen Lauf waere
 # das verwirrend; sie werden einzeln aufgerufen (siehe zweitpruefung/README.md).
 testpaths = ["tests"]
+# Befund N08 vom 12.10.2026: Pruefungen laufen ohne Netz und ohne die
+# Umgebung des Rechners (siehe tests/conftest.py). Wer wirklich hinaus muss,
+# sagt es mit dieser Marke - und braucht einen Testmandanten, keine echte Akte.
+markers = [
+  "echtes_netz: diese Pruefung baut absichtlich eine Verbindung nach draussen auf",
+]
