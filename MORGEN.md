@@ -2826,3 +2826,50 @@ Gegenproben: dass das Muster überhaupt sucht, und dass es „sauer" und
 
 **Gefunden hat es die Gegenprobe am Bündel**, nicht die Prüfungen — die
 suchten die Namen ja nicht. Das war Glück. Jetzt ist es keines mehr.
+
+---
+
+## 12.10.2026 — das neue Repository steht
+
+Auf Anweisung der Kanzlei. **Das Anlegen konnte ich nicht selbst** — die
+GitHub-Zugangsdaten dieser Sitzung gelten nur für das eine Repository, das
+Anlegen eines neuen wird mit Status 403 abgewiesen. Die Kanzlei hat es
+angelegt, dann war es anzuhängen und zu füllen.
+
+| | |
+|---|---|
+| Neu | `JosefBlack/jusperfect`, privat, leer angelegt |
+| Zweig `2.0` | 63 Commits, 1861 Prüfungen grün |
+| Zweig `main` | 79 Commits, 426 Prüfungen grün |
+
+### Die Gegenprobe lief am Server, nicht am Arbeitsstand
+
+Das ist der Unterschied, auf den es ankommt: Der Arbeitsstand war längst
+geprüft. Geprüft werden musste, was wirklich **oben** liegt. Also frisch
+geklont und darin gesucht:
+
+* **142 Commits**, beide Zweige, Dateien **und** Commit-Texte, mit
+  Wortgrenzen: kein Treffer.
+* **Die Prüfungen laufen aus dem frischen Klon** — 1861 auf `2.0`, 426 auf
+  `main`. Damit steht, dass der Push nichts verloren hat; eine Suche allein
+  hätte auch ein halbes Repository für sauber erklärt.
+
+### Was noch zu tun bleibt, und zwar von der Kanzlei
+
+1. **Den Vorgabezweig auf `2.0` stellen.** Das neue Repository zeigt auf
+   `main` — die Kanzlei arbeitet aber auf `2.0`, und spätere Sitzungen holen
+   sich den Vorgabezweig. Einstellungen → *Default branch* → `2.0`.
+2. **Das alte Repository löschen.** Das ist der Schritt, der wirkt; alles
+   davor hat die Lage nur vorbereitet. Solange es steht, sind die alten
+   Commits über ihre Prüfsumme erreichbar — dreimal gemessen am 12.10.2026.
+3. **Die örtlichen Kopien auf beiden Kanzleirechnern** zeigen noch auf das
+   alte Repository und tragen dessen Vorgeschichte. Sie gehören neu geklont,
+   nicht umgehängt: Ein `git remote set-url` tauscht die Adresse, nicht die
+   Geschichte.
+
+### Was dieser Sitzung nicht gelingt
+
+Der **Prüfbericht der Zweitprüfung** nennt eine ZIP mit einer Prüfsumme. Ob
+die Namen darin lagen, ist hier nicht festzustellen — die Datei liegt auf dem
+Rechner der Kanzlei. Diese Frage bleibt offen, und sie ist die einzige, bei
+der es um etwas geht, das das Haus schon verlassen hat.
