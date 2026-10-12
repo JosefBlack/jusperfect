@@ -2873,3 +2873,81 @@ Der **Prüfbericht der Zweitprüfung** nennt eine ZIP mit einer Prüfsumme. Ob
 die Namen darin lagen, ist hier nicht festzustellen — die Datei liegt auf dem
 Rechner der Kanzlei. Diese Frage bleibt offen, und sie ist die einzige, bei
 der es um etwas geht, das das Haus schon verlassen hat.
+
+---
+
+## 12.10.2026 — das alte Repository ist gelöscht, und die Probe fällt zum ersten Mal anders aus
+
+Die Kanzlei hat den Vorgabezweig auf `2.0` gestellt und das alte Repository
+gelöscht.
+
+### Die vierte Messung
+
+Dieselbe Probe wie dreimal zuvor — frisch angelegtes, leeres Verzeichnis, nur
+Adresse und Prüfsumme:
+
+| Alter Stand | 12.10., vorher | 12.10., nach dem Löschen |
+|---|---|---|
+| alter Kopf von `2.0` | zu holen | **nicht mehr erreichbar** |
+| alter Kopf von `main` | zu holen | **nicht mehr erreichbar** |
+| Zwischenstand des Pull Requests | zu holen | **nicht mehr erreichbar** |
+
+Und das Repository selbst: *„repository not found"*.
+
+> Umschreiben, überschreibend pushen, Pull Request schließen — dreimal keine
+> Wirkung. Löschen — Wirkung. Was dazwischen lag, war Vorbereitung.
+
+### Ein Verlust, und er geht auf mein Konto
+
+`ANLEITUNG.md` nennt drei Zweige: *„Daneben liegen `main` und `fassung-1.0`;
+in beiden steht die ältere Fassung 1.0."*
+
+**Den Zweig `fassung-1.0` habe ich nicht mitgenommen.** Er steht in keiner
+Sicherung, nicht im neuen Repository, und das alte gibt es nicht mehr.
+
+Der Fehler ist einfach zu benennen: Ich habe die Zweige mit `git branch -a`
+aufgezählt — das zeigt, was **geholt** ist, nicht, was auf dem Server liegt.
+`git ls-remote --heads` hätte alle drei gezeigt. Vor einem unumkehrbaren
+Schritt ist die Frage „was ist alles da?" am Server zu stellen, nicht am
+eigenen Verzeichnis.
+
+**Was vermutlich nicht verloren ist:** Die Anleitung sagt, in `fassung-1.0`
+und `main` stehe **dasselbe** — die ältere Fassung 1.0 —, und der Kopf von
+`main` heißt wörtlich „Fassung 1.0". Dass der Inhalt erhalten ist, ist damit
+wahrscheinlich; **dass die beiden auf denselben Commit zeigten, ist es nicht
+mehr zu prüfen.** Ich sage das so, weil ich es nicht besser weiß.
+
+Wenn der Zweig gebraucht wird, lässt sich bei GitHub nachfragen, ob ein
+kürzlich gelöschtes Repository wiederhergestellt werden kann. Ob und wie lange
+das geht, weiß ich nicht und rate es nicht.
+
+### Dazu ein zweiter Fehler, von der Kanzlei bemerkt
+
+Ich hatte geraten, die örtlichen Kopien auf beiden Rechnern **neu zu klonen**.
+Die Rückfrage lautete sinngemäß: Was ist mit der Eingabeaufforderung gemeint?
+
+**Die Kanzlei benutzt gar kein git.** `ANLEITUNG.md`, Schritt 2: „Grüner Knopf
+*Code* → *Download ZIP*". Ein Klon hat dort nie gestanden; meine Anweisung war
+für einen Arbeitsablauf gedacht, den es im Haus nicht gibt.
+
+**Was dadurch richtig bleibt und was nicht:**
+
+* **Falsch:** „die Kopien neu klonen". Es gibt keine Klone, also auch keine
+  alte Vorgeschichte auf den Rechnern.
+* **Richtig, und wichtiger:** Auf beiden Rechnern liegt ein **entpackter
+  ZIP-Ordner** mit dem Stand von vor der Bereinigung. Darin stehen Name,
+  Gegner und Aktenzeichen — in `MORGEN.md`, in `UEBERGABE.md`, in den
+  Prüfdateien. Das ist der örtliche Rückstand, und er wird durch eine neue ZIP
+  **überschrieben**, nicht gelöscht: Die Anleitung sagt ausdrücklich, dass nur
+  ersetzt wird, was auch im ZIP steht.
+
+### `ANLEITUNG.md` stimmt an drei Stellen nicht mehr
+
+Sie gehört zu den vier Dateien, die nur auf ausdrückliche Anweisung geändert
+werden. Deshalb hier benannt, nicht geändert:
+
+| Zeile | Was dort steht | Was gilt |
+|---|---|---|
+| 49 | die Adresse des alten Repositorys | es ist gelöscht — der Verweis geht ins Leere |
+| 54 | `jusperfect--2.0.zip`, Ordner `jusperfect--2.0` | jetzt `jusperfect-2.0.zip` und `jusperfect-2.0` |
+| ~57 | „daneben liegen `main` und `fassung-1.0`" | es gibt nur noch `main` |
