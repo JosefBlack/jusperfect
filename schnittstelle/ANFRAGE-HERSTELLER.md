@@ -76,6 +76,31 @@ wird ausschließlich die Akte:
 | beA aus der Akte | `read:bea:record`, `download:bea:record` | ~~`…:postbox`~~ |
 | Post | `read:post`, `download:post` | — |
 
+**Das ist keine Vorsichtsmaßnahme, sondern die Sache selbst.** Vorgabe der
+Kanzlei, bestätigt am 12.10.2026:
+
+> *„Alle E-Mails und Vermerke werden in der E-Akte abgespeichert. Es macht
+> daher keinen Sinn und wäre sogar kontraproduktiv, wenn das Postfach
+> ausgelesen wird, in welchem sich alle Akten befinden. Das Gleiche gilt für
+> die beA-Eingänge."*
+
+Im Postfach liegt die Post **aller** Mandate des Hauses. Was zu dieser Akte
+gehört, ist in der E-Akte abgelegt und dort vollständig. Ein Postfachzugriff
+brächte also nichts Neues und zugleich alles Fremde — ein Blick in Mandate,
+die diesen Vorgang nichts angehen (§ 203 StGB).
+
+**Und darauf kommt es an: Der Aufruf entscheidet es nicht, das Recht tut
+es.** `POST /mail/download` und `GET /bea` sind je **ein** Aufruf für beide
+Fälle; die Beschreibung nennt zu jedem zwei Rechte, `…:postbox` und
+`…:record`. Welche Nachrichten der Server herausgibt, hängt allein davon ab,
+welches davon am Schnittstellenbenutzer gesetzt ist. Darum darf das
+Postfachrecht nicht gesetzt werden — nicht „nur zum Ausprobieren".
+
+Die drei Aufrufe, die **ausschließlich** das Postfach betreffen, ruft das
+Programm nicht auf und wird es nicht: `GET /bea/postbox/search`,
+`GET /bea/folder/search`, `GET /bea/search`. Seit dem 12.10.2026 hält eine
+Prüfung das fest, statt es nur zu versprechen.
+
 ### Was ausdrücklich **nicht** gesetzt werden soll
 
 Alles Schreibende: `write:records`, `write:correspondence`, `write:file`,
@@ -86,9 +111,8 @@ Alles Schreibende: `write:records`, `write:correspondence`, `write:file`,
 heute keine Zusage des Programms, sondern eine Eigenschaft des Schlüssels.
 Ein Fehler im Programm — und es gab im Oktober mehrere — kann dann nichts
 anrichten. Ein Schlüssel mit allen Rechten nähme dieses Netz weg und ließe
-nur das Versprechen übrig. Dasselbe gilt für die `:postbox`-Rechte: Ein
-Postfachzugriff ist nach Vorgabe der Kanzlei vom 07.10.2026 nicht
-erforderlich, weil alles in der E-Akte liegt.
+nur das Versprechen übrig. Dasselbe gilt für die `:postbox`-Rechte, aus dem
+Grund, der eine Ebene weiter oben steht.
 
 ## Was wirklich offen bleibt
 
@@ -119,8 +143,8 @@ neuere gibt — es heißt nur, dass die Oberfläche keine andere zeigt.
 
 ## Durch den Lauf vom 08.10.2026 beantwortet
 
-`POST /correspondence/search` an `X-100-2026`: **Status 200, 26 Einträge**
-(22 `mail`, 4 `note`), eine Seite, Poststempel vom 30.07. bis 25.09.2026.
+`POST /correspondence/search` an einer Akte der Kanzlei: **Status 200, 26
+Einträge** (22 `mail`, 4 `note`), eine Seite.
 
 **Die Vermerke sind lesbar.** Drei wurden über
 `GET /record/note?id=…&record=…` geholt — mit beiden Pflichtparametern, mit

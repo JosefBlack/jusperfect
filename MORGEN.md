@@ -2494,3 +2494,68 @@ findet das Dokument im Gerichtsordner und zeigt es ohne Überschrift — weil
 dann nur noch ein Ordner übrig ist. Keine Meldung in der Browserkonsole.
 
 **1850 Prüfungen grün**, dreizehn neue in `tests/test_ordner_gruppieren.py`.
+
+### Nachtrag 12.10.2026 — das Aktenzeichen ist aus dem Schreiben heraus
+
+`schnittstelle/ANFRAGE-HERSTELLER.md` nannte in der Zeile über die gemessene
+E-Akte das Aktenzeichen `X-100-2026` und die Poststempel vom 30.07. bis
+25.09.2026 — und verlangte zwei Absätze weiter unten vom Leser ausdrücklich
+*„Nichts aus einer Akte. Keine Aktenkennung."* Beides ist heraus; es steht
+jetzt „an einer Akte der Kanzlei". Die Zahlen, auf die es ankommt — 26
+Einträge, 22 Mails, 4 Vermerke —, sagen nichts über ein Mandat.
+
+### Nachtrag 12.10.2026 — kein Postfachzugriff, und zwar geprüft
+
+Vorgabe der Kanzlei, heute bestätigt und begründet:
+
+> *„Alle E-Mails und Vermerke werden in der E-Akte abgespeichert. Es macht
+> daher keinen Sinn und wäre sogar kontraproduktiv, wenn das Postfach
+> ausgelesen wird, in welchem sich alle Akten befinden. Das Gleiche gilt für
+> die beA-Eingänge."*
+
+Das ist eine bessere Begründung als die bisher aufgeschriebene. Bisher stand
+da, ein Postfachzugriff sei „nicht erforderlich". Der eigentliche Punkt ist
+schärfer: Im Postfach liegt die Post **aller** Mandate. Ein Zugriff brächte
+also nichts Neues und zugleich alles Fremde.
+
+**Nachgesehen: Das Programm ruft keinen Postfachaufruf.** Kein `imaplib`,
+kein `smtplib`, keiner der drei beA-Postfachaufrufe.
+
+**Aber geprüft war das nicht.** Die Regel galt seit dem 07.10.2026 und ruhte
+auf einer Nachschau — auf einem Blick, den jemand einmal getan hat. Dieselbe
+Art Lücke hat die zweite Meinung am 11.10.2026 bei der Seitenzählung
+gefunden. Hier wäre sie teurer: Ein Postfachaufruf fiele niemandem auf, denn
+er brächte Daten zurück, nur die falschen.
+
+Seit heute steht es in `tests/test_kein_postfach.py`, fünf Prüfungen.
+
+### Und ein Punkt, der dabei erst klar wurde
+
+**Der Aufruf entscheidet es nicht, das Recht tut es.**
+
+`POST /mail/download` und `GET /bea` sind je **ein** Aufruf für beide Fälle.
+Die Beschreibung nennt zu jedem zwei Rechte: `download:mail:postbox` *(Für
+E-Mail im Postfach)* und `download:mail:record`, ebenso `read:bea:postbox`
+und `read:bea:record`. **Dieselbe Zeile Quelltext holt je nach Schlüssel eine
+Nachricht aus der Akte oder eine aus dem Postfach.**
+
+Am Client lässt sich das nicht prüfen, und die neue Prüfdatei sagt das auch
+ausdrücklich. Es hängt allein daran, dass die `:postbox`-Rechte nicht gesetzt
+sind. Nach der Liste vom 08.10.2026 sind sie es nicht — gesetzt ist
+`download:mail:record`, die Fassung für die Akte. Richtig so.
+
+Nur drei Aufrufe betreffen **ausschließlich** das Postfach, und keiner hat
+eine Fassung je Akte — sie sagen es in ihrer eigenen Beschreibung:
+
+| Aufruf | Beschreibung des Herstellers |
+|---|---|
+| `GET /bea/postbox/search` | „Listet alle hinterlegten beA-Postfächer auf" |
+| `GET /bea/folder/search` | „Listet alle Ordner eines beA-Postfachs auf" |
+| `GET /bea/search` | „Listet alle beA-Nachrichten eines beA-Postfaches in einem bestimmten Ordner auf" |
+
+Diese drei ruft das Programm nicht und wird es nicht. **Für den späteren
+Einbau von beA heißt das zugleich, welcher Weg der richtige ist:** über das
+Korrespondenzverzeichnis der Akte (`referenceBea`) und dann
+`GET /bea?beaIdentifier=…` — nie über eine Postfachsuche.
+
+**1855 Prüfungen grün.**
