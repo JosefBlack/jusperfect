@@ -26,6 +26,7 @@ am 11.10.2026 hat genau das ein echtes Rubrum zutage gefördert.
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import unittest
@@ -65,9 +66,32 @@ _RUBRUM = tuple("".join(teile) for teile in (
 NAMEN = tuple(re.compile(rf"\b{re.escape(n)}\b") for n in _RUBRUM)
 
 
+#: Was nie zum Bestand gehoert - Arbeitsspuren, nicht Programm.
+_NICHT_BESTAND = {".git", "__pycache__", ".pytest_cache", ".venv", "venv",
+                  "node_modules", ".jusperfect-gedaechtnis", "build", "dist"}
+
+
 def _dateien() -> list[str]:
-    roh = subprocess.run(["git", "ls-files"], cwd=WURZEL, capture_output=True,
-                         text=True, check=True).stdout.split()
+    """Jede Datei des Bestands, relativ zur Wurzel.
+
+    **Zuerst git, dann der Ordner — und das ist kein Luxus.** Die Prüfung ist
+    am 12.10.2026 im fertig geschnürten Prüfpaket durchgefallen, mit
+    ``git ls-files returned non-zero exit status 128``: Ein Paket für einen
+    Dritten enthält kein ``.git``, und damit brach gerade die Prüfung ab, die
+    dort am meisten zu sagen hat.
+
+    Eine Prüfung, die nur im Entwicklungsverzeichnis läuft, prüft das Paket
+    nicht. Sie fällt deshalb auf einen Lauf über den Ordner zurück.
+    """
+    try:
+        roh = subprocess.run(["git", "ls-files"], cwd=WURZEL, capture_output=True,
+                             text=True, check=True).stdout.split()
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        roh = []
+        for ordner, unter, dateien in os.walk(WURZEL):
+            unter[:] = [u for u in unter if u not in _NICHT_BESTAND]
+            for name in dateien:
+                roh.append(str(Path(ordner, name).relative_to(WURZEL).as_posix()))
     return [n for n in roh if n not in UNBERUEHRT]
 
 
@@ -146,6 +170,29 @@ class KeinEchtesAktenzeichenImBestand(unittest.TestCase):
         self.assertFalse(ECHT.search("Der Lauf an X-100-2026 ergab"),
                          "Eine erfundene Nummer darf sie nicht fangen.")
         self.assertFalse(ECHT.search("X-003-2025"))
+
+    def test_die_pruefung_laeuft_auch_ohne_git(self):
+        """Im Prüfpaket gibt es kein `.git` — dort muss sie erst recht greifen.
+
+        Am 12.10.2026 ist sie genau daran gescheitert: `git ls-files` brach mit
+        Status 128 ab, und mit ihr die Prüfung. Ein Paket für einen Dritten ist
+        der Ort, an dem ein echter Name am teuersten wäre — und war der Ort, an
+        dem niemand mehr nachsah.
+
+        Diese Prüfung stellt sicher, dass der Rückfall auf den Ordner wirklich
+        Dateien findet, statt leer zurückzukommen. Eine leere Liste macht jede
+        Suche grün.
+        """
+        import os as _os
+        hier = _os.getcwd()
+        try:
+            _os.chdir(WURZEL.parent)          # ausserhalb des git-Verzeichnisses
+            dateien = _dateien()
+        finally:
+            _os.chdir(hier)
+        self.assertGreater(len(dateien), 100,
+                           "Der Rückfall findet den Bestand nicht.")
+        self.assertIn("MORGEN.md", dateien)
 
     def test_der_vorsatz_x_wird_wirklich_benutzt(self):
         """Gegenprobe: Es gibt die erfundenen Nummern, sie sind nicht nur weg."""

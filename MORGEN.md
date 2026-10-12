@@ -3143,3 +3143,49 @@ jemand hingesehen hatte, nur **eine** Datei bereinigte.
 Seit dem 12.10.2026 prüft `tests/test_keine_echten_akten.py` beides, Namen und
 Aktenzeichen, über jede Datei, die git kennt. Vier Rückfälle an einem Tag hat
 sie gefangen — drei in der Chronik, einen in sich selbst.
+
+---
+
+## 12.10.2026 — das Prüfpaket, und was es gleich zutage förderte
+
+Die Kanzlei hat das Paket angefordert. Gebaut aus dem versionierten Bestand
+(`git archive`), ohne `.git`, mit fünf maskierten Infrastrukturangaben.
+
+### Beim ersten Testlauf **im Paket** fielen drei Prüfungen durch
+
+```
+git ls-files returned non-zero exit status 128
+```
+
+**`tests/test_keine_echten_akten.py` fragt git nach den Dateien** — und ein
+Paket für einen Dritten enthält kein `.git`. Also brach genau die Prüfung ab,
+die dort am meisten zu sagen hat: die, die nach echten Namen und Aktenzeichen
+sucht.
+
+> Eine Prüfung, die nur im Entwicklungsverzeichnis läuft, prüft das Paket
+> nicht. Und das Paket ist der Ort, an dem ein echter Name am teuersten wäre.
+
+Der Fehler ist meiner, und er ist von derselben Art wie die vier Rückfälle
+heute: **Die Vorrichtung gegen den Fund versagt dort, wo der Fund wehtut.**
+
+**Berichtigt:** `_dateien()` fällt auf einen Lauf über den Ordner zurück, wenn
+git nicht antwortet. Dazu eine Prüfung, die den Rückfall selbst misst — sie
+wechselt das Arbeitsverzeichnis aus dem git-Baum heraus und verlangt, dass
+mehr als hundert Dateien gefunden werden. **Eine leere Liste macht jede Suche
+grün**, und genau das wäre hier passiert, hätte ich nur den Abbruch abgefangen.
+
+**1862 Prüfungen grün**, eine neue.
+
+### Was im Paket maskiert ist
+
+Fünf Angaben statt zwei. Das Paket vom 05.10.2026 ersetzte den S3-Ablageort und
+die KMS-Schlüsselkennung; dazu kommen jetzt die AWS-Kontonummer, die Kennung
+des Schutzgeländers und die Adresse des jur|nodes-Servers.
+
+Nicht weil sie geheim wären — sondern weil sie für eine Prüfung des Programms
+nichts beitragen. **Ein Paket, das das Haus verlässt, soll so wenig
+Infrastruktur nennen wie möglich.**
+
+Die Ersetzung ist durchgängig: Quelltext, Unterlagen **und** Prüfungen tragen
+denselben Platzhalter. Deshalb laufen die Prüfungen auch im Paket — und das ist
+jetzt gemessen, nicht behauptet.
