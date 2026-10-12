@@ -3046,3 +3046,39 @@ Sie sind dadurch heute falsch:
 Die Anweisung lautete auf `ANLEITUNG.md`, und dabei bleibt es, bis die Kanzlei
 etwas anderes sagt. **Besonders `FASSUNGEN.md` sticht hervor:** Dort steht ein
 Befehl, der heute ins Leere greift.
+
+### Nachtrag 12.10.2026 — die vier weiteren Dateien sind nachgezogen
+
+Auf Anweisung der Kanzlei. Keine davon gehört zu den vier geschützten.
+
+| Datei | Was geändert wurde |
+|---|---|
+| `README.md` | nennt nur noch `main` als ältere Fassung |
+| `UEBERGABE.md` | Regel 2 nennt `main` als Rückfallebene, mit Hinweis auf den Verlust |
+| `AWS-EINRICHTEN.md` | Ordnername ohne doppelten Bindestrich |
+| `FASSUNGEN.md` | Zweigtabelle, Adresse, `git checkout`, dazu zwei Hinweise |
+
+**`FASSUNGEN.md` war die wichtigste.** Dort stand ein Befehl, der ins Leere
+greift (`git checkout fassung-1.0`), und die Zweigtabelle, die als einzige
+Quelle belegt, dass mit dem Zweig kein Inhalt verloren ging. Der Beleg bleibt
+stehen — er ist jetzt die Begründung dafür, dass `main` genügt.
+
+### Und ein Fund, der über die vier Dateien hinausgeht
+
+`FASSUNGEN.md` beschreibt als Rückfallebene ein **`git bundle`**:
+
+> `jusperfect-verzeichnis.bundle` enthält die vollständige Geschichte in einer
+> Datei … die Sicherung, die auch dann trägt, wenn weder Rechner noch GitHub
+> verfügbar sind.
+
+**Ein solches Bündel von vor dem 12.10.2026 trägt die Vorgeschichte mit
+Aktenzeichen und Namen** — genau das, was heute aus dem Verzeichnis entfernt
+wurde. Wer es auspackt, macht die Bereinigung rückgängig, ohne es zu merken.
+
+Im Programmordner liegt keines (nachgesehen; die Datei wird in `FASSUNGEN.md`
+nur beschrieben, nicht mitgeliefert). **Ob eines auf einem Kanzleirechner oder
+einer Sicherungsplatte liegt, weiß nur die Kanzlei.** Ein Warnhinweis steht
+jetzt in `FASSUNGEN.md`; das Nachsehen kann er nicht ersetzen.
+
+Das ist dieselbe Art Rückstand wie die unerreichbaren git-Objekte heute Mittag:
+**Nicht der Ort, an dem man sucht, sondern der, an den man nicht denkt.**

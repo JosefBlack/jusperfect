@@ -90,32 +90,46 @@ bleiben unberührt — sie liegen außerhalb des Programmordners.
 
 ```
 git branch -a                 # welche Fassungen es gibt
-git checkout fassung-1.0      # zu einer Fassung
+git checkout main             # zur älteren Fassung 1.0
 git checkout 2.0              # zurück zur Arbeit
 ```
 
-Auf GitHub (`JosefBlack/jusperfect-`) stehen:
+Auf GitHub (`JosefBlack/jusperfect`) stehen:
 
 | Zweig | |
 |---|---|
-| `fassung-1.0` | die geprüfte Fassung, unverändert |
-| `main` | zurzeit derselbe Stand wie `fassung-1.0` |
+| `main` | die geprüfte Fassung 1.0, unverändert |
 | `2.0` | der Arbeitszweig |
 
 Warum Zweige und keine Marken: Der Netzweg dieser Arbeitsumgebung lässt keine
 Tags durch. Für den Zweck — ein dauerhafter Zeiger auf einen bestimmten Stand —
 tut ein Zweig dasselbe.
 
-**Aus dem Bündel.** `jusperfect-verzeichnis.bundle` enthält die vollständige
-Geschichte in einer Datei. Daraus lässt sich das Verzeichnis überall neu
-aufbauen:
+> **Zum 12.10.2026 hat sich hier zweierlei geändert.** Das Verzeichnis wurde
+> neu angelegt (die Adresse endete früher auf einen Bindestrich), weil in
+> seiner Vorgeschichte ein Aktenzeichen und ein Mandantenname standen.
+>
+> Dabei ging der Zweig **`fassung-1.0`** verloren — er wurde beim Umzug nicht
+> mitgenommen. **Kein Inhalt ist verloren:** Die Tabelle an dieser Stelle hielt
+> fest, dass `main` denselben Stand trug, und zwar geschrieben, als es beide
+> noch gab. Wer früher `fassung-1.0` auscheckte, checkt heute `main` aus.
+
+**Aus dem Bündel.** Ein `git bundle` fasst die vollständige Geschichte in eine
+Datei; daraus lässt sich das Verzeichnis überall neu aufbauen:
 
 ```
-git clone jusperfect-verzeichnis.bundle jusperfect
+git bundle create jusperfect-verzeichnis.bundle --all    # erzeugen
+git clone jusperfect-verzeichnis.bundle jusperfect       # zurückholen
 ```
 
 Das ist die Sicherung, die auch dann trägt, wenn weder Rechner noch GitHub
 verfügbar sind.
+
+> **Vorsicht bei alten Bündeln.** Ein Bündel von **vor** dem 12.10.2026 trägt
+> die Vorgeschichte mit dem Aktenzeichen und dem Namen — genau das, was aus
+> dem Verzeichnis entfernt wurde. Eine solche Datei macht die Bereinigung
+> rückgängig, sobald jemand sie auspackt. **Liegt noch eine herum, gehört sie
+> gelöscht**, nicht aufgehoben.
 
 ### Das Aktengedächtnis wandert nicht mit
 

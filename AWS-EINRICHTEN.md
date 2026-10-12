@@ -937,7 +937,7 @@ hundert Megabyte und eine Einrichtung, dafür gibt es keine Rechteprobleme.
 
 1. Im **neuen** Konto anmelden.
 2. Die ZIP herunterladen und in den **eigenen** Ordner auspacken, etwa
-   `C:\Users\<neuer Name>\jusperfect--2.0`. Den äußeren Ordner nehmen, den,
+   `C:\Users\<neuer Name>\jusperfect-2.0`. Den äußeren Ordner nehmen, den,
    in dem die Startdateien liegen.
 3. `START-AWS.bat` doppelklicken. Beim ersten Mal legt es die Arbeitsumgebung
    an; das dauert ein paar Minuten und ist einmalig.

@@ -60,8 +60,8 @@ doppelklicken. Sie legt beim ersten Mal alles selbst an (virtuelle Umgebung, Bau
 neuer laufen nicht. Nutzerkennung im Browser: `ra-weber`. Zum Beenden das schwarze Fenster
 schließen.
 
-Der ZIP von der Startseite bringt die Arbeitsfassung **`2.0`**; `main` und `fassung-1.0`
-tragen die ältere Fassung 1.0. Eine ausführliche Anleitung steht in
+Der ZIP von der Startseite bringt die Arbeitsfassung **`2.0`**; `main` trägt die
+ältere Fassung 1.0. Eine ausführliche Anleitung steht in
 [ANLEITUNG.md](ANLEITUNG.md).
 
 ## Lokal starten (ohne AWS, ohne KI)

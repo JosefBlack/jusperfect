@@ -330,8 +330,11 @@ Wer hier weiterarbeitet, liest ihn zuerst, dann `MORGEN.md` (die Arbeitsliste).
 
 1. **Deutsch.** Der Nutzer ist Rechtsanwalt, kein Programmierer. Ganze Sätze,
    kein Fachjargon, Dateipfade immer vollständig nennen.
-2. **Zweig `2.0`, Fassung `2.0.0.dev`.** `fassung-1.0` bleibt unangetastet als
-   Rückfallebene. **Niemals auf einen anderen Zweig pushen.**
+2. **Zweig `2.0`, Fassung `2.0.0.dev`.** `main` trägt die ältere Fassung 1.0 und
+   bleibt unangetastet als Rückfallebene. **Niemals auf einen anderen Zweig
+   pushen.** (Bis zum 12.10.2026 stand hier `fassung-1.0`; der Zweig ging beim
+   Umzug auf das neue Verzeichnis verloren. Sein Inhalt liegt in `main` —
+   `FASSUNGEN.md` hielt fest, dass beide denselben Stand trugen.)
 3. **Niemals einen Pull Request eröffnen**, ohne dass der Nutzer darum bittet.
 4. **`ANLEITUNG.md`, `infra/IAM.md` und `infra/iam-nur-claude.json` werden nur
    auf ausdrückliche Anweisung geändert.** Sind sie veraltet: sagen, nicht ändern.
