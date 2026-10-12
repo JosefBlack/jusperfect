@@ -70,10 +70,20 @@ class KeinEchtesAktenzeichenImBestand(unittest.TestCase):
 
         Ohne das wäre sie grün, auch wenn das Muster nie passt — und genau
         diese Art Prüfung war am 08.10.2026 einer der fünf Funde im Prüfbogen.
+
+        **Die Probestücke sind zusammengesetzt und stehen nirgends als ganze
+        Zeichenkette in dieser Datei.** Sonst fände die Prüfung oben sich
+        selbst: Sie liest jede Datei, die git kennt, und diese gehört dazu.
+        Genau das ist am 12.10.2026 geschehen — der erste Entwurf trug die
+        Probestücke ausgeschrieben, lief grün, weil die Datei noch nicht in
+        git war, und wäre beim nächsten Lauf rot geworden.
         """
-        self.assertTrue(ECHT.search("Der Lauf an X-100-2026 ergab"))
-        self.assertTrue(ECHT.search("Thunert/2025/X-109-2025 Name"))
-        self.assertFalse(ECHT.search("Der Lauf an X-100-2026 ergab"))
+        wie_dortschy = "D-" + "123" + "-2026"
+        wie_thunert = "T-" + "456" + "-2025"
+        self.assertTrue(ECHT.search(f"Der Lauf an {wie_dortschy} ergab"))
+        self.assertTrue(ECHT.search(f"Thunert/2025/{wie_thunert} Name"))
+        self.assertFalse(ECHT.search("Der Lauf an X-100-2026 ergab"),
+                         "Eine erfundene Nummer darf sie nicht fangen.")
         self.assertFalse(ECHT.search("X-003-2025"))
 
     def test_der_vorsatz_x_wird_wirklich_benutzt(self):

@@ -2356,29 +2356,31 @@ Prüfungen.
 
 ## 11.10.2026 — ein echtes Rubrum lag im Programmbestand
 
-Aus der Kanzlei: *„X-107-2026 ist eine echte Akte."* Damit war
-`X-107-2026 Testmann ./. Musterhaft` kein Platzhalter, sondern Aktenzeichen, Mandant
-und Gegner einer laufenden Sache — in einem Bestand, der an Dritte geht.
+Auf Nachfrage aus der Kanzlei: Eines der Aktenzeichen, die in Beispielen und
+Prüfdateien standen, gehört zu einer **echten Akte**. Damit war der Name
+daneben kein Platzhalter, sondern Mandant und Gegner einer laufenden Sache —
+in einem Bestand, der an Dritte geht.
+
+> **Dieser Eintrag nennt weder den Namen noch die Nummer.** Am 12.10.2026 ist
+> aufgefallen, dass er es in seiner ersten Fassung tat: Die Beschreibung des
+> Fundes hat den Fund wieder hergestellt. Siehe dort.
 
 ### Was gefunden wurde
 
-| Wo | Was |
-|---|---|
-| `AWS-EINRICHTEN.md` | `J:\Akten\Dortschy\2026\X-107-2026 Testmann ./. Musterhaft\` |
-| `UEBERGABE.md` | zweimal `Testmann ./. Musterhaft` |
-| `tests/test_laufwerksweg.py` | `X-107-2026 Testmann`, `X-108-2026 Testmann`, `X-109-2025 Beispiel` |
-| `tests/test_webdav_adapter.py` | `X-107-2026 Testmann gegen Musterhaft`, `X-107-2026 Testmann gegen Musterhaft`, `X-109-2025 Miete Beispiel` |
-| `tests/test_jurnodes_http.py` | `Testmann ./. Musterhaft` als Kurzrubrum, dazu die Suchprüfungen |
-| fünf weitere Prüfdateien | `Testmann` ohne Umlaut — in der ersten Suche übersehen |
-| `jusperfect/jurnodes/http_adapter.py` | `"Testmann ./. Musterhaft"` im Kommentar |
+**120 Stellen in 16 Dateien** — in `AWS-EINRICHTEN.md` ein Laufwerkspfad mit
+vollem Rubrum, in `UEBERGABE.md` zweimal das Rubrum als Beispiel für einen
+Dateinamen, dazu dreizehn Prüfdateien mit Ordnernamen, Kurzrubren und
+Suchbegriffen, und ein Kommentar in `jusperfect/jurnodes/http_adapter.py`.
 
-**120 Stellen in 16 Dateien.** Alle ersetzt durch die erfundenen Namen, die
-der Bestand ohnehin führt: `Testmann`, `Musterhaft`, `Musterfrau`,
-`Beispiel`. Die Aktenzeichen der Beispiele sind jetzt `X-001-2026`,
-`X-002-2026`, `X-003-2025` — Nummern, die es nicht geben kann.
+Fünf der dreizehn trugen den Namen **ohne Umlaut** und waren in der ersten
+Suche durchgerutscht — gefunden hat sie erst der Austausch selbst, weil er
+beide Schreibweisen führte.
 
-`schnittstelle/jurnodes-api-1.0.2.json` blieb unberührt. Die Beispiele darin
-(`Testmann ./. Fischer`, `Autohaus Testmann`) sind die des Herstellers.
+Alle ersetzt durch die erfundenen Namen, die der Bestand ohnehin führt:
+`Testmann`, `Musterhaft`, `Musterfrau`, `Beispiel`.
+
+`schnittstelle/jurnodes-api-1.0.2.json` blieb unberührt — die Beispiele darin
+sind die des Herstellers.
 
 **1837 Prüfungen grün** — der Austausch war durchgängig, keine Prüfung hat
 ihn bemerkt.
@@ -2386,11 +2388,12 @@ ihn bemerkt.
 ### Dass es überhaupt auffiel, war ein Zufall
 
 `jusperfect/jurnodes/webdav_adapter.py` trug den Namen schon nicht mehr; dort
-steht seit längerem `X-107-2026 ohne Name wer gegen wen`. Jemand hat an einer
-Stelle hingesehen und an den übrigen sechzehn nicht. Dieser Unterschied —
-eine Datei bereinigt, der Rest nicht — war das Einzige, was den Verdacht
-getragen hat. Die Namen selbst sahen aus wie Platzhalter: Testmann, Meier,
-Schmidt, Beispiel sind die Namen, die man erfindet, wenn man einen erfinden will.
+steht seit längerem `ohne Name wer gegen wen`. Jemand hat an **einer** Stelle
+hingesehen und an den übrigen sechzehn nicht. Dieser Unterschied — eine Datei
+bereinigt, der Rest nicht — war das Einzige, was den Verdacht getragen hat.
+
+Die Namen selbst sahen aus wie Platzhalter. Es waren genau die Namen, die man
+erfindet, wenn man einen erfinden will.
 
 > Ein erfundener Name und ein echter sehen gleich aus. Was sie unterscheidet,
 > weiß nur die Kanzlei — also ist zu fragen, nicht zu schließen.
@@ -2633,3 +2636,66 @@ die Herkunft von `attachmentId` und `postFileUniqueKey`, die Bedeutung von
 `isInbox`, und die Seitenzählung.
 
 **1858 Prüfungen grün.**
+
+---
+
+## 12.10.2026, später — die Vorgeschichte ist umgeschrieben, und dabei fiel zweierlei auf
+
+Auf Anweisung der Kanzlei. Alle **58 Commits** des Zweigs `2.0` sind neu
+geschrieben: Dateien **und** Commit-Texte, sechs der Texte waren betroffen.
+Die Beschreibungsdatei des Herstellers blieb ausgenommen — ihre Beispiele sind
+seine, und das Programm vergleicht sich gegen sie.
+
+Vorher gesichert als `git bundle` außerhalb des Programmordners, und der alte
+Stand des Zweigs steht notiert, falls etwas zurückzuholen wäre.
+
+### Zwei Funde, die erst die Umschreibung zutage gefördert hat
+
+Die Gegenprobe war: **Der heutige Arbeitsstand muss unverändert bleiben.**
+Wenn das Umschreiben der Vorgeschichte den heutigen Stand ändert, dann war der
+heutige Stand nicht sauber. Er war es nicht — in zwei Dateien.
+
+**1. `MORGEN.md` trug den echten Namen noch.** Und zwar in dem Eintrag, der
+seine Entfernung *beschreibt*: Die Fundtabelle vom 11.10.2026 zitierte das
+Rubrum zehnmal, um zu zeigen, wo es überall gestanden hatte.
+
+Der Grund ist unangenehm einfach: Der Austausch lief, **dann** schrieb ich die
+Chronik. Die Gegenprobe danach — `grep` über den Bestand — lief vor dem
+Schreiben. Der Bericht über den Fund hat den Fund wieder hergestellt, und das
+blieb einen Tag so stehen.
+
+> Wer einen Fund beschreibt, schreibt ihn hin. Die Gegenprobe gehört deshalb
+> **ans Ende** der Arbeit, nicht in ihre Mitte.
+
+**2. `tests/test_keine_echten_akten.py` fiel durch die eigene Prüfung.** Die
+Gegenprobe darin — „fängt das Muster eine echte Nummer wirklich?" — trug zwei
+echt aussehende Aktenzeichen ausgeschrieben. Die Prüfung daneben liest jede
+Datei, die git kennt, und diese gehört dazu.
+
+Dass sie trotzdem grün lief, lag an einem Zufall der Reihenfolge: Beim Lauf
+war die Datei **noch nicht in git**, also stand sie nicht in `git ls-files`.
+Beim nächsten Lauf wäre sie rot geworden. Die Probestücke sind jetzt aus
+Teilen zusammengesetzt und stehen nirgends als ganze Zeichenkette.
+
+**Beide Male hat die Prüfung getan, was sie soll** — nur eben einen Tag zu
+spät und einmal an sich selbst. Das ist kein Argument gegen sie.
+
+### Was damit **nicht** erledigt ist
+
+**Der Zweig `main`.** Er trägt eine **eigene** Geschichte — 79 Commits, kein
+gemeinsamer Vorfahr mit `2.0`, Stand „Fassung 1.0" vom 15.09.2026 — und die
+Namen stehen dort nicht nur in der Vorgeschichte, sondern in den **heutigen
+Dateien**. Nach der Vorgabe der Kanzlei wird nur auf `2.0` geschrieben;
+`main` bleibt deshalb unberührt, bis die Kanzlei es ausdrücklich anweist.
+
+**Und das Entscheidende, das keine Umschreibung leistet:** Ein überschreibender
+Push nimmt die alten Commits **nicht** vom Server. Sie bleiben dort über ihre
+Prüfsumme erreichbar, und der offene Pull Request Nr. 1 hält sie zusätzlich
+fest. Wer die alte Prüfsumme kennt, kommt weiter heran.
+
+Sicher weg sind sie erst, wenn das Repository gelöscht und neu angelegt wird —
+oder GitHub die unerreichbaren Objekte auf Anfrage entfernt. Das ist eine
+Entscheidung der Kanzlei.
+
+**Entlastend bleibt:** Das Repository ist privat, ohne Forks und ohne
+Beobachter (nachgesehen am 11.10.2026).
