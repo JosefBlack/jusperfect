@@ -229,10 +229,17 @@ Gegenrede ist willkommen.
 
 **3a · Die Obergrenze ist 20 MB je Mail und 100 MB je Akte.** Darüber wird die
 Mail **nicht** geladen, bleibt aber mit Betreff, Datum und einer Warnung in der
-Dokumentzeile stehen. Grundlage: In zwei geprüften Akten lag genau **eine**
-Mail darüber (8,7 MB); die zweite gemessene wog 5 kB. Ist die Grenze an der
-richtigen Stelle — und ist „sichtbar fehlend" hier besser als „nachladen auf
-Klick"? (`jusperfect/jurnodes/http_adapter.py`, `MAIL_OHNE_INHALT`)
+Dokumentzeile stehen.
+
+*Berichtigt am 12.10.2026.* Hier stand: „In zwei geprüften Akten lag genau
+**eine** Mail darüber (8,7 MB)." Das ist falsch gerechnet — 8,7 MB liegen
+**unter** 20 MB. Richtig ist: Die größte gemessene Mail wog 8 753 880 Bytes
+(8,4 MiB), die zweite 5 kB. **Keine** gemessene Mail hat die Grenze
+überschritten. Die 20 MB sind also eine Vorsorge und keine aus dem Bestand
+abgeleitete Zahl; im Programm sind es 20 × 1024 × 1024 Bytes, nicht 20
+Millionen. Ist die Grenze an der richtigen Stelle — und ist „sichtbar
+fehlend" hier besser als „nachladen auf Klick"?
+(`jusperfect/jurnodes/http_adapter.py`, `MAIL_OHNE_INHALT`)
 
 **3b · Bei `isInbox = -1` steht keine Richtung am Schriftstück.** Der
 Hersteller sagt: 1 = Eingang, 0 = Ausgang, **-1 = Neutral/Unbekannt**. Jeder
