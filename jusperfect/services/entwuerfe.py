@@ -78,6 +78,37 @@ def freigabevorlage(entwurf) -> str:
     ])
 
 
+def betreff_aus_der_akte(art: EntwurfArt, akte) -> str:
+    """Der Betreff eines Entwurfs – aus der Akte, nicht aus dem Modell.
+
+    Befund N12 der dritten Zweitprüfung vom 12.10.2026: Das Modell liefert
+    ``betreff`` und ``text``. Nur ``text`` ging durch die Belegprüfung. Ein
+    Betreff wie „Anerkenntnis der Haftung vom 14.03.2026" blieb unverändert
+    stehen, sobald der Brieftext irgendeinen tragenden Beleg hatte – und kam
+    mit HTTP 201 heraus.
+
+    Der Betreff ist dabei nicht nur Zierrat: Bei der Freigabe geht er in den
+    **Vermerktext** und in den **Titel** des Vermerks nach jur|nodes. Eine
+    erfundene Behauptung landete also an der sichtbarsten Stelle der Akte.
+
+    Zu belegen ist ein Betreff schwer – er ist kein Satz, und ein ``[Q: …]``
+    im Betreff wäre unbrauchbar. Deshalb wird er hier **nicht geprüft, sondern
+    gar nicht erst vom Modell genommen**: Art des Schreibens, Aktenzeichen und
+    Bezeichnung der Akte stehen alle in jur|nodes. Keine dieser drei Angaben
+    kann das Modell erfinden.
+
+    Wer einen anderen Betreff will, trägt ihn ein – ``bearbeiten`` nimmt ihn,
+    und die Freigabeprüfsumme bindet ihn (Befund F06). Dann steht dort, was
+    ein Mensch geschrieben hat.
+    """
+    teile = [ENTWURF_BEZEICHNUNG[art]]
+    for angabe in (getattr(akte, "aktenzeichen", ""), getattr(akte, "bezeichnung", "")):
+        angabe = str(angabe or "").strip()
+        if angabe:
+            teile.append(angabe)
+    return " · ".join(teile)
+
+
 class Entwurfsdienst:
     def __init__(self, ausgang: Ausgang, speicher: SitzungsSpeicher,
                  adapter: JurNodesAdapter, freigabestelle: Freigabestelle,
@@ -114,11 +145,19 @@ class Entwurfsdienst:
                                   passagen=len(auswahl), detail=art.value)
         durchgang = self._ausgang.fragen(kontext, prompts.SYSTEM, material, aufgabe)
         antwort = durchgang.antwort
+        # Der Betreff kommt aus der Akte, nicht aus der Antwort (Befund N12,
+        # siehe betreff_aus_der_akte). Sagt das Modell trotzdem einen, wird er
+        # nicht verworfen, sondern als ungeprueft gekennzeichneter Vorschlag in
+        # die Hinweise gelegt - sichtbar fuer den Bearbeiter, aber ausserhalb
+        # von Entwurf, Vermerktext und Vermerktitel.
+        betreff = betreff_aus_der_akte(art, sitzung.akte)
+        vorschlag = ""
         try:
             roh = json_extrahieren(antwort.text)
-            betreff, text = str(roh.get("betreff", "")).strip(), str(roh.get("text", "")).strip()
+            text = str(roh.get("text", "")).strip()
+            vorschlag = str(roh.get("betreff", "")).strip()
         except AusgabeUnbrauchbar:
-            betreff, text = ENTWURF_BEZEICHNUNG[art], antwort.text.strip()
+            text = antwort.text.strip()
         if not text:
             raise EntwurfFehler("Das Modell hat keinen Entwurf geliefert.")
         index = index_bauen(auswahl)
@@ -146,8 +185,16 @@ class Entwurfsdienst:
             hinweise.append(frist_hinweis(gerechnet))
         if gekuerzt:
             hinweise.append("Nicht alle Passagen passten in den Aufruf; der Entwurf beruht auf einer Auswahl.")
+        # Der Vorschlag des Modells, falls es einen gemacht hat: ungeprueft und
+        # als Vorschlag benannt. Er geht nicht nach jur|nodes - Hinweise tun
+        # das nicht - und nicht in die Freigabevorlage.
+        if vorschlag and vorschlag != betreff:
+            hinweise.append(
+                f"Betreffvorschlag des Modells, nicht übernommen und nicht belegt: "
+                f"„{vorschlag}“. Der Betreff oben steht aus der Akte. Wer den "
+                f"Vorschlag will, trägt ihn ein.")
         entwurf = Entwurf(
-            id=uuid.uuid4().hex, akte_id=sitzung.akte_id, art=art, betreff=betreff or ENTWURF_BEZEICHNUNG[art],
+            id=uuid.uuid4().hex, akte_id=sitzung.akte_id, art=art, betreff=betreff,
             text=text, quellen=quellen, hinweise=hinweise, erstellt_von=identitaet.nutzer_id, modell=antwort.modell,
             kosten=durchgang.kosten,
         )

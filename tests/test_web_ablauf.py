@@ -174,7 +174,22 @@ class Entwuerfe(unittest.TestCase):
 
     def test_entwurf_angelegt(self):
         self.assertEqual(self.e["status"], "entwurf")
-        self.assertEqual(self.e["betreff"], "Deckungsanfrage")
+        # Der Betreff steht aus der Akte, nicht aus der Modellantwort (Befund
+        # N12 der dritten Zweitpruefung, 12.10.2026). Hier stand vorher
+        # "Deckungsanfrage" - der Wert, den das Skript des Providers liefert.
+        # Genau diese Zeile war der Nachweis des Fehlers: Sie verlangte, dass
+        # ungepruefter Modelltext zum Betreff wird.
+        from jusperfect.services.entwuerfe import betreff_aus_der_akte
+        from jusperfect.domain.models import EntwurfArt
+        akte = self.d.adapter.akte("VU-2026-0042")
+        self.assertEqual(self.e["betreff"],
+                         betreff_aus_der_akte(EntwurfArt.RSV, akte))
+        self.assertIn(akte.aktenzeichen, self.e["betreff"])
+        self.assertNotIn("Deckungsanfrage", self.e["betreff"])
+        # Verworfen wird der Vorschlag nicht - er steht als Vorschlag in den
+        # Hinweisen, damit der Bearbeiter ihn sieht und eintragen kann.
+        self.assertTrue(any("Deckungsanfrage" in h for h in self.e["hinweise"]),
+                        self.e["hinweise"])
         # Die Pruefsumme deckt die ganze Freigabevorlage ab, nicht nur den
         # Text - Akte, Art und Betreff werden mitgeschrieben (Befund F06).
         from jusperfect.services.entwuerfe import freigabevorlage
