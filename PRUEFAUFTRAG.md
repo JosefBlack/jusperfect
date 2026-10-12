@@ -334,15 +334,29 @@ soll das sagen — aber bitte mit Begründung, nicht als Routinehinweis.
 
 ## Was in diesem Paket verändert wurde
 
-Zwei Angaben sind ersetzt, weil sie zur Infrastruktur der Kanzlei gehören und
-für eine Prüfung des Programms nicht gebraucht werden:
+**Fünf Angaben sind ersetzt**, weil sie zur Infrastruktur der Kanzlei gehören
+und für eine Prüfung des Programms nicht gebraucht werden. Die Ersetzung ist
+**durchgängig** — Quelltext, Unterlagen und Prüfungen tragen denselben
+Platzhalter, deshalb laufen die Prüfungen auch im Paket grün:
 
 | Ersetzt durch | War |
 |---|---|
 | `KANZLEI-EIMER` | der Name des S3-Ablageorts |
 | `KMS-SCHLUESSEL-KENNUNG` | die Kennung des Verschlüsselungsschlüssels |
+| `AWS-KONTONUMMER` | die Nummer des AWS-Kontos (auch in den ARN-Beispielen) |
+| `GELAENDER-KENNUNG` | die Kennung des Bedrock-Schutzgeländers |
+| `KANZLEI.jur-nodes.net` | die Adresse des jur\|nodes-Servers |
 
-**Sonst ist nichts verändert.** Die Prüfungen laufen auch im Paket grün.
+Das Paket vom 05.10.2026 ersetzte nur die ersten beiden. Die drei übrigen sind
+am 12.10.2026 dazugekommen — nicht weil sie geheim wären, sondern weil sie für
+die Prüfung nichts beitragen und ein Paket, das das Haus verlässt, so wenig
+Infrastruktur nennen soll wie möglich.
+
+**Wo eine dieser Angaben für die Prüfung gebraucht würde** — etwa um eine
+Regionsliste oder eine Richtlinie nachzuvollziehen —, fragen Sie bitte; die
+Kanzlei reicht sie dann einzeln nach.
+
+**Sonst ist nichts verändert.**
 
 **Keine Zugangsdaten im Bestand.** Die vier Zugangswerte (jur|nodes-Adresse,
 Benutzer, Token; AWS-Schlüssel) liegen im Windows-Konto des jeweiligen
