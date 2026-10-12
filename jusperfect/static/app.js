@@ -762,6 +762,24 @@ function explorerStarten(initial) {
       eakteHinweis.textContent = eakteHinweis.textContent
         ? eakteHinweis.textContent + " — " + satz : satz;
     }
+
+    // Was beim Zerlegen der Mails nicht uebernommen wurde - mit Grund.
+    //
+    // Befund N04 der dritten Pruefung vom 12.10.2026: Der Parser zaehlte das
+    // und niemand sah es. Angezeigt wurden allein die angenommenen Anlagen,
+    // und die sahen vollstaendig aus. Das Bild einer Signatur zaehlt hier
+    // nicht mit - es ist kein Verlust, nur Rauschen in der Warnung.
+    const aus = sitzung.mail_ausgelassen || {};
+    const verluste = Object.entries(aus)
+      .filter(([grund, n]) => n > 0 && !grund.startsWith("eingebettetes Bild"))
+      .map(([grund, n]) => `${n}× ${grund}`);
+    if (verluste.length) {
+      eakteHinweis.hidden = false;
+      const satz = `Aus den E-Mails nicht übernommen: ${verluste.join(", ")}. `
+        + `Welche Mail es betrifft, steht in ihrer eigenen Zeile.`;
+      eakteHinweis.textContent = eakteHinweis.textContent
+        ? eakteHinweis.textContent + " — " + satz : satz;
+    }
   }
   $("explorer-uebernehmen").textContent = initial ? "Arbeitsfläche öffnen" : "Übernehmen";
   // Erst leeren, dann zeichnen. Umgekehrt zeigte der Explorer die Liste noch

@@ -590,3 +590,85 @@ class DieEAkteWirdUeberAlleSeitenGelesen(unittest.TestCase):
         self.assertEqual(5, len([d for d in dokumente
                                  if d.id.startswith(VERMERK_VORSATZ)]),
                          "Kein Vermerk darf auf einer späteren Seite liegen bleiben.")
+
+
+# ── Befund N04 der dritten Zweitprüfung vom 12.10.2026 ──────────────────────
+#
+# Der Parser zählte, was er nicht übernehmen konnte, und gab es zurück. Der
+# Adapter nahm diesen Zähler nicht. Angezeigt wurden allein die angenommenen
+# Anlagen — und die sahen vollständig aus. „Ein Zähler, den nur der Parser
+# kennt, ist kein Zähler."
+#
+# Gemessen wird deshalb hier: am Dokument, das in der Liste steht, und am
+# Zähler des Adapters, den `web.py` in die Antwort schreibt.
+
+def _eml_mit_leerer_anlage() -> bytes:
+    from email.message import EmailMessage
+
+    m = EmailMessage()
+    m["Subject"] = "Mit einer unlesbaren Anlage"
+    m["From"] = "gegner@example.invalid"
+    m["Date"] = "Wed, 08 Oct 2026 09:14:00 +0200"
+    m.set_content("Anbei der Schriftsatz.")
+    m.add_attachment(b"", maintype="application", subtype="pdf",
+                     filename="Schriftsatz.pdf")
+    return m.as_bytes()
+
+
+class DerVerlustErreichtDieAnzeige(unittest.TestCase):
+    def _dokumente(self, roh: bytes):
+        server = _Server([_eintrag("mail", referenceMail="m-1")],
+                         mails={"m-1": roh})
+        adapter = _adapter(server)
+        return adapter, adapter.dokumente(AKTE)
+
+    def test_die_zeile_der_mail_sagt_dass_etwas_fehlt(self):
+        """Dort sucht man es, wenn eine Anlage fehlt."""
+        _, dokumente = self._dokumente(_eml_mit_leerer_anlage())
+        mail = next(d for d in dokumente if d.id == f"{MAIL_VORSATZ}m-1")
+        self.assertIn("nicht alles übernommen", mail.titel)
+        self.assertIn("unvollständig", mail.kategorie)
+
+    def test_der_adapter_fuehrt_den_grund_mit(self):
+        adapter, _ = self._dokumente(_eml_mit_leerer_anlage())
+        self.assertTrue(adapter.letzte_mail_ausgelassen,
+                        "Der Zähler des Parsers muss im Adapter ankommen.")
+        self.assertEqual(1, sum(adapter.letzte_mail_ausgelassen.values()))
+
+    def test_eine_vollstaendige_mail_traegt_keine_warnung(self):
+        """Die Gegenrichtung: Eine Warnung an jeder Mail wäre keine Warnung."""
+        adapter, dokumente = self._dokumente(
+            _eml("Anbei.", anlagen=(("Schriftsatz.pdf", b"%PDF-1.4"),)))
+        mail = next(d for d in dokumente if d.id == f"{MAIL_VORSATZ}m-1")
+        self.assertNotIn("nicht alles übernommen", mail.titel)
+        self.assertEqual({}, adapter.letzte_mail_ausgelassen)
+
+    def test_der_zaehler_wird_je_akte_zurueckgesetzt(self):
+        """Sonst trüge die nächste Akte die Warnung der vorigen."""
+        adapter, _ = self._dokumente(_eml_mit_leerer_anlage())
+        self.assertTrue(adapter.letzte_mail_ausgelassen)
+        server = _Server([_eintrag("mail", referenceMail="m-2")],
+                         mails={"m-2": _eml("Ohne Anlage.")})
+        adapter._client = httpx.Client(base_url="https://beispiel.invalid",
+                                       transport=httpx.MockTransport(server))
+        adapter.dokumente(AKTE)
+        self.assertEqual({}, adapter.letzte_mail_ausgelassen)
+
+    def test_der_text_der_weitergeleiteten_mail_steht_im_dokument(self):
+        """Befund N03, am Weg durch den Adapter gemessen."""
+        from email.message import EmailMessage
+
+        innen = EmailMessage()
+        innen["Subject"] = "Abtretung"
+        innen["From"] = "mandant@example.invalid"
+        innen.set_content("Hiermit erkläre ich die Abtretung meiner Ansprüche.")
+        aussen = EmailMessage()
+        aussen["Subject"] = "Zur Kenntnis"
+        aussen["From"] = "gegner@example.invalid"
+        aussen["Date"] = "Wed, 08 Oct 2026 09:14:00 +0200"
+        aussen.set_content("Zur Kenntnis.")
+        aussen.add_attachment(innen)
+        adapter, dokumente = self._dokumente(aussen.as_bytes())
+        self.assertEqual(1, adapter.letzte_mail_nachrichten)
+        mail = next(d for d in dokumente if d.id == f"{MAIL_VORSATZ}m-1")
+        self.assertNotIn("nicht alles übernommen", mail.titel)

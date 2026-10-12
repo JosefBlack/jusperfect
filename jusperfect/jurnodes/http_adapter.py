@@ -16,7 +16,7 @@ import threading
 
 import json
 from collections.abc import Mapping
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -370,7 +370,8 @@ MAIL_OHNE_INHALT = {
 
 
 def mail_als_dokument(akte_id: str, kennung: str, huelle: Mapping[str, Any],
-                      mime_typ: str = "text/plain", grund: str = "") -> Dokument:
+                      mime_typ: str = "text/plain", grund: str = "",
+                      verlust: tuple[str, ...] = ()) -> Dokument:
     """Aus einem Korrespondenzeintrag der Art „mail" ein Dokument machen.
 
     Der Betreff und der Poststempel stehen in der Huelle; der Text kommt aus
@@ -381,6 +382,13 @@ def mail_als_dokument(akte_id: str, kennung: str, huelle: Mapping[str, Any],
     Die Mail bleibt dann in der Liste - mit Betreff, Datum und einer Warnung
     im Titel. Sie verschwinden zu lassen waere das Schlimmere: Was fehlt,
     faellt nur auf, wenn es dasteht.
+
+    ``verlust`` steht fuer das Umgekehrte: Der Inhalt **ist** da, aber beim
+    Zerlegen kam nicht alles mit - eine Anlage ohne lesbaren Inhalt, mehr als
+    fuenfzig Anlagen, ein Teil, der weder Brieftext noch Anlage war. Befund
+    N04 der dritten Zweitpruefung vom 12.10.2026: Diese Zahlen kannte der
+    Parser und niemand sonst. Jetzt stehen sie in der Zeile der Mail, denn
+    dort sucht man sie, wenn eine Anlage fehlt.
     """
     betreff = str(_erstes(huelle, "subject", "betreff", standard="")).strip()
     endung = "txt" if mime_typ == "text/plain" else "html"
@@ -391,6 +399,9 @@ def mail_als_dokument(akte_id: str, kennung: str, huelle: Mapping[str, Any],
             grund, (f"⚠ Inhalt nicht geladen ({grund})", grund))
         kategorie = f"{kategorie} – Inhalt fehlt ({kurz})"
         titel = f"{titel}  [{warnung}]"
+    elif verlust:
+        titel = f"{titel}  [⚠ nicht alles übernommen: {', '.join(verlust)}]"
+        kategorie = f"{kategorie} – unvollständig"
     return Dokument(
         id=f"{MAIL_VORSATZ}{kennung}",
         akte_id=akte_id,
@@ -977,6 +988,16 @@ class HttpJurNodesAdapter:
     letzte_mails_ohne_antwort: int = 0
     #: Wie viele Anlagen aus den Mails dieser Akte dazugekommen sind.
     letzte_mail_anhaenge: int = 0
+    #: Was beim Zerlegen der Mails nicht uebernommen wurde: Grund -> Anzahl.
+    #:
+    #: Befund N04 der dritten Zweitpruefung vom 12.10.2026: Der Parser kannte
+    #: diese Zahlen und gab sie zurueck - der Adapter nahm sie nicht. Die 51.
+    #: Anlage wurde gezaehlt und war nirgends zu sehen. Ein Zaehler, den nur
+    #: der Parser kennt, ist kein Zaehler; angezeigt wurden allein die
+    #: angenommenen Anlagen, und die sahen vollstaendig aus.
+    letzte_mail_ausgelassen: dict[str, int] = field(default_factory=dict)
+    #: Angehaengte Nachrichten, deren Text mit in die Dokumente kam (N03).
+    letzte_mail_nachrichten: int = 0
 
     def _ordner_durchgehen(self, wurzel: Any) -> list[tuple[str, Mapping[str, Any]]]:
         """Alle Eintraege einer Akte - auch die in Unterordnern.
@@ -1214,6 +1235,8 @@ class HttpJurNodesAdapter:
         self.letzte_mails_ueber_budget = 0
         self.letzte_mails_ohne_antwort = 0
         self.letzte_mail_anhaenge = 0
+        self.letzte_mail_ausgelassen = {}
+        self.letzte_mail_nachrichten = 0
         if self._mails_akte != akte_id:
             self._mails.clear()
             self._mails_akte = akte_id
@@ -1247,8 +1270,17 @@ class HttpJurNodesAdapter:
                     continue
                 self._mails[kennung] = zerlegt
 
+            # Was diese Mail an Teilen verloren hat, steht in ihrer eigenen
+            # Zeile - dort sucht man es, wenn eine Anlage fehlt. Die Summe
+            # ueber die Akte steht zusaetzlich oben in der Liste.
             dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
-                                               zerlegt.mime_typ))
+                                               zerlegt.mime_typ,
+                                               verlust=zerlegt.gruende()))
+            for grund, anzahl in zerlegt.ausgelassen.items():
+                if anzahl:
+                    self.letzte_mail_ausgelassen[grund] = (
+                        self.letzte_mail_ausgelassen.get(grund, 0) + anzahl)
+            self.letzte_mail_nachrichten += zerlegt.nachrichten
             for nr, anhang in enumerate(zerlegt.anhaenge):
                 dokumente.append(anhang_als_dokument(akte_id, kennung, nr,
                                                      anhang, eintrag))

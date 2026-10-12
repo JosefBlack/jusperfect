@@ -935,6 +935,15 @@ def _sitzung_antwort(d: Dienste, sitzung: Any) -> dict[str, Any]:
             "ohne_antwort": getattr(d.adapter, "letzte_mails_ohne_antwort", 0),
         },
         "mail_anhaenge": getattr(d.adapter, "letzte_mail_anhaenge", 0),
+        # Was beim Zerlegen der Mails nicht uebernommen wurde, mit Grund.
+        # Befund N04 der dritten Zweitpruefung vom 12.10.2026: Der Parser
+        # kannte diese Zahlen, der Adapter nahm sie nicht, und die Anzeige
+        # zeigte nur die angenommenen Anlagen - eine unvollstaendige Liste,
+        # die vollstaendig aussah. Grund -> Anzahl, damit die Oberflaeche
+        # sagen kann, WARUM etwas fehlt.
+        "mail_ausgelassen": dict(getattr(d.adapter, "letzte_mail_ausgelassen", {})),
+        # Angehaengte Nachrichten, deren Text mitgekommen ist (Befund N03).
+        "mail_nachrichten": getattr(d.adapter, "letzte_mail_nachrichten", 0),
         "beteiligte": [x.model_dump() for x in d.sitzungen.beteiligte(sitzung)],
         "fristen": [x.model_dump() for x in d.sitzungen.fristen(sitzung)],
         "gedaechtnis": d.gedaechtnis.uebersicht(d.gedaechtnis.lesen(sitzung.akte_id)),
