@@ -69,10 +69,14 @@ eigenen: Uvicorn, botocore, httpx, und was später dazukommt.
 from __future__ import annotations
 
 import logging
+import re
 import secrets
+import sys
 from typing import Any, Callable
 
-from jusperfect.security.protokoll import MAX_WERT_LAENGE, ereignis, protokoll
+from jusperfect.security.protokoll import (
+    MAX_WERT_LAENGE, ereignis, kurzkennung, protokoll,
+)
 
 _log = protokoll("fehlergrenze")
 
@@ -87,6 +91,44 @@ LAUTE_BIBLIOTHEKEN = (
 
 #: Was in der Antwort steht, wenn der Fehler keiner der bekannten ist.
 UNBEKANNT = "Interner Fehler. Der Vorgang wurde abgebrochen."
+
+#: Der Vorsatz der eigenen Protokollkanäle (``security/protokoll.py``).
+EIGENER_VORSATZ = "jusperfect"
+
+#: Fremde Protokollkanäle, deren **Wortlaut** stehen bleiben darf – und warum.
+#:
+#: Befund N02 der dritten Zweitprüfung vom 12.10.2026: Die Fabrik unten nahm
+#: den angehängten Traceback ab und ließ Meldungstext und Argumente
+#: unverändert. ``pypdf`` schreibt beim Lesen eines beschädigten PDF
+#: Bestandteile des Dokuments als gewöhnliche **Warnung** – kein Traceback,
+#: keine eigene Protokollfunktion, also auch keine Feldsperre. Derselbe
+#: Ausgang wie bei F01, nur ein anderer Weg dorthin.
+#:
+#: Daraus folgt die Richtung: Nicht der Traceback ist das Gefährliche, sondern
+#: **jeder Wortlaut, den eine fremde Bibliothek schreibt, die Akteninhalt in
+#: der Hand hat**. Ein Parser, ein Bildleser, ein OCR-Aufsatz hat ihn in der
+#: Hand; eine Liste der gefährlichen Kanäle wäre am Tag ihrer Aufstellung
+#: veraltet.
+#:
+#: Deshalb eine **Positivliste**. ``uvicorn`` steht darin, weil es den Start,
+#: das Ende und abgewiesene Anfragen meldet und niemals ein Dokument liest:
+#: Es sieht die Anfrage, nicht den Akteninhalt, und die Zugriffsprotokolle mit
+#: Pfaden sind in ``__main__.py`` ohnehin aus. Ohne diesen Eintrag stünde beim
+#: Start kein Lebenszeichen mehr im Fenster.
+#:
+#: Was hier nicht steht, ist stumm – auch eine Bibliothek, die erst morgen
+#: dazukommt. Eintragen darf nur, wer sagen kann, warum dieser Kanal
+#: Akteninhalt nicht sehen kann.
+WORTLAUT_ERLAUBT = ("uvicorn",)
+
+#: Die Form eines Kanalnamens, der Programmtext ist: ein mit Punkten
+#: gegliederter Bezeichner, wie ``logging.getLogger(__name__)`` ihn erzeugt.
+_KANALFORM = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*){0,6}\Z")
+
+#: Kanäle ohne eigenes Modul, deren Name trotzdem Programmtext ist.
+#: ``py.warnings`` ist eine Festlegung der Standardbibliothek
+#: (``logging.captureWarnings``), kein Name, der von irgendwo hereinkommt.
+_KANAL_OHNE_MODUL = frozenset({"py.warnings"})
 
 
 def _stelle(fehler: BaseException) -> str:
@@ -124,6 +166,66 @@ def ausnahmekette(fehler: BaseException | None, max_tiefe: int = 6) -> str:
     return " <- ".join(teile)
 
 
+def wortlaut_erlaubt(kanal: str) -> bool:
+    """Darf der Meldungstext dieses Protokollkanals stehen bleiben?
+
+    Eigene Kanäle: ja – sie gehen durch ``ereignis()`` und damit durch die
+    Feldsperren. Fremde: nur, wenn sie in ``WORTLAUT_ERLAUBT`` stehen.
+    """
+    kanal = str(kanal or "")
+    if kanal == EIGENER_VORSATZ or kanal.startswith(EIGENER_VORSATZ + "."):
+        return True
+    return any(kanal == erlaubt or kanal.startswith(erlaubt + ".")
+               for erlaubt in WORTLAUT_ERLAUBT)
+
+
+def kanalname(name: str) -> str:
+    """Der Name eines Protokollkanals, soweit er Programmtext ist.
+
+    Der Name wird selbst protokolliert – er ist die eine Angabe, die sagt,
+    *welche* Bibliothek sich gemeldet hat. Nur: ``getLogger`` nimmt jede
+    Zeichenkette, und eine Bibliothek, die ihren Kanal nach der gelesenen
+    Datei benennt, trüge den Dateinamen damit ins Protokoll. Ein Dateiname ist
+    in dieser Kanzlei Akteninhalt.
+
+    Zwei Bedingungen müssen zusammen erfüllt sein, sonst steht hier nur eine
+    Kurzkennung – eine Prüfsumme, die Wiedererkennung erlaubt und nichts
+    verrät:
+
+    1. Die **Form** eines Bezeichners, wie ``getLogger(__name__)`` ihn baut.
+    2. Der erste Teil ist ein Modul, das in diesem Prozess wirklich geladen
+       ist. ``pypdf._reader`` ja, ``Klage.pdf`` nein – und gerade die zweite
+       Form sieht der ersten Bedingung zum Verwechseln ähnlich.
+    """
+    name = str(name or "")
+    if not name:
+        return "(ohne Namen)"
+    if name in _KANAL_OHNE_MODUL:
+        return name
+    if not _KANALFORM.match(name):
+        return kurzkennung(name)
+    if name.split(".", 1)[0] not in sys.modules:
+        return kurzkennung(name)
+    return name
+
+
+def _fremdmeldung_ersetzen(eintrag: logging.LogRecord) -> None:
+    """Den Wortlaut einer fremden Meldung durch einen festen Satz ersetzen.
+
+    Stehen bleibt, was Programmtext ist: Kanal, Stufe, Datei und Zeile. Das
+    genügt zur Fehlersuche – man weiß, welche Bibliothek sich gemeldet hat und
+    wo. Der Wortlaut selbst geht nicht mit; er ist das Einzige, was
+    Akteninhalt tragen kann.
+    """
+    if wortlaut_erlaubt(eintrag.name):
+        return
+    eintrag.msg = (f"Fremdmeldung unterdrückt: Kanal {kanalname(eintrag.name)}, "
+                   f"Stufe {eintrag.levelname}, "
+                   f"{kanalname(str(eintrag.module))}:{eintrag.lineno}. "
+                   f"Der Wortlaut kann Akteninhalt tragen.")
+    eintrag.args = ()
+
+
 def protokolle_eindaemmen() -> None:
     """Kein Traceback mehr in irgendein Protokoll dieses Prozesses.
 
@@ -132,6 +234,11 @@ def protokolle_eindaemmen() -> None:
     """
     for name in LAUTE_BIBLIOTHEKEN:
         logging.getLogger(name).setLevel(logging.WARNING)
+
+    # Nicht jede Bibliothek protokolliert; manche ruft warnings.warn(), und
+    # das schreibt unmittelbar nach stderr - vorbei an jeder Fabrik. Hierdurch
+    # geht es durch den Kanal "py.warnings", und der ist fremd.
+    logging.captureWarnings(True)
 
     alte_fabrik = logging.getLogRecordFactory()
     if getattr(alte_fabrik, "_jusperfect_ohne_traceback", False):
@@ -145,6 +252,9 @@ def protokolle_eindaemmen() -> None:
             # exc_text unveraendert und baut den Traceback dann nicht mehr.
             eintrag.exc_text = f"Ausnahmekette: {kette}" if kette else ""
             eintrag.exc_info = None
+        # Befund N02: Der Traceback war nie der einzige Weg. Eine Warnung aus
+        # pypdf traegt den Inhalt im Meldungstext.
+        _fremdmeldung_ersetzen(eintrag)
         return eintrag
 
     fabrik._jusperfect_ohne_traceback = True  # type: ignore[attr-defined]
