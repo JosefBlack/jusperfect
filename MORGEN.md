@@ -2421,3 +2421,17 @@ Meinung arbeitet.
 
 Gesagt, nicht vermutet: Wenn die Namen im Paket lagen, ist das eine
 Offenlegung, die bereits stattgefunden hat.
+
+### Nachtrag 11.10.2026 — die übrigen Namen sind erfunden
+
+Aus der Kanzlei, auf Nachfrage: *„Krämer, Schulz und Vellinghausen sind
+erfunden, Meier auch."*
+
+Damit ist der Bestand geprüft und nicht nur bereinigt. Was heute noch an
+Namen darin steht — `Meier`, `Krämer`, `Schulz`, `Schulze`, `Vellinghausen`,
+dazu die Namen der erfundenen Testakten in `testdaten/` — ist bestätigt
+erfunden. Einzig `Testmann ./. Musterhaft` war echt, und das ist heraus.
+
+**Für spätere Sitzungen:** Diese Liste ist eine Auskunft der Kanzlei vom
+11.10.2026, kein Befund aus dem Quelltext. Kommt ein neuer Name hinzu, ist
+erneut zu fragen. Ein erfundener Name und ein echter sehen gleich aus.
