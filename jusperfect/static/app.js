@@ -1801,6 +1801,16 @@ function gedFehlende() {
   return (sitzung.dokumente || []).filter((d) => !drin.has(d.id));
 }
 
+/** Die fehlenden, die der Filter gerade stehen laesst.
+ *
+ * gedFehlende() zaehlt die ganze Akte - das gehoert in den Satz "x von y im
+ * Gedaechtnis". Zum Anhaken darf nur zaehlen, was man auch sieht.
+ */
+function gedSichtbarFehlende() {
+  const begriffe = suchbegriffe("ged-suche");
+  return gedFehlende().filter((d) => dokumentPasst(d, begriffe));
+}
+
 function gedaechtnisFensterZeigen() {
   const fenster = $("gedaechtnis-fenster");
   if (!fenster) return;
@@ -1989,33 +1999,19 @@ function gedExplorerZeichnen() {
 
   const begriffe = suchbegriffe("ged-suche");
   const links = $("ged-quelle-liste"); links.replaceChildren();
-  let linksN = 0;
-  for (const d of alle) {
-    if (!dokumentPasst(d, begriffe)) continue;
-    linksN++;
-    const li = document.createElement("li");
-    const fehlt = !drinNach.has(d.id);
-    li.className = "explorer-zeile" + (fehlt ? " fehlt" : " drin schon-drin");
-    // Ein Haekchen gibt es nur bei dem, was noch fehlt. Was schon drin ist,
-    // steht ausgegraut da - sichtbar, damit man es sucht und findet, aber
-    // nicht waehlbar, damit es nicht ein zweites Mal aufgenommen wird.
-    const box = document.createElement("input");
-    box.type = "checkbox";
-    box.checked = fehlt ? gedAuswahl.has(d.id) : true;
-    box.disabled = !fehlt;
-    box.title = fehlt ? "In das Aktengedächtnis aufnehmen" : "Liegt bereits im Aktengedächtnis";
-    if (fehlt) {
-      box.addEventListener("change", () => {
-        box.checked ? gedAuswahl.add(d.id) : gedAuswahl.delete(d.id);
-        gedUmfangZeigen();
-      });
-    }
-    li.appendChild(box);
-    li.appendChild(feld(d.titel, "explorer-titelzeile"));
-    li.appendChild(feld(fehlt ? "fehlt" : "schon im Gedächtnis", "explorer-marke"));
-    links.appendChild(li);
+  const sichtbar = alle.filter((d) => dokumentPasst(d, begriffe));
+
+  // Dieselbe Gliederung wie im Dokumentfenster - und hier zuerst. Angehakt
+  // wird zuerst in diesem Fenster: ohne Gedaechtnis hat die Arbeitsakte
+  // nichts, woraus sie schoepfen koennte. Ein einziger Ordner ist keine
+  // Gliederung; dann bleibt die Liste glatt wie bisher.
+  const gruppen = explorerNachOrdnern(sichtbar);
+  const mitUeberschrift = gruppen.length > 1;
+  for (const [ordner, dazu] of gruppen) {
+    if (mitUeberschrift) links.appendChild(gedOrdnerzeile(ordner, dazu, drinNach));
+    for (const d of dazu) links.appendChild(gedQuellzeile(d, drinNach));
   }
-  zahlZeigen("ged-quelle-zahl", linksN, alle.length);
+  zahlZeigen("ged-quelle-zahl", sichtbar.length, alle.length);
 
   const rechts = $("ged-drin-liste"); rechts.replaceChildren();
   let rechtsN = 0;
@@ -2044,6 +2040,78 @@ function gedExplorerZeichnen() {
   zahlZeigen("ged-drin-zahl", rechtsN, eintraege.length);
   gedInhaltZeigen();
   gedUmfangZeigen();
+}
+
+/** Eine Zeile der linken Spalte: ein Dokument der Akte.
+ *
+ * Ein Haekchen gibt es nur bei dem, was noch fehlt. Was schon drin ist, steht
+ * ausgegraut da - sichtbar, damit man es sucht und findet, aber nicht
+ * waehlbar, damit es nicht ein zweites Mal aufgenommen wird.
+ */
+function gedQuellzeile(d, drinNach) {
+  const li = document.createElement("li");
+  const fehlt = !drinNach.has(d.id);
+  li.className = "explorer-zeile" + (fehlt ? " fehlt" : " drin schon-drin");
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.checked = fehlt ? gedAuswahl.has(d.id) : true;
+  box.disabled = !fehlt;
+  box.title = fehlt ? "In das Aktengedächtnis aufnehmen" : "Liegt bereits im Aktengedächtnis";
+  if (fehlt) {
+    box.addEventListener("change", () => {
+      box.checked ? gedAuswahl.add(d.id) : gedAuswahl.delete(d.id);
+      gedUmfangZeigen();
+    });
+  }
+  li.appendChild(box);
+  li.appendChild(feld(d.titel, "explorer-titelzeile"));
+  li.appendChild(feld(fehlt ? "fehlt" : "schon im Gedächtnis", "explorer-marke"));
+  return li;
+}
+
+/** Die Ueberschrift eines Ordners in der linken Spalte.
+ *
+ * Die Zahl sagt nicht, wie gross der Ordner ist, sondern was hier noch zu tun
+ * ist - danach wird in diesem Fenster gesucht. Der Knopf nimmt nur die
+ * fehlenden; was schon im Gedaechtnis liegt, darf nicht ein zweites Mal
+ * aufgenommen werden. Fehlt in einem Ordner nichts, steht kein Knopf da:
+ * ein Knopf ohne Wirkung ist ein Versprechen, das nicht gehalten wird.
+ */
+function gedOrdnerzeile(ordner, dazu, drinNach) {
+  const li = document.createElement("li");
+  li.className = "explorer-ordner";
+  const name = document.createElement("span");
+  name.className = "explorer-ordnername";
+  // Der leere Ordner ist kein Ordner, sondern die Akte selbst.
+  name.textContent = ordner || "Unmittelbar im Aktenordner";
+  if (!ordner) li.classList.add("wurzel");
+  const fehlende = dazu.filter((d) => !drinNach.has(d.id));
+  const zahl = document.createElement("span");
+  zahl.className = "explorer-ordnerzahl";
+  zahl.textContent = fehlende.length
+    ? `${fehlende.length} von ${dazu.length} fehlen`
+    : (dazu.length === 1 ? "1 Dokument · im Gedächtnis" : `${dazu.length} Dokumente · im Gedächtnis`);
+  li.append(name, zahl);
+
+  if (fehlende.length) {
+    const alleDrin = fehlende.every((d) => gedAuswahl.has(d.id));
+    // type="button": Das Formular dieses Dialogs traegt method="dialog", und
+    // ein Knopf ohne diese Angabe wuerde den Dialog schliessen.
+    const knopf = document.createElement("button");
+    knopf.type = "button";
+    knopf.className = "explorer-ordnerknopf";
+    knopf.textContent = alleDrin ? "Haken entfernen" : "alle fehlenden";
+    knopf.title = alleDrin ? `Haken in „${name.textContent}" entfernen`
+                           : `Alle fehlenden aus „${name.textContent}" anhaken`;
+    knopf.addEventListener("click", () => {
+      for (const d of fehlende) {
+        if (alleDrin) gedAuswahl.delete(d.id); else gedAuswahl.add(d.id);
+      }
+      gedExplorerZeichnen();
+    });
+    li.appendChild(knopf);
+  }
+  return li;
 }
 
 // Der Inhalt ist eine einschaltbare Funktion: Zu ist der Regelfall, denn die
@@ -3871,7 +3939,10 @@ document.addEventListener("DOMContentLoaded", () => {
   $("ged-oeffnen").addEventListener("click", () => gedaechtnisExplorerOeffnen());
   $("ged-inhalt").addEventListener("toggle", gedInhaltSchalterMerken);
   $("ged-alle-fehlenden").addEventListener("click", () => {
-    for (const d of gedFehlende()) gedAuswahl.add(d.id);
+    // Nur die sichtbaren. Wer nach "Gegner" filtert und dann hier klickt,
+    // will den Gegner im Gedaechtnis - nicht die ganze Akte. Im
+    // Dokumentfenster gilt dasselbe seit dem 29.09.2026.
+    for (const d of gedSichtbarFehlende()) gedAuswahl.add(d.id);
     gedExplorerZeichnen();
   });
   $("ged-dialog").addEventListener("close", (ev) => {

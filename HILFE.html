@@ -385,7 +385,8 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
         <tr><td><strong>alle anhaken</strong></td><td>hakt alles an, was gerade sichtbar ist</td></tr>
         <tr><td><strong>Haken entfernen</strong></td><td>nimmt bei allen Sichtbaren den Haken weg</td></tr>
         <tr><td>die Felder oben<br><em>Gegner (6) · Mandant (2)</em></td><td>hakt eine ganze Kategorie an oder ab</td></tr>
-        <tr><td>das Suchfeld</td><td>filtert nach Titel, Datum oder Kategorie – <code>gegner 2026-05</code> findet die gegnerischen Schriftsätze aus dem Mai</td></tr>
+        <tr><td>das Suchfeld</td><td>filtert nach Titel, Datum, Ordner oder Kategorie – <code>gegner 2026-05</code> findet die gegnerischen Schriftsätze aus dem Mai</td></tr>
+        <tr><td>die Überschriften<br><em>Gericht · 6 Dokumente</em><span class="marke fertig">seit 12.10.2026</span></td><td>die Liste ist nach Ordnern gegliedert wie in jur|nodes; <strong>alle anhaken</strong> neben einer Überschrift nimmt diesen einen Ordner. <strong>E-Akte</strong> – Mails, Anlagen, Vermerke – steht zuletzt, weil sie aus einem anderen Ordnerbaum kommt</td></tr>
       </table>
       <p><strong>Weniger ist oft besser.</strong> Was Sie anhaken, geht an das Modell und
       wird bezahlt. Für eine Frage zur Unfallschilderung braucht es nicht die gesamte
@@ -545,6 +546,27 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
   </table>
   <p>Vor dem Einlesen sagt das Programm, wie viele Dokumente noch fehlen, wie viele Zeichen
   das sind und mit wie vielen Aufrufen zu rechnen ist. <strong>Erst dann wird gerechnet.</strong></p>
+
+  <h3>Die Akte nach Ordnern, im Fenster „Auswahl"<span class="marke fertig">seit 12.10.2026</span></h3>
+  <p>Links steht die Akte nicht mehr als eine Reihe, sondern <strong>nach Ordnern
+  gegliedert</strong> – so wie in jur|nodes. Über jedem Ordner steht sein Name und wie
+  viele darin <strong>noch fehlen</strong>:</p>
+  <table>
+    <tr><th>Was dort steht</th><th>Was es heißt</th></tr>
+    <tr><td><em>Gericht · 2 von 3 fehlen</em></td><td>von drei Dokumenten in diesem Ordner liegt eines schon im Gedächtnis</td></tr>
+    <tr><td><em>Gericht · 3 Dokumente · im Gedächtnis</em></td><td>in diesem Ordner fehlt nichts – dann steht dort auch kein Knopf</td></tr>
+    <tr><td><strong>alle fehlenden</strong> neben dem Ordnernamen</td><td>hakt die fehlenden dieses einen Ordners an; was schon drin ist, bleibt unberührt</td></tr>
+    <tr><td><strong>Unmittelbar im Aktenordner</strong></td><td>was in keinem Unterordner liegt – es steht oben</td></tr>
+    <tr><td><strong>E-Akte</strong></td><td>Mails, ihre Anlagen und Vermerke. Sie stehen <strong>zuletzt</strong>, weil sie aus einem anderen Ordnerbaum kommen als die Dateien</td></tr>
+  </table>
+  <p>Der Knopf <strong>alle fehlenden</strong> oben über der Spalte nimmt alle Ordner
+  zusammen – aber nur, <strong>was der Filter gerade stehen lässt</strong>. Wer nach
+  <code>gegner</code> filtert und dann klickt, nimmt den Gegner ins Gedächtnis und nicht
+  die ganze Akte. Das Suchfeld filtert auch <strong>über den Ordnernamen</strong>.</p>
+  <div class="merksatz">
+    <p><strong>Warum das hier zuerst steht:</strong> Angehakt wird zuerst im Gedächtnis.
+    Was dort nicht liegt, muss jedes Mal neu gelesen und neu bezahlt werden.</p>
+  </div>
 
   <h3>Nachlesen, was im Gedächtnis steht</h3>
   <p>Im Fenster <strong>Auswahl</strong> unten: <strong>„Was das Programm sich gemerkt

@@ -431,15 +431,17 @@
   <form method="dialog" class="explorer-form">
     <h2>Aktengedächtnis ergänzen</h2>
     <p class="nachweis-hinweis">Links die Akte aus jur|nodes, rechts was im Gedächtnis liegt.
-      Was rechts fehlt, ist links hervorgehoben. Rechts nimmt „vergessen" ein einzelnes
+      Was rechts fehlt, ist links hervorgehoben. Links steht die Akte nach Ordnern gegliedert;
+      jede Überschrift sagt, wie viele darin noch fehlen, und hakt sie auf einen Klick an.
+      Rechts nimmt „vergessen" ein einzelnes
       Dokument wieder heraus – die Akte in jur|nodes bleibt unberührt.</p>
     <input type="search" id="ged-suche" class="explorer-suche" autocomplete="off"
-           placeholder="Dokumente filtern – Titel, Datum oder Kategorie">
+           placeholder="Dokumente filtern – Titel, Datum, Ordner oder Kategorie">
     <div class="explorer">
       <section class="explorer-spalte">
         <div class="explorer-kopf">jur|nodes · Akte <span id="ged-quelle-zahl" class="zahl"></span>
           <button type="button" id="ged-alle-fehlenden" class="mini leise"
-                  title="Alle fehlenden auswählen">alle fehlenden</button></div>
+                  title="Alle fehlenden anhaken, die der Filter gerade stehen lässt">alle fehlenden</button></div>
         <ul id="ged-quelle-liste" class="explorer-liste"></ul>
       </section>
       <section class="explorer-spalte">
