@@ -2998,3 +2998,51 @@ Der ganze Container, Datei für Datei, dazu jedes gepackte git-Objekt einzeln:
   einer Suche aus wie ein Vorkommen, weil es eines ist.
 * Sonst nichts. Nicht im Arbeitsverzeichnis, nicht in den git-Objekten, nicht
   im Arbeitsordner dieser Sitzung.
+
+### Nachtrag 12.10.2026 — `ANLEITUNG.md` ist nachgezogen, auf ausdrückliche Anweisung
+
+Die Datei gehört zu den vier, die nur auf Anweisung geändert werden. Die
+Anweisung lag vor; geändert sind genau die drei benannten Stellen:
+
+| Was | Vorher | Jetzt |
+|---|---|---|
+| Adresse | das gelöschte Verzeichnis | das neue |
+| Dateiname | doppelter Bindestrich | einfacher |
+| Zweige | „`main` und `fassung-1.0`" | nur noch `main` |
+
+Dazu **ein Absatz, der nicht verlangt war** und den ich nenne, damit er nicht
+unbemerkt bleibt: ein Hinweis für den Fall, dass die alte Adresse als
+Lesezeichen gespeichert ist. Ohne ihn stünde der Leser vor einer Seite, die es
+nicht gibt, und wüsste nicht, warum. Er sagt, dass bereinigt wurde und warum —
+ohne Namen, ohne Aktenzeichen.
+
+### Und der verlorene Zweig ist doch belegt erhalten
+
+Bei der Durchsicht ist aufgefallen, was gestern noch eine Vermutung war.
+`FASSUNGEN.md` führt eine Tabelle der Zweige, und dort steht:
+
+> `main` | zurzeit derselbe Stand wie `fassung-1.0`
+
+Das ist keine Erinnerung und keine Ableitung, sondern eine Angabe, die
+geschrieben wurde, **als es beide noch gab**. Damit steht fest: Mit
+`fassung-1.0` ist eine Zweigbezeichnung verloren, **kein Inhalt**. Der Stand
+liegt in `main`.
+
+Der Fehler bleibt einer — die Zweige am Server abzufragen hätte ihn vermieden.
+Aber sein Schaden ist kleiner, als er aussah.
+
+### Was noch nicht stimmt, und wo ich nichts geändert habe
+
+Dieselbe Angabe steht in weiteren Dateien, die **nicht** zu den vier gehören.
+Sie sind dadurch heute falsch:
+
+| Datei | Was dort steht |
+|---|---|
+| `README.md` | „`main` und `fassung-1.0`" |
+| `FASSUNGEN.md` | eine Zeile je Zweig, dazu `git checkout fassung-1.0` als Anleitung |
+| `UEBERGABE.md` | „`fassung-1.0` bleibt unangetastet" |
+| `AWS-EINRICHTEN.md` | der alte Ordnername mit doppeltem Bindestrich |
+
+Die Anweisung lautete auf `ANLEITUNG.md`, und dabei bleibt es, bis die Kanzlei
+etwas anderes sagt. **Besonders `FASSUNGEN.md` sticht hervor:** Dort steht ein
+Befehl, der heute ins Leere greift.

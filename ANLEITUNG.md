@@ -46,19 +46,25 @@ sich die richtige. Findet er keine, sagt er es und verlinkt die richtige Seite.
 
 ### Schritt 2: Das Programm herunterladen
 
-1. <https://github.com/JosefBlack/jusperfect-> öffnen und anmelden
+1. <https://github.com/JosefBlack/jusperfect> öffnen und anmelden
 2. Grüner Knopf **„Code"** → **„Download ZIP"**
 3. Entpacken an einen Ort, an dem es bleiben darf – etwa `C:\jusperfect`.
    **Nicht** nach „Downloads": von dort wird gern aufgeräumt.
 
-Die Datei heisst `jusperfect--2.0.zip`, der entpackte Ordner `jusperfect--2.0`.
+Die Datei heisst `jusperfect-2.0.zip`, der entpackte Ordner `jusperfect-2.0`.
 Sie dürfen ihn umbenennen; die Dateien darin müssen aber beieinander bleiben.
 
 > **Zur Einordnung, falls Sie sich wundern.** Oben links steht ein Knopf mit
 > **`2.0`** darauf – das ist die Arbeitsfassung und zugleich die
-> Voreinstellung, Sie müssen dort nichts umstellen. Daneben liegen `main` und
-> `fassung-1.0`; in beiden steht die ältere **Fassung 1.0**. Die brauchen Sie
-> nur, wenn Sie einmal zurück wollen.
+> Voreinstellung, Sie müssen dort nichts umstellen. Daneben liegt `main`; dort
+> steht die ältere **Fassung 1.0**. Die brauchen Sie nur, wenn Sie einmal
+> zurück wollen.
+
+> **Falls Sie noch die alte Adresse gespeichert haben** (sie endete auf einen
+> Bindestrich): Die gibt es seit dem 12.10.2026 nicht mehr. Das Verzeichnis
+> wurde neu angelegt, weil in seiner Vorgeschichte ein Aktenzeichen und ein
+> Mandantenname standen. Der Inhalt ist derselbe – nur die Adresse ist neu
+> und die Vorgeschichte bereinigt.
 
 ### Schritt 3: Starten
 
