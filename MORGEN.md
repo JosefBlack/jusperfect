@@ -2435,3 +2435,62 @@ erfunden. Einzig `Testmann ./. Musterhaft` war echt, und das ist heraus.
 **Für spätere Sitzungen:** Diese Liste ist eine Auskunft der Kanzlei vom
 11.10.2026, kein Befund aus dem Quelltext. Kommt ein neuer Name hinzu, ist
 erneut zu fragen. Ein erfundener Name und ein echter sehen gleich aus.
+
+---
+
+## 12.10.2026 — die Ordner stehen im Dokumentfenster
+
+Die letzte der drei offenen Programmaufgaben. In `X-100-2026` standen 55
+Einträge aus acht Ordnern in einer Reihe.
+
+### Es war mehr als eine Anzeigeänderung
+
+**Der Ordner war im Programm gar nicht vorhanden.** `_ordner_durchgehen` in
+`jusperfect/jurnodes/http_adapter.py` läuft den Baum ab, kennt dabei jeden
+Ordnernamen — und warf ihn weg. Am `Dokument` gab es kein Feld dafür.
+
+Neu: `Dokument.ordner`. Der Baumdurchlauf gibt zu jedem Eintrag seinen Pfad
+zurück (`Schriftsätze/Gegenseite`); der Wurzelordner ist die leere
+Zeichenkette.
+
+### Drei Entscheidungen
+
+**Die E-Akte steht unter eigenem Namen und hinten.** Mails, ihre Anlagen und
+Vermerke tragen `ordner = "E-Akte"`. Sie kommen aus dem Korrespondenzbaum,
+nicht aus dem Dateiordner. Sie dazwischenzumischen hieße, zwei Bäume zu einem
+zu machen — und genau diese Verwechslung hat am 02.10.2026 drei fremde
+Schriftstücke in eine Bausache gebracht.
+
+**Ein Ordner ohne Namen bekommt seine Nummer.** `Ordner 2`, `Ordner 3`. Zwei
+namenlose Ordner dürfen nicht zu einem verschmelzen; das sähe aus wie ein
+Register, wo zwei sind.
+
+**Ein `/` im Ordnernamen wird zu `-`.** „Miete / Nebenkosten" ist ein Ordner,
+nicht zwei. Sonst täuschte der Pfad eine Ebene vor, die es nicht gibt.
+
+### Beim WebDAV-Adapter stand es schon da — an der falschen Stelle
+
+`jusperfect/jurnodes/webdav_adapter.py` legte den Unterordner seit jeher in
+`kategorie` ab. Das ist umgezogen nach `ordner`. `kategorie` bleibt für das
+frei, was ein Schriftstück **ist** (Mandant, Gegner, E-Mail (Eingang)); der
+Ordner sagt, **wo es liegt**. Beides in einem Feld hieß, dass die
+Stapelauswahl nach Art bei einer Laufwerksakte die Ordner anbot und bei einer
+jur|nodes-Akte die Arten.
+
+### Im Fenster
+
+Eine Überschrift je Ordner, mit Anzahl und einem Griff für den Stapel („alle
+anhaken" / „Haken entfernen") — wer ein Register ganz will, klickt einmal
+statt fünfzehnmal. Reihenfolge: zuerst, was unmittelbar im Aktenordner liegt,
+dann die Ordner nach dem Alphabet, die E-Akte zuletzt. **Bei einem einzigen
+Ordner bleibt die Liste glatt** — eine Gliederung aus einem Teil ist keine.
+
+Der Filter sucht jetzt auch im Ordnernamen; der Platzhalter sagt es.
+
+**Im echten Browser nachgesehen** (Chromium, 1320 × 1000, Demo mit
+Testdokumenten in sechs Ordnern): Die Überschriften stehen, der Stapelgriff
+hakt an und wieder ab und beschriftet sich um, die Suche nach „gericht"
+findet das Dokument im Gerichtsordner und zeigt es ohne Überschrift — weil
+dann nur noch ein Ordner übrig ist. Keine Meldung in der Browserkonsole.
+
+**1850 Prüfungen grün**, dreizehn neue in `tests/test_ordner_gruppieren.py`.

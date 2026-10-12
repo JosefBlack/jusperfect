@@ -163,7 +163,10 @@ class WebDavJurNodesAdapter:
         ergebnis: list[Dokument] = []
         for pfad in self._dateien(ordner):
             rel = pfad.relative_to(ordner)
-            kategorie = str(rel.parent).replace("\\", "/") if str(rel.parent) != "." else ""
+            # Der Unterordner stand bis zum 12.10.2026 in "kategorie". Er
+            # gehoert in "ordner": Dort erwartet ihn das Dokumentfenster, und
+            # "kategorie" bleibt fuer das frei, was ein Schriftstueck IST.
+            unterordner = str(rel.parent).replace("\\", "/") if str(rel.parent) != "." else ""
             try:
                 stat = pfad.stat()
                 datum = date.fromtimestamp(stat.st_mtime)
@@ -173,7 +176,7 @@ class WebDavJurNodesAdapter:
             ergebnis.append(Dokument(
                 id=rel.as_posix(), akte_id=akte_id, titel=pfad.stem, dateiname=rel.as_posix(),
                 mime_typ=MIME_NACH_ENDUNG.get(pfad.suffix.lower(), "application/octet-stream"),
-                datum=datum, kategorie=kategorie, groesse_bytes=groesse,
+                datum=datum, ordner=unterordner, groesse_bytes=groesse,
             ))
         return ergebnis
 

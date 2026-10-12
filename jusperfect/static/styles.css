@@ -515,6 +515,25 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .explorer-zeile.schon-drin .explorer-titelzeile,
 .explorer-eintrag.schon-drin .explorer-name { color: var(--gedaempft); }
 .explorer-zeile.schon-drin input[disabled] { cursor: default; }
+/* Die Ueberschrift eines Ordners in der Dokumentliste.
+   Sie ist kein Eintrag - deshalb kein Rahmen, kein Haken, und sie darf nicht
+   aussehen, als liesse sie sich anhaken. */
+.explorer-ordner { display: flex; align-items: baseline; gap: 10px;
+  margin: 14px 0 4px; padding: 0 2px 3px; border-bottom: 1px solid var(--linie);
+  list-style: none; }
+.explorer-ordner:first-child { margin-top: 2px; }
+.explorer-ordnername { font-weight: 600; font-size: 13px; color: var(--text);
+  letter-spacing: .01em; }
+.explorer-ordner.wurzel .explorer-ordnername { font-weight: 500; color: var(--gedaempft);
+  font-style: italic; }
+.explorer-ordnerzahl { font-size: 12px; color: var(--gedaempft);
+  font-variant-numeric: tabular-nums; }
+.explorer-ordnerknopf { margin-left: auto; font: inherit; font-size: 11.5px;
+  background: none; border: 0; padding: 1px 4px; border-radius: 3px;
+  color: var(--gedaempft); cursor: pointer; text-decoration: underline;
+  text-underline-offset: 2px; }
+.explorer-ordnerknopf:hover { color: var(--akzent); }
+
 .explorer-umfang { margin: 10px 0 0; color: var(--gedaempft); font-size: 12.5px;
   font-variant-numeric: tabular-nums; }
 .explorer-umfang.voll { color: var(--amber); font-weight: 600; }

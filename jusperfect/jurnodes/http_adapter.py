@@ -261,6 +261,14 @@ def _identitaet_pruefen(angefragt: str, daten: Mapping[str, Any]) -> None:
 #: gebracht hat.
 VERMERK_VORSATZ = "vermerk:"
 
+#: Unter welchem Namen die E-Akte im Dokumentfenster steht.
+#:
+#: Mails, ihre Anlagen und Vermerke kommen aus dem Korrespondenzbaum, nicht
+#: aus dem Dateiordner. Sie dort einzureihen hiesse, zwei Baeume zu einem zu
+#: machen - und genau diese Verwechslung hat am 02.10.2026 drei fremde
+#: Schriftstuecke in eine Bausache gebracht.
+EAKTE_ORDNER = "E-Akte"
+
 #: Wie ein Vermerk heisst, wenn er keinen Betreff traegt.
 #:
 #: Aus der Huelle kommt immer "note" - ob es eine Telefonnotiz ist, steht erst
@@ -293,6 +301,7 @@ def vermerk_als_dokument(akte_id: str, nummer: Any, huelle: Mapping[str, Any]) -
         mime_typ="text/html",
         datum=_datum(_erstes(huelle, "created", "postmark", standard=None)),
         kategorie=art,
+        ordner=EAKTE_ORDNER,
     )
 
 
@@ -390,6 +399,7 @@ def mail_als_dokument(akte_id: str, kennung: str, huelle: Mapping[str, Any],
         mime_typ=mime_typ,
         datum=_datum(_erstes(huelle, "postmark", "created", standard=None)),
         kategorie=kategorie,
+        ordner=EAKTE_ORDNER,
     )
 
 
@@ -423,6 +433,7 @@ def anhang_als_dokument(akte_id: str, kennung: str, nummer: int,
         mime_typ=anhang.mime_typ,
         datum=_datum(_erstes(huelle, "postmark", "created", standard=None)),
         kategorie=f"Anlage zur E-Mail{richtung}",
+        ordner=EAKTE_ORDNER,
     )
 
 
@@ -432,7 +443,24 @@ def _dateiname_teil(kennung: str) -> str:
     return sauber[:40] or "ohne-kennung"
 
 
-def dokument_aus_json(akte_id: str, d: Mapping[str, Any]) -> Dokument:
+#: Wie der Ordner heisst, wenn der Hersteller keinen Namen mitgibt.
+#:
+#: Dann steht die Nummer da. Ein Ordner ohne Bezeichnung ist unschoen, ein
+#: Ordner, der mit anderen namenlosen zu einem Haufen verschmilzt, ist falsch:
+#: Zwei Register der Akte saehen aus wie eines.
+def _ordnerpfad(bisher: str, ordner: Mapping[str, Any], nummer: Any) -> str:
+    """Den Pfad eines Unterordners aus dem seines Elternordners bilden."""
+    name = str(_erstes(ordner, "folderName", "name", "bezeichnung",
+                       standard="")).strip()
+    if not name:
+        name = f"Ordner {nummer}"
+    # Ein "/" im Namen wuerde eine Ebene vortaeuschen, die es nicht gibt.
+    name = name.replace("/", "-")
+    return f"{bisher}/{name}" if bisher else name
+
+
+def dokument_aus_json(akte_id: str, d: Mapping[str, Any],
+                      ordner: str = "") -> Dokument:
     """Ein Dokument aus einem ``file``-Eintrag von ``/file-system/folder/content``.
 
     jur|nodes fuehrt Namen und Endung getrennt (``fileName`` ohne, ``fileExtension``
@@ -450,6 +478,7 @@ def dokument_aus_json(akte_id: str, d: Mapping[str, Any]) -> Dokument:
         mime_typ=str(_erstes(d, "mime_typ", "mimeType", "contentType", standard="application/octet-stream")),
         datum=_datum(_erstes(d, "addedDate", "datum", "erstelltAm", "date", standard=None)),
         kategorie=str(_erstes(d, "kategorie", "typ", "art")),
+        ordner=ordner,
         groesse_bytes=_erstes(d, "size", "groesse_bytes", "groesse", standard=None),
     )
 
@@ -949,24 +978,30 @@ class HttpJurNodesAdapter:
     #: Wie viele Anlagen aus den Mails dieser Akte dazugekommen sind.
     letzte_mail_anhaenge: int = 0
 
-    def _ordner_durchgehen(self, wurzel: Any) -> list[Mapping[str, Any]]:
+    def _ordner_durchgehen(self, wurzel: Any) -> list[tuple[str, Mapping[str, Any]]]:
         """Alle Eintraege einer Akte - auch die in Unterordnern.
 
         Die Beschreibung des Herstellers fuehrt jeden Eintrag als "folder"
-        oder "file"; ein Ordner nennt seine Nummer in ``folder.id`` und sagt
-        mit ``canRead``, ob er gelesen werden darf. Ein Ordner, den der
-        Schluessel nicht lesen darf, wird uebersprungen statt einen Fehler zu
-        werfen - er gehoert dann jemand anderem.
+        oder "file"; ein Ordner nennt seine Nummer in ``folder.id``, seinen
+        Namen in ``folder.folderName`` und sagt mit ``canRead``, ob er gelesen
+        werden darf. Ein Ordner, den der Schluessel nicht lesen darf, wird
+        uebersprungen statt einen Fehler zu werfen - er gehoert dann jemand
+        anderem.
 
         Gegen Schleifen: Jede Ordnernummer wird nur einmal besucht.
+
+        **Zu jedem Eintrag kommt sein Ordner zurueck**, als Pfad unter dem
+        Aktenordner ("Schriftsaetze/Gegenseite"); der Wurzelordner selbst ist
+        die leere Zeichenkette. Ohne das steht die Akte spaeter in einer
+        Reihe - in X-100-2026 waren das 55 Eintraege aus acht Ordnern.
         """
         gesehen: set[str] = set()
         self.letzte_ordner_uebersprungen = 0
         self.letzte_dateien_aussortiert = 0
-        alle: list[Mapping[str, Any]] = []
-        offen: list[tuple[Any, int]] = [(wurzel, 0)]
+        alle: list[tuple[str, Mapping[str, Any]]] = []
+        offen: list[tuple[Any, int, str]] = [(wurzel, 0, "")]
         while offen and len(gesehen) < self.ORDNER_HOECHSTZAHL:
-            ordner_id, tiefe = offen.pop(0)
+            ordner_id, tiefe, pfad = offen.pop(0)
             if str(ordner_id) in gesehen:
                 continue
             gesehen.add(str(ordner_id))
@@ -981,7 +1016,8 @@ class HttpJurNodesAdapter:
                     raise
                 self.letzte_ordner_uebersprungen += 1
                 continue
-            alle.extend(self._fremde_dateien_aussondern(ordner_id, eintraege))
+            alle.extend((pfad, e) for e in
+                        self._fremde_dateien_aussondern(ordner_id, eintraege))
             if tiefe >= self.ORDNER_TIEFE:
                 continue
             for eintrag in eintraege:
@@ -994,7 +1030,7 @@ class HttpJurNodesAdapter:
                     continue
                 nummer = unter.get("id")
                 if nummer is not None and str(nummer) not in gesehen:
-                    offen.append((nummer, tiefe + 1))
+                    offen.append((nummer, tiefe + 1, _ordnerpfad(pfad, unter, nummer)))
         return alle
 
     def dokumente(self, akte_id: str) -> list[Dokument]:
@@ -1041,7 +1077,7 @@ class HttpJurNodesAdapter:
         # Akte, und den nimmt das Programm seit dem 06.10.2026:
         # POST /correspondence/search mit recordIdentifier.
         dokumente: list[Dokument] = []
-        for eintrag in eintraege:
+        for pfad, eintrag in eintraege:
             datei = eintrag.get("file") if isinstance(eintrag, Mapping) else None
             if datei is None and isinstance(eintrag, Mapping) and eintrag.get("type") == "folder":
                 continue
@@ -1058,7 +1094,7 @@ class HttpJurNodesAdapter:
             # die Datei gar nicht.
             if isinstance(roh, Mapping) and ist_gedaechtnis_datei(self._ganzer_name(roh)):
                 continue
-            dokumente.append(dokument_aus_json(akte_id, roh))
+            dokumente.append(dokument_aus_json(akte_id, roh, ordner=pfad))
         if self._korrespondenz:
             dokumente += self._vermerke(akte_id)
         return dokumente

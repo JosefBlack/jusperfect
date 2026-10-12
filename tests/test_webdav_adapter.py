@@ -68,7 +68,12 @@ class WebDavAdapter(unittest.TestCase):
         self.assertIn("Schriftsaetze/Erwiderung.md", dok)
         self.assertIn("beweisfoto.jpg", dok)
         self.assertNotIn("unwichtig.zip", dok)  # kein Dokumenttyp
-        self.assertEqual(dok["Schriftsaetze/Erwiderung.md"].kategorie, "Schriftsaetze")
+        # Seit dem 12.10.2026 steht der Unterordner in "ordner", nicht in
+        # "kategorie" - dort erwartet ihn das Dokumentfenster.
+        self.assertEqual(dok["Schriftsaetze/Erwiderung.md"].ordner, "Schriftsaetze")
+        self.assertEqual(dok["Schriftsaetze/Erwiderung.md"].kategorie, "")
+        self.assertEqual(dok["Klageschrift.txt"].ordner, "",
+                         "Was unmittelbar im Aktenordner liegt, hat keinen Unterordner.")
 
     def test_dokument_laden_liest_bytes(self):
         dokument, daten = self.a.dokument_laden("X-001-2026", "Klageschrift.txt")

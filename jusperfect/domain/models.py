@@ -32,6 +32,16 @@ class Dokument(BaseModel):
     mime_typ: str = "application/octet-stream"
     datum: date | None = None
     kategorie: str = ""
+    #: In welchem Ordner der Akte das Dokument liegt - leer heisst: unmittelbar
+    #: im Aktenordner. Bei mehreren Ebenen mit "/" verbunden
+    #: ("Schriftsaetze/Gegenseite"). Was aus der E-Akte kommt - Mails, deren
+    #: Anlagen und Vermerke - traegt "E-Akte"; es liegt in einem anderen Baum
+    #: als die Dateien, und das soll man sehen.
+    #:
+    #: Eingefuehrt am 12.10.2026: In X-100-2026 standen 55 Eintraege aus acht
+    #: Ordnern in einer Reihe. Ein Aktenordner, der seine Gliederung verliert,
+    #: ist schwerer zu lesen als ein Papierordner mit Registern.
+    ordner: str = ""
     groesse_bytes: int | None = None
 
 

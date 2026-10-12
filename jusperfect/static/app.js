@@ -723,10 +723,11 @@ async function dokumenteVerwalten() {
 function explorerStarten(initial) {
   const karte = new Map();
   for (const d of (sitzung.dokumente || []))
-    karte.set(d.id, { id: d.id, titel: d.titel, kategorie: d.kategorie || "", datum: d.datum || "" });
+    karte.set(d.id, { id: d.id, titel: d.titel, kategorie: d.kategorie || "",
+                      datum: d.datum || "", ordner: d.ordner || "" });
   const geladen = new Set((sitzung.sitzung.geladen || []).map((g) => g.dokument_id));
   for (const g of (sitzung.sitzung.geladen || []))
-    if (!karte.has(g.dokument_id)) karte.set(g.dokument_id, { id: g.dokument_id, titel: g.titel, kategorie: "", datum: "" });
+    if (!karte.has(g.dokument_id)) karte.set(g.dokument_id, { id: g.dokument_id, titel: g.titel, kategorie: "", datum: "", ordner: "" });
   explorer = { karte, gewaehlt: new Set(geladen), geladen, initial };
   const a = sitzung.sitzung.akte;
   $("explorer-titel").textContent = `${a.aktenzeichen} · ${a.bezeichnung}`;
@@ -782,7 +783,7 @@ function suchbegriffe(feldId) {
 
 function dokumentPasst(d, begriffe) {
   if (!begriffe.length) return true;
-  const text = `${d.titel || ""} ${d.datum || ""} ${d.kategorie || ""}`.toLowerCase();
+  const text = `${d.titel || ""} ${d.datum || ""} ${d.kategorie || ""} ${d.ordner || ""}`.toLowerCase();
   return begriffe.every((b) => text.includes(b));
 }
 
@@ -799,20 +800,92 @@ function explorerSichtbar() {
   return [...explorer.karte.values()].filter((d) => dokumentPasst(d, begriffe));
 }
 
+// Wie die Akte gegliedert ist: ohne Unterordner zuerst, dann die Ordner nach
+// dem Alphabet, die E-Akte zuletzt.
+//
+// Die E-Akte steht hinten, weil sie aus einem ANDEREN Baum kommt - Mails,
+// Anlagen und Vermerke liegen nicht im Dateiordner. Sie dazwischenzumischen
+// hiesse, zwei Baeume zu einem zu machen; genau diese Verwechslung hat am
+// 02.10.2026 drei fremde Schriftstuecke in eine Bausache gebracht.
+const EAKTE_ORDNER = "E-Akte";
+
+/** Die sichtbaren Dokumente nach Ordnern, in Lesereihenfolge.
+ *
+ * Gibt eine Liste von [ordner, dokumente] zurueck. Innerhalb eines Ordners
+ * bleibt die Reihenfolge, die der Aktenadapter geliefert hat.
+ */
+function explorerNachOrdnern(sichtbar) {
+  const nach = new Map();
+  for (const d of sichtbar) {
+    const o = d.ordner || "";
+    if (!nach.has(o)) nach.set(o, []);
+    nach.get(o).push(d);
+  }
+  const reihe = [...nach.keys()].sort((a, b) => {
+    if (a === b) return 0;
+    if (a === "") return -1;
+    if (b === "") return 1;
+    if (a === EAKTE_ORDNER) return 1;
+    if (b === EAKTE_ORDNER) return -1;
+    return a.localeCompare(b, "de");
+  });
+  return reihe.map((o) => [o, nach.get(o)]);
+}
+
 function explorerRendern() {
   const liste = $("quelle-liste");
   liste.replaceChildren();
   const sichtbar = explorerSichtbar();
   let angehakt = 0;
-  for (const d of sichtbar) {
-    const drin = explorer.gewaehlt.has(d.id);
-    if (drin) angehakt++;
-    liste.appendChild(explorerEintrag(d, drin));
+  for (const d of sichtbar) if (explorer.gewaehlt.has(d.id)) angehakt++;
+
+  // Ein einziger Ordner ist keine Gliederung - dann bleibt die Liste glatt.
+  const gruppen = explorerNachOrdnern(sichtbar);
+  const mitUeberschrift = gruppen.length > 1;
+  for (const [ordner, dazu] of gruppen) {
+    if (mitUeberschrift) liste.appendChild(explorerOrdnerzeile(ordner, dazu));
+    for (const d of dazu) liste.appendChild(explorerEintrag(d, explorer.gewaehlt.has(d.id)));
   }
+
   zahlZeigen("quelle-zahl", sichtbar.length, explorer.karte.size);
   zahlZeigen("arbeit-zahl", angehakt, explorer.gewaehlt.size);
   explorerArtenZeichnen(sichtbar);
   explorerUmfangZeigen();
+}
+
+/** Die Ueberschrift eines Ordners - mit Zahl und einem Griff fuer den Stapel.
+ *
+ * In X-100-2026 stehen 55 Eintraege aus acht Ordnern. Wer ein Register der
+ * Akte ganz oder gar nicht will, soll es nicht funfzehnmal anklicken muessen.
+ */
+function explorerOrdnerzeile(ordner, dazu) {
+  const li = document.createElement("li");
+  li.className = "explorer-ordner";
+  const name = document.createElement("span");
+  name.className = "explorer-ordnername";
+  // Der leere Ordner ist kein Ordner, sondern die Akte selbst.
+  name.textContent = ordner || "Unmittelbar im Aktenordner";
+  if (!ordner) li.classList.add("wurzel");
+  const zahl = document.createElement("span");
+  zahl.className = "explorer-ordnerzahl";
+  zahl.textContent = dazu.length === 1 ? "1 Dokument" : `${dazu.length} Dokumente`;
+
+  const alleDrin = dazu.every((d) => explorer.gewaehlt.has(d.id));
+  const knopf = document.createElement("button");
+  knopf.type = "button";
+  knopf.className = "explorer-ordnerknopf";
+  knopf.textContent = alleDrin ? "Haken entfernen" : "alle anhaken";
+  knopf.title = alleDrin ? `Alle Haken in „${name.textContent}" entfernen`
+                         : `Alles aus „${name.textContent}" anhaken`;
+  knopf.addEventListener("click", () => {
+    for (const d of dazu) {
+      if (alleDrin) explorer.gewaehlt.delete(d.id); else explorer.gewaehlt.add(d.id);
+    }
+    explorerRendern();
+  });
+
+  li.append(name, zahl, knopf);
+  return li;
 }
 
 // Stapelauswahl nach Kategorie. Bei acht Dokumenten haekelt man einzeln; bei
