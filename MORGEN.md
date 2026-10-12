@@ -2951,3 +2951,50 @@ werden. Deshalb hier benannt, nicht geändert:
 | 49 | die Adresse des alten Repositorys | es ist gelöscht — der Verweis geht ins Leere |
 | 54 | `jusperfect--2.0.zip`, Ordner `jusperfect--2.0` | jetzt `jusperfect-2.0.zip` und `jusperfect-2.0` |
 | ~57 | „daneben liegen `main` und `fassung-1.0`" | es gibt nur noch `main` |
+
+### Nachtrag 12.10.2026 — die Sicherungen sind gelöscht, und der Container ist durchgesehen
+
+Auf Anweisung der Kanzlei. Drei `git`-Bündel: zwei mit dem Stand **vor** der
+Bereinigung, eines mit dem bereinigten. Alle drei weg, der Ordner dazu auch.
+
+Damit ist auch das letzte Mittel fort, die Umschreibung rückgängig zu machen.
+Das ist der Zweck, nicht ein Nebeneffekt.
+
+### Dabei fiel zweierlei auf, das ich sonst übersehen hätte
+
+**1. Im Arbeitsverzeichnis lagen noch unerreichbare git-Objekte.** Neun Stück,
+darunter zwei Blobs und zwei Commit-Texte, die die Namen trugen — Reste der
+Umschreibungen und des überschreibenden Pushes. Nicht auf dem Server; der war
+am frischen Klon geprüft. Aber hier.
+
+`git reflog expire --expire-unreachable=now --all` und `git gc --prune=now`
+haben sie entfernt. Danach lassen sich die alten Prüfsummen nicht einmal mehr
+auflösen: `git cat-file -t` sagt zu jeder „weg".
+
+> Ein Repository, das sauber **aussieht**, hat die alten Stände oft noch —
+> nur nicht mehr in einem Zweig. Erreichbarkeit ist nicht Abwesenheit.
+
+**2. Meine eigenen Werkzeuge trugen die Namen.** Die Ersetzungslisten, mit
+denen umgeschrieben wurde, führen notwendigerweise beide Seiten: links den
+echten Namen, rechts den erfundenen. Sie lagen im Arbeitsordner und sind jetzt
+ebenfalls gelöscht.
+
+Das ist dieselbe Bewegung wie dreimal vorher an diesem Tag, nur eine Ebene
+tiefer: **Das Werkzeug gegen den Fund enthält den Fund.**
+
+### Die abschließende Probe
+
+Der ganze Container, Datei für Datei, dazu jedes gepackte git-Objekt einzeln:
+
+* **Ein einziger Treffer** — `schnittstelle/jurnodes-api-1.0.2.json`. Der
+  Hersteller führt in seinen eigenen Beispielen zufällig denselben Nachnamen
+  (es ist der häufigste in Deutschland; er steht dort an drei Stellen, in einer
+  Briefanrede und in zwei erfundenen Firmen). Die Datei gehört ihm, das
+  Programm vergleicht sich gegen sie, und sie bleibt unberührt.
+
+  **Der Satz oben ist in seiner ersten Fassung durch die eigene Prüfung
+  gefallen** — ich hatte die Beispiele des Herstellers *zitiert*. Die Regel
+  kennt keine Ausnahme für Zitate, und das ist richtig so: Ein Zitat sieht in
+  einer Suche aus wie ein Vorkommen, weil es eines ist.
+* Sonst nichts. Nicht im Arbeitsverzeichnis, nicht in den git-Objekten, nicht
+  im Arbeitsordner dieser Sitzung.
