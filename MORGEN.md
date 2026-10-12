@@ -2749,3 +2749,43 @@ Zweige geprüft und sauber.
 **Unverändert bleibt, was keine Umschreibung leistet:** Die alten Commits sind
 über ihre Prüfsumme weiter vom Server zu holen — am 12.10.2026 gemessen. Sicher
 weg sind sie erst, wenn das Repository gelöscht und neu angelegt wird.
+
+### Nachtrag 12.10.2026 — Pull Request Nr. 1: er war schon zu, und es ändert nichts
+
+Die Kanzlei hat angewiesen, ihn zu schließen. **Er war es bereits** — geschlossen
+am 12.10.2026 um 13:04:53 UTC, **nicht zusammengeführt**, und nicht von mir.
+
+Das ist genau die Minute des überschreibenden Pushes auf `main`. Die Erklärung
+liegt nahe: Der Pull Request lief von `2.0` nach `main`; nachdem `main` eine
+neu geschriebene Geschichte ohne gemeinsamen Vorfahr bekam, war er nicht mehr
+zusammenführbar, und GitHub hat ihn selbst geschlossen. Ich habe ihn also nicht
+geschlossen, sondern vorgefunden.
+
+### Und die Probe sagt: Es ändert nichts
+
+Dreimal gefragt, aus einem frisch angelegten, leeren Verzeichnis, nur mit
+Adresse und Prüfsumme:
+
+| Alter Stand | Noch zu holen? | Was darin steht |
+|---|---|---|
+| alter Kopf von `2.0` | **ja** | 13 Fundstellen des Namens, 9 des Gegners |
+| alter Kopf von `main` | **ja** | 3 und 13 Fundstellen, dazu 30-mal die Aktennummer |
+| Zwischenstand aus dem Pull Request | **ja** | — |
+
+**Der geschlossene Pull Request gibt die alten Commits nicht frei.** Das ist
+keine Eigenheit dieses Falles: Ein Commit bleibt auf dem Server erreichbar,
+solange der Anbieter ihn nicht aufräumt, und wann das geschieht, bestimmt nicht
+die Kanzlei.
+
+> Drei Maßnahmen, drei Messungen, dasselbe Ergebnis: Umschreiben, überschreibend
+> pushen, Pull Request schließen — die alten Stände bleiben abrufbar.
+
+**Damit ist belegt, was vorher eine Vermutung war:** Es bleibt genau ein Mittel,
+das sicher wirkt — **das Repository löschen und neu anlegen.** Alles andere
+verringert die Auffindbarkeit, nicht die Verfügbarkeit.
+
+Wer die Prüfsumme nicht kennt, kommt allerdings auch nicht heran: Sie steht in
+keinem Verzeichnis mehr, der Zweig zeigt woanders hin, und das Repository ist
+privat, ohne Forks und ohne Beobachter. Das ist kein Schutz, auf den man sich
+verlässt — aber es ist der Unterschied zwischen „offen zugänglich" und „für
+den auffindbar, der die Nummer schon hat".
