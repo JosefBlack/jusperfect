@@ -2688,10 +2688,18 @@ Namen stehen dort nicht nur in der Vorgeschichte, sondern in den **heutigen
 Dateien**. Nach der Vorgabe der Kanzlei wird nur auf `2.0` geschrieben;
 `main` bleibt deshalb unberührt, bis die Kanzlei es ausdrücklich anweist.
 
-**Und das Entscheidende, das keine Umschreibung leistet:** Ein überschreibender
-Push nimmt die alten Commits **nicht** vom Server. Sie bleiben dort über ihre
-Prüfsumme erreichbar, und der offene Pull Request Nr. 1 hält sie zusätzlich
-fest. Wer die alte Prüfsumme kennt, kommt weiter heran.
+**Und das Entscheidende, das keine Umschreibung leistet — am 12.10.2026
+gemessen, nicht vermutet:** Ein überschreibender Push nimmt die alten Commits
+**nicht** vom Server.
+
+Die Probe: ein frisch angelegtes, leeres Repository, als einzige Angabe die
+Adresse und die Prüfsumme des alten Stands, dann
+`git fetch --depth=1 origin <pruefsumme>`. **Der Server hat ihn herausgegeben**
+— nach dem überschreibenden Push, aus einem Verzeichnis, das nichts von dem
+Zweig wusste.
+
+Wer die Prüfsumme kennt, kommt also weiter heran. Der offene Pull Request
+Nr. 1 hält sie zusätzlich fest; er zeigt die alten Commits in seinem Verlauf.
 
 Sicher weg sind sie erst, wenn das Repository gelöscht und neu angelegt wird —
 oder GitHub die unerreichbaren Objekte auf Anfrage entfernt. Das ist eine
