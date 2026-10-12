@@ -1,16 +1,23 @@
 # Prüfauftrag für eine zweite Meinung
 
-**Stand: 05.10.2026.** Diese Datei liegt dem Prüfpaket bei. Sie sagt, was das
+**Stand: 12.10.2026.** Diese Datei liegt dem Prüfpaket bei. Sie sagt, was das
 Programm ist, worauf zu sehen ist und was bereits bekannt ist — damit die
 Prüfung nicht dort anfängt, wo schon jemand war.
+
+> **Es hat schon eine Zweitprüfung gegeben, am 05.10.2026.** Ihr Bericht liegt
+> im Paket unter `zweitpruefung/PRUEFBERICHT.md`, mit 13 Befunden und 17
+> Gegenproben. **Zwölf davon sind geschlossen**, der dreizehnte (F12) liegt bei
+> der Kanzlei. Wer dieselben dreizehn noch einmal findet, hat die Zeit beider
+> Seiten verbraucht — der Abschnitt „Was die erste Zweitprüfung schon gefunden
+> hat" sagt, was dort steht.
 
 **Zweierlei wird erbeten, und beides zählt:**
 
 1. **Eine Prüfung** des Programms — die Abschnitte „Die Zusagen" und „Worauf
    besonders zu sehen ist".
-2. **Antworten auf fünf offene Fragen** — der Abschnitt „Offene Fragen". Zwei
-   davon sind Wissensfragen (jur|nodes, AWS), drei sind Urteilsfragen. Wer nur
-   eines von beidem leisten kann, leistet gern nur das.
+2. **Antworten auf die offenen Fragen** — der Abschnitt „Offene Fragen". Eine
+   ist eine Wissensfrage, die übrigen sind Urteilsfragen. Wer nur eines von
+   beidem leisten kann, leistet gern nur das.
 
 ---
 
@@ -27,10 +34,30 @@ mit den echten Akten der Kanzlei.
 
 | | |
 |---|---|
-| Programm | 74 Python-Dateien, rund 15.900 Zeilen |
-| Prüfungen | 99 Dateien, rund 20.700 Zeilen, **1625 Prüfungen** |
+| Programm | 76 Python-Dateien, rund 18.700 Zeilen |
+| Prüfungen | 110 Dateien, rund 24.600 Zeilen, **1855 Prüfungen** |
 | Oberfläche | eine Seite, `jusperfect/static/` |
 | Sprache im Quelltext | Deutsch — Bezeichner, Kommentare, Fehlertexte |
+| Zweig | `2.0`, Fassung `2.0.0.dev` |
+
+**Python 3.11 oder 3.12.** Unter 3.13 bricht die Installation ab
+(`requires-python = ">=3.11,<3.13"`); das ist Absicht und kein Fehler des
+Pakets.
+
+### Was seit dem 05.10.2026 dazugekommen ist
+
+Das ist der Teil, den die erste Zweitprüfung **nicht** gesehen hat — und
+damit der Teil, auf den sich eine zweite Meinung heute am ehesten lohnt.
+
+| Seit | Was |
+|---|---|
+| 08.10. | **Die E-Akte wird gelesen**: Korrespondenzverzeichnis, Vermerke, E-Mails mit Brieftext, **jede Anlage als eigenes Dokument** |
+| 08.10. | **Obergrenzen** je Mail (20 MB) und je Akte (100 MB), mit Warnung in der Dokumentzeile statt stiller Auslassung |
+| 11.10. | **Die Richtung** eines Schreibens (`isInbox`: Eingang / Ausgang / weder noch) |
+| 12.10. | **Ordner** im Dokumentfenster, mit Stapelauswahl je Register |
+| 12.10. | **Kein Postfachzugriff** — bisher eine Zusage, jetzt eine Prüfung |
+
+Dazu rund 230 neue Prüfungen.
 
 Ausführen der Prüfungen:
 
@@ -56,6 +83,9 @@ erster Ordnung; alles andere ist nachrangig.
 | **Fail closed beim Start.** Mitschrift bei AWS an, kein Schutzgeländer, kein Schlüssel, Region außerhalb der EU → das Programm startet nicht | `jusperfect/config.py` |
 | **Das Modell sieht keine Kennungen.** Keine Dateinamen, Dokument-, Nutzer- oder Sitzungskennungen | `jusperfect/providers/bedrock.py` |
 | **Löschung folgt dem Aktenstatus**, nie dem Zeitablauf. Eine Bearbeitungspause löscht nie etwas | `jusperfect/services/abschluss.py`, `SICHERHEIT.md` |
+| **Das Programm schreibt nicht.** Keine Datei, kein Vermerk, kein Ordner in jur\|nodes — und das soll eine Eigenschaft des Schlüssels bleiben, keine Zusage des Programms | `jusperfect/jurnodes/http_adapter.py` |
+| **Kein Postfachzugriff.** Weder E-Mail- noch beA-Postfach: dort liegt die Post **aller** Mandate. Alles, was zu einer Akte gehört, kommt aus ihrer E-Akte | `tests/test_kein_postfach.py` *(neu am 12.10.2026)* |
+| **Was keinen Inhalt hat, verschwindet nicht**, sondern wird gezählt und angezeigt. Eine unvollständige Liste sieht sonst aus wie eine vollständige | `jusperfect/jurnodes/http_adapter.py`, `jusperfect/static/app.js` |
 
 ---
 
@@ -82,35 +112,68 @@ In dieser Reihenfolge — oben steht, was am meisten schadet, wenn es falsch ist
 6. **Die Einstellungen** (`jusperfect/config.py`). Gibt es eine Kombination, in
    der das Programm mit echten Akten startet, obwohl eine Zusage nicht gehalten
    ist?
-7. **Die Prüfungen selbst.** Prüft eine Prüfung den Wortlaut statt der Zusage?
+7. **Die E-Akte — die größte neue Fläche** (`http_adapter.py`, Abschnitt „Die
+   E-Akte", und `jusperfect/jurnodes/mail.py`). Eine `.eml` ist fremde Eingabe:
+   Sie kommt von außen, trägt Anlagen, MIME-Teile, Kodierungen und Dateinamen,
+   die sich jemand ausgesucht hat. Besonders: Kann ein Dateiname aus einer
+   Anlage irgendwo hin, wo er nicht hingehört (Pfad, Protokoll, Modell)?
+   Greifen die Obergrenzen auch bei einer Mail, die ihre Größe erst beim
+   Entpacken zeigt?
+8. **Die Prüfungen selbst.** Prüft eine Prüfung den Wortlaut statt der Zusage?
    Davon sind an einem einzigen Tag fünf gefunden worden — eine Prüfung, die
    anders misst als der Betrieb, misst etwas anderes als den Betrieb.
+
+**Und eine Frage, die über einzelne Funde hinausgeht:** *Wo ruht eine Zusage
+auf einer Nachschau statt auf einer Prüfung?* Zweimal in der Woche vom 06. bis
+12.10.2026 war das Programm richtig und ungeprüft — bei der Seitenzählung der
+E-Akte und beim Postfachzugriff. Beide Male hat es ein Dritter bemerkt, nicht
+die Entwicklung. **Eine solche Lücke ist hier ein Befund erster Ordnung**, auch
+wenn das Verhalten heute stimmt: Was nicht gemessen wird, bleibt nur so lange
+richtig, bis jemand daneben etwas ändert.
+
+---
+
+## Was die erste Zweitprüfung schon gefunden hat
+
+Der Bericht vom 05.10.2026 liegt im Paket (`zweitpruefung/PRUEFBERICHT.md`),
+daneben die 17 Gegenproben (`zweitpruefung/gegenproben.py`). **Zwölf der
+dreizehn Befunde sind geschlossen** — unter anderem die Fehlerprotokollierung
+(der ursprüngliche Anbieterfehler stand im Uvicorn-Protokoll), die
+unvollständige Löschung, die Beleg- und Fristensperren und die
+Freigabeprüfung.
+
+**Offen ist allein F12**, und er liegt nicht am Programm: Die
+Datenschutzunterlagen sagen, Textract verarbeite, speichere aber nicht. Das
+gilt für die KI-Dienste von AWS nur mit einer wirksamen
+**AI-services-Opt-out-Richtlinie** des Kontos. Die ist noch nicht eingerichtet;
+bis dahin behauptet die Unterlage mehr, als belegt ist. Die Kanzlei weiß das.
+
+Diese dreizehn bitte **nicht noch einmal melden**. Was willkommen ist: ob eine
+der zwölf Behebungen die Lücke nur verschiebt.
 
 ---
 
 ## Bekannt und offen — nicht als Fund melden, aber gern als Antwort
 
-Diese fünf Punkte sind bekannt. Sie noch einmal zu melden hilft nicht.
-**Etwas dazu zu sagen schon** — die Fragen stehen weiter unten unter
-„Offene Fragen".
-
-1. **Der Korrespondenzordner — aufgeklärt am 05.10.2026.** Es war ein Fehler
-   im Programm: zwei getrennte Ordnerbäume in jur|nodes, und die Nummer des
-   einen wurde am Pfad des anderen abgefragt. Der falsche Weg ist abgeschaltet,
-   der richtige belegt und in der Probe gemessen, aber **noch nicht im
-   Betrieb**. Einzelheiten in `schnittstelle/README.md`.
-2. **Die Regionen des Schutzgeländers.** Wohin das EU-Inferenzprofil und
-   `eu.guardrail.v1:0` **intern** verteilen, ist bei AWS erfragt und noch nicht
-   beantwortet.
-3. **Die Rechtsdokumentation.** `DSFA-ENTWURF.md` und
-   `DATENSCHUTZHINWEISE-ENTWURF.md` sind Entwürfe; 26 Stellen sind als
-   `[KANZLEI n]` offen gelassen und von der Kanzlei zu bewerten, nicht von der
-   Entwicklung.
-4. **Die Vermerke** aus jur|nodes werden noch nicht gelesen. Der Weg steht
-   seit dem 05.10.2026 fest — siehe Punkt 1.
-5. **Zugriff je Bearbeiter.** Technisch vorhanden, in der Kanzlei nicht
+1. **beA und Post werden nicht gelesen.** Die Ketten stehen in der
+   Herstellerbeschreibung vollständig, einschließlich der Dateiart vor dem
+   Herunterladen. Gebaut wird erst, wenn es eine Akte mit solchen Einträgen
+   gibt — in beiden geprüften kam kein einziger vor. Lieber ungebaut als
+   geraten.
+2. **Die Rechtsunterlagen** (`DSFA-ENTWURF.md`,
+   `DATENSCHUTZHINWEISE-ENTWURF.md`, `VERARBEITUNGSVERZEICHNIS-ENTWURF.md`)
+   sind Entwürfe; **41 Stellen** sind als `[KANZLEI n]` offen gelassen und von
+   der Kanzlei zu bewerten, nicht von der Entwicklung.
+3. **Zugriff je Bearbeiter.** Technisch vorhanden, in der Kanzlei nicht
    eingeschaltet: Alle eingetragenen Nutzer sehen alle Akten. Bewusst so, und
    offen.
+4. **Die Opt-out-Richtlinie bei AWS** — F12, siehe oben.
+5. **`correspondenceFolderId`** war **nie** ein Fehler des Herstellers. Die
+   Nummer gehört in den Ordnerbaum der Korrespondenz und wurde gegen den Baum
+   des Dateisystems abgefragt: zwei Nummernkreise, dieselbe Zahl, fremde Akte.
+   Der richtige Weg ist aktenbezogen (`POST /correspondence/search` mit
+   `recordIdentifier`) und seit dem 08.10.2026 am Server der Kanzlei gemessen.
+   **Dazu ist nichts zu melden.**
 
 ---
 
@@ -130,59 +193,63 @@ Ein erfundener Schnittstellenpfad kostet einen Prüflauf an echten Mandatsakten.
 
 ### ~~Frage 1 — Wie liest man die E-Akte von jur|nodes?~~ — **beantwortet**
 
-Am Abend des 05.10.2026 hat die Kanzlei die OpenAPI-Beschreibung des
-Herstellers geliefert (Fassung 1.0.2, 85 Pfade). Sie liegt im Paket unter
-`schnittstelle/jurnodes-api-1.0.2.json`, die Auswertung in
-`schnittstelle/README.md`. Kurz:
+Die Beschreibung des Herstellers (1.0.2) liegt im Paket unter
+`schnittstelle/jurnodes-api-1.0.2.json`. Der Weg steht und ist am Server der
+Kanzlei gemessen: `POST /correspondence/search` mit `recordIdentifier`,
+Vermerke über `GET /record/note?id=…&record=…` (**beide** Pflichtparameter),
+Mails über `POST /mail/download` (Dateiart `.eml`, gemessen).
 
-* Die E-Akte heißt **Korrespondenz**: `POST /correspondence/search`.
-* Die **Vermerke** sind Korrespondenzen vom Typ `note`, mit der Nummer in
-  `referenceNote`; **Telefonvermerke** tragen `type: "phonecall"`.
-* `GET /record/note` braucht **zwei** Pflichtparameter — `id` **und**
-  `record`. Daran ist die Suche vier Wochen gescheitert.
-* **Der Befund zum Korrespondenzordner war ein Fehler im Programm**, kein
-  Verhalten des Herstellers: zwei getrennte Ordnerbäume, eine Nummer aus dem
-  einen am Pfad des anderen abgefragt.
-
-**Was hier trotzdem willkommen ist:** ein Blick auf
-`schnittstelle/README.md` und auf `jusperfect/jurnodestest.py::_korrespondenz_lesen`
-— ist die Auswertung richtig gelesen? Besonders: Reicht
-`POST /correspondence/search` wirklich für **alle** Korrespondenz, oder braucht
-es zusätzlich den Ordnerbaum über `/correspondence/folder`?
+**Eine Teilfrage der alten Fassung ist am 11.10.2026 beantwortet worden**, und
+zwar von einer zweiten Meinung: Reicht `POST /correspondence/search` für
+*alle* Korrespondenz, oder braucht es zusätzlich den Ordnerbaum? Antwort: Es
+reicht — aber **alle Seiten** müssen gelesen werden (`page` beginnt bei 1, die
+Antwort führt `pagesTotal`). Das Programm tut das; geprüft war es nur für die
+GET-Aufrufe, nicht für die E-Akte. Jetzt auch dafür.
 
 ---
 
-### Frage 2 — In welche Regionen verteilt das EU-Inferenzprofil von AWS Bedrock?
+### ~~Frage 2 — In welche Regionen verteilt das EU-Inferenzprofil von AWS Bedrock?~~ — **beantwortet, mit Vorbehalt**
 
-Das Programm ruft Claude über **AWS Bedrock** in Frankfurt (`eu-central-1`)
-auf, und zwar über das **europäische Inferenzprofil**: Die Modellkennung trägt
-den Vorsatz `eu.`, etwa `eu.anthropic.claude-opus-4-6-v1`. Dazu kommt ein
-Schutzgeländer über das regionsübergreifende Profil **`eu.guardrail.v1:0`**.
+Die erste Zweitprüfung hat die AWS-Tabellen ausgewertet: **Zürich
+(`eu-central-2`) und London (`eu-west-2`) stehen nicht** in den Zielmengen für
+einen Aufruf aus Frankfurt. Wichtig dabei: Das ist keine Eigenschaft des
+Namensvorsatzes `eu.`, sondern hängt an der **Quellregion** — deshalb nennen
+die Unterlagen jetzt Modell und Quelle ausdrücklich.
 
-AWS beschreibt das in der Konsole nur als „across Regions within your
-geography" und nennt die Regionen nicht.
-
-**Gefragt ist — namentlich, nicht „bleibt in Europa":**
-
-1. In welche Regionen verteilt das `eu.`-Inferenzprofil für die
-   Claude-Modelle?
-2. Dasselbe für das Geländerprofil `eu.guardrail.v1:0`.
-3. Ist in einer der beiden Mengen **`eu-central-2` (Zürich, Schweiz)** oder
-   **`eu-west-2` (London, Vereinigtes Königreich)** enthalten?
-
-**Warum Punkt 3 entscheidend ist:** Beide tragen den Vorsatz `eu-` und liegen
-außerhalb der EU und des EWR. Für eine Kanzlei, deren Datenschutzunterlage
-„Übermittlung in Drittländer: keine" sagt, ist das der Unterschied zwischen
-einem Satz, der stimmt, und einem, der sich auf eine Buchstabenfolge stützt.
-Genau daran ist am 05.10.2026 ein Fehler im Programm aufgefallen: Es prüfte auf
-den Vorsatz statt auf die Regionen.
-
-**Mit Quellenangabe, bitte** — und wenn die Angabe aus dem Gedächtnis stammt,
-sagen Sie das dazu.
+**Was hier noch willkommen ist:** eine Gegenlesung dieser Auswertung, mit
+Quelle und Datum. Die Angabe stammt aus einer zweiten Meinung, nicht von AWS;
+sie steht in den Unterlagen entsprechend gekennzeichnet.
 
 ---
 
-### Frage 3 — Tragen die vier Entwurfsentscheidungen?
+### Frage 3 — Die drei neuen Entscheidungen der letzten Woche
+
+Alle drei betreffen die E-Akte und sind in einer Woche entstanden. Eine
+Gegenrede ist willkommen.
+
+**3a · Die Obergrenze ist 20 MB je Mail und 100 MB je Akte.** Darüber wird die
+Mail **nicht** geladen, bleibt aber mit Betreff, Datum und einer Warnung in der
+Dokumentzeile stehen. Grundlage: In zwei geprüften Akten lag genau **eine**
+Mail darüber (8,7 MB); die zweite gemessene wog 5 kB. Ist die Grenze an der
+richtigen Stelle — und ist „sichtbar fehlend" hier besser als „nachladen auf
+Klick"? (`jusperfect/jurnodes/http_adapter.py`, `MAIL_OHNE_INHALT`)
+
+**3b · Bei `isInbox = -1` steht keine Richtung am Schriftstück.** Der
+Hersteller sagt: 1 = Eingang, 0 = Ausgang, **-1 = Neutral/Unbekannt**. Jeder
+andere Wert wird wie -1 behandelt — also keine Angabe statt einer Vermutung.
+Richtig, oder sollte „unbekannt" sichtbar sein statt abwesend?
+(`http_adapter.py`, `_richtung`)
+
+**3c · Die E-Akte steht als eigener Ordner neben dem Dateiordner.** Mails,
+Anlagen und Vermerke tragen den Ordner „E-Akte" und stehen im Dokumentfenster
+hinten, getrennt von den Registern des Dateiordners. Begründung: Es sind zwei
+Bäume in jur|nodes, und sie zu vermischen hat am 02.10.2026 fremde
+Schriftstücke in eine Akte gebracht. Zu streng getrennt, oder richtig?
+(`jusperfect/static/app.js`, `explorerNachOrdnern`)
+
+---
+
+### Frage 4 — Tragen die vier älteren Entwurfsentscheidungen?
 
 Hier geht es nicht um Wissen, sondern um ein Urteil. Vier Entscheidungen, bei
 denen eine Gegenrede nützlich wäre:
@@ -216,11 +283,12 @@ Prüfsumme je Dokument — mit allem, was daran hängt?
 
 ---
 
-### Frage 4 — Die Rechtsdokumentation
+### Frage 5 — Die Rechtsdokumentation
 
-`DSFA-ENTWURF.md` (Folgenabschätzung nach Art. 35 DSGVO) und
-`DATENSCHUTZHINWEISE-ENTWURF.md` (Hinweise nach Art. 13, Mandatsklausel) sind
-Entwürfe der Entwicklung. **26 Stellen sind als `[KANZLEI n]` offen gelassen**,
+`DSFA-ENTWURF.md` (Art. 35 DSGVO, 19 Stellen),
+`DATENSCHUTZHINWEISE-ENTWURF.md` (Art. 13, 9 Stellen) und
+`VERARBEITUNGSVERZEICHNIS-ENTWURF.md` (Art. 30, 13 Stellen) sind
+Entwürfe der Entwicklung. **41 Stellen sind als `[KANZLEI n]` offen gelassen**,
 weil sie eine rechtliche Bewertung verlangen; sie stehen am Ende jeder Datei in
 einer Liste.
 
@@ -238,12 +306,15 @@ Rechtsfrage ausgibt, schiebt Arbeit auf den Falschen.
 
 ---
 
-### Frage 5 — Was würden Sie als Nächstes bauen?
+### Frage 6 — Was würden Sie als Nächstes bauen?
 
-Am Programm ist nichts offen, was das Arbeiten mit einer Akte verhindert. Die
-Arbeitsliste steht in `MORGEN.md`. **Wenn Sie den Bestand gelesen haben: Was
-fehlt Ihrer Meinung nach am meisten?** Gern auch etwas, das in der Liste nicht
-vorkommt.
+Am Programm ist nichts offen, was das Arbeiten mit einer Akte verhindert. Auf
+der Liste steht noch **beA und Post** — und das wartet bewusst auf eine Akte,
+an der es sich messen lässt.
+
+**Wenn Sie den Bestand gelesen haben: Was fehlt Ihrer Meinung nach am
+meisten?** Gern auch etwas, das in der Liste nicht vorkommt. Die Liste steht
+in `MORGEN.md`, der Querschnitt in `STAND-08.10.2026.md`.
 
 ---
 
@@ -279,8 +350,34 @@ Rechners, nie im Programmordner. Was wie ein Schlüssel aussieht, ist ein
 Prüfwert — `AKIAIOSFODNN7EXAMPLE` stammt aus der Dokumentation von AWS.
 
 **Enthalten sind erfundene Testakten** (`testdaten/`). Sie sind erfunden, auch
-wo sie echt klingen. Echte Aktenzeichen kommen in Befundbeschreibungen vor
-(etwa `X-100-2026`); sie benennen einen Vorgang, nicht seinen Inhalt.
+wo sie echt klingen.
+
+**Und ein Fund in eigener Sache, am 11.10.2026.** In diesem Bestand stand bis
+dahin an siebzehn Stellen ein **echtes Rubrum** der Kanzlei — Aktenzeichen,
+Mandant und Gegner einer laufenden Sache, in Beispielen und Prüfdateien, wo
+Platzhalter hingehörten. Es sah aus wie ein Platzhalter; die Namen, die man
+erfindet, und die, die es gibt, sehen gleich aus. Aufgefallen ist es nur, weil
+**eine** Datei schon bereinigt war und die übrigen sechzehn nicht.
+
+120 Stellen sind ersetzt; an ihrer Stelle stehen jetzt `Testmann`,
+`Musterhaft`, `Beispiel` und die Aktenzeichen `X-001-2026`, `X-002-2026`,
+`X-003-2025` — Nummern, die es nicht geben kann. Die Kanzlei hat bestätigt,
+dass die übrigen Namen im Bestand (`Meier`, `Krämer`, `Schulz`,
+`Vellinghausen`) erfunden sind.
+
+**Was weiter im Bestand steht, und bewusst:** In `MORGEN.md` und in
+Befundbeschreibungen stehen **echte Aktenzeichen** der Kanzlei (etwa
+`X-100-2026`) mit gemessenen Angaben — wie viele Einträge eine Akte hat, wie
+viele Mails, aus wie vielen Ordnern. Kein Name, kein Betreff, kein Dateiname.
+Sie sind der Beleg, auf dem die Chronik ruht; ohne sie wäre sie eine
+Behauptung. **Wer sie nicht braucht, braucht sie nicht zu lesen** — und wer
+aus dem Paket zitiert, lässt sie bitte weg.
+
+> **Daraus eine Bitte, die zur Sache gehört.** Dieses Paket ist Mandatsgut in
+> zweiter Reihe. Bitte nicht in ein Werkzeug geben, das Eingaben zum Training
+> verwendet oder dauerhaft speichert, und nach der Prüfung löschen. Wenn Ihre
+> Arbeitsweise das nicht zulässt, sagen Sie es bitte vorher — das ist keine
+> Absage, sondern eine Angabe, die die Kanzlei braucht.
 
 ---
 
@@ -320,3 +417,22 @@ hier als Absicht dokumentiert ist?** Die Begründungen stehen in `KONZEPT.md`,
 | `MORGEN.md` | die Arbeitsliste mit allen Begründungen |
 | `ANLEITUNG.md` | die Bedienung, für den Anwender geschrieben |
 | `infra/IAM.md` | die AWS-Zugriffsrichtlinie im Wortlaut |
+| `STAND-08.10.2026.md` | der Querschnitt in einem Durchgang — **schneller als `MORGEN.md`** |
+| `zweitpruefung/PRUEFBERICHT.md` | die erste Zweitprüfung, 13 Befunde |
+| `schnittstelle/ANFRAGE-HERSTELLER.md` | was an jur\|nodes noch offen ist, und was ausdrücklich nicht mehr |
+| `schnittstelle/jurnodes-api-1.0.2.json` | die Beschreibung des Herstellers, 94 Aufrufe |
+
+---
+
+## Ein Satz zum Schluss, der ernst gemeint ist
+
+Die drei teuersten Fehler dieses Projekts sahen aus wie Fehler eines Dritten
+und waren eigene: ein Status 401, der ein fehlendes Recht zu sein schien und
+ein POST ohne Schlüssel war; fremde Schriftstücke in einer Akte, die eine
+verwechselte Ordnernummer waren; und eine Aufgabe für die Kanzlei, die aus
+einem falsch gelesenen Bildschirmfoto entstand.
+
+> Eine Erklärung, die alle beobachteten Daten erklärt, ist noch keine richtige.
+
+**Wo Sie den Eindruck haben, hier werde eine Erklärung zu früh für wahr
+gehalten, sagen Sie es.** Das ist nützlicher als ein weiterer Befund.
