@@ -189,8 +189,26 @@ class EineKaputteMailKostetNichtDieAkte(unittest.TestCase):
         self.assertIn("Original.pdf", namen,
                       "Die Anlage der weitergeleiteten Mail gehört in die Akte.")
         self.assertIn("Zur Kenntnis.", z.text)
-        self.assertNotIn("Die ursprüngliche Nachricht.", z.text,
-                         "Der Text der Weiterleitung steht schon im Brieftext.")
+        # Hier stand bis zum 12.10.2026 das Gegenteil:
+        #
+        #     self.assertNotIn("Die ursprüngliche Nachricht.", z.text,
+        #                      "Der Text der Weiterleitung steht schon im
+        #                       Brieftext.")
+        #
+        # Befund N03 der dritten Zweitprüfung: Diese Prüfung VERLANGTE den
+        # Verlust — und ihre eigene äußere Mail sagt nur „Zur Kenntnis.",
+        # zitiert den inneren Text also gerade nicht. Die Begründung war eine
+        # Annahme, die am eigenen Beispiel nachweislich nicht stimmte.
+        #
+        # Eine Mail mit „Zur Kenntnis." und einer angehängten Nachricht verlor
+        # damit die ganze übermittelte Erklärung, ohne Warnung und ohne
+        # Zähler. Der Anwalt analysierte eine vermeintlich vollständige Mail.
+        self.assertIn("Die ursprüngliche Nachricht.", z.text,
+                      "Der Text der angehängten Nachricht gehört in die Akte.")
+        self.assertIn("Angehängte Nachricht 1", z.text,
+                      "Und er muss als solcher erkennbar sein.")
+        self.assertEqual(1, z.nachrichten)
+        self.assertEqual(0, z.verloren, z.ausgelassen)
 
 
 class DerAnhangKenntSeineGroesse(unittest.TestCase):
