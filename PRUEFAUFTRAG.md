@@ -345,7 +345,7 @@ Platzhalter, deshalb laufen die Prüfungen auch im Paket grün:
 | `KMS-SCHLUESSEL-KENNUNG` | die Kennung des Verschlüsselungsschlüssels |
 | `AWS-KONTONUMMER` | die Nummer des AWS-Kontos (auch in den ARN-Beispielen) |
 | `GELAENDER-KENNUNG` | die Kennung des Bedrock-Schutzgeländers |
-| `KANZLEI.jur-nodes.net` | die Adresse des jur\|nodes-Servers |
+| `KANZLEI.jur-nodes.…` | die Adresse des jur\|nodes-Servers |
 
 Das Paket vom 05.10.2026 ersetzte nur die ersten beiden. Die drei übrigen sind
 am 12.10.2026 dazugekommen — nicht weil sie geheim wären, sondern weil sie für
