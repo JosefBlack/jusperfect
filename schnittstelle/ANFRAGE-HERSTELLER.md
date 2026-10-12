@@ -1,8 +1,8 @@
 # Was von jur|nodes noch fehlt — Stand 11.10.2026
 
 **Fast alles ist beantwortet.** Der Lauf vom 08.10.2026 am Server der Kanzlei
-hat die letzten Fragen gemessen statt gefragt. Offen sind **zwei**
-Kleinigkeiten; sie stehen unten. Die lange Liste darunter ist Gedächtnisstütze — sie sagt,
+hat die letzten Fragen gemessen statt gefragt. Offen ist **eine einzige**
+Kleinigkeit; sie steht unten. Die lange Liste darunter ist Gedächtnisstütze — sie sagt,
 was **nicht** mehr zu fragen ist.
 
 > **Berichtigung vom 08.10.2026.** Die Fassungen vom 06. und 07.10.2026
@@ -125,18 +125,22 @@ Bei einem von 85 Pfaden fehlt der führende `/`:
 
 > **Frage:** Lautet der Pfad `/correspondence/get-by-reference`?
 
-### 2. Gibt es eine neuere Fassung als 1.0.2?
+### ~~2. Gibt es eine neuere Fassung als 1.0.2?~~ — **beantwortet: nein**
 
-Falls ja, bitte diese.
-
-*Nachtrag 11.10.2026:* Vieles spricht dagegen, dass eine fehlt. Drei Aufrufe
+*Auskunft der Kanzlei vom 12.10.2026: nein.* **1.0.2 ist die geltende
+Fassung.** Damit ist auch der Vergleich vom 11.10.2026 bestätigt: Drei Aufrufe
 aus der Oberfläche der Herstellerdokumentation — `POST /correspondence/add`,
-`GET /correspondence`, `POST /correspondence` — wurden gegen
-`jurnodes-api-1.0.2.json` gehalten: Überschrift, Beschreibungssatz und
-benötigtes Recht wörtlich gleich, und `CorrespondenceModel` mit **22 Feldern
-in derselben Reihenfolge**, kein Feld zu viel, keines zu wenig. Was online
-steht, ist also die Fassung, die wir haben. Das beweist nicht, dass es keine
-neuere gibt — es heißt nur, dass die Oberfläche keine andere zeigt.
+`GET /correspondence`, `POST /correspondence` — waren gegen
+`jurnodes-api-1.0.2.json` Feld für Feld und Wort für Wort deckungsgleich, mit
+`CorrespondenceModel` in 22 Feldern derselben Reihenfolge. Die Oberfläche
+zeigte keine andere, weil es keine andere gibt.
+
+**Was daraus folgt, und das ist mehr als eine erledigte Frage:** Die
+Beschreibung im Programmordner ist nicht nur *eine* Fassung, sondern **die**
+Fassung. Was dort nicht steht, gibt es nicht — und was dort steht, ist zu
+lesen, bevor gefragt wird. Viermal in dieser Woche lag die Antwort in dieser
+Datei: die benötigten Rechte, die Herkunft von `attachmentId` und
+`postFileUniqueKey`, die Bedeutung von `isInbox`, und die Seitenzählung.
 
 ---
 

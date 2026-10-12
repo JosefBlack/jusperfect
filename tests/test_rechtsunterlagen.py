@@ -164,9 +164,19 @@ class TestEsStehtNichtsDarinWasNichtHineingehoert:
             assert not re.search(muster, text), (datei.name, muster)
 
     @pytest.mark.parametrize("datei", (DSFA, HINWEISE), ids=lambda p: p.name)
-    def test_keine_echten_aktenzeichen_ausser_dem_einen_befund(self, datei: Path) -> None:
-        """X-100-2026 darf vorkommen: Der Befund vom 05.10.2026 ist ohne die
-        Akte nicht zu beschreiben, und sie steht bereits in MORGEN.md. Andere
-        nicht."""
-        gefunden = set(re.findall(r"\bD-\d{3}-\d{4}\b", datei.read_text(encoding="utf-8")))
-        assert gefunden <= {"X-100-2026"}, gefunden
+    def test_keine_echten_aktenzeichen(self, datei: Path) -> None:
+        """Seit dem 12.10.2026 gar keines mehr — auch nicht das eine.
+
+        Bis dahin stand hier eine Ausnahme: Ein Aktenzeichen durfte vorkommen,
+        weil der Befund vom 05.10.2026 „ohne die Akte nicht zu beschreiben"
+        sei. Das war bequem und falsch. Die Kanzlei hat am 12.10.2026
+        entschieden, dass alle echten Aktenzeichen aus dem Bestand kommen; die
+        Befunde sind mit erfundenen Nummern genauso gut zu beschreiben.
+
+        Die vollständige Regel steht in `tests/test_keine_echten_akten.py` und
+        gilt für den ganzen Bestand. Hier bleibt sie stehen, weil die
+        Rechtsunterlagen das Haus verlassen.
+        """
+        gefunden = set(re.findall(r"\b[DT]-\d{3}-\d{4}\b",
+                                  datei.read_text(encoding="utf-8")))
+        assert not gefunden, gefunden

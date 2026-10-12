@@ -365,13 +365,22 @@ erfindet, und die, die es gibt, sehen gleich aus. Aufgefallen ist es nur, weil
 dass die übrigen Namen im Bestand (`Meier`, `Krämer`, `Schulz`,
 `Vellinghausen`) erfunden sind.
 
-**Was weiter im Bestand steht, und bewusst:** In `MORGEN.md` und in
-Befundbeschreibungen stehen **echte Aktenzeichen** der Kanzlei (etwa
-`X-100-2026`) mit gemessenen Angaben — wie viele Einträge eine Akte hat, wie
-viele Mails, aus wie vielen Ordnern. Kein Name, kein Betreff, kein Dateiname.
-Sie sind der Beleg, auf dem die Chronik ruht; ohne sie wäre sie eine
-Behauptung. **Wer sie nicht braucht, braucht sie nicht zu lesen** — und wer
-aus dem Paket zitiert, lässt sie bitte weg.
+**Auch die Aktenzeichen sind heraus — seit dem 12.10.2026.** Bis dahin standen
+in `MORGEN.md` und in Befundbeschreibungen die echten Nummern der Kanzlei mit
+gemessenen Angaben (wie viele Einträge, wie viele Mails, aus wie vielen
+Ordnern). Kein Name, kein Betreff — aber eine Aussage über ein bestimmtes
+Mandat. Die Kanzlei hat entschieden, dass auch sie nicht in ein Paket
+gehören, das das Haus verlässt.
+
+> **Die Regel, in einem Satz: Ein Aktenzeichen in diesem Bestand beginnt mit
+> `X`.** Die Kanzlei führt `D` und `T`; ein `X` kann es dort nicht geben.
+> `tests/test_keine_echten_akten.py` misst das über jede Datei, die git kennt
+> — einschließlich einer Gegenprobe, dass das Muster eine echte Nummer
+> wirklich fängt.
+
+Die Zuordnung zwischen erfundener und echter Nummer steht nirgends im Paket.
+Das heißt auch: **Ein Befund, der sich auf „X-100-2026" bezieht, ist für uns
+eindeutig** — die Nummern sind durchgehend vergeben, nicht pro Datei neu.
 
 > **Daraus eine Bitte, die zur Sache gehört.** Dieses Paket ist Mandatsgut in
 > zweiter Reihe. Bitte nicht in ein Werkzeug geben, das Eingaben zum Training

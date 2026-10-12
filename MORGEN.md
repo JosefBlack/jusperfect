@@ -2559,3 +2559,77 @@ Korrespondenzverzeichnis der Akte (`referenceBea`) und dann
 `GET /bea?beaIdentifier=…` — nie über eine Postfachsuche.
 
 **1855 Prüfungen grün.**
+
+---
+
+## 12.10.2026 — die Aktenzeichen sind heraus, und die letzte Frage ist beantwortet
+
+### Entscheidung der Kanzlei: auch aus `MORGEN.md`
+
+Gestern hatte ich dafür gehalten, die echten Aktenzeichen behalten zu dürfen,
+und es im Prüfauftrag auch so aufgeschrieben: Sie trügen den Beleg, ohne sie
+wäre die Chronik eine Behauptung. „X-100-2026 hat 26 Einträge, 22 Mails, 4
+Vermerke" ist eine Messung — „eine Akte hat 26 Einträge" ist keine.
+
+**Das Argument war nicht falsch, aber das schwächere.** Der Bestand geht an
+Dritte; eine Zweitprüfung hat ihn schon zweimal bekommen. Ein Aktenzeichen mit
+gemessenen Angaben ist eine Aussage über ein bestimmtes Mandat, auch ohne
+Namen. Und die Chronik verliert nichts: Die Zahlen bleiben, nur der Zeiger auf
+die Akte fällt weg.
+
+### Die Regel, in einem Satz
+
+> **Ein Aktenzeichen im Bestand beginnt mit `X`.**
+
+Die Kanzlei führt `D` (Dortschy) und `T` (Thunert). Ein `X` kann es dort nicht
+geben. Damit ist jede Nummer im Bestand auf einen Blick als erfunden zu
+erkennen — und eine Prüfung kann einen Rückfall **messen**, statt ihn zu
+erhoffen.
+
+**141 Stellen in 26 Dateien.** Die Zuordnung ist durchgehend, damit die
+Chronik lesbar bleibt: Jede echte Nummer hat **überall** dieselbe erfundene
+bekommen — die am 08.10. gemessene Akte heißt von der ersten bis zur letzten
+Erwähnung `X-100-2026`, die zweite `X-101-2026`. Mit umgezogen sind auch die
+Platzhalter von gestern, damit es genau **eine** Regel gibt statt zwei.
+
+Die Zuordnung selbst steht nirgends im Bestand, und das ist Absicht: Sie wäre
+sonst der Schlüssel, der alles rückgängig macht. Die Kanzlei weiß, welche Akte
+22 Mails hatte.
+
+Die Stapeldateien sind binär ersetzt worden; ihre CRLF-Zeilenenden stehen
+noch — nachgesehen mit `file`.
+
+### Eine Ausnahme, die ich selbst eingebaut hatte, ist gestrichen
+
+`tests/test_rechtsunterlagen.py` ließ **ein** Aktenzeichen in der DSFA zu, mit
+der Begründung, der Befund sei „ohne die Akte nicht zu beschreiben". Das war
+bequem und falsch. Die Prüfung verlangt jetzt gar keines mehr.
+
+Neu ist `tests/test_keine_echten_akten.py`: drei Prüfungen über den **ganzen**
+Bestand, jede Datei, die git kennt. Dazu eine Gegenprobe, die misst, dass das
+Muster eine echte Nummer wirklich fängt — eine Prüfung, die nichts findet, muss
+zeigen, dass sie suchen kann. Genau diese Art Prüfung war am 08.10.2026 einer
+der fünf Funde im Prüfbogen.
+
+**Was sie nicht kann, und das steht auch dort:** Die zweite Schreibweise des
+Hauses („42/26 VU") fällt ihr nicht auf. Dagegen hilft nur Nachfragen — und
+genau das hat am 11.10.2026 ein echtes Rubrum zutage gefördert.
+
+### Die letzte Frage an jur|nodes ist beantwortet
+
+Aus der Kanzlei: *„Gibt es eine neuere Fassung als 1.0.2? Nein."*
+
+Damit steht fest, dass `schnittstelle/jurnodes-api-1.0.2.json` nicht *eine*
+Fassung ist, sondern **die**. Der Vergleich vom 11.10.2026 — drei Aufrufe,
+Feld für Feld und Wort für Wort deckungsgleich — hatte recht.
+
+**Offen ist an der Schnittstelle nur noch der fehlende Schrägstrich bei
+`correspondence/get-by-reference`**, und der hält nichts auf.
+
+Was daraus folgt, ist mehr als eine erledigte Frage: **Was in dieser Datei
+nicht steht, gibt es nicht — und was dort steht, ist zu lesen, bevor gefragt
+wird.** Viermal in dieser Woche lag die Antwort darin: die benötigten Rechte,
+die Herkunft von `attachmentId` und `postFileUniqueKey`, die Bedeutung von
+`isInbox`, und die Seitenzählung.
+
+**1858 Prüfungen grün.**
