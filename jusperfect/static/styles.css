@@ -1048,3 +1048,17 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
   background: var(--rot-hell);
   border-color: var(--rot);
 }
+
+
+/* Die Linie zwischen dem Gespeicherten und dem Heutigen.
+   Aus der Kanzlei am 13.10.2026: "Der Chat steht im Vordergrund. Der Rest ist
+   nur Hilfsmittel." Wenn alles Frühere dasteht, braucht es eine Stelle, an
+   der man sieht, wo das Heutige anfängt. */
+.thread-trennung {
+  flex: none; display: flex; align-items: center; gap: 10px;
+  color: var(--gedaempft); font-size: 12.5px; margin: 4px 0;
+}
+.thread-trennung::before,
+.thread-trennung::after {
+  content: ""; flex: 1; height: 1px; background: var(--linie);
+}

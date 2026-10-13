@@ -1820,7 +1820,19 @@ function gedaechtnisImThreadZeigen() {
     antworttext(inhalt, g.lebenssachverhalt);
     karte.append(titel, inhalt); t.appendChild(karte);
   }
-  for (const qa of (g.fragen_antworten || []).slice(-5)) {
+  // ALLE frueheren Fragen, nicht die letzten fuenf.
+  //
+  // Aus der Kanzlei am 13.10.2026: "5 Fragen im Chat sind zu wenig -
+  // eigentlich sollte der Chat scrollbar und zurueckverfolgbar sein. Der Chat
+  // steht im Vordergrund. Der Rest ist nur Hilfsmittel."
+  //
+  // Die Fuenf waren eine Vorsicht ohne Anlass: Die Spalte scrollt (siehe
+  // `.thread { overflow: auto }`), die Fundstellen in den alten Antworten
+  // sind anklickbar wie in den neuen, und im Gedaechtnis liegen ohnehin nur
+  // die letzten hundert. Abgeschnitten wurde also beim Anzeigen, nicht beim
+  // Speichern - der Verlauf war da und nicht zu sehen.
+  const frueher = g.fragen_antworten || [];
+  for (const qa of frueher) {
     const frage = document.createElement("div"); frage.className = "karte-c user";
     const frageWer = document.createElement("div"); frageWer.className = "who"; frageWer.textContent = "Frühere Frage";
     const frageText = document.createElement("div"); frageText.className = "inhalt"; frageText.textContent = qa.frage;
@@ -1831,6 +1843,19 @@ function gedaechtnisImThreadZeigen() {
     antworttext(antwortText, qa.antwort);
     antwort.append(antwortWer, antwortText); t.appendChild(antwort);
   }
+  // Eine Linie zwischen dem, was war, und dem, was jetzt kommt. Ohne sie
+  // steht die erste neue Frage in derselben Reihe wie die Frage von gestern.
+  if (frueher.length) {
+    const strich = document.createElement("div");
+    strich.className = "thread-trennung";
+    strich.textContent = frueher.length === 1
+      ? "1 frühere Frage aus dem Gedächtnis – darunter das Heutige"
+      : `${frueher.length} frühere Fragen aus dem Gedächtnis – darunter das Heutige`;
+    t.appendChild(strich);
+  }
+  // Unten anfangen, nicht oben: Das Juengste ist das, woran weitergearbeitet
+  // wird. Bei hundert Fragen stuende sonst die aelteste im Bild.
+  t.scrollTop = t.scrollHeight;
 }
 
 // ── Gedächtnis: was liegt drin, was fehlt, wie groß ist es ─────────────
