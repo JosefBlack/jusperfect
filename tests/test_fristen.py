@@ -157,7 +157,7 @@ class Scans(unittest.TestCase):
 
 
 class Fristenkalender(unittest.TestCase):
-    """Der Kalender in jur|nodes ist die eine Stelle, an der Fristen gerechnet
+    """Der Kalender in jurnodes ist die eine Stelle, an der Fristen gerechnet
     werden dürfen. Ein Datum von dort ist keine Erfindung des Modells."""
 
     def test_ein_kalenderdatum_bleibt_stehen(self):
@@ -182,7 +182,7 @@ class Fristenkalender(unittest.TestCase):
 
 class DerHinweisSagtEsDeutlich(unittest.TestCase):
     def test_er_nennt_jurnodes(self):
-        self.assertIn("jur|nodes", hinweis(1))
+        self.assertIn("jurnodes", hinweis(1))
         self.assertIn("rechnet keine Fristen", hinweis(1))
 
 

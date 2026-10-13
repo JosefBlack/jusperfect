@@ -414,6 +414,6 @@ def text_extrahieren(dokument: Dokument, daten: bytes, ocr: OcrDienst, sitzung_i
     if art == "alt":
         raise NichtUnterstuetzt(
             f"Altes Microsoft-Format ({PurePosixPath(dokument.dateiname).suffix}). "
-            "Es lässt sich nicht zuverlässig lesen; in jur|nodes als PDF oder "
+            "Es lässt sich nicht zuverlässig lesen; in jurnodes als PDF oder "
             "als neueres Format ablegen.")
     raise NichtUnterstuetzt(f"Dateityp nicht unterstützt: {dokument.dateiname}")

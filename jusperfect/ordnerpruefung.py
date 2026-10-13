@@ -1,4 +1,4 @@
-"""Die Laufwerksprobe: Taugt der jur|nodes-Ordnerexport für jusperfect?
+"""Die Laufwerksprobe: Taugt der jurnodes-Ordnerexport für jusperfect?
 
 ``python -m jusperfect.ordnerpruefung "J:\\Akten"`` – oder ORDNER-PRUEFEN.bat.
 
@@ -433,7 +433,7 @@ def _ablauf(argv: list[str]) -> int:
     # Auf einem WebDAV-Server koennen die Rechte je Ebene verschieden sein;
     # eine schreibbare Wurzel sagt nichts ueber den Aktenordner.
     _sagen(" ", "Geschrieben wird an zwei Stellen: der freigegebene Vermerk nach")
-    _sagen(" ", f"<Akte>/{VERMERK_ORDNER}/, das Aktengedächtnis als eine einzelne")
+    _sagen(" ", f"<Akte>/{VERMERK_ORDNER}/, das Gedächtnis als eine einzelne")
     _sagen(" ", f"Datei ({GEDAECHTNIS_DATEI}) in der Akte selbst.")
     print()
 
@@ -472,7 +472,7 @@ def _ablauf(argv: list[str]) -> int:
         print()
         _sagen(" ", "Lesen und Arbeiten geht trotzdem, aber zwei Dinge nicht:")
         _sagen(" ", "Ein freigegebener Vermerk liesse sich nicht zurückschreiben,")
-        _sagen(" ", "und das Aktengedächtnis liesse sich nicht in der Akte ablegen.")
+        _sagen(" ", "und das Gedächtnis liesse sich nicht in der Akte ablegen.")
         _sagen(" ", "Beides fiele sonst erst beim ersten Versuch auf – beim")
         _sagen(" ", "Gedächtnis womöglich erst Wochen später.")
 

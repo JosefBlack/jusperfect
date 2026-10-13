@@ -113,7 +113,7 @@ class EinUnlesbarerDokumenttext(unittest.TestCase):
         antwort = self.c.get(f"/api/sitzungen/{self.sid}/passagen")
         satz = antwort.json()["fehler"]
         self.assertIn("Mahnung", satz, "Ohne den Titel weiß niemand, welches.")
-        self.assertIn("jur|nodes ist unberührt", satz)
+        self.assertIn("jurnodes ist unberührt", satz)
 
     def test_es_wird_nicht_still_ausgelassen(self):
         """Die Belegpflicht beruht darauf, dass jede Aussage auf eine Passage zeigt.

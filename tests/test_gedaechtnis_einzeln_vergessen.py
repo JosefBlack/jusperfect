@@ -1,4 +1,4 @@
-"""Ein einzelnes Dokument aus dem Aktengedächtnis nehmen – mit Ansage.
+"""Ein einzelnes Dokument aus dem Gedächtnis nehmen – mit Ansage.
 
 Aus der Kanzlei am 05.10.2026, nach der Ausschlussliste: „Ja, bau das
 Entfernen einzelner Dokumente aus dem Gedächtnis."
@@ -143,7 +143,7 @@ class DieRueckfrageSagtWasFaellt(unittest.TestCase):
 
     def test_sie_sagt_dass_die_akte_in_jurnodes_unberuehrt_bleibt(self) -> None:
         """Die Frage, die hier zuerst aufkommt — und die teuerste, wenn falsch."""
-        self.assertIn("Die Akte in jur|nodes bleibt unberührt.", self.block)
+        self.assertIn("Die Akte in jurnodes bleibt unberührt.", self.block)
 
     def test_sie_verspricht_kein_zurueck(self) -> None:
         """Zurücklegen geht, kostet aber — und holt das Abgeleitete nicht wieder.
@@ -180,7 +180,11 @@ class DerKnopfStehtInDerZeile(unittest.TestCase):
 
     def test_das_fenster_sagt_dass_es_den_weg_gibt(self) -> None:
         """Ein Knopf, von dem niemand weiß, ist kein Weg."""
-        self.assertIn('nimmt „vergessen" ein einzelnes', HTML)
+        # Der Absatz ist am 13.10.2026 neu geschrieben worden - aus der
+        # Kanzlei: "Der Text stimmt nicht. So ist es nicht." Geprueft wird
+        # deshalb die Zusage, nicht ihr damaliger Wortlaut.
+        self.assertIn("vergessen", HTML)
+        self.assertIn("ein einzelnes Dokument wieder heraus", HTML)
 
 
 class DanachStimmtDerSchirm(unittest.TestCase):
@@ -261,7 +265,7 @@ class EineEinzelneFrageVergessen(unittest.TestCase):
         self.assertIn("Lebenssachverhalt und der Zeitstrahl bleiben stehen.", self.block)
 
     def test_sie_sagt_dass_die_akte_in_jurnodes_unberuehrt_bleibt(self) -> None:
-        self.assertIn("Die Akte in jur|nodes bleibt unberührt.", self.block)
+        self.assertIn("Die Akte in jurnodes bleibt unberührt.", self.block)
 
     def test_sie_nennt_den_preis_des_zweiten_mals(self) -> None:
         self.assertIn("kostet einen neuen Modellaufruf", self.block)

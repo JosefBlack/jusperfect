@@ -59,7 +59,7 @@ class WasErTut(unittest.TestCase):
         # Zahlen des Gedaechtnisses statt einer blossen Zusage.
         self.assertIn("schlussfrage()", inhalt)
         frage = re.search(r"function schlussfrage\(\) \{(.*?)\n\}", JS, re.S).group(1)
-        self.assertIn("Aktengedächtnis", frage)
+        self.assertIn("Gedächtnis", frage)
         self.assertIn("Entwürfe", frage)
 
 
@@ -93,7 +93,7 @@ class DasSchliessen(unittest.TestCase):
     def test_der_titel_sagt_was_geloescht_wird_und_was_bleibt(self):
         knopf = re.search(r'<button id="sitzung-schliessen".*?>', HTML, re.S).group(0)
         self.assertIn("löscht die temporären Texte", knopf)
-        self.assertIn("Aktengedächtnis bleibt", knopf)
+        self.assertIn("Gedächtnis bleibt", knopf)
 
     def test_es_geht_ueber_dieselbe_rueckfrage_wie_der_wechsel(self):
         """Ein prominenter Knopf wird auch versehentlich getroffen."""

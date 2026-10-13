@@ -1,1 +1,1 @@
-"""Dauerhaftes Aktengedächtnis – bewusst getrennt vom Sitzungsspeicher."""
+"""Dauerhaftes Gedächtnis – bewusst getrennt vom Sitzungsspeicher."""

@@ -234,7 +234,7 @@ def _dateien_pruefen(probe: Probe, adapter: Any, akte_id: str) -> None:
             continue
         inhalt = datei or eintrag
         if isinstance(inhalt, Mapping) and ist_gedaechtnis_datei(adapter._ganzer_name(inhalt)):
-            _sagen(PUNKT, f"[{nr}] das Aktengedächtnis selbst - kein Dokument der Akte")
+            _sagen(PUNKT, f"[{nr}] das Gedächtnis selbst - kein Dokument der Akte")
             continue
         was = f"[{nr}] Datei, Ordnertiefe {pfad.count('/')}"
         gelungen, _ = probe.versuchen(

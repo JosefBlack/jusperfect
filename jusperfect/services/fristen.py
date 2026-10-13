@@ -76,7 +76,7 @@ from jusperfect.domain.models import Passage
 
 # Was an die Stelle des gerechneten Datums tritt. Kein leerer Raum: Wer die
 # Zeile liest, soll sehen, dass hier etwas entfernt wurde und wohin er sieht.
-ERSATZ = "[Datum entfernt – nicht belegt, Fristenkalender in jur|nodes]"
+ERSATZ = "[Datum entfernt – nicht belegt, Fristenkalender in jurnodes]"
 
 # Dasselbe fuer ein Datum, das gar nicht nach einer Frist klingt. Der Hinweis
 # auf den Fristenkalender waere dort irrefuehrend - die Akte kennt diesen Tag
@@ -369,7 +369,7 @@ def hinweis(anzahl: int) -> str:
         f"{anzahl} Datum/Daten aus der Ausgabe entfernt: Sie stehen in keiner "
         f"mitgeschickten Passage und in keinem Eintrag des Fristenkalenders. "
         f"Das Programm erkennt Fristauslöser, es rechnet keine Fristen. "
-        f"Maßgeblich ist der Fristenkalender in jur|nodes."
+        f"Maßgeblich ist der Fristenkalender in jurnodes."
     )
 
 

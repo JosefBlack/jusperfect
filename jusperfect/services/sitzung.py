@@ -217,7 +217,7 @@ class Sitzungsdienst:
             raise nicht_geladen[0]
         if gedaechtnis_fehler:
             sitzung.hinweise.append(
-                "Die Dokumente sind in der Arbeitsakte. Das Aktengedächtnis "
+                "Die Dokumente sind in der Arbeitsakte. Das Gedächtnis "
                 "konnte nicht gesichert werden – gearbeitet werden kann "
                 f"trotzdem. {gedaechtnis_fehler}")
         # Die Bilanz nach VORN. Aus der Kanzlei am 25.09.2026: "er uebernimmt
@@ -238,7 +238,7 @@ class Sitzungsdienst:
                 gruende.append(f"{nicht_lesbar} in einem Format, das nicht "
                                "gelesen werden kann")
             if nicht_geladen:
-                gruende.append(f"{len(nicht_geladen)} von jur|nodes nicht "
+                gruende.append(f"{len(nicht_geladen)} von jurnodes nicht "
                                "geliefert")
             if arten:
                 # Die Dateiarten mit Anzahl - das ist die Auskunft, mit der
@@ -344,7 +344,7 @@ class Sitzungsdienst:
                 raise SitzungNichtGefunden(
                     f"Der abgelegte Text von „{geladen.titel}“ lässt sich nicht "
                     "mehr lesen. Bitte das Dokument im Explorer abwählen und "
-                    "erneut laden. Die Akte in jur|nodes ist unberührt."
+                    "erneut laden. Die Akte in jurnodes ist unberührt."
                 ) from fehler
             dokument = Dokument(id=geladen.dokument_id, akte_id=sitzung.akte_id, titel=geladen.titel, dateiname="")
             ergebnis.extend(passagen_bilden(nr, dokument, seiten))

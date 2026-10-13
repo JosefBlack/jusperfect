@@ -71,7 +71,7 @@ class WasDieMeldungSagt(unittest.TestCase):
         self.assertIn("Entwürfe und Eingangsprüfungen werden nicht gespeichert.", self.block)
 
     def test_ohne_gedaechtnis_behauptet_sie_nichts(self):
-        self.assertIn("das Aktengedächtnis ist nicht aktiviert", self.block)
+        self.assertIn("das Gedächtnis ist nicht aktiviert", self.block)
 
     def test_die_zahlen_kommen_aus_dem_speicher_nicht_aus_der_oberflaeche(self):
         """`bericht` ist die Antwort des Servers, nicht der Stand im Browser."""

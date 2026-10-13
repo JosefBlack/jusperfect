@@ -1,4 +1,4 @@
-"""Dauerhaftes Aktengedächtnis in S3, serverseitig mit dem Kanzlei-KMS-Schlüssel verschlüsselt.
+"""Dauerhaftes Gedächtnis in S3, serverseitig mit dem Kanzlei-KMS-Schlüssel verschlüsselt.
 
 Der Inhalt liegt gepackt (siehe ``gedaechtnis/packen.py``) und ist über
 ``ContentEncoding: gzip`` als solcher gekennzeichnet. Der Objektname behält die
@@ -75,13 +75,13 @@ def _nicht_erreichbar(fehler: Exception) -> str:
     for merkmal, erklaerung in _GRUENDE:
         if merkmal in klein:
             return erklaerung
-    return f"AWS-Aktengedächtnis ist nicht erreichbar ({type(fehler).__name__})."
+    return f"AWS-Gedächtnis ist nicht erreichbar ({type(fehler).__name__})."
 
 
 class AwsGedaechtnisSpeicher:
     def __init__(self, bucket: str, region: str, kms_schluessel_id: str, s3: Any | None = None) -> None:
         if not kms_schluessel_id:
-            raise GedaechtnisFehler("Das AWS-Aktengedächtnis benötigt einen KMS-Schlüssel.")
+            raise GedaechtnisFehler("Das AWS-Gedächtnis benötigt einen KMS-Schlüssel.")
         if s3 is None:
             import boto3
             from botocore.config import Config
@@ -112,9 +112,9 @@ class AwsGedaechtnisSpeicher:
         try:
             gedaechtnis = entpacken(antwort["Body"].read())
         except Exception as e:
-            raise GedaechtnisFehler(f"AWS-Aktengedächtnis ist nicht lesbar ({type(e).__name__}).") from e
+            raise GedaechtnisFehler(f"AWS-Gedächtnis ist nicht lesbar ({type(e).__name__}).") from e
         if gedaechtnis.akte_id != akte_id:
-            raise GedaechtnisFehler("Das geladene Aktengedächtnis gehört zu einer anderen Akte.")
+            raise GedaechtnisFehler("Das geladene Gedächtnis gehört zu einer anderen Akte.")
         # Die Revision gehoert an DIESES Objekt, nicht in eine Tabelle des
         # Speichers - siehe `Aktengedaechtnis._revision` und Befund F03.
         gedaechtnis._revision = antwort.get("ETag")
@@ -142,11 +142,11 @@ class AwsGedaechtnisSpeicher:
             code = getattr(e, "response", {}).get("Error", {}).get("Code", "")
             if code in ("PreconditionFailed", "412", "ConditionalRequestConflict"):
                 raise GedaechtnisFehler(
-                    "Das Aktengedächtnis wurde zwischenzeitlich von einer anderen Stelle "
+                    "Das Gedächtnis wurde zwischenzeitlich von einer anderen Stelle "
                     "geändert. Ihr Stand ist nicht gespeichert worden. Bitte die Akte neu "
                     "laden und den Vorgang wiederholen."
                 ) from e
-            raise GedaechtnisFehler(f"AWS-Aktengedächtnis konnte nicht gespeichert werden ({type(e).__name__}).") from e
+            raise GedaechtnisFehler(f"AWS-Gedächtnis konnte nicht gespeichert werden ({type(e).__name__}).") from e
         gedaechtnis._revision = antwort.get("ETag")
 
     def auflisten(self) -> list[Aktengedaechtnis]:
@@ -173,4 +173,4 @@ class AwsGedaechtnisSpeicher:
         try:
             self._s3.delete_object(Bucket=self._bucket, Key=self._schluessel(akte_id))
         except Exception as e:
-            raise GedaechtnisFehler(f"AWS-Aktengedächtnis konnte nicht gelöscht werden ({type(e).__name__}).") from e
+            raise GedaechtnisFehler(f"AWS-Gedächtnis konnte nicht gelöscht werden ({type(e).__name__}).") from e

@@ -1,4 +1,4 @@
-"""Zugangsdaten für jur|nodes.
+"""Zugangsdaten für jurnodes.
 
 In AWS liegt das Token im Secrets Manager; die Lambda-Rolle darf genau dieses
 eine Geheimnis lesen. Lokal kommt es aus einer Umgebungsvariablen, deren Name
@@ -31,12 +31,12 @@ def jurnodes_token(einstellungen: Einstellungen, env: Mapping[str, str] | None =
         except (json.JSONDecodeError, AttributeError):
             pass
         if not wert:
-            raise KonfigurationsFehler("Das jur|nodes-Geheimnis im Secrets Manager ist leer.")
+            raise KonfigurationsFehler("Das jurnodes-Geheimnis im Secrets Manager ist leer.")
         return wert
     token = env.get(einstellungen.jurnodes_token_var, "")
     if not token:
         raise KonfigurationsFehler(
-            f"Das jur|nodes-Token fehlt: Umgebungsvariable {einstellungen.jurnodes_token_var} ist leer."
+            f"Das jurnodes-Token fehlt: Umgebungsvariable {einstellungen.jurnodes_token_var} ist leer."
         )
     return token
 
@@ -55,7 +55,7 @@ def jurnodes_benutzer(einstellungen: Einstellungen,
     benutzer = env.get(einstellungen.jurnodes_benutzer_var, "").strip()
     if not benutzer:
         raise KonfigurationsFehler(
-            f"Der jur|nodes-Benutzer fehlt: Umgebungsvariable "
+            f"Der jurnodes-Benutzer fehlt: Umgebungsvariable "
             f"{einstellungen.jurnodes_benutzer_var} ist leer. "
             "Eintragen mit JURNODES-ZUGANG.bat."
         )

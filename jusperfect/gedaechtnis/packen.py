@@ -1,4 +1,4 @@
-"""Das Aktengedächtnis gepackt ablegen – ohne dass ein Zeichen verloren geht.
+"""Das Gedächtnis gepackt ablegen – ohne dass ein Zeichen verloren geht.
 
 Aus der Kanzlei: „Problem ist, dass der Serverspeicher sehr teuer ist."
 
@@ -38,7 +38,7 @@ def ist_gepackt(rohdaten: bytes) -> bool:
 
 
 def packen(gedaechtnis: Aktengedaechtnis) -> bytes:
-    """Ein Aktengedächtnis in die Form bringen, in der es abgelegt wird."""
+    """Ein Gedächtnis in die Form bringen, in der es abgelegt wird."""
     roh = gedaechtnis.model_dump_json().encode("utf-8")
     # mtime=0: Zweimal dasselbe Gedaechtnis ergibt dieselben Bytes. Sonst
     # truege jede Ablage die Uhrzeit im Kopf, und zwei inhaltsgleiche Staende
@@ -47,13 +47,13 @@ def packen(gedaechtnis: Aktengedaechtnis) -> bytes:
 
 
 def entpacken(rohdaten: bytes) -> Aktengedaechtnis:
-    """Gelesene Bytes zurück in ein Aktengedächtnis – gepackt oder nicht."""
+    """Gelesene Bytes zurück in ein Gedächtnis – gepackt oder nicht."""
     if ist_gepackt(rohdaten):
         try:
             rohdaten = gzip.decompress(rohdaten)
         except Exception as e:
             raise GedaechtnisFehler(
-                f"Das Aktengedächtnis ist gepackt, lässt sich aber nicht entpacken "
+                f"Das Gedächtnis ist gepackt, lässt sich aber nicht entpacken "
                 f"({type(e).__name__})."
             ) from e
     return Aktengedaechtnis.model_validate_json(rohdaten)

@@ -400,7 +400,7 @@ class Analysedienst:
         wirkliche Passage zeigt, fällt weiterhin.
         """
         if not lebenssachverhalt.strip():
-            raise AnalyseFehler("Das Aktengedächtnis enthält noch keinen Lebenssachverhalt.")
+            raise AnalyseFehler("Das Gedächtnis enthält noch keinen Lebenssachverhalt.")
         material = prompts.material_gedaechtnis(sitzung.akte, beteiligte, fristen,
                                                 lebenssachverhalt, chronologie)
         kontext = Ausgangskontext(identitaet, sitzung.id, sitzung.akte_id, "analyse",
@@ -409,7 +409,7 @@ class Analysedienst:
             kontext, material, prompts.aufgabe_analyse_gedaechtnis(), Aktenanalyse)
         index = index_bauen(alle_passagen)
         eigener_hinweis = [
-            "Diese Analyse beruht auf dem Lebenssachverhalt aus dem Aktengedächtnis, "
+            "Diese Analyse beruht auf dem Lebenssachverhalt aus dem Gedächtnis, "
             f"nicht unmittelbar auf den Dokumenten. Er ist abschnittsweise aus allen "
             f"{len({p.dokument_id for p in alle_passagen})} Dokumenten dieser Akte entstanden; "
             "die Fundstellen zeigen auf die Originalpassagen und sind gegen diese geprüft."
@@ -561,14 +561,14 @@ def _ausweg(was: str, zeichen: int, grenze: int, gedaechtnis_aktiv: bool) -> str
             f"abschnittsweise vorgehen – oder eine Frage stellen statt der {was}. "
             "Fragen suchen sich die passenden Stellen aus der ganzen Akte und sind von "
             "dieser Grenze kaum betroffen.\n\n"
-            "Der bequemere Weg wäre das Aktengedächtnis: Damit liest jusperfect die Akte "
+            "Der bequemere Weg wäre das Gedächtnis: Damit liest jusperfect die Akte "
             "in Portionen ein und arbeitet danach auf dem Gelesenen. Es ist derzeit nicht "
             "eingeschaltet."
         )
     portionen = max(2, -(-zeichen // max(1, grenze)))
     return (
-        f"Was jetzt hilft: die Akte abschnittsweise ins Aktengedächtnis lesen – der Knopf "
-        f"„Akte einlesen“ im Fenster Aktengedächtnis. Sie wird dann in etwa {portionen} "
+        f"Was jetzt hilft: die Akte abschnittsweise ins Gedächtnis lesen – der Knopf "
+        f"„Akte einlesen“ im Fenster Gedächtnis. Sie wird dann in etwa {portionen} "
         f"Portionen gelesen, jede knüpft an die vorige an, und am Ende steht der "
         f"Lebenssachverhalt der ganzen Akte. Das dauert und kostet entsprechend viele "
         f"Modellaufrufe – dafür muss es nur einmal geschehen.\n\n"

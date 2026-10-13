@@ -1,4 +1,4 @@
-"""jur|nodes-Ersatz aus einem Ordner mit Testakten.
+"""jurnodes-Ersatz aus einem Ordner mit Testakten.
 
 Für Entwicklung, Tests und die Vorführung ohne Kanzleianbindung. Jede Akte
 ist ein Unterordner mit ``akte.json`` (Stammdaten, Dokumentliste, Beteiligte,

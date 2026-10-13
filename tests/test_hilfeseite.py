@@ -150,7 +150,7 @@ def test_sie_sagt_was_wie_lange_bleibt(quelle: str) -> None:
     """Die Frage, die bei einem KI-Programm zuerst zu stellen ist."""
     assert 'id="speicherung"' in quelle
     abschnitt = quelle.split('<section id="speicherung">')[1].split("</section>")[0]
-    for muss in ("Aktengedächtnis", "Entwürfe", "jur|nodes",
+    for muss in ("Gedächtnis", "Entwürfe", "jurnodes",
                  "weg, sobald das schwarze Serverfenster zugeht",
                  "nur ein Vermerk"):
         assert muss in abschnitt, muss

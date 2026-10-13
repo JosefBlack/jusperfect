@@ -117,10 +117,10 @@ def material_bauen(akte: Akte, beteiligte: list[Beteiligter], fristen: list[Fris
         f"Rechtsgebiet: {akte.rechtsgebiet or 'nicht angegeben'}",
     ]
     if beteiligte:
-        zeilen.append("Beteiligte laut Aktenstammdaten (jur|nodes):")
+        zeilen.append("Beteiligte laut Aktenstammdaten (jurnodes):")
         zeilen += [f"- {b.rolle}: {b.name}{' (' + b.organisation + ')' if b.organisation else ''}" for b in beteiligte]
     if fristen:
-        zeilen.append("Fristen laut Fristenkalender (jur|nodes, verbindlich dort, nicht hier):")
+        zeilen.append("Fristen laut Fristenkalender (jurnodes, verbindlich dort, nicht hier):")
         zeilen += [f"- {f.datum.isoformat()}: {f.bezeichnung} ({f.status})" for f in fristen]
     zeilen.append("")
     zeilen.append("## Passagen")
@@ -163,10 +163,10 @@ def material_gedaechtnis(akte: Akte, beteiligte: list[Beteiligter], fristen: lis
         f"Rechtsgebiet: {akte.rechtsgebiet or 'nicht angegeben'}",
     ]
     if beteiligte:
-        zeilen.append("Beteiligte laut Aktenstammdaten (jur|nodes):")
+        zeilen.append("Beteiligte laut Aktenstammdaten (jurnodes):")
         zeilen += [f"- {b.rolle}: {b.name}{' (' + b.organisation + ')' if b.organisation else ''}" for b in beteiligte]
     if fristen:
-        zeilen.append("Fristen laut Fristenkalender (jur|nodes, verbindlich dort, nicht hier):")
+        zeilen.append("Fristen laut Fristenkalender (jurnodes, verbindlich dort, nicht hier):")
         zeilen += [f"- {f.datum.isoformat()}: {f.bezeichnung} ({f.status})" for f in fristen]
     zeilen += [
         "",

@@ -49,7 +49,7 @@ FUNKTION_NAME = {
     "analyse": "Analyse",
     "triage": "Eingangsprüfung",
     "entwurf": "Entwürfe",
-    "gedaechtnis": "Aktengedächtnis",
+    "gedaechtnis": "Gedächtnis",
 }
 
 # Was die Zugriffsrichtlinie der Kanzlei abdeckt (infra/iam-nur-claude.json):
@@ -315,7 +315,7 @@ class Selbsttest:
             return Punkt("akten", titel, SCHLECHT,
                          self._akten_fehler(fehler), self._akten_rat())
         wie = {"fixture": "erfundene Testakten", "webdav": "Aktenordner auf dem Laufwerk",
-               "http": "jur|nodes über die Schnittstelle"}.get(self._e.jurnodes_adapter, self._e.jurnodes_adapter)
+               "http": "jurnodes über die Schnittstelle"}.get(self._e.jurnodes_adapter, self._e.jurnodes_adapter)
         # Erreichbar ist erreichbar - auch bei den erfundenen Akten. Dass darin
         # kein Mandantengeheimnis steht, gehoert in den Hinweis, nicht in den
         # Zustand: Sonst stuende im Demo-Betrieb nirgends ein Haken, und ein
@@ -326,7 +326,7 @@ class Selbsttest:
     def _gedaechtnis(self) -> Punkt:
         ort = self._e.gedaechtnis
         if ort == "aus":
-            return Punkt("gedaechtnis", "Aktengedächtnis", ENTFAELLT,
+            return Punkt("gedaechtnis", "Gedächtnis", ENTFAELLT,
                          "Abgeschaltet – eine Sitzung lebt, solange sie offen ist.")
         # Der Ablageort in AWS wird genannt, aber nicht behauptet.
         #
@@ -342,7 +342,7 @@ class Selbsttest:
         # ist, sagt der Selbsttest. Ob es arbeitet, sagt eine Probe.
         if ort == "aws":
             return Punkt(
-                "gedaechtnis", "Aktengedächtnis", UNGEPRUEFT,
+                "gedaechtnis", "Gedächtnis", UNGEPRUEFT,
                 f"Eingestellt auf den S3-Bucket „{self._e.gedaechtnis_bucket}“ mit dem "
                 f"Kanzleischlüssel.",
                 "Dass beides hinterlegt ist, steht hier. Ob der Bucket das Ablegen "
@@ -355,7 +355,7 @@ class Selbsttest:
         satz, zustand = wo
         hinweis = ("Nur mit den erfundenen Testakten zulässig; die Einstellungen lassen "
                    "es mit echten Akten nicht zu.") if ort == "lokal" else ""
-        return Punkt("gedaechtnis", "Aktengedächtnis", zustand, f"Es liegt {satz}.", hinweis)
+        return Punkt("gedaechtnis", "Gedächtnis", zustand, f"Es liegt {satz}.", hinweis)
 
     def _kostenbremse(self) -> Punkt:
         if self._e.anbieter == "demo":

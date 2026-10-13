@@ -141,7 +141,7 @@ class EineOffeneSitzungBehaeltDenAuszugNichtMehr(unittest.TestCase):
             u.c.delete(f"/api/akten/{AKTE}/gedaechtnis/dokumente/D-001")
             sitzung = u.c.get(f"/api/sitzungen/{u.sid}")
             self.assertEqual(sitzung.status_code, 200)
-            self.assertTrue(any("aus dem Aktengedächtnis entfernt" in h
+            self.assertTrue(any("aus dem Gedächtnis entfernt" in h
                                 for h in sitzung.json()["sitzung"]["hinweise"]))
 
     def test_der_text_ist_auch_aus_dem_sitzungsspeicher_weg(self):

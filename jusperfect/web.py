@@ -789,7 +789,7 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
             if g is None or not g.lebenssachverhalt.strip() or offen:
                 if g is not None and g.lebenssachverhalt.strip() and offen:
                     raise AktenZuGross(
-                        f"{zu_gross}\n\nDas Aktengedächtnis ist erst zum Teil gelesen: "
+                        f"{zu_gross}\n\nDas Gedächtnis ist erst zum Teil gelesen: "
                         f"{offen} Dokument(e) fehlen noch im Lebenssachverhalt. Eine Analyse "
                         f"darüber sähe aus wie eine über die ganze Akte. Bitte „Akte einlesen“ "
                         f"zu Ende laufen lassen."

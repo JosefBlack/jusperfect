@@ -1,4 +1,4 @@
-"""Freigaben für das Zurückschreiben nach jur|nodes.
+"""Freigaben für das Zurückschreiben nach jurnodes.
 
 jusperfect schreibt nie von sich aus. Eine Freigabe entsteht nur, wenn ein
 benannter Nutzer einen konkreten Text ausdrücklich bestätigt. Sie ist an
@@ -63,7 +63,7 @@ class Freigabestelle:
 
     def pruefen(self, freigabe: object, akte_id: str, text: str) -> Freigabe:
         if not isinstance(freigabe, Freigabe):
-            raise FreigabeUngueltig("Schreiben nach jur|nodes nur mit einer Freigabe.")
+            raise FreigabeUngueltig("Schreiben nach jurnodes nur mit einer Freigabe.")
         if freigabe.akte_id != akte_id:
             raise FreigabeUngueltig("Die Freigabe gehört zu einer anderen Akte.")
         if not hmac.compare_digest(freigabe.text_pruefsumme, text_pruefsumme(text)):

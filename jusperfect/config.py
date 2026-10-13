@@ -675,7 +675,7 @@ class Einstellungen:
                 "Inaktivitätsfrist, sondern kontrolliert über den Aktenstatus in jurnodes ausgelöst."
             )
         if self.betriebsart == "aws" and self.gedaechtnis == "lokal":
-            raise KonfigurationsFehler("In AWS ist das lokale Aktengedächtnis nicht zulässig.")
+            raise KonfigurationsFehler("In AWS ist das lokale Gedächtnis nicht zulässig.")
         # Das lokale Gedächtnis schreibt unverschlüsselten Klartext auf die
         # Platte – gut genug für erfundene Testakten, nicht für Mandantendaten.
         # Ohne diese Prüfung genügte es, in einer Startdatei den Adapter auf das
@@ -684,7 +684,7 @@ class Einstellungen:
         # etwas davon merkt.
         if self.gedaechtnis == "lokal" and self.jurnodes_adapter != "fixture":
             raise KonfigurationsFehler(
-                "Das lokale Aktengedächtnis speichert unverschlüsselt auf der Festplatte und "
+                "Das lokale Gedächtnis speichert unverschlüsselt auf der Festplatte und "
                 "ist deshalb nur zusammen mit den Testakten zulässig "
                 "(JUSPERFECT_JURNODES_ADAPTER=fixture). Für echte Akten "
                 "JUSPERFECT_GEDAECHTNIS=aws mit Bucket und Kanzleischlüssel setzen."

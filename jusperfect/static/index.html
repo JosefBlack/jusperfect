@@ -17,7 +17,7 @@
     <!-- Stand zwischen Analyse und Entwurf, also zwischen den Arbeitsknoepfen.
          Es beendet aber die Arbeit; es gehoert neben den anderen Weg hinaus. -->
     <button id="sitzung-schliessen" type="button" class="akte-wechseln"
-            title="Beendet die Arbeit an dieser Akte und löscht die temporären Texte. Das Aktengedächtnis bleibt.">Sitzung schließen</button>
+            title="Beendet die Arbeit an dieser Akte und löscht die temporären Texte. Das Gedächtnis bleibt.">Sitzung schließen</button>
   </div>
   <div class="kopf-rechts">
     <span id="kosten" class="kosten" title="Verbrauch im laufenden Monat"></span>
@@ -75,7 +75,7 @@
 <!-- Aktenauswahl -->
 <section id="einstieg" class="einstieg" hidden>
   <h1>Akte öffnen</h1>
-  <p class="unterzeile">Wählen Sie eine Akte aus jur|nodes. jusperfect verarbeitet den Text im gesicherten Bereich – kein Umweg über Platzhalter.</p>
+  <p class="unterzeile">Wählen Sie eine Akte aus jurnodes. jusperfect verarbeitet den Text im gesicherten Bereich – kein Umweg über Platzhalter.</p>
   <!-- Was beim Schliessen gesichert wurde. Steht hier und nicht nur als kurze
        Einblendung unten rechts: Wer eine Akte zumacht, will schwarz auf weiss
        lesen, dass nichts verlorengegangen ist - und zwar so lange, bis er die
@@ -193,7 +193,7 @@
                aus wie ein Fehler. Er steht jetzt fest neben den beiden
                Arbeitsknoepfen; ist das Gedaechtnis aus, sagt der Klick, wie
                es wieder angeht. -->
-          <button data-aktion="gedaechtnis" class="mini">Aktengedächtnis</button>
+          <button data-aktion="gedaechtnis" class="mini">Gedächtnis</button>
           <div class="mehr">
             <button id="mehr-knopf" type="button" class="mini leise" aria-expanded="false">Mehr ▾</button>
             <div id="mehr-menue" class="mehr-menue" hidden>
@@ -256,11 +256,11 @@
       <div class="spalte-kopf">
         <span class="kopf-links">
           <button type="button" class="fenster-zu" data-fenster-zu="gedaechtnis"
-                  title="Aktengedächtnis ausblenden" aria-label="Aktengedächtnis ausblenden">‹</button>
+                  title="Gedächtnis ausblenden" aria-label="Gedächtnis ausblenden">‹</button>
           <button type="button" class="fenster-los" data-fenster-los="gedaechtnis"
-                  title="Aktengedächtnis in einem eigenen Fenster öffnen – für den zweiten Bildschirm"
-                  aria-label="Aktengedächtnis in einem eigenen Fenster öffnen">⧉</button>
-          <span>Aktengedächtnis</span>
+                  title="Gedächtnis in einem eigenen Fenster öffnen – für den zweiten Bildschirm"
+                  aria-label="Gedächtnis in einem eigenen Fenster öffnen">⧉</button>
+          <span>Gedächtnis</span>
         </span>
         <span class="kopf-rechts">
           <span id="ged-stand" class="beleg-stand"></span>
@@ -276,7 +276,7 @@
                loeschen?" Einzeln ja, ganz nicht. Eine Funktion ohne Weg
                dorthin ist keine. -->
           <button type="button" id="ged-ganz-loeschen" class="mini leise gefahr"
-                  title="Das ganze Aktengedächtnis dieser Akte verwerfen – die Akte in jur|nodes bleibt unberührt">Gedächtnis verwerfen</button>
+                  title="Das ganze Gedächtnis dieser Akte verwerfen – die Akte in jurnodes bleibt unberührt">Gedächtnis verwerfen</button>
         </span></div>
       <div id="ged-uebersicht" class="ged-uebersicht"></div>
       <!-- Sieben Modellaufrufe dauern. Ohne Anzeige sitzt der Bearbeiter vor
@@ -438,17 +438,37 @@
 
 <dialog id="ged-dialog" class="explorer-dialog">
   <form method="dialog" class="explorer-form">
-    <h2>Aktengedächtnis ergänzen</h2>
-    <p class="nachweis-hinweis">Links die Akte aus jur|nodes, rechts was im Gedächtnis liegt.
-      Was rechts fehlt, ist links hervorgehoben. Links steht die Akte nach Ordnern gegliedert;
-      jede Überschrift sagt, wie viele darin noch fehlen, und hakt sie auf einen Klick an.
-      Rechts nimmt „vergessen" ein einzelnes
-      Dokument wieder heraus – die Akte in jur|nodes bleibt unberührt.</p>
+    <h2>Gedächtnis ergänzen</h2>
+    <!-- Aus der Kanzlei am 13.10.2026: "Der Text stimmt nicht. So ist es
+         nicht." Er stimmte an drei Stellen nicht:
+
+         1. "jede Ueberschrift sagt, wie viele darin noch fehlen" - Ordner-
+            ueberschriften gibt es nur, wenn die Akte MEHR ALS EINEN Ordner
+            hat, und der Knopf daneben nur, wenn dort etwas fehlt.
+         2. "hakt sie auf einen Klick an" - das tut nicht die Ueberschrift,
+            sondern ein Knopf daneben.
+         3. "Was rechts fehlt, ist links hervorgehoben" - richtig, aber
+            verdreht gesagt, und das Wichtigste fehlte ganz: Was schon im
+            Gedaechtnis liegt, steht links ANGEHAKT und laesst sich hier
+            nicht abwaehlen. Wer das nicht weiss, haelt die gesperrten Haken
+            fuer seine eigenen.
+
+         Geschrieben ist der Text jetzt nach dem, was gedQuellzeile und
+         gedOrdnerzeile wirklich tun - nicht nach dem, was sie tun sollten. -->
+    <p class="nachweis-hinweis"><strong>Links die Akte, rechts was im Gedächtnis liegt.</strong>
+      Links trägt jede Zeile ein Kästchen: Was <em>fehlt</em>, können Sie anhaken;
+      was <em>schon im Gedächtnis</em> liegt, ist angehakt und hier nicht abwählbar.
+      Hat die Akte mehrere Ordner, steht die Liste <strong>nach Ordnern</strong> gegliedert:
+      über jedem sein Name mit „… von … fehlen“
+      und daneben – solange dort etwas fehlt – der Knopf <strong>alle fehlenden</strong>.
+      Unten sagt eine Zeile, wie viel das Angehakte umfasst.
+      Rechts nimmt „vergessen“ ein einzelnes Dokument wieder heraus; die Akte in
+      jurnodes bleibt dabei unberührt.</p>
     <input type="search" id="ged-suche" class="explorer-suche" autocomplete="off"
            placeholder="Dokumente filtern – Titel, Datum, Ordner oder Kategorie">
     <div class="explorer">
       <section class="explorer-spalte">
-        <div class="explorer-kopf">jur|nodes · Akte <span id="ged-quelle-zahl" class="zahl"></span>
+        <div class="explorer-kopf">jurnodes · Akte <span id="ged-quelle-zahl" class="zahl"></span>
           <button type="button" id="ged-alle-fehlenden" class="mini leise"
                   title="Alle fehlenden anhaken, die der Filter gerade stehen lässt">alle fehlenden</button></div>
         <ul id="ged-quelle-liste" class="explorer-liste"></ul>
@@ -502,13 +522,13 @@
 <dialog id="abschluss-dialog" class="nachweis-dialog">
   <form method="dialog" class="nachweis-form">
     <h2>Akte abschließen</h2>
-    <p class="nachweis-hinweis">Gelöscht wird nach dem Aktenstatus in jur|nodes, nicht nach der Zeit.
+    <p class="nachweis-hinweis">Gelöscht wird nach dem Aktenstatus in jurnodes, nicht nach der Zeit.
       Eine Bearbeitungspause löst nie eine Löschung aus. Erst wird der belegte Arbeitsstand als Vermerk
-      nach jur|nodes zurückgeschrieben, danach werden Gedächtnis, Sitzungen, Dokumentauszüge und
+      nach jurnodes zurückgeschrieben, danach werden Gedächtnis, Sitzungen, Dokumentauszüge und
       Entwürfe dieser Akte gelöscht.</p>
     <div id="abschluss-stand" class="abschluss-stand"></div>
     <div id="abschluss-vorschau-block" hidden>
-      <p class="nachweis-hinweis">Genau dieser Text geht nach jur|nodes:</p>
+      <p class="nachweis-hinweis">Genau dieser Text geht nach jurnodes:</p>
       <textarea id="abschluss-vorschau" class="abschluss-vorschau" readonly rows="12"></textarea>
       <label class="abschluss-bestaetigung">
         <input type="checkbox" id="abschluss-bestaetigt">
@@ -526,7 +546,7 @@
 <dialog id="aufsicht-dialog" class="nachweis-dialog">
   <form method="dialog" class="nachweis-form">
     <h2>Aufbewahrung</h2>
-    <p class="nachweis-hinweis">jusperfect löscht einen Arbeitsbereich nur, wenn jur|nodes die Akte
+    <p class="nachweis-hinweis">jusperfect löscht einen Arbeitsbereich nur, wenn jurnodes die Akte
       als abgeschlossen meldet – nie nach Zeitablauf. Hier stehen die Fälle, in denen es
       <b>nicht selbst entscheiden darf</b>. Ohne diese Liste blieben sie unbemerkt liegen.</p>
     <div id="aufsicht-liste" class="nachweis-liste"></div>

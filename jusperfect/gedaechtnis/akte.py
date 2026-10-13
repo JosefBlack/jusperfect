@@ -1,4 +1,4 @@
-"""Das Aktengedächtnis liegt in der Akte selbst.
+"""Das Gedächtnis liegt in der Akte selbst.
 
 Aus der Kanzlei: „Ich möchte das Gedächtnis in der Akte haben. Ich möchte nicht
 lange nach dem Gedächtnis suchen müssen. Problem ist, dass der Serverspeicher
@@ -33,7 +33,7 @@ from jusperfect.jurnodes.base import JurNodesAdapter, JurNodesFehler
 
 
 class AkteGedaechtnisSpeicher:
-    """Führt das Gedächtnis als Datei in der Akte, über den jur|nodes-Adapter.
+    """Führt das Gedächtnis als Datei in der Akte, über den jurnodes-Adapter.
 
     Seit dem 25.09.2026 sind es mehrere Fassungen nebeneinander statt einer
     übereinander: jur|nodes ersetzt eine vorhandene Datei nicht, sondern
@@ -71,7 +71,7 @@ class AkteGedaechtnisSpeicher:
             # gefaehrlicher als keine: Sie brachte fremden Aktentext in diese
             # Sache. Kopierte Aktenordner sind der uebliche Weg dorthin.
             raise GedaechtnisFehler(
-                "Das Aktengedächtnis in diesem Aktenordner gehört zu einer anderen Akte."
+                "Das Gedächtnis in diesem Aktenordner gehört zu einer anderen Akte."
             )
         return gedaechtnis
 

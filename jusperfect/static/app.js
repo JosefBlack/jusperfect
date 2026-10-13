@@ -675,7 +675,7 @@ function archivMarke() {
   const marke = document.createElement("span");
   marke.className = "archivmarke";
   marke.textContent = "archiviert";
-  marke.title = "Diese Akte ist in jur|nodes archiviert.";
+  marke.title = "Diese Akte ist in jurnodes archiviert.";
   return marke;
 }
 
@@ -703,7 +703,7 @@ async function aktenSuchen() {
   }
 }
 
-// ── Zwei-Fenster-Explorer: jur|nodes ⇄ Arbeitsakte ───────────────────────────
+// ── Zwei-Fenster-Explorer: jurnodes ⇄ Arbeitsakte ───────────────────────────
 
 let explorer = null;  // { karte: Map(id->dok), gewaehlt: Set, geladen: Set, initial: bool }
 
@@ -754,7 +754,7 @@ function explorerStarten(initial) {
     const teile = [];
     if (m.zu_gross) teile.push(`${m.zu_gross} über der Größengrenze`);
     if (m.gesamtmass) teile.push(`${m.gesamtmass} über dem Gesamtmaß der Akte`);
-    if (m.ohne_antwort) teile.push(`${m.ohne_antwort} von jur|nodes nicht herausgegeben`);
+    if (m.ohne_antwort) teile.push(`${m.ohne_antwort} von jurnodes nicht herausgegeben`);
     if (teile.length) {
       eakteHinweis.hidden = false;
       const satz = `Bei ${teile.join(", ")} E-Mail(s) fehlt der Inhalt. `
@@ -774,9 +774,9 @@ function explorerStarten(initial) {
     // Akte, in der nur die E-Akte liegt.
     if (sitzung.akte_ohne_dateiordner) {
       eakteHinweis.hidden = false;
-      const satz = "Diese Akte nennt in jur|nodes keinen Dateiordner. "
+      const satz = "Diese Akte nennt in jurnodes keinen Dateiordner. "
         + "Die Dateien der Akte fehlen deshalb in dieser Liste; was aus der "
-        + "E-Akte kommt, steht vollständig da. Bitte in jur|nodes nachsehen.";
+        + "E-Akte kommt, steht vollständig da. Bitte in jurnodes nachsehen.";
       eakteHinweis.textContent = eakteHinweis.textContent
         ? satz + " — " + eakteHinweis.textContent : satz;
     }
@@ -1249,7 +1249,7 @@ async function dokumenteInPortionenLesen(dazu) {
  * Aus der Kanzlei am 25.09.2026: "beim Öffnen der Akte sehen, was man als
  * Letztes gemacht hat, sodass man dann wieder daran ansetzen kann."
  *
- * Kostet nichts: Alles steht schon im Aktengedächtnis. Gezeigt werden die
+ * Kostet nichts: Alles steht schon im Gedächtnis. Gezeigt werden die
  * eigenen Fragen im Wortlaut - keine vom Modell geschriebene Zusammenfassung,
  * die bei jedem Öffnen Geld kostete und danebenliegen könnte.
  */
@@ -1815,7 +1815,7 @@ function gedaechtnisImThreadZeigen() {
   const t = $("thread");
   if (g.lebenssachverhalt) {
     const karte = document.createElement("div"); karte.className = "karte-c ai";
-    const titel = document.createElement("div"); titel.className = "titelzeile"; titel.textContent = "Aktengedächtnis · Lebenssachverhalt";
+    const titel = document.createElement("div"); titel.className = "titelzeile"; titel.textContent = "Gedächtnis · Lebenssachverhalt";
     const inhalt = document.createElement("div"); inhalt.className = "inhalt";
     antworttext(inhalt, g.lebenssachverhalt);
     karte.append(titel, inhalt); t.appendChild(karte);
@@ -1833,10 +1833,10 @@ function gedaechtnisImThreadZeigen() {
   }
 }
 
-// ── Aktengedächtnis: was liegt drin, was fehlt, wie groß ist es ─────────────
+// ── Gedächtnis: was liegt drin, was fehlt, wie groß ist es ─────────────
 // Ein dauerhafter Speicher, den niemand einsehen kann, ist eine Zusage ohne
 // Nachweis. Das Fenster nennt den Umfang, der Explorer zeigt ihn neben der
-// Akte aus jur|nodes – und hebt hervor, was noch fehlt.
+// Akte aus jurnodes – und hebt hervor, was noch fehlt.
 
 let gedAuswahl = new Set();
 
@@ -1985,7 +1985,7 @@ async function gedaechtnisEinlesen() {
     // Auswahlfenster ist ein modaler Dialog und legte sich sonst ueber die
     // Meldung, die ihn erklaert.
     const weg = [
-      "Im Aktengedächtnis liegt noch kein Dokument.",
+      "Im Gedächtnis liegt noch kein Dokument.",
       "",
       "„Akte einlesen“ baut den Lebenssachverhalt aus dem, was im Gedächtnis",
       "liegt. Hinein kommen die Dokumente durch das Anhaken – im Fenster",
@@ -2004,7 +2004,7 @@ async function gedaechtnisEinlesen() {
   const portionen = Math.max(1, Math.ceil(zeichen / grenze));
   const nichtDrin = (sitzung.dokumente || []).length - gesamt;
   const teile = [
-    "Die Akte wird Portion für Portion ins Aktengedächtnis gelesen.",
+    "Die Akte wird Portion für Portion ins Gedächtnis gelesen.",
     "",
     `Noch einzulesen: ${offenAmAnfang} von ${gesamt} Dokumenten (${zeichen.toLocaleString("de-DE")} Zeichen)`,
     `Zu erwarten: etwa ${portionen} Modellaufruf(e)`,
@@ -2063,7 +2063,7 @@ async function gedaechtnisEinlesen() {
 function hinweisImThread(text) {
   const karte = document.createElement("div"); karte.className = "karte-c ai";
   const titel = document.createElement("div"); titel.className = "titelzeile";
-  titel.textContent = "Aktengedächtnis · Hinweis";
+  titel.textContent = "Gedächtnis · Hinweis";
   const inhalt = document.createElement("div"); inhalt.className = "inhalt"; inhalt.textContent = text;
   karte.append(titel, inhalt);
   $("thread").appendChild(karte);
@@ -2131,7 +2131,7 @@ function gedExplorerZeichnen() {
     weg.type = "button";
     weg.className = "mini leise ged-vergessen";
     weg.textContent = "vergessen";
-    weg.title = `„${e.titel}" aus dem Aktengedächtnis entfernen`;
+    weg.title = `„${e.titel}" aus dem Gedächtnis entfernen`;
     weg.addEventListener("click", (ev) => mitKnopf(ev.target, () => gedaechtnisDokumentVergessen(e)));
     li.appendChild(weg);
     rechts.appendChild(li);
@@ -2155,7 +2155,7 @@ function gedQuellzeile(d, drinNach) {
   box.type = "checkbox";
   box.checked = fehlt ? gedAuswahl.has(d.id) : true;
   box.disabled = !fehlt;
-  box.title = fehlt ? "In das Aktengedächtnis aufnehmen" : "Liegt bereits im Aktengedächtnis";
+  box.title = fehlt ? "In das Gedächtnis aufnehmen" : "Liegt bereits im Gedächtnis";
   if (fehlt) {
     box.addEventListener("change", () => {
       box.checked ? gedAuswahl.add(d.id) : gedAuswahl.delete(d.id);
@@ -2289,7 +2289,7 @@ function gedInhaltZeigen() {
     weg.type = "button";
     weg.className = "mini leise ged-vergessen";
     weg.textContent = "vergessen";
-    weg.title = "Diese Frage und ihre Antwort aus dem Aktengedächtnis entfernen";
+    weg.title = "Diese Frage und ihre Antwort aus dem Gedächtnis entfernen";
     weg.addEventListener("click", (ev) => mitKnopf(ev.target, () => gedaechtnisFrageVergessen(f)));
     li.appendChild(weg);
     fragenListe.appendChild(li);
@@ -2307,7 +2307,7 @@ function gedUmfangZeigen() {
   // und zwar ueber die Frage, die hier am meisten zaehlt.
   teile.push(K.gedaechtnisOrt === "akte"
     ? "gespeichert wird in der Akte selbst"
-    : "gespeichert wird bei jusperfect, nicht in jur|nodes");
+    : "gespeichert wird bei jusperfect, nicht in jurnodes");
   $("ged-umfang").textContent = teile.join(" · ");
 }
 
@@ -2336,7 +2336,7 @@ function gedaechtnisAbhaengiges(dokumentId) {
 async function gedaechtnisDokumentVergessen(e) {
   const ab = gedaechtnisAbhaengiges(e.dokument_id);
   const teile = [
-    `„${e.titel}" aus dem Aktengedächtnis entfernen?`,
+    `„${e.titel}" aus dem Gedächtnis entfernen?`,
     "",
     "Das fällt mit heraus:",
     `· der Auszug selbst – ${e.seiten} Seite(n), ${umfangKurz(e.zeichen)}`,
@@ -2351,7 +2351,7 @@ async function gedaechtnisDokumentVergessen(e) {
     teile.push("· sonst nichts – auf diesen Auszug stützt sich bisher keine Antwort.");
   teile.push(
     "",
-    "Die Akte in jur|nodes bleibt unberührt. Entfernt wird nur, was sich",
+    "Die Akte in jurnodes bleibt unberührt. Entfernt wird nur, was sich",
     "jusperfect gemerkt hat.",
     "",
     "Zurücklegen ist möglich, kostet aber ein neues Einlesen – bei einem Scan",
@@ -2381,7 +2381,7 @@ async function gedaechtnisDokumentVergessen(e) {
   const nach = [];
   if (ab.fragen) nach.push(`${ab.fragen} Frage(n)`);
   if (ab.zeitstrahl) nach.push(`${ab.zeitstrahl} Zeitstrahleintrag/-einträge`);
-  melden(`„${e.titel}" ist nicht mehr im Aktengedächtnis.`
+  melden(`„${e.titel}" ist nicht mehr im Gedächtnis.`
          + (nach.length ? ` Mit entfallen: ${nach.join(", ")}.` : ""));
 }
 
@@ -2417,12 +2417,12 @@ async function gedaechtnisGanzVerwerfen() {
   // liest.
   if (g.unlesbar) {
     const weg = [
-      `Das Aktengedächtnis von ${a.aktenzeichen} verwerfen?`,
+      `Das Gedächtnis von ${a.aktenzeichen} verwerfen?`,
       "",
       "Es lässt sich nicht mehr einlesen; wie viel darin liegt, ist deshalb",
       "nicht zu sagen. Verworfen wird es trotzdem vollständig.",
       "",
-      "Die Akte in jur|nodes bleibt unberührt.",
+      "Die Akte in jurnodes bleibt unberührt.",
       "",
       "Danach baut „Akte einlesen“ es neu auf. Das kostet Modellaufrufe,",
       "bei Scans zusätzlich die Texterkennung.",
@@ -2434,13 +2434,13 @@ async function gedaechtnisGanzVerwerfen() {
     return;
   }
   if (!g.vorhanden) {
-    melden(`Zu ${a.aktenzeichen} ist noch kein Aktengedächtnis gespeichert.`);
+    melden(`Zu ${a.aktenzeichen} ist noch kein Gedächtnis gespeichert.`);
     return;
   }
   // Was weg ist, soll vor dem Klick dastehen - nicht danach. Dieselbe
   // Erwaegung wie beim einzelnen Vergessen darueber.
   const teile = [
-    `Das ganze Aktengedächtnis von ${a.aktenzeichen} verwerfen?`,
+    `Das ganze Gedächtnis von ${a.aktenzeichen} verwerfen?`,
     "",
     "Das fällt heraus:",
     `· ${eintraege.length} Dokumentauszug/-auszüge – ${umfangKurz(g.zeichen || 0)}`,
@@ -2455,7 +2455,7 @@ async function gedaechtnisGanzVerwerfen() {
     teile.push("· die gespeicherte Analyse der Akte");
   teile.push(
     "",
-    "Die Akte in jur|nodes bleibt unberührt. Verworfen wird nur, was sich",
+    "Die Akte in jurnodes bleibt unberührt. Verworfen wird nur, was sich",
     "jusperfect gemerkt hat.",
     "",
     "Zurücklegen heißt: die Akte neu einlesen. Das kostet Modellaufrufe,",
@@ -2474,7 +2474,7 @@ async function gedaechtnisGanzVerwerfen() {
  *
  * Hier stand eine Schleife: erst das Gedaechtnis loeschen, dann je Dokument
  * ein DELETE an die Sitzung. Jede dieser Antworten ist eine vollstaendige
- * Sitzungsantwort, und die liest die Dokumentliste **neu bei jur|nodes** -
+ * Sitzungsantwort, und die liest die Dokumentliste **neu bei jurnodes** -
  * Ordnerbaum und Korrespondenzverzeichnis, je Aufruf, und der Hersteller
  * laesst eine Anfrage je IP-Adresse zugleich zu. Bei fuenfzig Dokumenten
  * waren das fuenfzig Lesevorgaenge der ganzen Akte fuer einen Klick.
@@ -2499,7 +2499,7 @@ async function gedaechtnisWeg() {
   gedaechtnisFensterZeigen();
   chronologieZeigen();
   ladeStatus();
-  melden(`Das Aktengedächtnis von ${a.aktenzeichen} ist verworfen. `
+  melden(`Das Gedächtnis von ${a.aktenzeichen} ist verworfen. `
          + `„Akte einlesen" baut es neu auf.`);
 }
 
@@ -2518,7 +2518,7 @@ async function gedaechtnisFrageVergessen(f) {
   if (stelle < 0) {
     sitzung.gedaechtnis = frisch;
     gedExplorerZeichnen();
-    melden("Diese Frage liegt nicht mehr im Aktengedächtnis – jemand war schneller. "
+    melden("Diese Frage liegt nicht mehr im Gedächtnis – jemand war schneller. "
            + "Die Ansicht steht jetzt auf dem neuen Stand.", true);
     return;
   }
@@ -2526,12 +2526,12 @@ async function gedaechtnisFrageVergessen(f) {
   const teile = [
     `„${kurz}"`,
     "",
-    "Diese Frage und ihre Antwort aus dem Aktengedächtnis entfernen?",
+    "Diese Frage und ihre Antwort aus dem Gedächtnis entfernen?",
     "",
     "Es fällt nur diese eine Runde heraus. Die Dokumentauszüge, der",
     "Lebenssachverhalt und der Zeitstrahl bleiben stehen.",
     "",
-    "Die Akte in jur|nodes bleibt unberührt.",
+    "Die Akte in jurnodes bleibt unberührt.",
     "",
     "Dieselbe Frage noch einmal zu stellen kostet einen neuen Modellaufruf.",
     "",
@@ -2541,7 +2541,7 @@ async function gedaechtnisFrageVergessen(f) {
   sitzung.gedaechtnis = await api("DELETE", `/api/akten/${akte}/gedaechtnis/fragen/${stelle}`);
   gedExplorerZeichnen();
   gedaechtnisFensterZeigen();
-  melden("Die Frage ist nicht mehr im Aktengedächtnis.");
+  melden("Die Frage ist nicht mehr im Gedächtnis.");
 }
 
 /** Die angehakten Dokumente holen - mit dem Balken, den es laengst gibt.
@@ -2609,7 +2609,7 @@ async function gedaechtnisAktualisieren() {
   // verschwindet, sieht aus wie ein Fehler, und niemand erfaehrt, dass es die
   // Sache ueberhaupt gibt.
   if (!K.gedaechtnisAktiv) {
-    melden("Das Aktengedächtnis ist ausgeschaltet. Es lässt sich in der "
+    melden("Das Gedächtnis ist ausgeschaltet. Es lässt sich in der "
            + "Startdatei wieder einschalten (JUSPERFECT_GEDAECHTNIS). "
            + "Ohne es wird jede Akte bei jeder Sitzung neu eingelesen.", true);
     return;
@@ -2617,7 +2617,7 @@ async function gedaechtnisAktualisieren() {
   const g = await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/gedaechtnis/aktualisieren`);
   sitzung.gedaechtnis = g;
   const karte = threadKarte("ai");
-  const titel = document.createElement("div"); titel.className = "titelzeile"; titel.textContent = "Aktengedächtnis aktualisiert";
+  const titel = document.createElement("div"); titel.className = "titelzeile"; titel.textContent = "Gedächtnis aktualisiert";
   const inhalt = document.createElement("div"); inhalt.className = "inhalt";
   if (g.lebenssachverhalt) antworttext(inhalt, g.lebenssachverhalt);
   else inhalt.textContent = "Noch kein belegter Lebenssachverhalt vorhanden.";
@@ -3229,7 +3229,7 @@ function feld(text, klasse) {
 
 // ── Chronologie ─────────────────────────────────────────────────────────────
 // Sie ist ohne KI-Aufruf gefüllt: Dokumentdaten und Fristen stehen in den
-// Stammdaten aus jur|nodes. Eine Aktenanalyse reichert sie später an; bis
+// Stammdaten aus jurnodes. Eine Aktenanalyse reichert sie später an; bis
 // dahin ist sie kein leeres Fenster, sondern der Zeitstrahl der Akte.
 
 let chronoAusAnalyse = [];   // Einträge, die die Analyse beigesteuert hat
@@ -3306,7 +3306,7 @@ function belegPasst(e) {
    Genauer geht es nicht ohne Modell, und ungenauer wäre nutzlos. */
 function aehnlich(a, b) {
   // Auf fünf Zeichen gekürzt: Deutsch beugt am Wortende ("Betriebsrat" /
-  // "Betriebsrats"). Dieselbe Regel wie beim Speichern im Aktengedächtnis –
+  // "Betriebsrats"). Dieselbe Regel wie beim Speichern im Gedächtnis –
   // was dort ein Eintrag ist, soll hier nicht als zwei erscheinen.
   const menge = (t) => new Set((String(t).toLowerCase().match(/[a-zäöüß0-9]{4,}/g) || [])
     .map((w) => w.slice(0, 5)));
@@ -3374,7 +3374,7 @@ async function abschlussZeichnen() {
     d.append(feld(beschriftung, "abschluss-name"), feld(wert, klasse || "abschluss-wert"));
     ziel.appendChild(d);
   };
-  zeile("Status in jur|nodes", stand.aktenstatus);
+  zeile("Status in jurnodes", stand.aktenstatus);
   if (stand.abgeschlossen_am) zeile("Abschluss vorgemerkt", datum(stand.abgeschlossen_am));
   if (stand.loeschung_vorgesehen_am)
     zeile("Löschung frühestens", datum(stand.loeschung_vorgesehen_am),
@@ -3385,7 +3385,7 @@ async function abschlussZeichnen() {
   }
   if (!stand.abschlussreif) {
     const p = document.createElement("p"); p.className = "abschluss-hinweis";
-    p.textContent = "Die Akte ist in jur|nodes nicht abgeschlossen. Der Arbeitsbereich bleibt "
+    p.textContent = "Die Akte ist in jurnodes nicht abgeschlossen. Der Arbeitsbereich bleibt "
       + "unverändert erhalten; es ist nichts zu tun.";
     ziel.appendChild(p);
   }
@@ -3440,7 +3440,7 @@ function abschlussNachweisZeigen(nachweis) {
     d.append(feld(name, "abschluss-name"), feld(wert, "abschluss-wert"));
     ziel.appendChild(d);
   };
-  zeile("Nach jur|nodes gesichert", nachweis.jurnodes_referenz);
+  zeile("Nach jurnodes gesichert", nachweis.jurnodes_referenz);
   zeile("Freigegeben von", nachweis.nutzer_id);
   zeile("Zeitpunkt", new Date(nachweis.zeitpunkt).toLocaleString("de-DE"));
   zeile("Gelöscht", `${g.dokumente} Dokumentauszug/-auszüge, ${g.fragen} Frage(n), `
@@ -3448,7 +3448,7 @@ function abschlussNachweisZeigen(nachweis) {
   const hinweis = document.createElement("p");
   hinweis.className = "abschluss-hinweis";
   hinweis.textContent = "Der Arbeitsbereich dieser Akte ist gelöscht. Die Akte selbst bleibt in "
-    + "jur|nodes unberührt; dort steht jetzt der gesicherte Arbeitsstand als Vermerk.";
+    + "jurnodes unberührt; dort steht jetzt der gesicherte Arbeitsstand als Vermerk.";
   ziel.appendChild(hinweis);
 }
 
@@ -3528,7 +3528,7 @@ async function aufsichtOeffnen() {
   } else if (daten.eintraege.length) {
     const p = document.createElement("p");
     p.className = "aufbewahrung-ruhe";
-    p.textContent = "Nichts zu entscheiden. Alle Arbeitsbereiche folgen dem Stand in jur|nodes.";
+    p.textContent = "Nichts zu entscheiden. Alle Arbeitsbereiche folgen dem Stand in jurnodes.";
     ziel.appendChild(p);
   }
 
@@ -3908,14 +3908,14 @@ async function entwurfStarten(art, anweisung, empfaenger, auftrag) {
   antworttext(inhalt, e.text);
   karte.appendChild(inhalt);
   const fuss = fusszeile(e);
-  const frei = document.createElement("button"); frei.className = "mini"; frei.textContent = "Freigeben und in jur|nodes ablegen";
+  const frei = document.createElement("button"); frei.className = "mini"; frei.textContent = "Freigeben und in jurnodes ablegen";
   frei.addEventListener("click", () => mitKnopf(frei, async () => {
-    if (!confirm("Diesen von der KI vorbereiteten Entwurf als Vermerk in die jur|nodes-Akte schreiben?")) return;
+    if (!confirm("Diesen von der KI vorbereiteten Entwurf als Vermerk in die jurnodes-Akte schreiben?")) return;
     // Die Pruefsumme deckt seit dem 05.10.2026 Akte, Art, Betreff UND Text ab.
     // Vorher nur den Text - ein in einem anderen Fenster geaenderter Betreff
     // ging damit ungesehen in den Vermerk (Befund F06 der Zweitpruefung).
     const f = await api("POST", `/api/entwuerfe/${e.id}/freigabe`, { bestaetigung: true, freigabe_pruefsumme: e.freigabe_pruefsumme });
-    frei.replaceWith(Object.assign(document.createElement("span"), { textContent: `In jur|nodes abgelegt (${f.jurnodes_referenz || ""})` }));
+    frei.replaceWith(Object.assign(document.createElement("span"), { textContent: `In jurnodes abgelegt (${f.jurnodes_referenz || ""})` }));
   }));
   fuss.appendChild(frei);
   // Aus der Kanzlei: "Ich denke auch einen Wissenstempel bauen, dass sich KI
@@ -4010,17 +4010,17 @@ async function akteWechseln() {
 }
 
 // Die Rückfrage vor dem Schließen. Sie sagt nicht mehr nur, was gelöscht wird,
-// sondern zuerst, was bleibt – und mit welchen Zahlen. "Was im Aktengedächtnis
+// sondern zuerst, was bleibt – und mit welchen Zahlen. "Was im Gedächtnis
 // steht, bleibt erhalten" ist eine Zusage; "50 Dokumente, 68 Zeilen Chronologie,
 // 4 Antworten" ist eine Auskunft.
 function schlussfrage() {
   const g = (sitzung && sitzung.gedaechtnis) || {};
   const bleibt = K.gedaechtnisAktiv && g.vorhanden
-    ? "Im Aktengedächtnis bleiben: der Lebenssachverhalt, "
+    ? "Im Gedächtnis bleiben: der Lebenssachverhalt, "
       + `${(g.eintraege || []).length} Dokument(e), `
       + `${(g.chronologie || []).length} Zeile(n) Chronologie und `
       + `${g.fragen || 0} geprüfte Antwort(en).`
-    : "Zu dieser Akte besteht kein Aktengedächtnis – gespeichert wird deshalb nichts.";
+    : "Zu dieser Akte besteht kein Gedächtnis – gespeichert wird deshalb nichts.";
   return "Akte schließen?\n\n" + bleibt
     + "\n\nNicht gespeichert werden Entwürfe und Eingangsprüfungen aus diesem Gespräch. "
     + "Wer einen Entwurf noch braucht, kopiert ihn vorher heraus.";
@@ -4061,13 +4061,13 @@ async function sitzungSchliessen() {
 function schlussmeldung(bericht, fehler) {
   if (fehler)
     return "Nicht gespeichert: " + fehler
-      + " Die Sitzung ist geschlossen; das Aktengedächtnis kann unvollständig sein.";
+      + " Die Sitzung ist geschlossen; das Gedächtnis kann unvollständig sein.";
   if (!bericht || !bericht.gesichert)
     return (bericht && bericht.aktiv)
-      ? "Zu dieser Akte besteht noch kein Aktengedächtnis, gespeichert wurde deshalb nichts. "
+      ? "Zu dieser Akte besteht noch kein Gedächtnis, gespeichert wurde deshalb nichts. "
         + "Die Sitzung ist geschlossen und die temporären Texte sind gelöscht."
       : "Sitzung geschlossen, temporäre Texte gelöscht. Gespeichert wurde nichts – "
-        + "das Aktengedächtnis ist nicht aktiviert.";
+        + "das Gedächtnis ist nicht aktiviert.";
   const teile = [];
   if ((bericht.lebenssachverhalt || "").length)
     teile.push(`Lebenssachverhalt (${umfangKurz(bericht.lebenssachverhalt.length)})`);
@@ -4075,7 +4075,7 @@ function schlussmeldung(bericht, fehler) {
   if ((bericht.chronologie || []).length) teile.push(`${bericht.chronologie.length} Zeile(n) Chronologie`);
   if (bericht.fragen) teile.push(`${bericht.fragen} geprüfte Antwort(en)`);
   const wo = bericht.aktenzeichen ? " zu " + bericht.aktenzeichen : "";
-  return `Gespeichert im Aktengedächtnis${wo}: ` + (teile.length ? teile.join(", ") : "nichts Belegtes")
+  return `Gespeichert im Gedächtnis${wo}: ` + (teile.length ? teile.join(", ") : "nichts Belegtes")
     + ". Entwürfe und Eingangsprüfungen werden nicht gespeichert.";
 }
 

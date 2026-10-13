@@ -1,4 +1,4 @@
-"""Anbindung an die jur|nodes-REST-API.
+"""Anbindung an die jurnodes-REST-API.
 
 Die Pfade und Feldnamen der jur|nodes-API sind der wichtigste Prüfpunkt von
 Phase 0 (siehe Konzept). Deshalb sind beide hier nicht fest verdrahtet,
@@ -38,7 +38,7 @@ from jusperfect.security.approval import Freigabe, Freigabestelle
 
 @dataclass(frozen=True)
 class Endpunkte:
-    """Die Pfade der jur|nodes-Schnittstelle.
+    """Die Pfade der jurnodes-Schnittstelle.
 
     **Seit dem 23.09.2026 sind das keine Annahmen mehr.** Bis dahin stand hier
     ein geratener Satz Pfade (``/akten``, ``/akten/{akte_id}`` und so fort),
@@ -119,15 +119,15 @@ class Endpunkte:
         datei = Path(pfad)
         if not datei.is_file():
             raise KonfigurationsFehler(
-                f"Die Datei mit den jur|nodes-Pfaden fehlt: {datei}")
+                f"Die Datei mit den jurnodes-Pfaden fehlt: {datei}")
         try:
             daten = json.loads(datei.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as fehler:
             raise KonfigurationsFehler(
-                f"Die Datei mit den jur|nodes-Pfaden ist unlesbar ({datei}): {fehler}") from fehler
+                f"Die Datei mit den jurnodes-Pfaden ist unlesbar ({datei}): {fehler}") from fehler
         if not isinstance(daten, Mapping):
             raise KonfigurationsFehler(
-                f"Die Datei mit den jur|nodes-Pfaden muss ein JSON-Objekt sein: {datei}")
+                f"Die Datei mit den jurnodes-Pfaden muss ein JSON-Objekt sein: {datei}")
         # Zeilen, die mit einem Unterstrich anfangen, sind Erklaerung und kein
         # Pfad. Eine Datei, die ein Nichtprogrammierer bearbeiten soll, muss
         # ihre Anleitung bei sich tragen duerfen - sonst steht sie woanders und
@@ -238,7 +238,7 @@ _STATUS = {
 
 
 def _status_uebersetzen(wert: Any) -> str:
-    """Das Wort von jur|nodes in eines der drei Woerter des Programms.
+    """Das Wort von jurnodes in eines der drei Woerter des Programms.
 
     "unbekannt" ist kein Fehler, sondern eine Vorlage zur Entscheidung: Es
     wird dann nichts geloescht, und die Aufsicht zeigt die Akte an.
@@ -300,7 +300,7 @@ def _identitaet_pruefen(angefragt: str, daten: Mapping[str, Any]) -> None:
     # Die fremde Kennung geht NICHT in die Meldung: Sie gehoert zu einer
     # anderen Akte, und eine fremde Aktenkennung ist Mandantengeheimnis.
     raise JurNodesFehler(
-        "jur|nodes hat auf die Anfrage nach dieser Akte eine andere Akte "
+        "jurnodes hat auf die Anfrage nach dieser Akte eine andere Akte "
         "geantwortet" + ("" if zurueck else " – die Antwort trug überhaupt keine "
                          "Aktenkennung") + ". Der Vorgang wurde abgebrochen; es "
         "wurde nichts geladen. Bitte die Kanzleiverwaltung verständigen.")
@@ -418,7 +418,7 @@ def _richtung(huelle: Mapping[str, Any]) -> str:
 MAIL_OHNE_INHALT = {
     "zu_gross": ("⚠ Inhalt nicht geladen: zu groß", "zu groß"),
     "budget": ("⚠ Inhalt nicht geladen: Gesamtmaß der Akte erreicht", "Gesamtmaß"),
-    "status": ("⚠ Inhalt nicht geladen: jur|nodes hat ihn nicht herausgegeben", "abgewiesen"),
+    "status": ("⚠ Inhalt nicht geladen: jurnodes hat ihn nicht herausgegeben", "abgewiesen"),
     "netz": ("⚠ Inhalt nicht geladen: die Schnittstelle war nicht erreichbar", "kein Netz"),
 }
 
@@ -753,9 +753,9 @@ class HttpJurNodesAdapter:
     ) -> None:
         if not basis_url.startswith("https://") and not basis_url.startswith("http://localhost") \
                 and not basis_url.startswith("http://127.0.0.1"):
-            raise KonfigurationsFehler("Die jur|nodes-URL muss mit https:// beginnen.")
+            raise KonfigurationsFehler("Die jurnodes-URL muss mit https:// beginnen.")
         if not token:
-            raise KonfigurationsFehler("Kein jur|nodes-Schlüssel vorhanden.")
+            raise KonfigurationsFehler("Kein jurnodes-Schlüssel vorhanden.")
         # Die Pfade, mit denen wirklich gesprochen wird - gleich, ob sie aus
         # der Vorgabe, aus einer Datei oder von einem Aufrufer kommen. Befund
         # N09: Geprueft war nur der Quelltext, und die Pfade sind einstellbar.
@@ -883,12 +883,12 @@ class HttpJurNodesAdapter:
                 antwort = self._client.get(pfad, params=params or None,
                                            headers=self._kopf(pfad))
         except httpx.HTTPError as e:
-            raise JurNodesFehler(f"jur|nodes nicht erreichbar ({type(e).__name__}).") from e
+            raise JurNodesFehler(f"jurnodes nicht erreichbar ({type(e).__name__}).") from e
         if antwort.status_code == 404:
-            raise nicht_gefunden(f"In jur|nodes nicht gefunden (GET {pfad}).")
+            raise nicht_gefunden(f"In jurnodes nicht gefunden (GET {pfad}).")
         if antwort.status_code in (401, 403):
             raise JurNodesFehler(
-                f"jur|nodes hat den Zugriff abgelehnt (GET {pfad}, Status "
+                f"jurnodes hat den Zugriff abgelehnt (GET {pfad}, Status "
                 f"{antwort.status_code}). Dem Schlüssel fehlt der Bereich "
                 f"{bereich_von(pfad) or pfad} oder ein Recht darin.")
         if antwort.status_code >= 400:
@@ -898,7 +898,7 @@ class HttpJurNodesAdapter:
             # Dutzend. Am 24.09.2026 hat genau das eine Stunde gekostet.
             # Ein Pfad ist fest verdrahtet und enthaelt keinen Akteninhalt.
             raise _mit_wortlaut(JurNodesFehler(
-                f"jur|nodes antwortete auf GET {pfad} mit Status "
+                f"jurnodes antwortete auf GET {pfad} mit Status "
                 f"{antwort.status_code}." + _erlaubte_verfahren(antwort)), antwort)
         return antwort
 
@@ -967,17 +967,17 @@ class HttpJurNodesAdapter:
             with self._nacheinander:
                 antwort = self._client.post(pfad, json=koerper, headers=self._kopf(pfad))
         except httpx.HTTPError as e:
-            raise JurNodesFehler(f"jur|nodes nicht erreichbar ({type(e).__name__}).") from e
+            raise JurNodesFehler(f"jurnodes nicht erreichbar ({type(e).__name__}).") from e
         if antwort.status_code == 404:
-            raise nicht_gefunden(f"In jur|nodes nicht gefunden (POST {pfad}).")
+            raise nicht_gefunden(f"In jurnodes nicht gefunden (POST {pfad}).")
         if antwort.status_code in (401, 403):
             raise JurNodesFehler(
-                f"jur|nodes hat den Zugriff abgelehnt (POST {pfad}, Status "
+                f"jurnodes hat den Zugriff abgelehnt (POST {pfad}, Status "
                 f"{antwort.status_code}). Dem Schlüssel fehlt der Bereich "
                 f"{bereich_von(pfad) or pfad} oder ein Recht darin.")
         if antwort.status_code >= 400:
             raise _mit_wortlaut(JurNodesFehler(
-                f"jur|nodes antwortete auf POST {pfad} mit Status "
+                f"jurnodes antwortete auf POST {pfad} mit Status "
                 f"{antwort.status_code}." + _erlaubte_verfahren(antwort)), antwort)
         return antwort
 
@@ -1033,7 +1033,7 @@ class HttpJurNodesAdapter:
             for s in schluessel:
                 if isinstance(daten.get(s), list):
                     return daten[s]
-        raise JurNodesFehler("Unerwartetes Antwortformat von jur|nodes.")
+        raise JurNodesFehler("Unerwartetes Antwortformat von jurnodes.")
 
     # ── Schnittstelle ──────────────────────────────────────────────────────
 
@@ -1041,7 +1041,7 @@ class HttpJurNodesAdapter:
         """Akten suchen - ueber das Aktenzeichen UND das Kurzrubrum.
 
         Das ist der Gewinn gegenueber dem Laufwerk. Dort steht im Ordnernamen
-        nur das Aktenzeichen; wer "Testmann" sucht, findet nichts. jur|nodes
+        nur das Aktenzeichen; wer "Testmann" sucht, findet nichts. jurnodes
         fuehrt daneben das Kurzrubrum, und danach laesst sich fragen.
 
         Zwei Anfragen statt einer, weil die Schnittstelle je Feld sucht. Sie
@@ -1063,7 +1063,7 @@ class HttpJurNodesAdapter:
 
     @staticmethod
     def _platzhalter(suchbegriff: str) -> str:
-        """Den Suchbegriff so stellen, wie jur|nodes ihn erwartet.
+        """Den Suchbegriff so stellen, wie jurnodes ihn erwartet.
 
         Zwei Dinge, die beide erst der Betrieb gezeigt hat:
 
@@ -1101,7 +1101,7 @@ class HttpJurNodesAdapter:
         daten = self._get(self._endpunkte.akte, AkteNichtGefunden,
                           **{self._endpunkte.kennungparameter: akte_id}).json()
         if not isinstance(daten, Mapping):
-            raise JurNodesFehler("Unerwartetes Antwortformat von jur|nodes.")
+            raise JurNodesFehler("Unerwartetes Antwortformat von jurnodes.")
         _identitaet_pruefen(akte_id, daten)
         self._kurz_merken(("akte", akte_id), daten)
         return daten
@@ -1768,11 +1768,11 @@ class HttpJurNodesAdapter:
         if isinstance(daten, Mapping) and isinstance(daten.get("model"), Mapping):
             daten = daten["model"]
         if not isinstance(daten, Mapping):
-            raise JurNodesFehler("Unerwartetes Antwortformat von jur|nodes.")
+            raise JurNodesFehler("Unerwartetes Antwortformat von jurnodes.")
         zurueck = str(daten.get("record", "")).strip()
         if zurueck and zurueck.casefold() != str(akte_id).strip().casefold():
             raise JurNodesFehler(
-                "jur|nodes hat auf die Anfrage nach einem Vermerk dieser Akte einen "
+                "jurnodes hat auf die Anfrage nach einem Vermerk dieser Akte einen "
                 "Vermerk einer anderen Akte geantwortet. Der Vorgang wurde abgebrochen.")
         inhalt = str(daten.get("content", "") or "")
         return daten, inhalt.encode("utf-8")
@@ -1912,9 +1912,9 @@ class HttpJurNodesAdapter:
                                             json={"model": vermerk, "onlyValidate": False},
                                             headers=self._kopf(self._endpunkte.vermerke))
         except httpx.HTTPError as e:
-            raise JurNodesFehler(f"jur|nodes nicht erreichbar ({type(e).__name__}).") from e
+            raise JurNodesFehler(f"jurnodes nicht erreichbar ({type(e).__name__}).") from e
         if antwort.status_code >= 400:
-            raise JurNodesFehler(f"jur|nodes hat den Vermerk abgelehnt (Status {antwort.status_code}).")
+            raise JurNodesFehler(f"jurnodes hat den Vermerk abgelehnt (Status {antwort.status_code}).")
         daten = antwort.json() if antwort.content else {}
         return str(_erstes(daten, "id", "vermerkId", "kennung", standard="ohne-kennung"))
 
@@ -1961,7 +1961,7 @@ class HttpJurNodesAdapter:
 
     @staticmethod
     def _ganzer_name(datei: Mapping[str, Any]) -> str:
-        """Name und Endung, wie jur|nodes sie getrennt fuehrt."""
+        """Name und Endung, wie jurnodes sie getrennt fuehrt."""
         name = str(datei.get("fileName", ""))
         endung = str(datei.get("fileExtension", "")).lstrip(".")
         return f"{name}.{endung}" if endung else name
@@ -2008,7 +2008,7 @@ class HttpJurNodesAdapter:
         ordner_id = self._roh_akte(akte_id).get("fileFolderId")
         if not ordner_id:
             raise JurNodesFehler(
-                "Diese Akte nennt keinen Dateiordner; das Aktengedächtnis "
+                "Diese Akte nennt keinen Dateiordner; das Gedächtnis "
                 "lässt sich dort nicht ablegen.")
         # EINE Datei je Akte, unter einem festen Namen.
         #
@@ -2028,12 +2028,12 @@ class HttpJurNodesAdapter:
         name = GEDAECHTNIS_DATEI
         if self._gedaechtnis_dateien(ordner_id):
             raise JurNodesFehler(
-                "In dieser Akte liegt bereits ein Aktengedächtnis, und "
-                "jur|nodes ersetzt eine vorhandene Datei nicht - es weist sie "
+                "In dieser Akte liegt bereits ein Gedächtnis, und "
+                "jurnodes ersetzt eine vorhandene Datei nicht - es weist sie "
                 f"ab. Solange {GEDAECHTNIS_DATEI} dort liegt, lässt sich keine "
                 "neue Fassung ablegen. Es geht nichts verloren: Die Akte wird "
                 "beim nächsten Mal neu eingelesen. Abhilfe: die Datei in "
-                "jur|nodes entfernen, oder das Aktengedächtnis an einem "
+                "jurnodes entfernen, oder das Gedächtnis an einem "
                 "anderen Ort führen (JUSPERFECT_GEDAECHTNIS).")
         pfad = self._endpunkte.datei_hinzufuegen
         try:
@@ -2050,10 +2050,10 @@ class HttpJurNodesAdapter:
                     files={"file": (name, rohdaten, "application/gzip")},
                 )
         except httpx.HTTPError as e:
-            raise JurNodesFehler(f"jur|nodes nicht erreichbar ({type(e).__name__}).") from e
+            raise JurNodesFehler(f"jurnodes nicht erreichbar ({type(e).__name__}).") from e
         if antwort.status_code in (401, 403):
             raise JurNodesFehler(
-                f"jur|nodes lässt das Ablegen der Datei nicht zu (POST {pfad}, "
+                f"jurnodes lässt das Ablegen der Datei nicht zu (POST {pfad}, "
                 f"Status {antwort.status_code}). Dem Schlüssel fehlt im Bereich "
                 "Dateisystem das Recht zum Erzeugen einer Datei.")
         if antwort.status_code == 405:
@@ -2075,7 +2075,7 @@ class HttpJurNodesAdapter:
             wenn_erlaubt = (f" Der Server nimmt dort an: {erlaubt}." if erlaubt
                             else " Der Server sagt nicht, was er dort annimmt.")
             raise JurNodesFehler(
-                f"jur|nodes hat das Ablegen abgelehnt (POST {pfad}, Status "
+                f"jurnodes hat das Ablegen abgelehnt (POST {pfad}, Status "
                 "405). Bei diesem Hersteller heißt 405 nicht 'falscher Weg', "
                 "sondern 'ungültige Eingabe' - eine der mitgeschickten "
                 "Angaben nimmt der Server nicht an." + wenn_erlaubt +
@@ -2087,7 +2087,7 @@ class HttpJurNodesAdapter:
                 serverwort=serverwort(antwort))
         if antwort.status_code >= 400:
             raise JurNodesFehler(
-                f"jur|nodes hat das Aktengedächtnis abgelehnt "
+                f"jurnodes hat das Gedächtnis abgelehnt "
                 f"(POST {pfad}, Status {antwort.status_code}).",
                 serverwort=serverwort(antwort))
         # Was gerade geschrieben wurde, darf nicht aus dem Puffer kommen.
@@ -2111,7 +2111,7 @@ class HttpJurNodesAdapter:
         # braucht, muss es in jur|nodes von Hand tun - eine Datei, ein
         # bekannter Name, und der Nachweis darueber entsteht ohnehin dort.
         raise JurNodesFehler(
-            "Über die jur|nodes-Schnittstelle löscht jusperfect nichts – auch "
-            "das Aktengedächtnis nicht. Es liegt als Datei "
+            "Über die jurnodes-Schnittstelle löscht jusperfect nichts – auch "
+            "das Gedächtnis nicht. Es liegt als Datei "
             f"{GEDAECHTNIS_DATEI} im Dateiordner der Akte und ist dort von "
             "Hand zu entfernen.")

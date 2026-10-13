@@ -11,7 +11,7 @@ eine Vorgangsnummer ohne Satz, und die Akte blieb zu.
 
 Diese Datei hält drei Dinge fest:
 
-1. **Die Akte geht auf.** Die Dokumente stehen in jur|nodes; das Gedächtnis ist
+1. **Die Akte geht auf.** Die Dokumente stehen in jurnodes; das Gedächtnis ist
    eine Arbeitshilfe, keine Bedingung.
 2. **Es wird nichts überschrieben.** Jeder schreibende Weg liest zuerst und
    bricht ab. Ein Stand, den wir nicht lesen konnten, ist der einzige, an dem
@@ -79,7 +79,7 @@ class DieAkteGehtAuf(unittest.TestCase):
             hinweise = " ".join(neu["sitzung"]["hinweise"])
             self.assertIn("Gedächtnis verwerfen", hinweise)
             self.assertIn("Akte einlesen", hinweise)
-            self.assertIn("jur|nodes ist", hinweise)
+            self.assertIn("jurnodes ist", hinweise)
 
     def test_der_hinweis_nennt_die_stelle_und_keinen_wortlaut(self):
         with tempfile.TemporaryDirectory() as tmp:

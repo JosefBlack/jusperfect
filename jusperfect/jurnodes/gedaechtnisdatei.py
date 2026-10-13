@@ -33,7 +33,7 @@ def lesen(ordner: Path) -> bytes | None:
         return pfad.read_bytes()
     except Exception as e:
         raise JurNodesFehler(
-            f"Das Aktengedächtnis in der Akte ist nicht lesbar ({type(e).__name__})."
+            f"Das Gedächtnis in der Akte ist nicht lesbar ({type(e).__name__})."
         ) from e
 
 
@@ -43,7 +43,7 @@ def ablegen(ordner: Path, rohdaten: bytes, schreibbar: bool) -> None:
     # Vermerk faellt das auf - beim Gedaechtnis erst Wochen spaeter.
     if not schreibbar:
         raise JurNodesFehler(
-            "Dieser Aktenzugang ist schreibgeschützt; das Aktengedächtnis kann "
+            "Dieser Aktenzugang ist schreibgeschützt; das Gedächtnis kann "
             "nicht in der Akte abgelegt werden."
         )
     pfad = _pfad(ordner)
@@ -60,19 +60,19 @@ def ablegen(ordner: Path, rohdaten: bytes, schreibbar: bool) -> None:
         except OSError:
             pass
         raise JurNodesFehler(
-            f"Das Aktengedächtnis konnte nicht in der Akte abgelegt werden ({type(e).__name__})."
+            f"Das Gedächtnis konnte nicht in der Akte abgelegt werden ({type(e).__name__})."
         ) from e
 
 
 def loeschen(ordner: Path, schreibbar: bool) -> None:
     if not schreibbar:
         raise JurNodesFehler(
-            "Dieser Aktenzugang ist schreibgeschützt; das Aktengedächtnis kann "
+            "Dieser Aktenzugang ist schreibgeschützt; das Gedächtnis kann "
             "nicht aus der Akte entfernt werden."
         )
     try:
         _pfad(ordner).unlink(missing_ok=True)
     except Exception as e:
         raise JurNodesFehler(
-            f"Das Aktengedächtnis konnte nicht aus der Akte entfernt werden ({type(e).__name__})."
+            f"Das Gedächtnis konnte nicht aus der Akte entfernt werden ({type(e).__name__})."
         ) from e

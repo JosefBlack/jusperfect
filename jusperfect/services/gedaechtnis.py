@@ -1,4 +1,4 @@
-"""Dauerhaftes Aktengedächtnis laden, ergänzen und belegt fortschreiben.
+"""Dauerhaftes Gedächtnis laden, ergänzen und belegt fortschreiben.
 
 Das Gedächtnis ersetzt jur|nodes nicht. Es hält genau die Arbeitskopie, die
 eine spätere Wiederaufnahme verbilligt: extrahierte Texte, einen belegten
@@ -163,8 +163,8 @@ class Gedaechtnisdienst:
             # laesst, was ihm fehlte. Alle schreibenden Wege gehen durch diese
             # Stelle und brechen deshalb hier ab, bevor sie etwas ablegen.
             raise GedaechtnisFehler(
-                "Das Aktengedächtnis dieser Akte lässt sich nicht mehr "
-                "einlesen. Die Akte selbst ist unberührt; in jur|nodes ist "
+                "Das Gedächtnis dieser Akte lässt sich nicht mehr "
+                "einlesen. Die Akte selbst ist unberührt; in jurnodes ist "
                 "nichts geschehen. Der Weg hinaus: im Gedächtnisfenster "
                 "„Gedächtnis verwerfen“, danach „Akte einlesen“ – das "
                 "Gedächtnis entsteht dann neu. Bitte diese Angabe weitergeben: "
@@ -206,7 +206,7 @@ class Gedaechtnisdienst:
         if g is None:
             return sitzung
         if g.akte_id != sitzung.akte_id:
-            raise GedaechtnisFehler("Das Aktengedächtnis gehört zu einer anderen Akte.")
+            raise GedaechtnisFehler("Das Gedächtnis gehört zu einer anderen Akte.")
         # jurnodes ist für den Lebenszyklus führend. Wir übernehmen den Status
         # bei jedem Öffnen, löschen aber niemals aufgrund eines unbekannten,
         # fehlenden oder länger unveränderten Status.
@@ -219,13 +219,13 @@ class Gedaechtnisdienst:
         if grenze and fassungen > grenze:
             sitzung.hinweise.append(
                 f"In dieser Akte liegen {fassungen} Fassungen des "
-                "Aktengedächtnisses. Gelesen wird die jüngste; die älteren "
-                "lassen sich in jur|nodes entfernen.")
+                "Gedächtnisses. Gelesen wird die jüngste; die älteren "
+                "lassen sich in jurnodes entfernen.")
         if self._status_synchronisieren(g, sitzung):
             fehler = self._nachtragen(g, "status")
             if fehler:
                 sitzung.hinweise.append(
-                    "Der Stand des Aktengedächtnisses konnte nicht gesichert "
+                    "Der Stand des Gedächtnisses konnte nicht gesichert "
                     "werden. Die Arbeit geht weiter; die Akte wird beim "
                     "nächsten Öffnen neu eingelesen. " + fehler)
         vorhanden = {d.dokument_id for d in sitzung.geladen}
@@ -254,7 +254,7 @@ class Gedaechtnisdienst:
         ]
         if g.dokumente:
             sitzung.hinweise.append(
-                f"Aktengedächtnis geladen: {len(g.dokumente)} Dokument(e), "
+                f"Gedächtnis geladen: {len(g.dokumente)} Dokument(e), "
                 f"{len(g.fragen_antworten)} frühere Frage(n)."
             )
         self._sitzungsspeicher.sitzung_ablegen(sitzung)
@@ -391,7 +391,7 @@ class Gedaechtnisdienst:
                                         sitzung: Sitzung) -> Einleseergebnis:
         """Liest genau eine Portion nach und schreibt den Lebenssachverhalt fort."""
         if self._speicher is None:
-            raise GedaechtnisFehler("Das Aktengedächtnis ist nicht aktiviert.")
+            raise GedaechtnisFehler("Das Gedächtnis ist nicht aktiviert.")
         g = self._gelesen(sitzung.akte_id) or self._neu(sitzung)
         ergebnis = Einleseergebnis(gedaechtnis=g, offene_passagen=len(self._offene_passagen(g)))
         if ergebnis.offene_passagen:
@@ -412,7 +412,7 @@ class Gedaechtnisdienst:
         verloren; ein zweiter Aufruf setzt genau dort fort.
         """
         if self._speicher is None:
-            raise GedaechtnisFehler("Das Aktengedächtnis ist nicht aktiviert.")
+            raise GedaechtnisFehler("Das Gedächtnis ist nicht aktiviert.")
         g = self._gelesen(sitzung.akte_id) or self._neu(sitzung)
         ergebnis = Einleseergebnis(gedaechtnis=g, offene_passagen=len(self._offene_passagen(g)))
         while ergebnis.offene_passagen and ergebnis.portionen < _MAX_PORTIONEN:
@@ -636,7 +636,7 @@ class Gedaechtnisdienst:
         """
         g = self._holen(akte_id)
         if not any(d.dokument_id == dokument_id for d in g.dokumente):
-            raise GedaechtnisFehler(f"Das Dokument {dokument_id} liegt nicht im Aktengedächtnis.")
+            raise GedaechtnisFehler(f"Das Dokument {dokument_id} liegt nicht im Gedächtnis.")
         entfallene = {p.kennung for p in self._passagen(g, nur_dokumente={dokument_id})}
         g.dokumente = [d for d in g.dokumente if d.dokument_id != dokument_id]
         vorher = len(g.fragen_antworten)
@@ -684,7 +684,7 @@ class Gedaechtnisdienst:
                 continue
             sitzung.geladen = [d for d in sitzung.geladen if d.dokument_id != dokument_id]
             sitzung.hinweise = list(sitzung.hinweise) + [
-                "Ein Dokument ist aus dem Aktengedächtnis entfernt worden und steht "
+                "Ein Dokument ist aus dem Gedächtnis entfernt worden und steht "
                 "dieser Sitzung nicht mehr zur Verfügung."
             ]
             self._sitzungsspeicher.text_loeschen(sitzung_id, dokument_id)
@@ -696,7 +696,7 @@ class Gedaechtnisdienst:
         """Entfernt genau eine gespeicherte Frage-Antwort-Runde."""
         g = self._holen(akte_id)
         if not 0 <= nummer < len(g.fragen_antworten):
-            raise GedaechtnisFehler("Diese Frage liegt nicht im Aktengedächtnis.")
+            raise GedaechtnisFehler("Diese Frage liegt nicht im Gedächtnis.")
         del g.fragen_antworten[nummer]
         g.aktualisiert_am = datetime.now(timezone.utc)
         self._speicher.ablegen(g)
@@ -705,10 +705,10 @@ class Gedaechtnisdienst:
 
     def _holen(self, akte_id: str) -> Aktengedaechtnis:
         if self._speicher is None:
-            raise GedaechtnisFehler("Das Aktengedächtnis ist nicht aktiviert.")
+            raise GedaechtnisFehler("Das Gedächtnis ist nicht aktiviert.")
         g = self._gelesen(akte_id)
         if g is None:
-            raise GedaechtnisFehler("Für diese Akte gibt es kein Aktengedächtnis.")
+            raise GedaechtnisFehler("Für diese Akte gibt es kein Gedächtnis.")
         return g
 
     @staticmethod
@@ -796,12 +796,12 @@ class Gedaechtnisdienst:
 
     def ablegen(self, gedaechtnis: Aktengedaechtnis) -> None:
         if self._speicher is None:
-            raise GedaechtnisFehler("Das Aktengedächtnis ist nicht aktiviert.")
+            raise GedaechtnisFehler("Das Gedächtnis ist nicht aktiviert.")
         self._speicher.ablegen(gedaechtnis)
 
     def loeschen(self, akte_id: str) -> None:
         if self._speicher is None:
-            raise GedaechtnisFehler("Das Aktengedächtnis ist nicht aktiviert.")
+            raise GedaechtnisFehler("Das Gedächtnis ist nicht aktiviert.")
         self._speicher.loeschen(akte_id)
         ereignis(_log, "gedaechtnis_geloescht", akte=akte_id)
 

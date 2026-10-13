@@ -93,7 +93,7 @@ class MitGelesenemGedaechtnis(_Aufbau):
         """Ein stiller Wechsel der Grundlage wäre genau das, was dieses Programm
         sonst verweigert."""
         hinweise = self.c.post(f"/api/sitzungen/{self.sid}/analyse").json()["hinweise"]
-        self.assertIn("Aktengedächtnis", hinweise[0])
+        self.assertIn("Gedächtnis", hinweise[0])
         self.assertIn("nicht unmittelbar auf den Dokumenten", hinweise[0])
 
     def test_geprueft_wird_gegen_die_ganze_akte(self):

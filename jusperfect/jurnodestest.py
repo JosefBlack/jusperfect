@@ -1,4 +1,4 @@
-"""Antwortet die jur|nodes-Schnittstelle – und wie heißen die Felder?
+"""Antwortet die jurnodes-Schnittstelle – und wie heißen die Felder?
 
 **Warum es dieses Werkzeug gibt.** Der Hersteller bestätigt eine offene
 REST-Schnittstelle, stellt die Dokumentation aber auf dem jeweiligen
@@ -64,7 +64,7 @@ def _umbrechen(text: str, breite: int = 64) -> list[str]:
 def felder(daten: Any, tiefe: int = 0) -> list[str]:
     """Die Feldnamen einer Antwort – Namen und Arten, keine Werte.
 
-    Das ist der eigentliche Zweck: Ob jur|nodes ein Aktenzeichen „aktenzeichen",
+    Das ist der eigentliche Zweck: Ob jurnodes ein Aktenzeichen „aktenzeichen",
     „az" oder „fileNumber" nennt, entscheidet über die Zuordnung in
     ``http_adapter.py`` – und steht in keiner Vermutung, sondern nur in einer
     echten Antwort.
@@ -179,7 +179,7 @@ def _wortlaut(antwort: Any) -> None:
 
 
 #: Was die Zahl 405 bei diesem Hersteller bedeutet - und was nicht.
-HINWEIS_405 = ("405 heisst bei jur|nodes nicht \"diesen Weg gibt es nicht\", "
+HINWEIS_405 = ("405 heisst bei jurnodes nicht \"diesen Weg gibt es nicht\", "
                "sondern \"ungueltige Eingabe\".")
 
 
@@ -584,7 +584,7 @@ def _ordnerbaum(client: Any, endpunkte: Any, kennung: str,
             _sagen(" ", f"     Ordner {ordner_id}: erste Ablage {frueheste}")
         _sagen(" ", "     Eine Datei kann nicht in eine Akte gelegt worden sein,")
         _sagen(" ", "     die es noch nicht gab. Diese Ordner sind nicht fuer")
-        _sagen(" ", "     diese Akte angelegt worden - zu klaeren in jur|nodes.")
+        _sagen(" ", "     diese Akte angelegt worden - zu klaeren in jurnodes.")
         _sagen(" ", "     Das ist der Baum, den der Betrieb liest.")
         print()
     if im_korrespondenzbaum:
@@ -632,7 +632,7 @@ def _ordnerbaum(client: Any, endpunkte: Any, kennung: str,
     elif dateien and not ohne_angabe:
         _sagen("✓", "Keine Datei nennt eine andere Akte - der Durchlauf bleibt drin.")
         _sagen(" ", "     Liegen trotzdem fremde Schriftstuecke in der Arbeitsakte,")
-        _sagen(" ", "     sind sie in jur|nodes in dieser Akte abgelegt.")
+        _sagen(" ", "     sind sie in jurnodes in dieser Akte abgelegt.")
     if elternverweise:
         print()
         _sagen("!", "Ordner, die anderswo zu liegen angeben, als sie gefunden wurden:")
@@ -1483,7 +1483,7 @@ def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int,
             if recht:
                 _sagen(" ", "")
                 _sagen("✓", f"   Die Beschreibung nennt es: {recht}")
-                _sagen(" ", "   In jur|nodes dem Schnittstellenbenutzer genau")
+                _sagen(" ", "   In jurnodes dem Schnittstellenbenutzer genau")
                 _sagen(" ", "   dieses Recht geben. Danach diesen Lauf noch einmal.")
             else:
                 _sagen(" ", "   Welches, sagt die Beschreibung zu diesem Pfad -")
@@ -1878,7 +1878,7 @@ def _ordner_aufteilen(client: Any, endpunkte: Any, ordner_id: str,
 
     _sagen(" ", f"     Ordner gesamt (mit Unterordnern): "
                 f"{sammlung['ordner']} Unterordner, {sammlung['dateien']} Dateien, "
-                f"Aktengedächtnis: {sammlung['gedaechtnis']}")
+                f"Gedächtnis: {sammlung['gedaechtnis']}")
     if sammlung["arten"]:
         geordnet = sorted(sammlung["arten"].items(), key=lambda x: -x[1])
         _sagen(" ", "     Dateiarten: " + ", ".join(
@@ -1955,7 +1955,7 @@ def _herunterladen_proben(client: Any, endpunkte: Any,
     if antwort.status_code in (401, 403):
         _sagen(" ", "     Das ist kein Formatproblem und kein Fehler im")
         _sagen(" ", "     Programm: Der Schluessel darf diese Datei nicht")
-        _sagen(" ", "     holen. Das Recht wird in jur|nodes vergeben.")
+        _sagen(" ", "     holen. Das Recht wird in jurnodes vergeben.")
 
 
 def _kennung_aus_suche(client: Any, endpunkte: Any, aktenzeichen: str) -> str:
@@ -2020,7 +2020,7 @@ def main(argv: list[str] | None = None) -> int:
 
 def _ablauf(argv: list[str] | None = None) -> int:
     zerleger = argparse.ArgumentParser(
-        description="Fragt die jur|nodes-Schnittstelle ab. Liest nur.")
+        description="Fragt die jurnodes-Schnittstelle ab. Liest nur.")
     zerleger.add_argument("--akte", metavar="AKTENZEICHEN", default=None,
                           help="Eine Akte, an der die übrigen Pfade geprüft werden")
     zerleger.add_argument("--kennung", metavar="IDENTIFIER", default=None,
@@ -2046,7 +2046,7 @@ def _ablauf(argv: list[str] | None = None) -> int:
             setattr(argumente, feld, wert.strip() or None)
 
     print(TRENNER)
-    print("  jusperfect – antwortet die jur|nodes-Schnittstelle?")
+    print("  jusperfect – antwortet die jurnodes-Schnittstelle?")
     print(TRENNER)
     print()
     for zeile in _umbrechen(
@@ -2103,7 +2103,7 @@ def _ablauf(argv: list[str] | None = None) -> int:
         # sucht beim Eintragen, obwohl das Fenster die Ursache ist.
         _sagen("✗", "JUSPERFECT_JURNODES_URL ist nicht gesetzt.")
         _sagen(" ", "Ohne Adresse gibt es nichts zu fragen. Sie kommt vom")
-        _sagen(" ", "jur|nodes-Server der Kanzlei.")
+        _sagen(" ", "jurnodes-Server der Kanzlei.")
         _sagen(" ", "")
         _sagen(" ", "Eintragen: JURNODES-ZUGANG.bat im Programmordner.")
         _sagen(" ", "Schon eingetragen? Dann ALLE Fenster schliessen und diese")
@@ -2118,7 +2118,7 @@ def _ablauf(argv: list[str] | None = None) -> int:
         print()
         _sagen("✗", "Es ist kein Zugang hinterlegt.")
         _sagen(" ", f"Gebraucht werden zwei Werte: {e.jurnodes_benutzer_var}")
-        _sagen(" ", f"und {e.jurnodes_token_var}. jur|nodes schickt sie als")
+        _sagen(" ", f"und {e.jurnodes_token_var}. jurnodes schickt sie als")
         _sagen(" ", "die Kopfzeilen X-Auth-User und X-Auth-Key mit.")
         _sagen(" ", "Sie gehören in die Umgebung, nicht in eine Datei im")
         _sagen(" ", "Programmordner - und nie in das Versionsverzeichnis.")

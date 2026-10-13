@@ -1,4 +1,4 @@
-"""jur|nodes aus einem Ordnerbaum – der WebDAV-Export der Kanzlei.
+"""jurnodes aus einem Ordnerbaum – der WebDAV-Export der Kanzlei.
 
 jur|nodes legt die Akten als Ordner ab, die über ein eingebundenes Laufwerk
 (WebDAV/OneDrive/Nextcloud) erreichbar sind. Der Baum ist:

@@ -818,7 +818,7 @@ class EineDateiJeAkteAberAlteFassungenBleibenLesbar(unittest.TestCase):
         a = self._adapter([GEDAECHTNIS_DATEI], anfragen)
         with self.assertRaises(JurNodesFehler) as fehler:
             a.gedaechtnis_ablegen("rec-1", b"x")
-        self.assertIn("bereits ein Aktengedächtnis", str(fehler.exception))
+        self.assertIn("bereits ein Gedächtnis", str(fehler.exception))
         self.assertIn("nichts verloren", str(fehler.exception))
         self.assertFalse([r for r in anfragen if "add-file" in str(r.url)],
                          "Der Server wurde gefragt, obwohl die Antwort feststand.")

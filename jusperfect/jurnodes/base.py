@@ -1,4 +1,4 @@
-"""Schnittstelle zu jur|nodes.
+"""Schnittstelle zu jurnodes.
 
 jur|nodes ist die Single Source of Truth. jusperfect liest über diese
 Schnittstelle bedarfsbezogen – nie die ganze Kanzlei, nie dauerhaft – und

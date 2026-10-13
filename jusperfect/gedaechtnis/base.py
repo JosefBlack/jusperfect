@@ -1,4 +1,4 @@
-"""Speichergrenze für das dauerhafte Aktengedächtnis."""
+"""Speichergrenze für das dauerhafte Gedächtnis."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ class GedaechtnisSpeicher(Protocol):
     def ablegen(self, gedaechtnis: Aktengedaechtnis) -> None: ...
     def loeschen(self, akte_id: str) -> None: ...
     def auflisten(self) -> list[Aktengedaechtnis]:
-        """Alle vorhandenen Aktengedächtnisse – für die Aufsicht.
+        """Alle vorhandenen Gedächtnisse – für die Aufsicht.
 
         Die Kennung der Akte steht nur im Inhalt, nicht im Objektnamen; die
         Liste muss deshalb lesen, nicht nur auflisten.

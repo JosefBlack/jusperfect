@@ -5,7 +5,7 @@ aus einer fremden Verkehrsunfallsache. „Es ist nicht ersichtlich, wie diese
 Sachen hineingekommen sind."
 
 Zwei Erklärungen sind möglich, und sie verlangen entgegengesetzte Handgriffe:
-die Schriftstücke liegen wirklich in dieser Akte (dann ist in jur|nodes falsch
+die Schriftstücke liegen wirklich in dieser Akte (dann ist in jurnodes falsch
 abgelegt worden), oder der Durchlauf verlässt die Akte (dann ist es ein Fehler
 des Programms). Die Probe muss **beide** Fälle auseinanderhalten können –
 eine, die immer dasselbe sagt, entscheidet nichts.
@@ -33,7 +33,7 @@ class _Antwort:
 
 
 class _Server:
-    """Ein jur|nodes, dessen Ordnerbaum wir selbst bestimmen."""
+    """Ein jurnodes, dessen Ordnerbaum wir selbst bestimmen."""
 
     def __init__(self, baum, dateien, akte=None):
         self.baum = baum          # {ordner_id: [unter_ids]}
@@ -73,9 +73,9 @@ class DerSaubereFall(unittest.TestCase):
         self.assertIn("4 Datei(en)", text)
 
     def test_und_verweist_auf_die_andere_erklaerung(self):
-        """Dann liegt es an der Ablage in jur|nodes – das muss dastehen."""
+        """Dann liegt es an der Ablage in jurnodes – das muss dastehen."""
         text = _lauf(_Server({10: []}, {10: ["A-1"]}))
-        self.assertIn("in jur|nodes in dieser Akte abgelegt", text)
+        self.assertIn("in jurnodes in dieser Akte abgelegt", text)
 
 
 class DerFallDerUntersucht_Wird(unittest.TestCase):
@@ -91,7 +91,7 @@ class DerFallDerUntersucht_Wird(unittest.TestCase):
         """Diese Ausgabe wird verschickt.
 
         Sie soll zeigen, DASS eine fremde Akte dabei ist – nicht welche. Der
-        Bearbeiter sieht das in jur|nodes selbst; ich brauche es nicht.
+        Bearbeiter sieht das in jurnodes selbst; ich brauche es nicht.
         """
         text = _lauf(_Server({10: []}, {10: ["041234/22"]}))
         self.assertNotIn("041234/22", text)
@@ -312,7 +312,7 @@ class AelterAlsDieAkte(unittest.TestCase):
 
     Die Folgerung ist schlicht und hält: Eine Datei kann nicht in eine Akte
     gelegt worden sein, die es noch nicht gab. ``addedDate`` ist der Tag der
-    Ablage in jur|nodes, nicht das Datum des Schriftstücks – ein altes
+    Ablage in jurnodes, nicht das Datum des Schriftstücks – ein altes
     Schreiben, das heute eingescannt wird, trägt das heutige Datum.
     """
 
@@ -340,7 +340,7 @@ class AelterAlsDieAkte(unittest.TestCase):
         self.assertIn("1 Ordner im DATEIbaum wurden befuellt, BEVOR es diese "
                       "Akte gab", text)
         self.assertIn("Ordner 11: erste Ablage 2022-12-15", text)
-        self.assertIn("zu klaeren in jur|nodes", text)
+        self.assertIn("zu klaeren in jurnodes", text)
         self.assertIn("Das ist der Baum, den der Betrieb liest.", text)
 
     def test_im_korrespondenzbaum_ist_er_kein_mangel(self):

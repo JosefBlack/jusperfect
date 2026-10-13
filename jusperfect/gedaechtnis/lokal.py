@@ -47,7 +47,7 @@ class LokalerGedaechtnisSpeicher:
             raise
         except Exception as e:
             raise GedaechtnisFehler(
-                f"Lokales Aktengedächtnis ist nicht lesbar ({type(e).__name__})."
+                f"Lokales Gedächtnis ist nicht lesbar ({type(e).__name__})."
             ) from e
 
     def lesen(self, akte_id: str) -> Aktengedaechtnis | None:
@@ -68,7 +68,7 @@ class LokalerGedaechtnisSpeicher:
                 self._pfad(gedaechtnis.akte_id, ENDUNG_ALT).unlink(missing_ok=True)
         except Exception as e:
             raise GedaechtnisFehler(
-                f"Lokales Aktengedächtnis konnte nicht gespeichert werden ({type(e).__name__})."
+                f"Lokales Gedächtnis konnte nicht gespeichert werden ({type(e).__name__})."
             ) from e
 
     def auflisten(self) -> list[Aktengedaechtnis]:
@@ -85,5 +85,5 @@ class LokalerGedaechtnisSpeicher:
                 self._pfad(akte_id, endung).unlink(missing_ok=True)
         except Exception as e:
             raise GedaechtnisFehler(
-                f"Lokales Aktengedächtnis konnte nicht gelöscht werden ({type(e).__name__})."
+                f"Lokales Gedächtnis konnte nicht gelöscht werden ({type(e).__name__})."
             ) from e

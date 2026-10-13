@@ -1,4 +1,4 @@
-"""Anbindung an jur|nodes – die führende Akte."""
+"""Anbindung an jurnodes – die führende Akte."""
 
 from jusperfect.jurnodes.base import (
     AkteNichtGefunden,

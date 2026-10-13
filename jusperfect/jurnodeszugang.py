@@ -1,4 +1,4 @@
-"""Den jur|nodes-Zugang hinterlegen – Adresse, Benutzer, Schlüssel.
+"""Den jurnodes-Zugang hinterlegen – Adresse, Benutzer, Schlüssel.
 
 **Warum dafür ein eigenes Programm nötig ist.** Der Schlüssel darf in keine
 Datei des Programmordners, denn der wird als ZIP weitergegeben, und er darf
@@ -211,7 +211,7 @@ def was_daran_nicht_stimmt(name: str, wert: str) -> str:
     elif name == "JURNODES_API_USER":
         if wert.startswith(("http://", "https://")) or "/" in wert:
             return ("Ein Benutzername ist keine Adresse. Gemeint ist der "
-                    "kurze Name aus jur|nodes, etwa user_2.")
+                    "kurze Name aus jurnodes, etwa user_2.")
         if any(z.isspace() for z in wert):
             return ("Darin steckt ein Leerzeichen. Ein Benutzername hat "
                     "keines - gemeint ist nur der Name selbst, etwa user_2.")

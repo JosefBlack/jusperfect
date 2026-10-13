@@ -267,7 +267,7 @@ class Abschlussdienst:
         # den Arbeitsbereich aber niemals von sich aus.
         self._berechtigungen.pruefen(identitaet, akte_id)
         if not self._gedaechtnis.aktiv:
-            raise GedaechtnisFehler("Das Aktengedächtnis ist nicht aktiviert.")
+            raise GedaechtnisFehler("Das Gedächtnis ist nicht aktiviert.")
         g = self._gedaechtnis.lesen(akte_id)
         if g is None:
             raise AbschlussFehler("Für diese Akte gibt es keinen Arbeitsbereich.")

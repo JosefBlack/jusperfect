@@ -174,7 +174,7 @@ class DerKnopfIstDa(unittest.TestCase):
                         "Erst fragen, dann löschen.")
         self.assertIn("Lebenssachverhalt", funktion)
         self.assertIn("Zeitstrahl", funktion)
-        self.assertIn("jur|nodes bleibt unberührt", funktion)
+        self.assertIn("jurnodes bleibt unberührt", funktion)
 
     def test_es_ist_genau_EIN_aufruf_und_nicht_einer_je_dokument(self):
         """Aus der Kanzlei: „scheint nicht abzuschließen … eine Sanduhr."

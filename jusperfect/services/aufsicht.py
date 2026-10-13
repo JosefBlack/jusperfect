@@ -24,12 +24,12 @@ from jusperfect.services.gedaechtnis import Gedaechtnisdienst
 
 #: Befunde, die eine Entscheidung durch einen Menschen verlangen.
 BEFUND_TEXT = {
-    "akte_fehlt": "Die Akte ist in jur|nodes nicht mehr auffindbar; der Arbeitsbereich ist verwaist.",
-    "jurnodes_nicht_erreichbar": "Der Status konnte nicht aus jur|nodes gelesen werden.",
-    "status_unbekannt": "jur|nodes meldet keinen Status; es wird nicht gelöscht.",
+    "akte_fehlt": "Die Akte ist in jurnodes nicht mehr auffindbar; der Arbeitsbereich ist verwaist.",
+    "jurnodes_nicht_erreichbar": "Der Status konnte nicht aus jurnodes gelesen werden.",
+    "status_unbekannt": "jurnodes meldet keinen Status; es wird nicht gelöscht.",
     "abschluss_vorgemerkt": "Der Abschluss ist vorgemerkt; die Übergangsfrist läuft.",
     "loeschung_faellig": "Die Übergangsfrist ist abgelaufen; der Abschluss kann ausgeführt werden.",
-    "abschlussreif_ohne_vormerkung": "Die Akte ist in jur|nodes abgeschlossen, der Abschluss aber noch nicht vorgemerkt.",
+    "abschlussreif_ohne_vormerkung": "Die Akte ist in jurnodes abgeschlossen, der Abschluss aber noch nicht vorgemerkt.",
 }
 
 #: Was der Mensch daraufhin tun kann. Ein Befund ohne naechsten Schritt ist eine
@@ -37,17 +37,17 @@ BEFUND_TEXT = {
 #: allein. Beide Saetze stehen hier nebeneinander, damit sie nicht auseinander
 #: laufen - der Befund kommt von der Pruefung, der Schritt gehoert dazu.
 SCHRITT_TEXT = {
-    "akte_fehlt": "Prüfen, ob die Akte in jur|nodes umbenannt, verschoben oder gelöscht wurde. "
+    "akte_fehlt": "Prüfen, ob die Akte in jurnodes umbenannt, verschoben oder gelöscht wurde. "
                   "Ist sie endgültig fort, kann dieser Arbeitsbereich nach Export gelöscht werden.",
-    "jurnodes_nicht_erreichbar": "Verbindung zu jur|nodes prüfen (Netzlaufwerk, Zugang). "
+    "jurnodes_nicht_erreichbar": "Verbindung zu jurnodes prüfen (Netzlaufwerk, Zugang). "
                                  "Bis dahin wird hier nichts gelöscht.",
-    "status_unbekannt": "Den Aktenstatus in jur|nodes setzen. Ohne ihn bleibt der "
+    "status_unbekannt": "Den Aktenstatus in jurnodes setzen. Ohne ihn bleibt der "
                         "Arbeitsbereich unbefristet erhalten.",
     "abschluss_vorgemerkt": "Nichts. Die Frist läuft; danach steht die Akte hier erneut.",
-    "loeschung_faellig": "Akte öffnen und den Abschluss ausführen: erst Export nach jur|nodes, "
+    "loeschung_faellig": "Akte öffnen und den Abschluss ausführen: erst Export nach jurnodes, "
                          "dann Löschung des Arbeitsbereichs.",
     "abschlussreif_ohne_vormerkung": "Akte öffnen und den Abschluss vormerken – oder den Status "
-                                     "in jur|nodes richtigstellen, falls das Mandat weiterläuft.",
+                                     "in jurnodes richtigstellen, falls das Mandat weiterläuft.",
 }
 
 
@@ -69,7 +69,7 @@ class Aufsichtsdienst:
         if "*" not in nutzer.akten:
             raise ZugriffVerweigert("Die Übersicht der Arbeitsbereiche ist der Verwaltung vorbehalten.")
         if not self._gedaechtnis.aktiv:
-            raise GedaechtnisFehler("Das Aktengedächtnis ist nicht aktiviert.")
+            raise GedaechtnisFehler("Das Gedächtnis ist nicht aktiviert.")
 
         eintraege = [self._eintrag(g) for g in self._gedaechtnis.auflisten()]
         eintraege.sort(key=lambda x: (not x["handlungsbedarf"], x["aktenzeichen"]))

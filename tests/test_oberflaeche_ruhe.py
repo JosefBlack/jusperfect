@@ -272,7 +272,7 @@ def test_rechts_steht_der_pfeil_links_in_der_kopfzeile(html: str) -> None:
     """
     rechts = html[html.index('<aside class="spalte rechts"'):html.index("</aside>")]
     for schluessel, titel in (("chronologie", "Chronologie"),
-                              ("gedaechtnis", "Aktengedächtnis"),
+                              ("gedaechtnis", "Gedächtnis"),
                               ("belege", "Belege")):
         assert (rechts.index(f'data-fenster-zu="{schluessel}"')
                 < rechts.index(f"<span>{titel}</span>")), schluessel

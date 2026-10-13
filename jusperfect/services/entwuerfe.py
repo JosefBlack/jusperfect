@@ -1,4 +1,4 @@
-"""Entwürfe: erzeugen, bearbeiten, freigeben – und erst dann nach jur|nodes.
+"""Entwürfe: erzeugen, bearbeiten, freigeben – und erst dann nach jurnodes.
 
 Ein Entwurf ist bis zur Freigabe ein temporäres Objekt im Sitzungsspeicher.
 Freigeben kann nur, wer ihn erstellt hat, und nur mit ausdrücklicher
@@ -50,7 +50,7 @@ FREIGABE_FASSUNG = "1"
 
 
 def freigabevorlage(entwurf) -> str:
-    """Genau das, was nach jur|nodes geschrieben wird – als ein Text.
+    """Genau das, was nach jurnodes geschrieben wird – als ein Text.
 
     Befund F06 der Zweitprüfung vom 05.10.2026. Bestätigt wurde bisher die
     Prüfsumme **des Textes**. Geschrieben werden aber vier Dinge: Akte, Art,
@@ -236,7 +236,7 @@ class Entwurfsdienst:
 
     def freigeben(self, identitaet: Identitaet, entwurf_id: str, bestaetigung: bool,
                   freigabe_pruefsumme: str) -> Entwurf:
-        """Schreibt den Entwurf als Vermerk in die jur|nodes-Akte.
+        """Schreibt den Entwurf als Vermerk in die jurnodes-Akte.
 
         ``freigabe_pruefsumme`` ist die Prüfsumme der **Freigabevorlage** –
         Akte, Art, Betreff und Text zusammen, also alles, was geschrieben
@@ -254,7 +254,7 @@ class Entwurfsdienst:
         with self._freigabeschloss:
             entwurf = self.lesen(identitaet, entwurf_id)
             if not bestaetigung:
-                raise EntwurfFehler("Ohne ausdrückliche Bestätigung wird nichts nach jur|nodes geschrieben.")
+                raise EntwurfFehler("Ohne ausdrückliche Bestätigung wird nichts nach jurnodes geschrieben.")
             if entwurf.status != EntwurfStatus.ENTWURF:
                 raise EntwurfFehler("Der Entwurf wurde bereits freigegeben oder verworfen.")
             if pruefsumme(freigabevorlage(entwurf)) != freigabe_pruefsumme:
