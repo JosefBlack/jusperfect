@@ -214,3 +214,71 @@ class TestDieProbeLiestDieVermerke:
         _vermerke_lesen(client, Endpunkte(), AKTE, [_eintrag(type="note")])
         assert "ohne referenceNote" in capsys.readouterr().out
         assert not client.gets
+
+
+# ── Der Prüfbogen beschrieb den Stand von vorgestern ───────────────────────
+#
+# Nachgezogen am 13.10.2026. Der Lauf vom 12.10.2026 an einer echten Akte gab
+# drei Sätze aus, die seit dem 08.10.2026 nicht mehr stimmten — und eine
+# prüfende KI hat sie gelesen und für eine Messung genommen:
+#
+#   „Noch ohne Inhalt im Programm: 22 (mail). Sie stehen nicht in der
+#    Dokumentliste."
+#   „Mail, beA und Post bleiben vorerst draussen … zwei Dinge zu entscheiden
+#    sind: eine Obergrenze je Mail und ob der Anhang mit ins
+#    Aktengedaechtnis soll."
+#   „ob es eine neuere Fassung als 1.0.2 gibt" — als offene Frage
+#
+# > Ein Prüfbogen, der den Stand von vorgestern beschreibt, ist schlimmer als
+# > keiner: Er wird für eine Messung gehalten.
+#
+# Die Lehre ist dieselbe wie bei den Zählern in `MAIL_OHNE_INHALT`: Wo ein
+# Text etwas über das Programm sagt, muss eine Prüfung ihn mit dem Programm
+# verbinden — sonst altert er still.
+
+class TestDerBogenSagtWasDasProgrammTut:
+    def test_mails_stehen_nicht_mehr_unter_ohne_inhalt(self, capsys) -> None:
+        # Ohne referenceMail: Der Nachbau hier kann keinen Download
+        # beantworten, und gemessen wird die Einordnung, nicht der Abruf.
+        client = _Client([_eintrag(type="mail")])
+        _korrespondenz_lesen(client, Endpunkte(), AKTE)
+        ausgabe = capsys.readouterr().out
+        assert "Davon E-Mails (type=mail): 1" in ausgabe
+        assert "seit dem 08.10.2026 als Dokumente" in ausgabe
+        assert "Noch ohne Inhalt im Programm" not in ausgabe, \
+            "Die Mail ist seit dem 08.10.2026 in der Dokumentliste."
+
+    def test_bea_und_post_stehen_weiter_unter_ohne_inhalt(self, capsys) -> None:
+        """Die Gegenrichtung: Was wirklich fehlt, muss dastehen."""
+        client = _Client([_eintrag(type="bea"), _eintrag(type="post")])
+        _korrespondenz_lesen(client, Endpunkte(), AKTE)
+        ausgabe = capsys.readouterr().out
+        assert "Noch ohne Inhalt im Programm: 2" in ausgabe
+        assert "bea" in ausgabe and "post" in ausgabe
+        assert "geraten wird hier nicht" in ausgabe
+
+    def test_die_liste_der_gelesenen_arten_steht_im_programm(self) -> None:
+        """Eine zweite Liste im Prüftext wäre am ersten Tag veraltet."""
+        from jusperfect.jurnodestest import MIT_INHALT
+
+        assert "mail" in MIT_INHALT
+        assert "note" in MIT_INHALT
+
+    def test_das_urteil_nennt_die_obergrenzen_als_entschieden(self, capsys) -> None:
+        from jusperfect.jurnodestest import _eakte_urteil
+
+        _eakte_urteil(26, 4, 3)
+        ausgabe = capsys.readouterr().out
+        assert "Vermerke UND E-Mails" in ausgabe
+        assert "20 MB je Mail, 100 MB je Akte" in ausgabe
+        assert "sichtbar fehlend" in ausgabe
+        # Und nicht mehr das, was am 08.10.2026 entschieden wurde.
+        assert "zwei Dinge zu entscheiden" not in ausgabe
+        assert "Mail, beA und Post bleiben vorerst draussen" not in ausgabe
+
+    def test_das_urteil_nennt_bea_und_post_weiter_als_offen(self, capsys) -> None:
+        from jusperfect.jurnodestest import _eakte_urteil
+
+        _eakte_urteil(26, 4, 3)
+        ausgabe = capsys.readouterr().out
+        assert "Draussen bleiben nur beA und Post" in ausgabe

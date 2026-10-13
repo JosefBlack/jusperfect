@@ -3725,3 +3725,64 @@ Stand: 13 der 14 neuen Prüfungen zu N06/N10 fallen durch, alle 5 zu N07,
 | `[KANZLEI 19]`, `[KANZLEI 20]` | bei der Kanzlei |
 | Sperrliste auf beiden Rechnern | bei der Kanzlei |
 | die vier veralteten Stellen im Prüfbogen | offen |
+
+---
+
+## 13.10.2026 — der Prüfbogen sagt wieder, was das Programm tut
+
+Vier Stellen, die der Lauf vom 12.10.2026 an einer echten Akte ausgegeben hat
+und die eine prüfende KI gelesen und für eine Messung genommen hat.
+
+### Drei waren schlicht veraltet
+
+| Was dort stand | Was jetzt dasteht |
+|---|---|
+| „Noch ohne Inhalt im Programm: 22 (mail). Sie stehen nicht in der Dokumentliste." | *„Davon E-Mails (type=mail): 22 — sie stehen seit dem 08.10.2026 als Dokumente in der Aktenliste, je Mail der Brieftext, je Anlage ein eigenes Dokument."* Unter „ohne Inhalt" bleiben beA und Post, mit dem Grund dabei |
+| „Mail, beA und Post bleiben vorerst draussen … zwei Dinge zu entscheiden" | *„Die Obergrenzen stehen: 20 MB je Mail, 100 MB je Akte, als Byte-Konto der Akte über alle Aufrufe … Draussen bleiben nur beA und Post"* |
+| „ob es eine neuere Fassung als 1.0.2 gibt" als offene Frage | *„Seit dem 12.10.2026 ist auch beantwortet: Es gibt keine neuere Fassung als 1.0.2"* — offen ist nur noch der führende Schrägstrich |
+
+Die Liste der Korrespondenzarten, die das Programm mit Inhalt liest, steht
+jetzt als `MIT_INHALT` **im Programm** und nicht zweimal: Eine zweite Liste im
+Prüftext wäre am ersten Tag veraltet.
+
+### Die vierte war ein aufgeklärter Befund, der weiter als Mangel dastand
+
+```
+✗  5 Ordner wurden befuellt, BEVOR es diese Akte gab (angelegt 2026-07-30):
+      Ordner 2872: erste Ablage 2022-12-15
+      …
+      Diese Ordner sind nicht fuer diese Akte angelegt worden
+      - zu klaeren in jur|nodes.
+```
+
+Am Quelltext nachgesehen, und das war der Grund, es nicht sofort anzufassen:
+Der Durchlauf geht **beide** Wurzeln ab — `fileFolderId` **und**
+`correspondenceFolderId` —, und das Urteil stand über allen Ordnern zusammen.
+Im Lauf vom 12.10. lagen **alle fünf** unter `correspondenceFolderId`.
+
+> Also genau das Muster, das am 08.10.2026 als **unser eigener** Fehler
+> aufgeklärt worden ist. Die Nummer gehört nicht zur Korrespondenz dieser
+> Akte, und der Betrieb liest diesen Baum seit dem 05.10.2026 nicht mehr.
+
+**Ein Bogen, der einen aufgeklärten Befund weiter als Mangel ausgibt, schickt
+die Kanzlei zum Hersteller — mit einer Frage, die schon beantwortet ist.**
+
+Getrennt nach Baum. Im **Dateibaum** bleibt derselbe Fund ein `✗` mit „zu
+klären in jur|nodes" — dort liest der Betrieb, und dort kann eine Datei nicht
+in einer Akte liegen, die es noch nicht gab. Im **Korrespondenzbaum** steht
+jetzt ein `!` mit der Einordnung und dem richtigen Weg
+(`POST /correspondence/search`) dabei.
+
+Dafür führt der Durchlauf mit, aus welcher Wurzel jeder Ordner stammt. Ein
+Merker genügt statt eines vierten Feldes in jeder Schlange: Eine Wurzel wird
+vollständig abgegangen, bevor die nächste beginnt.
+
+### Stand
+
+**1995 Prüfungen grün, eine übersprungen.** Neu: 5 zur Korrespondenzausgabe,
+2 zur Trennung der beiden Bäume, dazu nachgezogene Erwartungen in
+`test_jurnodestest.py` und `test_ordnerbaum_probe.py`. **Gegenprobe: 9 von
+ihnen fallen gegen den vorigen Stand durch.**
+
+Damit ist am Programm nichts mehr offen, was aus der dritten Zweitprüfung oder
+aus dem Lauf vom 12.10.2026 stammt.

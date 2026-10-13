@@ -434,6 +434,12 @@ def _ordnerbaum(client: Any, endpunkte: Any, kennung: str,
     # Betrieb, nennt irgendwann den falschen Ordner, und niemand merkt es.
     gesehen: set[str] = set()
     schlangen: list[list[tuple[Any, int, Any]]] = [[(w, 0, "(Akte)")] for _, w in wurzeln]
+    #: Aus welcher Wurzel jede Schlange kommt - in derselben Reihenfolge.
+    wurzelnamen: list[str] = [name for name, _ in wurzeln]
+    #: Und je Ordner, aus welcher Wurzel er stammt. Das ist der Unterschied,
+    #: an dem das Urteil weiter unten haengt (siehe dort, 13.10.2026).
+    wurzel_je_ordner: dict[str, str] = {}
+    aktuelle_wurzel = ""
     offen: list[tuple[Any, int, Any]] = []
     dateien = fremde = ohne_angabe = 0
     fremde_werte: dict[str, int] = {}
@@ -453,12 +459,17 @@ def _ordnerbaum(client: Any, endpunkte: Any, kennung: str,
 
     while (offen or schlangen) and len(gesehen) < ordner_hoechstens:
         if not offen:
+            # Eine Wurzel wird vollstaendig abgegangen, bevor die naechste
+            # beginnt - deshalb genuegt ein Merker statt eines vierten Feldes
+            # in jedem Eintrag der Schlange.
             offen = schlangen.pop(0)
+            aktuelle_wurzel = wurzelnamen.pop(0) if wurzelnamen else ""
             continue
         ordner_id, tiefe, von = offen.pop(0)
         if str(ordner_id) in gesehen:
             continue
         gesehen.add(str(ordner_id))
+        wurzel_je_ordner[str(ordner_id)] = aktuelle_wurzel
         try:
             antwort = client.get(endpunkte.ordner_inhalt,
                                  params={endpunkte.ordnerparameter: ordner_id,
@@ -546,16 +557,50 @@ def _ordnerbaum(client: Any, endpunkte: Any, kennung: str,
     # Die Folgerung ist schlicht und haelt: Eine Datei kann nicht in eine Akte
     # gelegt worden sein, die es noch nicht gab. Wo das trotzdem dasteht, ist
     # der Ordner nicht fuer diese Akte angelegt worden.
+    #
+    # **Getrennt nach Baum, seit dem 13.10.2026.** Bis dahin stand hier ein
+    # einziges "✗ ... zu klaeren in jur|nodes" ueber alle Ordner. Der Lauf am
+    # 12.10.2026 hat damit fuenf Ordner als Mangel des Herstellers gemeldet,
+    # die ALLE im Korrespondenzbaum lagen - also genau das Muster, das am
+    # 08.10.2026 als UNSER eigener Fehler aufgeklaert worden ist: Die Nummer
+    # in correspondenceFolderId gehoert nicht zur Korrespondenz dieser Akte,
+    # und der Betrieb liest diesen Baum seit dem 05.10.2026 nicht mehr.
+    #
+    # Ein Bogen, der einen aufgeklaerten Befund weiter als Mangel ausgibt,
+    # schickt die Kanzlei zum Hersteller - mit einer Frage, die schon
+    # beantwortet ist. Im Dateibaum bleibt derselbe Fund dagegen ein Mangel:
+    # Dort liest der Betrieb, und dort kann eine Datei nicht in einer Akte
+    # liegen, die es noch nicht gab.
     zu_alt = [(o, min(t)) for o, t in daten_je_ordner.items()
               if angelegt and min(t) < angelegt]
-    if zu_alt:
-        _sagen("✗", f"{len(zu_alt)} Ordner wurden befuellt, BEVOR es diese Akte gab "
-                    f"(angelegt {angelegt}):")
-        for ordner_id, frueheste in sorted(zu_alt, key=lambda x: x[1]):
+    im_dateibaum = [(o, t) for o, t in zu_alt
+                    if wurzel_je_ordner.get(str(o)) != "correspondenceFolderId"]
+    im_korrespondenzbaum = [(o, t) for o, t in zu_alt
+                            if wurzel_je_ordner.get(str(o)) == "correspondenceFolderId"]
+    if im_dateibaum:
+        _sagen("✗", f"{len(im_dateibaum)} Ordner im DATEIbaum wurden befuellt, "
+                    f"BEVOR es diese Akte gab (angelegt {angelegt}):")
+        for ordner_id, frueheste in sorted(im_dateibaum, key=lambda x: x[1]):
             _sagen(" ", f"     Ordner {ordner_id}: erste Ablage {frueheste}")
         _sagen(" ", "     Eine Datei kann nicht in eine Akte gelegt worden sein,")
         _sagen(" ", "     die es noch nicht gab. Diese Ordner sind nicht fuer")
         _sagen(" ", "     diese Akte angelegt worden - zu klaeren in jur|nodes.")
+        _sagen(" ", "     Das ist der Baum, den der Betrieb liest.")
+        print()
+    if im_korrespondenzbaum:
+        _sagen("!", f"{len(im_korrespondenzbaum)} Ordner im KORRESPONDENZbaum "
+                    f"wurden befuellt, bevor es diese Akte gab "
+                    f"(angelegt {angelegt}):")
+        for ordner_id, frueheste in sorted(im_korrespondenzbaum, key=lambda x: x[1]):
+            _sagen(" ", f"     Ordner {ordner_id}: erste Ablage {frueheste}")
+        _sagen(" ", "     Das ist KEIN Mangel und nicht beim Hersteller zu")
+        _sagen(" ", "     klaeren: Am 08.10.2026 ist dasselbe Muster als unser")
+        _sagen(" ", "     eigener Fehler aufgeklaert worden. Die Nummer in")
+        _sagen(" ", "     correspondenceFolderId gehoert nicht zur Korrespondenz")
+        _sagen(" ", "     dieser Akte; der Betrieb liest diesen Baum seit dem")
+        _sagen(" ", "     05.10.2026 nicht mehr und holt die E-Akte ueber")
+        _sagen(" ", "     POST /correspondence/search mit recordIdentifier.")
+        _sagen(" ", "     Diese Probe zeigt den Baum nur, damit es nachzusehen ist.")
         print()
     if nummern:
         _sagen(" ", "Welche Dokumentnummer aus welchem Ordner stammt:")
@@ -1304,17 +1349,44 @@ def _korrespondenz_lesen(client: Any, endpunkte: Any, kennung: str) -> bool:
                 if isinstance(e, Mapping) and e.get("type") == "note"]
     _sagen("✓" if vermerke else " ",
            f"Davon Vermerke (type=note): {len(vermerke)}")
+    # Was das Programm aus der Korrespondenz holt - und was nicht.
+    #
+    # **Berichtigt am 13.10.2026.** Hier stand "mail" bis heute unter "noch
+    # ohne Inhalt": "Noch ohne Inhalt im Programm: 22 (mail). Sie stehen nicht
+    # in der Dokumentliste." Das stimmte bis zum 08.10.2026 und keinen Tag
+    # laenger - seitdem steht jeder Mailtext als eigenes Dokument in der
+    # Liste, und jeder Anhang zusaetzlich.
+    #
+    # Der Lauf am 12.10.2026 hat den alten Satz ueber eine echte Akte
+    # ausgegeben, und die prueffende KI hat ihn gelesen. Ein Pruefbogen, der
+    # den Stand von vorgestern beschreibt, ist schlimmer als keiner: Er wird
+    # fuer eine Messung gehalten.
+    mails = [e for e in eintraege
+             if isinstance(e, Mapping) and str(e.get("type", "")).lower() == "mail"]
+    if mails:
+        _sagen("✓", f"Davon E-Mails (type=mail): {len(mails)}")
+        _sagen(" ", "     Sie stehen seit dem 08.10.2026 als Dokumente in der")
+        _sagen(" ", "     Aktenliste - je Mail der Brieftext, je Anlage ein")
+        _sagen(" ", "     eigenes Dokument. Der Weg: POST /mail/download.")
     ohne_inhalt = [e for e in eintraege if isinstance(e, Mapping)
-                   and str(e.get("type", "")).lower() not in ("note", "file", "")]
+                   and str(e.get("type", "")).lower() not in MIT_INHALT]
     if ohne_inhalt:
         arten = sorted({str(e.get("type")) for e in ohne_inhalt})
         _sagen(" ", f"Noch ohne Inhalt im Programm: {len(ohne_inhalt)} "
                     f"({', '.join(arten)}). Sie stehen nicht in der Dokumentliste.")
+        _sagen(" ", "     beA und Post sind gemessen, aber nicht gebaut: Es gibt")
+        _sagen(" ", "     bisher keine Akte mit solchen Eintraegen zum Pruefen,")
+        _sagen(" ", "     und geraten wird hier nicht.")
     gelungen = _vermerke_lesen(client, endpunkte, kennung, vermerke)
     _download_messen(client, eintraege)
     _eakte_urteil(len(eintraege), len(vermerke), gelungen)
     return True
 
+
+#: Welche Arten der Korrespondenz das Programm mit Inhalt in die Aktenliste
+#: nimmt. "mail" steht seit dem 08.10.2026 darin; die Liste steht hier, damit
+#: der Bogen und das Programm nicht auseinanderlaufen.
+MIT_INHALT = ("note", "file", "mail", "")
 
 #: Woran eine Datei an ihren ersten Bytes zu erkennen ist.
 #:
@@ -1441,12 +1513,22 @@ def _eakte_urteil(eintraege: int, vermerke: int, gelungen: int,
         _sagen("✓", f"JA. Das Verzeichnis ist lesbar und {gelungen} Vermerk(e) "
                     f"wurden abgerufen.")
         _sagen(" ", "   Sie ist seit dem 08.10.2026 von Haus aus ein - es ist")
-        _sagen(" ", "   nichts einzutragen. Die Vermerke stehen als Dokumente in")
-        _sagen(" ", "   der Aktenliste.")
-        _sagen(" ", "   Mail, beA und Post bleiben vorerst draussen. Nicht mehr,")
-        _sagen(" ", "   weil etwas fehlt - der Weg ist gemessen -, sondern weil")
-        _sagen(" ", "   zwei Dinge zu entscheiden sind: eine Obergrenze je Mail")
-        _sagen(" ", "   und ob der Anhang mit ins Aktengedaechtnis soll.")
+        _sagen(" ", "   nichts einzutragen. Vermerke UND E-Mails stehen als")
+        _sagen(" ", "   Dokumente in der Aktenliste, jede Anlage als eigenes.")
+        # Berichtigt am 13.10.2026. Hier stand: "Mail, beA und Post bleiben
+        # vorerst draussen ... zwei Dinge zu entscheiden sind: eine Obergrenze
+        # je Mail und ob der Anhang mit ins Aktengedaechtnis soll."
+        #
+        # Beides ist am 08.10.2026 entschieden und gebaut. Der Satz hat die
+        # Entscheidung vier Tage lang als offen ausgegeben - an einer echten
+        # Akte und gegenueber einer prueffenden KI.
+        _sagen(" ", "   Die Obergrenzen stehen: 20 MB je Mail, 100 MB je Akte,")
+        _sagen(" ", "   als Byte-Konto der Akte ueber alle Aufrufe. Was darueber")
+        _sagen(" ", "   liegt, bleibt mit Betreff, Datum und einer Warnung in der")
+        _sagen(" ", "   Zeile stehen - sichtbar fehlend statt lautlos ausgelassen.")
+        _sagen(" ", "   Draussen bleiben nur beA und Post: Der Weg ist gemessen,")
+        _sagen(" ", "   aber es gibt keine Akte mit solchen Eintraegen zum")
+        _sagen(" ", "   Pruefen, und geraten wird hier nicht.")
         return
     _sagen("✗", "NEIN. Das Verzeichnis ist lesbar, aber kein Vermerk liess sich "
                 "abrufen. Die Zeilen darueber nennen den Status; meist fehlt dem "
@@ -1621,10 +1703,13 @@ def _was_offen_bleibt() -> None:
     print("      Seit dem 11.10.2026 auch, was isInbox bedeutet: die")
     print("      Beschreibung sagt 1 = Eingang, 0 = Ausgang, -1 = Neutral.")
     print()
-    print("      Offen sind nur noch zwei Kleinigkeiten: ob der Pfad")
-    print("      wirklich correspondence/get-by-reference ohne fuehrenden")
-    print("      Schraegstrich heisst, und ob es eine neuere Fassung als")
-    print("      1.0.2 gibt.")
+    print("      Seit dem 12.10.2026 ist auch beantwortet: Es gibt")
+    print("      keine neuere Fassung als 1.0.2 - von der Kanzlei beim")
+    print("      Hersteller erfragt.")
+    print()
+    print("      Offen ist nur noch eine Kleinigkeit: ob der Pfad wirklich")
+    print("      correspondence/get-by-reference ohne fuehrenden")
+    print("      Schraegstrich heisst.")
 
 
 def _vermerke_erraten(client: Any, endpunkte: Any, kennung: str,

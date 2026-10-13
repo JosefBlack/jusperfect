@@ -334,11 +334,77 @@ class AelterAlsDieAkte(unittest.TestCase):
         return server
 
     def test_er_wird_benannt(self):
+        """Im DATEIbaum ist er ein Mangel — dort liest der Betrieb."""
         text = _lauf(self._server("2026-07-29T08:00:00",
                                   {10: "2026-08-01", 11: "2022-12-15"}))
-        self.assertIn("1 Ordner wurden befuellt, BEVOR es diese Akte gab", text)
+        self.assertIn("1 Ordner im DATEIbaum wurden befuellt, BEVOR es diese "
+                      "Akte gab", text)
         self.assertIn("Ordner 11: erste Ablage 2022-12-15", text)
         self.assertIn("zu klaeren in jur|nodes", text)
+        self.assertIn("Das ist der Baum, den der Betrieb liest.", text)
+
+    def test_im_korrespondenzbaum_ist_er_kein_mangel(self):
+        """Berichtigt am 13.10.2026.
+
+        Bis dahin stand über allen Ordnern ein einziges „✗ … zu klaeren in
+        jur|nodes". Der Lauf am 12.10.2026 hat damit fünf Ordner als Mangel
+        des Herstellers gemeldet, die **alle im Korrespondenzbaum** lagen —
+        also genau das Muster, das am 08.10.2026 als **unser eigener** Fehler
+        aufgeklärt worden ist: Die Nummer in `correspondenceFolderId` gehört
+        nicht zur Korrespondenz dieser Akte, und der Betrieb liest diesen Baum
+        seit dem 05.10.2026 nicht mehr.
+
+        Ein Bogen, der einen aufgeklärten Befund weiter als Mangel ausgibt,
+        schickt die Kanzlei zum Hersteller — mit einer Frage, die schon
+        beantwortet ist.
+        """
+        server = _Server({10: [], 20: [21], 21: []},
+                         {10: ["A-1"], 20: ["A-1"], 21: ["A-1"]})
+        server.akte = {"identifier": "A-1", "fileFolderId": 10,
+                       "correspondenceFolderId": 20,
+                       "creationDate": "2026-07-29T08:00:00"}
+        echt = server.get
+        tage = {10: "2026-08-01", 20: "2023-03-22", 21: "2022-12-15"}
+
+        def mit_daten(pfad, params=None):
+            antwort = echt(pfad, params)
+            if pfad == Endpunkte.ordner_inhalt:
+                for e in antwort.json()["elements"]:
+                    if e.get("type") == "file":
+                        e["file"]["addedDate"] = tage[params.get("folderId")]
+            return antwort
+
+        server.get = mit_daten
+        text = _lauf(server)
+        self.assertIn("Ordner im KORRESPONDENZbaum", text)
+        self.assertIn("Das ist KEIN Mangel", text)
+        self.assertNotIn("im DATEIbaum wurden befuellt", text,
+                         "Der Dateiordner ist hier jünger als die Akte.")
+        # Und die Abhilfe steht dabei, nicht nur die Einordnung.
+        self.assertIn("POST /correspondence/search", text)
+
+    def test_beide_baeume_werden_getrennt_genannt(self):
+        """Liegt in beiden etwas Älteres, darf nicht eines das andere decken."""
+        server = _Server({10: [11], 11: [], 20: []},
+                         {10: ["A-1"], 11: ["A-1"], 20: ["A-1"]})
+        server.akte = {"identifier": "A-1", "fileFolderId": 10,
+                       "correspondenceFolderId": 20,
+                       "creationDate": "2026-07-29T08:00:00"}
+        echt = server.get
+        tage = {10: "2026-08-01", 11: "2022-12-15", 20: "2023-03-22"}
+
+        def mit_daten(pfad, params=None):
+            antwort = echt(pfad, params)
+            if pfad == Endpunkte.ordner_inhalt:
+                for e in antwort.json()["elements"]:
+                    if e.get("type") == "file":
+                        e["file"]["addedDate"] = tage[params.get("folderId")]
+            return antwort
+
+        server.get = mit_daten
+        text = _lauf(server)
+        self.assertIn("im DATEIbaum wurden befuellt", text)
+        self.assertIn("im KORRESPONDENZbaum", text)
 
     def test_ein_ordner_aus_der_zeit_der_akte_nicht(self):
         text = _lauf(self._server("2026-07-29T08:00:00",
