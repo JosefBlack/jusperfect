@@ -22,6 +22,30 @@ steht, fällt ihr nicht auf — etwa „42/26 VU", die zweite Schreibweise des
 Hauses. Die kommt in den erfundenen Testakten vor und ist dort erfunden; eine
 echte in dieser Form würde hier durchgehen. Dagegen hilft nur Nachfragen, und
 am 11.10.2026 hat genau das ein echtes Rubrum zutage gefördert.
+
+---
+
+## Die Namen stehen nicht in dieser Datei — seit dem 13.10.2026
+
+Für die **Namen** braucht diese Prüfung eine Liste, und bis zum 13.10.2026
+stand die hier: zerlegt, mit Rollenzuordnung im Kommentar. Damit standen die
+echten Namen weiter im Bestand, nur in zwei Stücken — und der Riegel gegen
+das Verbreiten von Namen war selbst das Leck. So ist er in einem Prüfpaket
+aus dem Haus gegangen (Befund N01 der dritten Zweitprüfung).
+
+**Entscheidung der Kanzlei, Variante A:** Die Liste liegt außerhalb des
+Programmordners, auf den Rechnern der Kanzlei. Was das für einen Lauf
+bedeutet:
+
+| Wo gelaufen | Aktenzeichen | Namen |
+|---|---|---|
+| Rechner der Kanzlei, Liste vorhanden | geprüft | **geprüft** |
+| Prüfpaket für einen Dritten, keine Liste | geprüft | **übersprungen, mit Warnung im Lauf** |
+
+Die Warnung ist der Kern dieser Lösung. Ein Lauf ohne Liste sieht sonst
+genauso grün aus wie einer mit — und bedeutet etwas anderes. Siehe
+``SPERRLISTE_ORTE`` und
+``test_es_wird_gesagt_wenn_nach_namen_nicht_gesucht_wurde``.
 """
 
 from __future__ import annotations
@@ -39,31 +63,73 @@ WURZEL = Path(__file__).resolve().parent.parent
 ECHT = re.compile(r"\b[DT]-\d{3}-\d{4}\b")
 
 #: Die Datei des Herstellers wird nicht angefasst - ihre Beispiele sind seine.
-#: Sie fuehrt selbst einen der Namen unten; deshalb steht sie hier.
+#: Sie fuehrt selbst einen der gesperrten Namen; deshalb steht sie hier.
 UNBERUEHRT = {"schnittstelle/jurnodes-api-1.0.2.json"}
 
-#: Das echte Rubrum, das am 11.10.2026 im Bestand gefunden wurde.
+#: Wo die Liste der gesperrten Namen liegt — **ausserhalb des
+#: Programmordners**, und das ist der ganze Punkt.
 #:
-#: **Zusammengesetzt, und das ist der Punkt.** Diese Datei wird von der
-#: Pruefung unten selbst gelesen; stuenden die Namen hier ausgeschrieben,
-#: fiele sie durch sich selbst. Genau das ist am 12.10.2026 dreimal passiert -
-#: einmal in der Pruefdatei und zweimal in der Chronik, jedesmal weil die
-#: Beschreibung eines Fundes den Fund wieder hergestellt hat.
+#: **Befund N01 der dritten Zweitpruefung vom 12.10.2026.** Hier standen die
+#: echten Namen. Sie mussten irgendwo stehen, denn die Pruefung unten muss
+#: wissen, wonach sie sucht - und ausgeschrieben haetten sie die Pruefung
+#: durch sich selbst durchfallen lassen, weil sie jede Datei des Bestands
+#: liest, auch diese. Mein Ausweg war, sie zerlegt hinzuschreiben und in der
+#: Zeile darunter zusammenzusetzen.
 #:
-#: > Wer einen Fund beschreibt, schreibt ihn hin.
+#: Das war kein Ausweg. Die Namen standen damit weiter im Bestand, nur in
+#: zwei Stuecken - und die Kommentare sagten dazu, wer Mandant und wer Gegner
+#: ist, also das Rubrum. Jeder Mensch liest das in zwei Sekunden; der externe
+#: Pruefer hat es getan. **Der Riegel gegen das Verbreiten von Namen war
+#: selbst das Leck**, und er ist so in einem Pruefpaket aus dem Haus gegangen.
 #:
-#: Die Namen sind hier nicht verschluesselt und sollen es nicht sein - wer die
-#: Datei liest, soll sehen, worum es geht. Sie stehen nur nicht als ganze
-#: Zeichenkette darin.
-_RUBRUM = tuple("".join(teile) for teile in (
-    ("M", "üller"),     # Mandant, mit Umlaut
-    ("M", "ueller"),    # und ohne - fuenf Dateien trugen nur diese Form
-    ("H", "UK"),        # der Gegner
-    ("Sau", "er"),      # eine zweite Akte, gleiches Muster
-))
+#: **Entscheidung der Kanzlei vom 13.10.2026 (Variante A):** Die Namen kommen
+#: aus dem Repository heraus in eine Datei, die nur auf den Rechnern der
+#: Kanzlei liegt. Dort laeuft die Pruefung vollstaendig. In einem Paket fuer
+#: einen Dritten ist die Liste nicht dabei - dann prueft diese Datei nur noch
+#: das Aktenzeichenmuster **und sagt das**, damit niemand ein gruenes
+#: Ergebnis fuer "keine Namen gefunden" haelt.
+#:
+#: Gesucht wird an zwei festen Orten, beide **neben** oder **ueber** dem
+#: Programmordner, nie darin: Eine Datei im Programmordner kaeme in jedes ZIP.
+#: Keine Einstellung, keine Umgebungsvariable - zu konfigurieren gibt es hier
+#: nichts, und die Pruefungen erben seit Befund N08 ohnehin keine Umgebung.
+SPERRLISTE_NAME = "jusperfect-sperrwoerter.txt"
+SPERRLISTE_ORTE = (WURZEL.parent / SPERRLISTE_NAME,
+                   Path.home() / SPERRLISTE_NAME)
 
-#: Als ganzes Wort, Gross-/Kleinschreibung zaehlt: "sauer" ist ein Adjektiv.
-NAMEN = tuple(re.compile(rf"\b{re.escape(n)}\b") for n in _RUBRUM)
+
+def sperrliste() -> Path | None:
+    """Die Datei mit den gesperrten Namen - oder None, wenn es keine gibt."""
+    for ort in SPERRLISTE_ORTE:
+        try:
+            if ort.is_file():
+                return ort
+        except OSError:                 # ein Pfad, den dieses System nicht mag
+            continue
+    return None
+
+
+def gesperrte_woerter() -> tuple[str, ...]:
+    """Ein Wort je Zeile; ``#`` beginnt einen Kommentar, Leerzeilen zaehlen nicht.
+
+    **Faellt die Datei aus, faellt die Pruefung aus** - nicht still gruen. Eine
+    Liste, die sich nicht lesen laesst, ist etwas anderes als keine Liste: Im
+    ersten Fall ist etwas kaputt, im zweiten ist es Absicht.
+    """
+    ort = sperrliste()
+    if ort is None:
+        return ()
+    woerter = []
+    for zeile in ort.read_text(encoding="utf-8").splitlines():
+        zeile = zeile.split("#", 1)[0].strip()
+        if zeile:
+            woerter.append(zeile)
+    return tuple(woerter)
+
+
+def muster(woerter: tuple[str, ...]) -> tuple[re.Pattern[str], ...]:
+    """Als ganzes Wort, Gross- und Kleinschreibung zaehlt: "sauer" ist ein Adjektiv."""
+    return tuple(re.compile(rf"\b{re.escape(w)}\b") for w in woerter)
 
 
 #: Was nie zum Bestand gehoert - Arbeitsspuren, nicht Programm.
@@ -95,6 +161,20 @@ def _dateien() -> list[str]:
     return [n for n in roh if n not in UNBERUEHRT]
 
 
+def treffer_im_bestand(gesucht: tuple[re.Pattern[str], ...]) -> dict[str, list[str]]:
+    """Welche Datei welches Muster traegt. Leer heisst: nichts gefunden."""
+    treffer: dict[str, list[str]] = {}
+    for name in _dateien():
+        try:
+            text = (WURZEL / name).read_text(encoding="utf-8")
+        except (UnicodeDecodeError, IsADirectoryError, FileNotFoundError):
+            continue
+        gefunden = [m.pattern for m in gesucht if m.search(text)]
+        if gefunden:
+            treffer[name] = gefunden
+    return treffer
+
+
 class KeinEchterNameImBestand(unittest.TestCase):
     """Dasselbe fuer das Rubrum — und das hat laenger gefehlt als noetig.
 
@@ -109,27 +189,89 @@ class KeinEchterNameImBestand(unittest.TestCase):
     """
 
     def test_das_rubrum_steht_nirgends(self):
-        treffer: dict[str, list[str]] = {}
-        for name in _dateien():
-            try:
-                text = (WURZEL / name).read_text(encoding="utf-8")
-            except (UnicodeDecodeError, IsADirectoryError, FileNotFoundError):
-                continue
-            gefunden = [m.pattern for m in NAMEN if m.search(text)]
-            if gefunden:
-                treffer[name] = gefunden
-        self.assertEqual({}, treffer, "Das echte Rubrum ist zurueck im Bestand.")
+        woerter = gesperrte_woerter()
+        if not woerter:
+            self.skipTest(
+                "Keine Sperrliste gefunden — nach NAMEN wurde nicht gesucht. "
+                f"Gesucht wurde an: {', '.join(str(o) for o in SPERRLISTE_ORTE)}. "
+                "Geprueft wurde nur das Aktenzeichenmuster. Siehe den Kopf "
+                "dieser Datei (Befund N01).")
+        treffer = treffer_im_bestand(muster(woerter))
+        self.assertEqual({}, treffer, "Ein gesperrter Name ist im Bestand.")
 
-    def test_die_pruefung_kann_suchen(self):
-        """Sonst waere sie gruen, weil sie nichts findet — nicht, weil nichts da ist."""
-        probe = f"Akte {_RUBRUM[0]} gegen {_RUBRUM[2]}"
-        self.assertTrue(any(m.search(probe) for m in NAMEN))
-        self.assertFalse(any(m.search("Akte Testmann gegen Musterhaft") for m in NAMEN))
+    def test_die_suche_findet_wirklich_etwas(self):
+        """Sonst waere sie gruen, weil sie nichts kann — nicht, weil nichts da ist.
+
+        Gesucht wird hier nach einem **erfundenen** Namen aus den Testakten.
+        Von ihm ist bekannt, dass er im Bestand vorkommt; findet die Suche ihn
+        nicht, ist die Suche kaputt und nicht der Bestand sauber.
+
+        Die echten Namen taugen fuer diese Gegenprobe nicht mehr — sie stehen
+        nicht in dieser Datei, und das ist der Zweck der Aenderung vom
+        13.10.2026.
+        """
+        erfunden = "Vellinghausen"          # eine der erfundenen Testakten
+        self.assertTrue(treffer_im_bestand(muster((erfunden,))),
+                        "Die Suche findet einen Namen nicht, der nachweislich "
+                        "im Bestand steht.")
 
     def test_ein_gewoehnliches_wort_wird_nicht_gefangen(self):
-        """„sauer" ist ein Adjektiv, „Sauerstoff" ein Gas."""
-        self.assertFalse(any(m.search("Die Milch ist sauer.") for m in NAMEN))
-        self.assertFalse(any(m.search("Sauerstoffgehalt") for m in NAMEN))
+        """Als ganzes Wort, Gross- und Kleinschreibung zaehlt.
+
+        Viele deutsche Nachnamen sind auch gewoehnliche Woerter. Suchte diese
+        Datei ohne Wortgrenze und ohne Ruecksicht auf die Schreibung, waere
+        jeder zweite Satz ein Treffer und die Pruefung nach einer Woche
+        abgeschaltet.
+
+        **Das Beispiel ist mit Bedacht ein Name, der mit keiner Akte zu tun
+        hat.** Beim Umbau am 13.10.2026 stand hier zuerst einer der echten —
+        in genau der Aenderung, die die echten Namen entfernen sollte, zum
+        fuenften Mal dasselbe Muster. Gefunden hat es nicht meine
+        Aufmerksamkeit, sondern ein Nachlauf mit den Namen aus der Liste.
+        Genau darum geht es in dieser Datei.
+        """
+        gesucht = muster(("Koch",))
+        self.assertFalse(any(m.search("Die Suppe kocht.") for m in gesucht))
+        self.assertFalse(any(m.search("Ein Kochtopf.") for m in gesucht))
+        self.assertTrue(any(m.search("Akte Koch gegen Dritte") for m in gesucht))
+
+    def test_die_sperrliste_liegt_niemals_im_bestand(self):
+        """Der Riegel um den Riegel.
+
+        Eine Liste echter Namen **im** Programmordner waere in jedem ZIP, das
+        die Kanzlei herunterlaedt — genau der Fehler, den Variante A behebt.
+        Deshalb stehen die beiden Suchorte ausserhalb, und deshalb prueft das
+        hier nach.
+        """
+        for ort in SPERRLISTE_ORTE:
+            self.assertNotIn(WURZEL, ort.parents,
+                             f"{ort} liegt im Programmordner.")
+        verdaechtig = [n for n in _dateien() if "sperrwoert" in n.lower()]
+        self.assertEqual([], verdaechtig,
+                         "Eine Sperrliste ist in den Bestand geraten.")
+
+    def test_es_wird_gesagt_wenn_nach_namen_nicht_gesucht_wurde(self):
+        """Eine Pruefung, die ausfaellt, muss das in den Lauf schreiben.
+
+        Ohne diese Warnung sieht ein Lauf im Pruefpaket genauso gruen aus wie
+        einer in der Kanzlei — und bedeutet etwas anderes. Das ist dasselbe
+        Muster wie bei der leeren Dateiliste weiter unten: Was nicht sucht,
+        ist still gruen.
+        """
+        import warnings
+
+        ort = sperrliste()
+        if ort is None:
+            warnings.warn(
+                "Keine Sperrliste gefunden: In diesem Lauf wurde NICHT nach "
+                "Namen gesucht, nur nach dem Aktenzeichenmuster. Das ist im "
+                "Prueflauf eines Dritten der vorgesehene Zustand (Befund N01); "
+                "auf einem Rechner der Kanzlei fehlt die Datei "
+                f"{SPERRLISTE_NAME} neben oder ueber dem Programmordner.",
+                UserWarning, stacklevel=1)
+        else:
+            self.assertTrue(gesperrte_woerter(),
+                            f"{ort} ist da, aber leer — dann prueft sie nichts.")
 
 
 class KeinEchtesAktenzeichenImBestand(unittest.TestCase):
