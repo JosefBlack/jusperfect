@@ -4144,13 +4144,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // einer Akte, sondern zur Rechenschaft ueber alle - deshalb steht er jetzt
   // bei der Verwaltung und nicht mehr im Weg.
   $("nachweis-oeffnen").addEventListener("click", (ev) => mitKnopf(ev.target, nachweisZeigen));
+  // Die beiden Kreuze gehören NICHT zur Anmeldung.
+  //
+  // Aus der Kanzlei am 13.10.2026: „Fehlermeldung nimmt viel Platz weg und
+  // läßt sich nicht schließen. Auch nicht mit dem Kreuz."
+  //
+  // Sie standen beide innerhalb von `if (AWS_MODUS)`. Die Kanzlei läuft mit
+  // JUSPERFECT_BETRIEBSART=lokal, also ist AWS_MODUS falsch - und die
+  // Kreuze bekamen nie einen Anschluss. Ein Knopf, der dasteht und nichts
+  // tut, ist schlimmer als keiner: Man klickt ihn und zweifelt an sich.
+  //
+  // Warum sie dort landeten: Der Block begann mit der Anmeldung, und was
+  // danach dazukam, wurde darunter geschrieben. Eine Einrückung ist kein
+  // Zusammenhang.
+  const astZu = $("arbeitsstand-zu");
+  if (astZu) astZu.addEventListener("click", arbeitsstandSchliessen);
+  const ubZu = $("uebernahme-zu");
+  if (ubZu) ubZu.addEventListener("click", () => { $("uebernahme").hidden = true; });
   if (AWS_MODUS) {
     $("anmelden-aws").hidden = false;
     $("anmeldung").addEventListener("click", () => (angemeldet() ? abmelden() : anmeldungStarten()));
-    const astZu = $("arbeitsstand-zu");
-    if (astZu) astZu.addEventListener("click", arbeitsstandSchliessen);
-    const ubZu = $("uebernahme-zu");
-    if (ubZu) ubZu.addEventListener("click", () => { $("uebernahme").hidden = true; });
     anmeldungAbschliessen()
       .catch(() => anmeldeFehler("Die Anmeldung ist fehlgeschlagen."))
       .finally(async () => {

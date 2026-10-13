@@ -5139,3 +5139,43 @@ Erstes sind die fünf angezeigten Fragen gefallen: Gespeichert waren hundert.
 Offen und ausdrücklich **nicht** entschieden: die beiden Fenster „Arbeitsakte"
 und „Auswahl". Die Kanzlei dazu: *„Ich finde die Auswahl rechts und links als
 Vergleich eigentlich nicht schlecht."* Der Zweispalter bleibt also.
+
+---
+
+## 13.10.2026 — zwei Kreuze, die in der Kanzlei nie etwas taten
+
+Aus der Kanzlei, zu einem Hinweis über ein nicht lesbares PDF:
+
+> „Fehlermeldung nimmt viel Platz weg und läßt sich nicht schließen. Auch
+> nicht mit dem Kreuz."
+
+Beide Schließkreuze — der über dem Arbeitsstand und der über der Bilanz des
+Einlesens — bekamen ihren Anschluss **innerhalb von `if (AWS_MODUS)`**:
+
+```js
+if (AWS_MODUS) {
+  $("anmelden-aws").hidden = false;
+  …
+  const ubZu = $("uebernahme-zu");
+  if (ubZu) ubZu.addEventListener("click", …);
+```
+
+`AWS_MODUS` ist `K.betriebsart === "aws"`. In der Kanzlei steht
+`JUSPERFECT_BETRIEBSART=lokal`. **Die Kreuze waren dort nie angeschlossen.**
+
+Wie sie dorthin geraten sind, ist die unspektakulärste Erklärung von allen:
+Der Block begann mit der Anmeldung, und was später dazukam, wurde darunter
+geschrieben.
+
+> Eine Einrückung ist kein Zusammenhang.
+
+Man klickt so ein Kreuz, nichts geschieht, und man zweifelt an sich statt am
+Programm. Das ist dieselbe Art Schaden wie bei einer Prüfung, die das Falsche
+misst — nur beim Benutzer statt beim Entwickler.
+
+`tests/test_kreuze_schliessen_wirklich.py`, fünf Prüfungen. Die enge Regel
+darin: **Kein Knopf mit der Endung `-zu` darf im Anmeldeblock stehen.** Sie
+bewertet nicht, was dort sonst steht — Anmeldesachen gehören hinein —, sondern
+genau das, woran es lag.
+
+2199 Prüfungen grün, eine übersprungen.
