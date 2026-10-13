@@ -4731,3 +4731,75 @@ ist das nicht**, und es ändert nichts: Der `TypeError` ist behoben, und die
 Akte geht in beiden Fällen auf.
 
 2141 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026 — „Bitte geben Sie eine Page an" — die E-Akte fiel ganz aus
+
+Der erste Lauf der Aktenprobe mit richtiger Kennung, und der Server sagt es
+wörtlich:
+
+```
+POST /correspondence/search mit Status 405.
+Der Server sagt dazu: {"error":"Bitte geben Sie eine Page an",
+                       "validationErrors":[]}
+```
+
+Zugleich: **38 Dokumente in der Liste**, die Akte öffnet. Es fehlte allein die
+E-Akte — und zwar **ganz**: 26 Einträge, 22 davon E-Mails samt Anlagen, kein
+einziger in der Akte.
+
+### Die Ursache
+
+`_alle_seiten_post` ließ die Seitenangabe bei der **ersten** Anfrage weg:
+
+```python
+seitenangabe = {} if erste_anfrage else {"page": seite}
+```
+
+Das war eine Entscheidung vom 28.09.2026, damals an den **GET**-Suchen
+gemessen, wo dieser Server ohne Seitenangabe antwortet. Für diesen POST gilt
+sie nicht. Jetzt nennt auch die erste Anfrage ihre Seite.
+
+### Warum vier Prüfläufe daran vorbeigingen
+
+Der erfundene Server in `tests/test_eakte.py` tat das **Gegenteil** des echten:
+
+```python
+if "page" in str(anfrage.content or b""):
+    return Response(200, json={"elements": [], "pagesTotal": 1})
+return Response(200, json={"elements": self.korrespondenz, ...})
+```
+
+Er gab die Einträge heraus, *solange keine Seite genannt wurde*, und nichts,
+sobald eine dastand. Und eine Prüfung schrieb das sogar fest:
+
+```python
+self.assertIsNone(seiten[0], "Die erste Anfrage geht ohne Seitenangabe.")
+```
+
+> Ein erfundener Server, der mehr durchgehen lässt als der echte, ist
+> schlimmer als keiner: Er färbt die Prüfung grün. Dieselbe Form wie am
+> 02.10.2026 bei Textract — ein Aufruf, der ohne Fehler zurückkam und nicht
+> gearbeitet hatte.
+
+Berichtigt sind beide: der erfundene Server **und** die Prüfung, die seine
+Erfindung festhielt.
+
+### Und der Satz, der alles entschieden hat
+
+`{"error":"Bitte geben Sie eine Page an"}` — dieser eine Satz beendet die
+Sache in einem Schritt. Er kam erst in dieser Fassung mit, weil ich ihn heute
+Nachmittag an das Fehlerobjekt gehängt habe. In den Läufen davor stand nur
+„Status 405", und daraus habe ich geschlossen, der Hersteller weise einen
+beschriebenen Aufruf ab — und das der Kanzlei so geschrieben.
+
+Zum zweiten Mal an einem Tag dieselbe Lehre: **Was der Server sagt, ist die
+Antwort. Was ich aus einer Zahl schließe, ist eine Vermutung.**
+
+`tests/test_seite_wird_immer_genannt.py`, neun Prüfungen — mit einem erfundenen
+Server, der die Abweisung **wörtlich** nachspielt, und mit Prüfungen über den
+erfundenen Server selbst, damit die alte Bequemlichkeit beim nächsten Umbau
+nicht zurückschleicht. Gegenprobe gemacht: mit der alten Zeile fallen vier.
+
+2150 Prüfungen grün, eine übersprungen.

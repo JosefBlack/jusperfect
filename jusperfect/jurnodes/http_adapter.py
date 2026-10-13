@@ -989,13 +989,26 @@ class HttpJurNodesAdapter:
         Seite holt, bekommt bei einer Akte mit 120 Schriftstücken 100 davon –
         und die übrigen 20 fehlen lautlos.
         """
+        # **Auch die erste Anfrage nennt ihre Seite.** Bei den GET-Suchen ist
+        # das freigestellt - dort wurde am 28.09.2026 gemessen, dass der
+        # Server ohne Seitenangabe antwortet. Dieser POST tut es nicht; er
+        # sagt es am 13.10.2026 in ganzen Worten::
+        #
+        #     POST /correspondence/search -> Status 405
+        #     {"error": "Bitte geben Sie eine Page an", "validationErrors": []}
+        #
+        # Die E-Akte fiel damit an diesem Server vollstaendig aus - 26
+        # Eintraege, 22 davon E-Mails, und keiner davon in der Akte. Im
+        # Pruefbogen der Schnittstelle ging derselbe Aufruf durch: Der sendet
+        # "Seite 1" ausdruecklich. Zwei Werkzeuge, zwei Ergebnisse, und der
+        # Unterschied war diese eine Angabe.
+        #
+        # Im Zweifel gilt der Server, nicht seine Beschreibung - dieselbe
+        # Entscheidung wie bei ERSTE_SEITE oben.
         seite = erste_seite(pfad)
         alle: list[Mapping[str, Any]] = []
-        erste_anfrage = True
         while seite - erste_seite(pfad) < SEITEN_GRENZE:
-            seitenangabe: dict[str, Any] = {} if erste_anfrage else {"page": seite}
-            erste_anfrage = False
-            daten = self._lesen_per_post(pfad, nicht_gefunden, **seitenangabe, **koerper).json()
+            daten = self._lesen_per_post(pfad, nicht_gefunden, page=seite, **koerper).json()
             teil = self._liste(daten, *schluessel)
             alle.extend(teil)
             if not teil:

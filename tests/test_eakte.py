@@ -88,8 +88,22 @@ class _Server:
         pfad = anfrage.url.path
         self.gefragt.append(f"{anfrage.method} {pfad}")
         if pfad.endswith("/correspondence/search"):
-            self.koerper.append(json.loads(anfrage.content or b"{}"))
-            if "page" in str(anfrage.content or b""):
+            koerper = json.loads(anfrage.content or b"{}")
+            self.koerper.append(koerper)
+            # So wie der echte Server, gemessen am 13.10.2026 am Server der
+            # Kanzlei. Hier stand vorher: ohne "page" die Eintraege, mit
+            # "page" nichts - also das Gegenteil. Diese Erfindung hat den
+            # Fehler zugedeckt, an dem die E-Akte dort vollstaendig ausfiel:
+            # Der Adapter liess die Seitenangabe bei der ersten Anfrage weg,
+            # und der Server wies sie ab.
+            #
+            # Ein erfundener Server, der mehr durchgehen laesst als der
+            # echte, ist schlimmer als keiner: Er faerbt die Pruefung gruen.
+            if "page" not in koerper:
+                return httpx.Response(
+                    405, json={"error": "Bitte geben Sie eine Page an",
+                               "validationErrors": []})
+            if int(koerper["page"]) != 1:
                 return httpx.Response(200, json={"elements": [], "pagesTotal": 1})
             return httpx.Response(200, json={"elements": self.korrespondenz, "pagesTotal": 1})
         if pfad.endswith("/record/note"):
@@ -269,7 +283,7 @@ class DerLesendePostAufrufBleibtDieAusnahme(unittest.TestCase):
             if anfrage.url.path.endswith("/correspondence/search"):
                 koerper = json.loads(anfrage.content or b"{}")
                 seiten.append(koerper.get("page"))
-                if koerper.get("page"):
+                if koerper.get("page") != 1:
                     return httpx.Response(200, json={"elements": [], "pagesTotal": 2})
                 return httpx.Response(200, json={
                     "elements": [_eintrag("note", referenceNote=1)], "pagesTotal": 2})
@@ -282,7 +296,13 @@ class DerLesendePostAufrufBleibtDieAusnahme(unittest.TestCase):
                                 korrespondenz=True)
         a.dokumente(AKTE)
         self.assertGreaterEqual(len(seiten), 2)
-        self.assertIsNone(seiten[0], "Die erste Anfrage geht ohne Seitenangabe.")
+        # Berichtigt am 13.10.2026. Hier stand: "Die erste Anfrage geht ohne
+        # Seitenangabe." Der Server der Kanzlei weist genau das ab -
+        # {"error": "Bitte geben Sie eine Page an"} -, und die ganze E-Akte
+        # fiel dort aus. Ein erfundener Server, der mehr durchgehen laesst
+        # als der echte, faerbt die Pruefung gruen.
+        self.assertEqual(seiten[0], 1, "Auch die erste Anfrage nennt ihre Seite.")
+        self.assertEqual(seiten[1], 2, "Und die zweite ist die zweite.")
 
 
 class DieEinstellungStehtSeitDemLaufAufEin(unittest.TestCase):
@@ -421,7 +441,8 @@ class DieObergrenzeWarntDenBearbeiter(unittest.TestCase):
         def server(anfrage: httpx.Request) -> httpx.Response:
             pfad = anfrage.url.path
             if pfad.endswith("/correspondence/search"):
-                if "page" in str(anfrage.content or b""):
+                # Seite 1 traegt die Eintraege - wie der echte Server.
+                if json.loads(anfrage.content or b"{}").get("page") != 1:
                     return httpx.Response(200, json={"elements": [], "pagesTotal": 1})
                 return httpx.Response(200, json={
                     "elements": [_eintrag("mail", referenceMail="m-1")],
