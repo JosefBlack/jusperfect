@@ -4248,8 +4248,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("explorer-dialog").returnValue === "uebernehmen") mitKnopf(null, explorerUebernehmen);
   });
   $("frage-form").addEventListener("submit", (ev) => { ev.preventDefault(); mitKnopf($("senden"), frageStellen); });
+  // Die Eingabetaste fragt.
+  //
+  // Aus der Kanzlei am 13.10.2026: "Fragen mit Returntaste ausloesen." Bisher
+  // brauchte es Strg+Eingabe - eine Abkuerzung, die man kennen muss. In einem
+  // Chat erwartet jeder, dass die Eingabetaste abschickt.
+  //
+  // Umschalt+Eingabe macht weiterhin einen Zeilenumbruch, fuer die seltene
+  // mehrzeilige Frage. Strg+Eingabe bleibt ebenfalls: Wer es sich angewoehnt
+  // hat, soll nicht ins Leere greifen.
+  //
+  // Waehrend eine Frage laeuft, tut die Taste nichts: `mitKnopf` sperrt den
+  // Knopf, und zwei Fragen zugleich waeren zwei Modellaufrufe fuer eine
+  // Absicht.
   $("frage").addEventListener("keydown", (ev) => {
-    if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); mitKnopf($("senden"), frageStellen); }
+    if (ev.key !== "Enter" || ev.isComposing) return;
+    if (ev.shiftKey) return;
+    ev.preventDefault();
+    if ($("senden").disabled) return;
+    mitKnopf($("senden"), frageStellen);
   });
   $("chrono-aktualisieren").addEventListener("click", (ev) =>
     mitKnopf(ev.currentTarget, chronologieAktualisieren));
