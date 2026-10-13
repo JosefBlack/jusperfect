@@ -3046,30 +3046,51 @@ function bibHinweis(text) {
   p.hidden = !text;
 }
 
-/** Die Leiste aus einer Antwort des Servers zeichnen. */
+/** Die Leiste aus einer Antwort des Servers zeichnen - eine Zeile je Gruppe.
+ *
+ * Erst das Rechtsgebiet der Akte, dann was in jedem Verfahren gilt (die
+ * Gerichtsmuster). Aus der Kanzlei: "Eigenstaendiger Bereich
+ * ‚Gerichtsmuster'" - eine Klageerwiderung schreibt man im Bau- wie im
+ * Arbeitsrecht. Zusammengeworfen waeren es dreissig Knoepfe, in denen man
+ * suchen muesste.
+ */
 function bibliothekZeichnen(daten) {
   bibliothekStand = daten;
   const kasten = $("bibliothek");
   if (!kasten) return;
   kasten.hidden = false;
   const gebiet = $("bib-gebiet");
-  gebiet.textContent = daten.aus_akte
-    ? `Prompts · ${daten.rechtsgebiet}`
-    : "Prompts · ohne Rechtsgebiet in der Akte";
+  gebiet.textContent = daten.aus_akte ? daten.rechtsgebiet : "ohne Rechtsgebiet in der Akte";
   gebiet.title = daten.aus_akte
     ? "Das Rechtsgebiet kommt aus jur|nodes. Abgelegte Prompts erscheinen bei jeder Akte dieses Gebiets wieder."
     : "jur|nodes nennt zu dieser Akte kein Rechtsgebiet. Abgelegtes landet in einer gemeinsamen Liste.";
   const liste = $("bib-liste");
   liste.replaceChildren();
-  const eintraege = daten.eintraege || [];
-  if (!eintraege.length) {
+  const gruppen = (daten.gruppen || []).filter((g) => (g.eintraege || []).length);
+  if (!gruppen.length) {
     const leer = document.createElement("span");
     leer.className = "bib-leer";
     leer.textContent = "Noch nichts abgelegt. Ein Prompt, der sich bewährt hat, kommt über „+ Neu\u201c hierher.";
     liste.appendChild(leer);
     return;
   }
-  for (const eintrag of eintraege) {
+  for (const gruppe of gruppen) liste.appendChild(bibGruppe(gruppe, gruppen.length > 1));
+}
+
+/** Eine Gruppe: Beschriftung und ihre Knöpfe. */
+function bibGruppe(gruppe, beschriften) {
+  const zeile = document.createElement("div"); zeile.className = "bib-gruppe";
+  if (beschriften) {
+    const name = document.createElement("span"); name.className = "bib-gruppenname";
+    name.textContent = gruppe.name;
+    if (gruppe.basis) {
+      name.textContent += " · mit Vorspann";
+      name.title = "Zu dieser Gruppe gehört ein gemeinsamer Vorspann. "
+                 + "Er kommt sichtbar mit ins Eingabefeld.";
+    }
+    zeile.appendChild(name);
+  }
+  for (const eintrag of gruppe.eintraege) {
     const chip = document.createElement("span");
     chip.className = "bib-chip" + (eintrag.mitgeliefert ? " mitgeliefert" : "");
     const nehmen = document.createElement("button");
@@ -3078,12 +3099,18 @@ function bibliothekZeichnen(daten) {
     nehmen.textContent = eintrag.titel;
     nehmen.title = (eintrag.mitgeliefert ? "Mitgeliefert. " : "")
                  + "In das Eingabefeld übernehmen:\n\n" + eintrag.text;
+    const ganz = (gruppe.basis ? gruppe.basis + "\n\n" : "") + eintrag.text;
     nehmen.addEventListener("click", () => {
       const feld = $("frage");
-      feld.value = eintrag.text;
+      feld.value = ganz;
       feld.focus();
-      feld.setSelectionRange(eintrag.text.length, eintrag.text.length);
-      bibHinweis("");
+      // Der Blick gehört ans Ende - dorthin, wo das eigentliche Modul steht.
+      // Ohne das stünde der Vorspann im Bild und das Modul nicht.
+      feld.setSelectionRange(ganz.length, ganz.length);
+      feld.scrollTop = feld.scrollHeight;
+      bibHinweis(gruppe.basis
+        ? `Der gemeinsame Vorspann „${gruppe.name}“ steht mit im Feld. Er ist zu lesen und zu ändern.`
+        : "");
     });
     const weg = document.createElement("button");
     weg.type = "button"; weg.className = "bib-weg";
@@ -3094,8 +3121,9 @@ function bibliothekZeichnen(daten) {
     weg.setAttribute("aria-label", "Prompt aus der Leiste nehmen");
     weg.addEventListener("click", () => mitKnopf(weg, () => bibVergessen(eintrag.titel)));
     chip.append(nehmen, weg);
-    liste.appendChild(chip);
+    zeile.appendChild(chip);
   }
+  return zeile;
 }
 
 async function bibliothekLaden() {
@@ -4172,6 +4200,21 @@ async function entwurfStarten(art, anweisung, empfaenger, auftrag) {
     frei.replaceWith(Object.assign(document.createElement("span"), { textContent: `In jurnodes abgelegt (${f.jurnodes_referenz || ""})` }));
   }));
   fuss.appendChild(frei);
+  // Auf den Briefbogen der Kanzlei.
+  //
+  // Aus der Kanzlei am 13.10.2026: "Entwurf-Funktion funktioniert noch
+  // nicht, jur|nodes lehnt ab, was ich erstmal nicht so schlimm finde.
+  // Koennen wir hier einen Briefbogen hinterlegen?" Das ist der Weg um
+  // jur|nodes herum: Der Entwurf geht als Word-Datei auf den echten
+  // Briefbogen, und was damit geschieht, entscheidet der Bearbeiter.
+  //
+  // Der Knopf steht immer da, auch ohne hinterlegten Briefbogen - dann sagt
+  // der Klick, wohin die Datei gehoert. Ein Knopf, der nur erscheint, wenn
+  // alles schon eingerichtet ist, erklaert nie, wie man dorthin kommt.
+  const brief = document.createElement("button"); brief.className = "mini";
+  brief.textContent = "Auf Briefbogen (Word)";
+  brief.addEventListener("click", () => mitKnopf(brief, () => briefbogenHolen(e.id)));
+  fuss.appendChild(brief);
   // Aus der Kanzlei: "Ich denke auch einen Wissenstempel bauen, dass sich KI
   // gleiche Vorgaenge merkt." Der Weg dorthin faengt hier an - bei der
   // Anweisung, die gerade getippt wurde. Ohne Anweisung gibt es nichts zu
@@ -4184,6 +4227,29 @@ async function entwurfStarten(art, anweisung, empfaenger, auftrag) {
   }
   karte.appendChild(fuss);
   ladeStatus();
+}
+
+/** Den Entwurf als Word-Datei auf dem Briefbogen holen.
+ *
+ * Nicht ueber `api`: Was zurueckkommt, ist kein JSON, sondern eine Datei.
+ * Gespeichert wird sie nicht vom Programm - der Browser fragt, wohin.
+ */
+async function briefbogenHolen(entwurfId) {
+  const antwort = await fetch(K.apiBasis + `/api/entwuerfe/${entwurfId}/briefbogen`,
+                              { headers: kopfzeilen() });
+  if (!antwort.ok) {
+    let f = null; try { f = await antwort.json(); } catch (e) { /* keine JSON-Antwort */ }
+    throw new Error((f && f.fehler) || `Fehler ${antwort.status}`);
+  }
+  const blob = await antwort.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `Entwurf-${entwurfId}.docx`;
+  document.body.appendChild(a); a.click(); a.remove();
+  // Aufraeumen: Ohne das bleibt der ganze Entwurf im Speicher des Browsers
+  // liegen, bis die Seite neu geladen wird.
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  melden("Der Entwurf liegt als Word-Datei im Download-Ordner.");
 }
 
 // ── Aus einer Anweisung ein Muster machen ──────────────────────────────────

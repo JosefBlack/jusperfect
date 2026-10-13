@@ -81,13 +81,36 @@ class DerAusgelieferteVorrat(unittest.TestCase):
 
     VORRAT = pb.vorrat()
 
-    def test_verkehrsrecht_ist_hinterlegt(self):
-        self.assertIn("Verkehrsrecht", self.VORRAT)
-        self.assertEqual(len(self.VORRAT["Verkehrsrecht"]), 17)
+    def test_die_gebiete_der_kanzlei_sind_hinterlegt(self):
+        self.assertEqual(len(self.VORRAT["Verkehrsrecht"]["eintraege"]), 17)
+        self.assertEqual(len(self.VORRAT["Arbeitsrecht"]["eintraege"]), 10)
+        self.assertEqual(len(self.VORRAT["Privates Baurecht"]["eintraege"]), 10)
+        self.assertEqual(len(self.VORRAT["Gerichtsmuster"]["eintraege"]), 12)
+
+    def test_der_basisprompt_des_baurechts_ist_vollstaendig_da(self):
+        """„Gemeinsamer Basisprompt fuer alle Module." Er ist ueber
+        dreitausend Zeichen lang; eine zu enge Grenze haette ihn
+        abgeschnitten, und das waere niemandem aufgefallen."""
+        basis = pb.basis("Privates Baurecht")
+        self.assertGreater(len(basis), 3000)
+        self.assertLessEqual(len(basis), pb.MAX_ZEICHEN)
+        for stichwort in ("MANDANTENROLLE", "AKTENAUSWERTUNG", "FRISTEN",
+                          "VERTRAULICHKEIT", "[BITTE ERGÄNZEN]", "Kanzleifreigabe"):
+            with self.subTest(stichwort=stichwort):
+                self.assertIn(stichwort, basis)
+
+    def test_der_vorspann_findet_sich_auch_unter_kurzem_namen(self):
+        """jur|nodes nennt das Gebiet vielleicht nur „Baurecht"."""
+        self.assertEqual(pb.basis("Baurecht"), pb.basis("Privates Baurecht"))
+
+    def test_die_anderen_gebiete_haben_keinen_vorspann(self):
+        """Die Kanzlei hat ihn nur zum Baurecht mitgeliefert."""
+        self.assertEqual(pb.basis("Verkehrsrecht"), "")
+        self.assertEqual(pb.basis("Arbeitsrecht"), "")
 
     def test_jeder_eintrag_hat_ueberschrift_und_text(self):
-        for gebiet, liste in self.VORRAT.items():
-            for eintrag in liste:
+        for gebiet, block in self.VORRAT.items():
+            for eintrag in block["eintraege"]:
                 with self.subTest(gebiet=gebiet, titel=eintrag["titel"]):
                     self.assertTrue(eintrag["titel"].strip())
                     self.assertTrue(eintrag["text"].strip())
@@ -95,7 +118,8 @@ class DerAusgelieferteVorrat(unittest.TestCase):
     def test_keiner_wird_beim_lesen_abgeschnitten(self):
         """Sonst fehlte die letzte Anweisung - unbemerkt."""
         roh = json.loads(pb.VORRAT.read_text(encoding="utf-8"))
-        for gebiet, liste in roh["rechtsgebiete"].items():
+        for gebiet, block in roh["rechtsgebiete"].items():
+            liste = block if isinstance(block, list) else block["eintraege"]
             for eintrag in liste:
                 with self.subTest(gebiet=gebiet, titel=eintrag["titel"]):
                     self.assertLessEqual(len(eintrag["titel"]), pb.MAX_TITEL)
@@ -104,16 +128,16 @@ class DerAusgelieferteVorrat(unittest.TestCase):
     def test_keine_ueberschrift_doppelt(self):
         """Die Ueberschrift ist der Griff zum Herausnehmen - sie muss
         innerhalb eines Gebiets eindeutig sein."""
-        for gebiet, liste in self.VORRAT.items():
-            titel = [e["titel"].casefold() for e in liste]
+        for gebiet, block in self.VORRAT.items():
+            titel = [e["titel"].casefold() for e in block["eintraege"]]
             with self.subTest(gebiet=gebiet):
                 self.assertEqual(len(titel), len(set(titel)))
 
     def test_er_passt_in_die_leiste(self):
         """Mehr als MAX_EINTRAEGE waere keine Auswahl mehr."""
-        for gebiet, liste in self.VORRAT.items():
+        for gebiet, block in self.VORRAT.items():
             with self.subTest(gebiet=gebiet):
-                self.assertLessEqual(len(liste), pb.MAX_EINTRAEGE)
+                self.assertLessEqual(len(block["eintraege"]), pb.MAX_EINTRAEGE)
 
 
 class AblegenUndHerausnehmen(unittest.TestCase):
@@ -250,8 +274,10 @@ class MitgeliefertesWirdAusgeblendetNichtGeloescht(unittest.TestCase):
         self.ort = Path(self._ordner.name) / pb.DATEINAME
         self.addCleanup(self._ordner.cleanup)
         self._alt = pb.vorrat
-        pb.vorrat = lambda ort=None: {"Verkehrsrecht": [      # type: ignore[assignment]
-            {"titel": "Haftungsquote", "text": "Welche Haftungsquote ergibt sich?"}]}
+        pb.vorrat = lambda ort=None: {"Verkehrsrecht": {   # type: ignore[assignment]
+            "basis": "",
+            "eintraege": [{"titel": "Haftungsquote",
+                           "text": "Welche Haftungsquote ergibt sich?"}]}}
         self.addCleanup(lambda: setattr(pb, "vorrat", self._alt))
 
     def test_ausgeblendetes_erscheint_nicht_mehr(self):
@@ -265,7 +291,82 @@ class MitgeliefertesWirdAusgeblendetNichtGeloescht(unittest.TestCase):
 
     def test_der_vorrat_selbst_bleibt_unberuehrt(self):
         pb.vergessen("Verkehrsrecht", "Haftungsquote", self.ort)
-        self.assertEqual(len(pb.vorrat()["Verkehrsrecht"]), 1)
+        self.assertEqual(len(pb.vorrat()["Verkehrsrecht"]["eintraege"]), 1)
+
+
+class DieGerichtsmusterGeltenImmer(unittest.TestCase):
+    """Aus der Kanzlei: „Eigenstaendiger Bereich ‚Gerichtsmuster'."
+
+    Eine Klageerwiderung schreibt man im Bau- wie im Arbeitsrecht. Sie
+    haengen deshalb nicht am Rechtsgebiet der Akte - stehen aber in einer
+    eigenen Zeile und nicht zwischen den Modulen des Gebiets.
+    """
+
+    def setUp(self):
+        self._ordner = TemporaryDirectory()
+        self.ort = Path(self._ordner.name) / pb.DATEINAME
+        self.addCleanup(self._ordner.cleanup)
+
+    def test_sie_stehen_bei_jedem_rechtsgebiet(self):
+        for gebiet in ("Verkehrsrecht", "Arbeitsrecht", "Privates Baurecht",
+                       "Sozialrecht", ""):
+            with self.subTest(gebiet=gebiet):
+                namen = [g["name"] for g in pb.gruppen(gebiet, self.ort)]
+                self.assertIn("Gerichtsmuster", namen)
+
+    def test_das_rechtsgebiet_steht_vorn(self):
+        """Es ist das, woran gerade gearbeitet wird."""
+        gruppen = pb.gruppen("Verkehrsrecht", self.ort)
+        self.assertEqual(gruppen[0]["name"], "Verkehrsrecht")
+        self.assertFalse(gruppen[0]["immer"])
+
+    def test_sie_stehen_nicht_zweimal_da(self):
+        """Auch nicht, wenn eine Akte zufaellig „Gerichtsmuster" hiesse."""
+        namen = [g["name"] for g in pb.gruppen("Gerichtsmuster", self.ort)]
+        self.assertEqual(namen.count("Gerichtsmuster"), 1)
+
+    def test_jede_gruppe_hat_ihren_eigenen_vorspann(self):
+        """Der des Rechtsgebiets gilt nicht fuer ein Gerichtsmuster."""
+        gruppen = {g["name"]: g for g in pb.gruppen("Privates Baurecht", self.ort)}
+        self.assertNotEqual(gruppen["Privates Baurecht"]["basis"],
+                            gruppen["Gerichtsmuster"]["basis"])
+        self.assertIn("gerichtlicher Schriftsätze", gruppen["Gerichtsmuster"]["basis"])
+        self.assertIn("privaten Baurecht", gruppen["Privates Baurecht"]["basis"])
+
+    def test_ausgeblendetes_bleibt_in_jedem_gebiet_weg(self):
+        """Sonst waere ein Gerichtsmuster nur in Akten eines Gebiets weg."""
+        pb.vergessen("Verkehrsrecht", "Duplik", self.ort)
+        for gebiet in ("Verkehrsrecht", "Arbeitsrecht", "Privates Baurecht"):
+            with self.subTest(gebiet=gebiet):
+                gm = [g for g in pb.gruppen(gebiet, self.ort)
+                      if g["name"] == "Gerichtsmuster"][0]
+                self.assertNotIn("Duplik", [e["titel"] for e in gm["eintraege"]])
+
+    def test_sie_mischen_sich_nicht_unter_das_rechtsgebiet(self):
+        eigen = pb.eintraege("Verkehrsrecht", self.ort)
+        self.assertNotIn("Duplik", [e["titel"] for e in eigen])
+
+
+class DerVorspannKommtSichtbarInsFeld(unittest.TestCase):
+    """Ein Vorspann, den man nicht sieht, ist eine Anweisung, von der man
+    nichts weiss."""
+
+    JS = (WURZEL / "jusperfect" / "static" / "app.js").read_text(encoding="utf-8")
+
+    def _block(self):
+        return self.JS[self.JS.index("function bibGruppe"):
+                       self.JS.index("async function bibliothekLaden")]
+
+    def test_er_wird_dem_prompt_vorangestellt(self):
+        self.assertIn("gruppe.basis", self._block())
+        self.assertIn("feld.value = ganz", self._block())
+
+    def test_das_feld_sagt_es(self):
+        self.assertIn("Vorspann", self._block())
+
+    def test_der_web_liefert_ihn_mit(self):
+        web = (WURZEL / "jusperfect" / "web.py").read_text(encoding="utf-8")
+        self.assertIn('"basis": g["basis"]', web)
 
 
 class EineKaputteDateiWirdNichtUeberschrieben(unittest.TestCase):
@@ -331,20 +432,25 @@ class UeberDenWeb(unittest.TestCase):
         self.c = client(self.d)
         self.sid = self.c.post("/api/sitzungen", json={"akte_id": "AR-2026-0115"}).json()["sitzung"]["id"]
 
+    def _eigene(self, daten):
+        """Die Gruppe des Rechtsgebiets - die erste."""
+        return daten["gruppen"][0]["eintraege"]
+
     def test_das_gebiet_steht_in_der_antwort_und_kam_aus_der_akte(self):
         daten = self.c.get(f"/api/sitzungen/{self.sid}/prompts").json()
         self.assertEqual(daten["rechtsgebiet"], "Arbeitsrecht")
         self.assertTrue(daten["aus_akte"])
-        self.assertEqual(daten["eintraege"], [])
+        self.assertEqual(self._eigene(daten), [])
 
     def test_ablegen_und_wieder_lesen(self):
         abgelegt = self.c.post(f"/api/sitzungen/{self.sid}/prompts",
                                json={"titel": "Fristen", "text": "Welche Fristen laufen?"})
         self.assertEqual(abgelegt.status_code, 201, abgelegt.text)
-        self.assertEqual(abgelegt.json()["eintraege"],
+        self.assertEqual(self._eigene(abgelegt.json()),
                          [{"titel": "Fristen", "text": "Welche Fristen laufen?",
                            "mitgeliefert": False}])
-        self.assertEqual(len(self.c.get(f"/api/sitzungen/{self.sid}/prompts").json()["eintraege"]), 1)
+        self.assertEqual(
+            len(self._eigene(self.c.get(f"/api/sitzungen/{self.sid}/prompts").json())), 1)
 
     def test_herausnehmen_ueber_den_web(self):
         self.c.post(f"/api/sitzungen/{self.sid}/prompts",
@@ -352,7 +458,7 @@ class UeberDenWeb(unittest.TestCase):
         antwort = self.c.post(f"/api/sitzungen/{self.sid}/prompts/vergessen",
                               json={"titel": "Fristen"})
         self.assertEqual(antwort.status_code, 200, antwort.text)
-        self.assertEqual(antwort.json()["eintraege"], [])
+        self.assertEqual(self._eigene(antwort.json()), [])
 
     def test_leeres_wird_abgewiesen_und_nicht_mit_500(self):
         antwort = self.c.post(f"/api/sitzungen/{self.sid}/prompts",
@@ -404,6 +510,13 @@ class DieOberflaecheZeigtSie(unittest.TestCase):
         self.assertNotIn("innerHTML =", block)
         self.assertNotIn("insertAdjacentHTML", block)
         self.assertIn("nehmen.textContent = eintrag.titel", block)
+
+    def test_jede_gruppe_bekommt_ihre_eigene_zeile(self):
+        """Dreissig Knoepfe in einer Reihe waeren eine Liste zum Durchsuchen."""
+        block = self.JS[self.JS.index("function bibliothekZeichnen"):
+                        self.JS.index("async function bibliothekLaden")]
+        self.assertIn("bib-gruppe", block)
+        self.assertIn("bib-gruppenname", block)
 
     def test_der_dialog_ist_vorgefuellt_aber_zu_lesen(self):
         """Waehrend der Arbeit fuellen - aber mit einem Blick darauf."""

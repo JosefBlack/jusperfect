@@ -64,8 +64,12 @@ VORRAT = Path(__file__).resolve().parent.parent / "promptvorrat.json"
 #: auftaucht.
 OHNE_GEBIET = "Ohne Rechtsgebiet"
 
-#: Laenger als das ist kein Prompt mehr, sondern ein Schriftsatz.
-MAX_ZEICHEN = 4000
+#: Laenger als das ist kein Prompt mehr, sondern ein Schriftsatz. Grosszuegig
+#: bemessen: Der Basisprompt der Kanzlei zum privaten Baurecht ist allein
+#: ueber dreitausend Zeichen lang, und eine Grenze, die mitgeliefertes
+#: Material abschneidet, faellt niemandem auf - sie nimmt nur die letzte
+#: Anweisung weg.
+MAX_ZEICHEN = 8000
 
 #: Eine Ueberschrift muss in eine Leiste passen.
 MAX_TITEL = 80
@@ -142,14 +146,17 @@ def _passt(eines: str, anderes: str) -> bool:
         return a == b
     if a == b:
         return True
-    if a.startswith(b) or b.startswith(a):
-        return len(min(a, b, key=len)) >= 4
+    kurz, lang = sorted((a, b), key=len)
+    if lang.startswith(kurz):
+        return len(kurz) >= 4                 # „Miet" und „Mietrecht"
+    if kurz in lang:
+        return len(kurz) >= GLEICHER_ANFANG   # „Baurecht" und „privates Baurecht"
     gemeinsam = 0
     for links, rechts in zip(a, b):
         if links != rechts:
             break
         gemeinsam += 1
-    return gemeinsam >= GLEICHER_ANFANG
+    return gemeinsam >= GLEICHER_ANFANG       # „Verkehrsrecht" und „Verkehrsunfallrecht"
 
 
 def _titel_glaetten(text: str) -> str:
@@ -183,7 +190,7 @@ def _eintrag(roh: object) -> dict[str, str] | None:
 
 # ── Der mitgelieferte Vorrat ───────────────────────────────────────────────
 
-def vorrat(ort: Path | None = None) -> dict[str, list[dict[str, str]]]:
+def vorrat(ort: Path | None = None) -> dict[str, dict[str, object]]:
     """Was mitgeliefert wird. Faellt er aus, faellt nur er aus.
 
     Anders als bei der eigenen Datei wird hier abgefangen: Der Vorrat ist
@@ -198,13 +205,30 @@ def vorrat(ort: Path | None = None) -> dict[str, list[dict[str, str]]]:
             return {}
     except (OSError, UnicodeDecodeError, ValueError, KeyError, TypeError):
         return {}
-    fertig: dict[str, list[dict[str, str]]] = {}
-    for gebiet, liste in gebiete.items():
-        if not isinstance(liste, list):
+    fertig: dict[str, dict[str, object]] = {}
+    for gebiet, roh_gebiet in gebiete.items():
+        # Zwei Schreibweisen: eine blosse Liste, oder ein Block mit einem
+        # gemeinsamen Basisprompt davor. Die Kanzlei hat ihn zum privaten
+        # Baurecht mitgeliefert ("Gemeinsamer Basisprompt fuer alle Module")
+        # und fuer die anderen Gebiete nicht - beides muss gehen.
+        if isinstance(roh_gebiet, list):
+            basis, immer, liste = "", False, roh_gebiet
+        elif isinstance(roh_gebiet, dict):
+            basis = _text_glaetten(str(roh_gebiet.get("basis", "")))
+            # "immer": Diese Gruppe haengt nicht am Rechtsgebiet der Akte.
+            # Die Kanzlei hat die Gerichtsmuster so beschrieben: "Eigen-
+            # staendiger Bereich" - sie gelten in jedem Verfahren, gleich
+            # welches Rechtsgebiet die Akte traegt.
+            immer = bool(roh_gebiet.get("immer"))
+            liste = roh_gebiet.get("eintraege") or []
+            if not isinstance(liste, list):
+                continue
+        else:
             continue
         eintraege = [e for e in (_eintrag(x) for x in liste) if e]
         if eintraege:
-            fertig[_schluessel(str(gebiet))] = eintraege
+            fertig[_schluessel(str(gebiet))] = {"basis": basis, "immer": immer,
+                                                "eintraege": eintraege}
     return fertig
 
 
@@ -305,14 +329,84 @@ def eintraege(rechtsgebiet: str, ort: Path | None = None,
         for e in reversed(eigene)          # zuletzt Abgelegtes zuerst
     ]
     schon = {e["text"].casefold() for e in eigene}
-    for gebiet, liste in vorrat(vorrat_ort).items():
+    for gebiet, block in vorrat(vorrat_ort).items():
         if not _passt(gebiet, gesucht):
             continue
-        for e in liste:
+        for e in block["eintraege"]:          # type: ignore[union-attr]
             if e["titel"].casefold() in verborgen or e["text"].casefold() in schon:
                 continue
             fertig.append({"titel": e["titel"], "text": e["text"], "mitgeliefert": True})
     return tuple(fertig)
+
+
+def gruppen(rechtsgebiet: str, ort: Path | None = None,
+            vorrat_ort: Path | None = None) -> tuple[dict[str, object], ...]:
+    """Die Leiste, in Gruppen: erst das Rechtsgebiet, dann was immer gilt.
+
+    Aus der Kanzlei am 13.10.2026 zu den Gerichtsmustern: „Eigenstaendiger
+    Bereich ‚Gerichtsmuster' mit diesen zehn Auswahlmoeglichkeiten." Sie
+    haengen nicht am Rechtsgebiet - eine Klageerwiderung schreibt man im
+    Bau- wie im Arbeitsrecht. Sie stehen deshalb in einer eigenen Zeile und
+    nicht zwischen den Modulen des Gebiets: zusammengeworfen waere es eine
+    Liste von dreissig Knoepfen, in der man suchen muesste.
+
+    Jede Gruppe traegt ihren eigenen Vorspann. Der des Rechtsgebiets gilt
+    nicht fuer ein Gerichtsmuster und umgekehrt.
+    """
+    gesucht = _schluessel(rechtsgebiet)
+    fertig: list[dict[str, object]] = [{
+        "name": gesucht,
+        "basis": basis(rechtsgebiet, vorrat_ort),
+        "immer": False,
+        "eintraege": list(eintraege(rechtsgebiet, ort, vorrat_ort)),
+    }]
+    verborgen_alle: dict[str, list[str]] = laden(ort)["versteckt"]   # type: ignore[assignment]
+    for gebiet, block in vorrat(vorrat_ort).items():
+        if not block.get("immer") or _passt(gebiet, gesucht):
+            continue
+        verborgen = {t.casefold() for g, titel in verborgen_alle.items()
+                     if _passt(g, gebiet) for t in titel}
+        liste = [{"titel": e["titel"], "text": e["text"], "mitgeliefert": True}
+                 for e in block["eintraege"]             # type: ignore[union-attr]
+                 if e["titel"].casefold() not in verborgen]
+        if liste:
+            fertig.append({"name": gebiet, "basis": block.get("basis", ""),
+                           "immer": True, "eintraege": liste})
+    return tuple(fertig)
+
+
+def basis(rechtsgebiet: str, vorrat_ort: Path | None = None) -> str:
+    """Der gemeinsame Vorspann dieses Rechtsgebiets, oder "".
+
+    Aus der Kanzlei zum privaten Baurecht: „Gemeinsamer Basisprompt fuer alle
+    Module." Er sagt, was in jedem Modul dieses Gebiets gilt - Mandantenrolle,
+    Aktenauswertung, Fristen, Vertraulichkeit - und stuende sonst zehnmal da.
+
+    Er wird **nicht heimlich** vorangestellt: Die Oberflaeche schreibt ihn
+    sichtbar ins Eingabefeld, wo er zu lesen und zu aendern ist. Ein Vorspann,
+    den man nicht sieht, ist eine Anweisung, von der man nicht weiss.
+    """
+    gesucht = _schluessel(rechtsgebiet)
+    for gebiet, block in vorrat(vorrat_ort).items():
+        if _passt(gebiet, gesucht) and block.get("basis"):
+            return str(block["basis"])
+    return ""
+
+
+def _vergessen_gebiet(titel: str) -> str:
+    """Zu welcher Gruppe eine ausgeblendete Ueberschrift gehoert.
+
+    Eine "immer"-Gruppe wird unter IHREM Namen ausgeblendet, nicht unter dem
+    Rechtsgebiet der Akte: Sonst waere ein Gerichtsmuster nur in Akten eines
+    Gebiets weg und in allen anderen weiter da.
+    """
+    gesucht = _titel_glaetten(titel).casefold()
+    for gebiet, block in vorrat().items():
+        if block.get("immer") and any(
+                e["titel"].casefold() == gesucht
+                for e in block["eintraege"]):            # type: ignore[union-attr]
+            return gebiet
+    return ""
 
 
 def merken(rechtsgebiet: str, titel: str, text: str,
@@ -353,7 +447,7 @@ def vergessen(rechtsgebiet: str, titel: str, ort: Path | None = None) -> None:
     waere er wieder da.
     """
     gesucht = _titel_glaetten(titel)
-    gebiet_gesucht = _schluessel(rechtsgebiet)
+    gebiet_gesucht = _vergessen_gebiet(titel) or _schluessel(rechtsgebiet)
     ort = ort or _ziel()
     bestand = laden(ort)
     gebiete: dict[str, list[dict[str, str]]] = bestand["rechtsgebiete"]   # type: ignore[assignment]
@@ -366,10 +460,11 @@ def vergessen(rechtsgebiet: str, titel: str, ort: Path | None = None) -> None:
         if len(uebrig) != len(liste):
             gebiete[gebiet] = uebrig
             geaendert = True
-    for gebiet, liste in vorrat().items():
+    for gebiet, block in vorrat().items():
         if not _passt(gebiet, gebiet_gesucht):
             continue
-        if any(e["titel"].casefold() == gesucht.casefold() for e in liste):
+        if any(e["titel"].casefold() == gesucht.casefold()
+               for e in block["eintraege"]):   # type: ignore[union-attr]
             weg = verborgen.setdefault(gebiet_gesucht, [])
             if gesucht not in weg:
                 weg.append(gesucht)

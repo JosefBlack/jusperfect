@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -48,6 +48,8 @@ from jusperfect.services.entwuerfe import (
 from jusperfect.services.kosten import BudgetErschoepft, Kostenwaechter
 from jusperfect.services.abschluss import AbschlussFehler, Abschlussdienst
 from jusperfect.services.aufsicht import Aufsichtsdienst
+from jusperfect.services import briefbogen
+from jusperfect.services.briefbogen import BriefbogenFehler
 from jusperfect.services.gedaechtnis import Gedaechtnisdienst
 from jusperfect.services.selbsttest import (
     Selbsttest, gelaender_anprobieren, modelle_anprobieren)
@@ -307,7 +309,7 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         # einen Aufruf. Die Oberflaeche zeigt den Text unveraendert an.
         (AktenZuGross, 422),
         (ReferenzFehler, 422), (GedaechtnisFehler, 422), (AbschlussFehler, 409),
-        (BibliothekFehler, 422),
+        (BibliothekFehler, 422), (BriefbogenFehler, 422),
         (BudgetErschoepft, 429), (GuardrailEingriff, 422), (AnalyseFehler, 422), (EntwurfFehler, 422),
         (KonfigurationsFehler, 500), (JurNodesFehler, 502), (ProviderFehler, 502), (SpeicherFehler, 503),
     ]
@@ -524,10 +526,16 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
 
     def _bibliothek_antwort(sitzung: Any) -> dict[str, Any]:
         gebiet = _gebiet(sitzung)
-        liste = promptbibliothek.eintraege(gebiet)
+        # In Gruppen: erst das Rechtsgebiet der Akte, dann was in jedem
+        # Verfahren gilt (die Gerichtsmuster). Jede Gruppe traegt ihren
+        # eigenen Vorspann; die Oberflaeche setzt ihn SICHTBAR ins
+        # Eingabefeld, nie heimlich davor.
         return {"rechtsgebiet": gebiet or promptbibliothek.OHNE_GEBIET,
                 "aus_akte": bool(gebiet),
-                "eintraege": [dict(e) for e in liste],
+                "gruppen": [{"name": g["name"], "basis": g["basis"],
+                             "immer": g["immer"],
+                             "eintraege": [dict(e) for e in g["eintraege"]]}
+                            for g in promptbibliothek.gruppen(gebiet)],
                 "max_titel": promptbibliothek.MAX_TITEL,
                 "max_zeichen": promptbibliothek.MAX_ZEICHEN}
 
@@ -1000,6 +1008,34 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         return _entwurf_antwort(d.entwuerfe.freigeben(ident, entwurf_id, daten.bestaetigung,
                                                      daten.freigabe_pruefsumme))
 
+    @app.get("/api/briefbogen")
+    def briefbogen_stand(ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Liegt ein Briefbogen bereit, und wenn nicht: wohin gehoert er?"""
+        d.berechtigungen.nutzer(ident)
+        ort = briefbogen.finden()
+        return {"vorhanden": ort is not None,
+                "dateiname": briefbogen.DATEINAME,
+                "ordner": str(briefbogen.orte()[0].parent)}
+
+    @app.get("/api/entwuerfe/{entwurf_id}/briefbogen")
+    def entwurf_auf_briefbogen(entwurf_id: str,
+                               ident: Identitaet = Depends(identitaet)) -> Response:
+        """Den Entwurf auf dem Briefbogen der Kanzlei - als Word-Datei.
+
+        Es wird nichts auf die Platte geschrieben: Das Dokument entsteht im
+        Arbeitsspeicher und geht an den Browser. Wohin es kommt, entscheidet
+        der Bearbeiter im Speichern-Dialog.
+        """
+        entwurf = d.entwuerfe.lesen(ident, entwurf_id)
+        inhalt = briefbogen.erzeugen(briefbogentext(entwurf))
+        ereignis(_log, "entwurf_auf_briefbogen", entwurf=entwurf.id,
+                 nutzer=ident.nutzer_id, bytes=len(inhalt))
+        name = f"Entwurf-{entwurf.id}.docx"
+        return Response(
+            content=inhalt,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
     @app.delete("/api/entwuerfe/{entwurf_id}", status_code=204)
     def entwurf_verwerfen(entwurf_id: str, ident: Identitaet = Depends(identitaet)) -> None:
         d.entwuerfe.verwerfen(ident, entwurf_id)
@@ -1119,6 +1155,29 @@ def _kostenschaetzung(d: Dienste, sitzung: Any) -> dict[str, Any]:
     werte = d.kosten.schaetzen(d.einstellungen.modell_fuer("frage"), zeichen)
     werte["dokumente"] = len(sitzung.geladen)
     return werte
+
+
+def briefbogentext(entwurf: Any) -> str:
+    """Was auf dem Briefbogen steht: Betreff, Text, und was zurueckgehalten wurde.
+
+    Die Hinweise gehoeren mit aufs Blatt. Ein Entwurf, dem eine Aussage
+    fehlt, weil sie keinen Beleg hatte, sieht ohne diesen Satz aus wie ein
+    fertiger Brief - und genau so wuerde er unterschrieben. Auf dem Papier
+    ist das noch wichtiger als auf dem Bildschirm: Das Blatt verlaesst den
+    Rechner, die Oberflaeche nicht.
+
+    Die Fundstellen kommen nicht mit. Sie sind der Weg zum Beleg im
+    Programm; in einem Schreiben an die Gegenseite haetten sie nichts zu
+    suchen.
+    """
+    zeilen: list[str] = []
+    if entwurf.betreff:
+        zeilen += [entwurf.betreff, ""]
+    zeilen.append(entwurf.text)
+    if entwurf.hinweise:
+        zeilen += ["", "---", "Hinweise aus der Belegprüfung (nicht Teil des Schreibens):"]
+        zeilen += [f"- {h}" for h in entwurf.hinweise]
+    return "\n".join(zeilen)
 
 
 def _entwurf_antwort(entwurf: Any) -> dict[str, Any]:

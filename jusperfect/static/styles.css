@@ -426,7 +426,14 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .bib-kopf { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
 .bib-gebiet { font-size: 12px; color: var(--gedaempft); }
 .bib-kopf .mini { margin-left: auto; }
-.bib-liste { display: flex; flex-wrap: wrap; gap: 6px; max-height: 92px; overflow-y: auto; }
+.bib-liste { display: flex; flex-direction: column; gap: 5px; max-height: 118px; overflow-y: auto; }
+/* Eine Zeile je Gruppe: das Rechtsgebiet der Akte, danach die
+   Gerichtsmuster. Innerhalb einer Gruppe darf umbrochen werden, zwischen
+   zwei Gruppen nie - sonst stuende ein Gerichtsmuster mitten zwischen den
+   Modulen des Rechtsgebiets. */
+.bib-gruppe { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.bib-gruppenname { font-size: 11px; color: var(--gedaempft); text-transform: uppercase;
+  letter-spacing: .04em; padding-right: 2px; }
 .bib-leer { font-size: 12px; color: var(--gedaempft); }
 .bib-chip { display: inline-flex; align-items: stretch; border: 1px solid var(--linie);
   border-radius: 999px; background: var(--flaeche); overflow: hidden; max-width: 100%; }
