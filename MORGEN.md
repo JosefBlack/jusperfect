@@ -4803,3 +4803,56 @@ erfundenen Server selbst, damit die alte Bequemlichkeit beim nächsten Umbau
 nicht zurückschleicht. Gegenprobe gemacht: mit der alten Zeile fallen vier.
 
 2150 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026, Abschluss — die Akte öffnet, kein Schritt gescheitert
+
+Aus der Kanzlei: „Neue ZIP geholt, Akte öffnen - keiner gescheitert."
+
+Damit ist die Kette vom Vormittag zu Ende gemessen. Vier Fehler lagen
+hintereinander, und jeder verdeckte den nächsten:
+
+| # | Was | Woran es lag |
+|---|---|---|
+| 1 | Die Zeile zur Vorgangsnummer gab es nicht | `ereignis` schrieb auf INFO, das Fenster nimmt erst ab WARNUNG |
+| 2 | „Interner Fehler" beim Öffnen | `field(default_factory=dict)` in einer Klasse, die keine Dataclass ist |
+| 3 | Zwei Aufrufe schienen abgewiesen | Die Aktenprobe sendete das **Aktenzeichen** statt der Kennung |
+| 4 | Die E-Akte fiel ganz aus | Die **erste** Anfrage nannte ihre Seite nicht |
+
+Drei davon sind an einem Tag von mir selbst eingebaut worden (1, 2, 4 war
+älter). Und dreimal war die Antwort schon da, bevor ich gefragt habe:
+
+* die Protokollzeile — sie entstand und ging nirgendwohin;
+* der Prüfbogen der Schnittstelle, der dieselbe Akte am selben Tag gelesen
+  hatte — in der Datei, die ich nicht aufgemacht habe;
+* der Satz des Servers („Bitte geben Sie eine Page an") — er kam in der
+  Antwort mit und wurde weggeworfen.
+
+> Die drei Lehren sind eine: **Was gemessen vorliegt, schlägt, was ich
+> schließe.** Eine Zahl ohne den Satz daneben ist keine Auskunft, und ein
+> erfundener Server, der mehr durchgehen lässt als der echte, färbt die
+> Prüfung grün.
+
+### Was jetzt nachzusehen ist — in der Akte selbst
+
+Gemessen ist, dass gelesen wird. **Nicht** gemessen ist, ob es richtig
+dasteht. Das geht nur am Schirm:
+
+1. Stehen die Dokumente **nach Ordnern gegliedert**, mit der Gruppe **E-Akte**
+   zuletzt?
+2. Tragen die Mails **Eingang/Ausgang** richtig, und steht bei den neutralen
+   nichts statt einer geratenen Richtung?
+3. Stehen zu jeder Mail der **Brieftext** und ihre **Anlagen** als eigene
+   Dokumente daneben?
+4. Steht an einer Mail, bei der etwas fehlt, der **Grund** in ihrer Zeile?
+5. Steht die Zeile über der Liste nur dann da, wenn wirklich etwas fehlt?
+
+### Stand
+
+2150 Prüfungen grün, eine übersprungen. Zweig `2.0`.
+
+**Offen bei der Kanzlei:** die Sperrliste am zweiten Rechner (vier Wörter),
+`[KANZLEI 19]` AWS-Opt-out, `[KANZLEI 20]` Auftragsverarbeitung.
+**Offen am Programm:** beA und Post — bewusst ungebaut, solange keine Akte mit
+solchen Einträgen vorliegt.
