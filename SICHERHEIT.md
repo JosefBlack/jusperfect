@@ -388,6 +388,101 @@ und verändert nichts.
 - Es läuft nicht von selbst. Der Abschluss wird von einem Menschen ausgelöst; die
   Aufsicht macht sichtbar, was ansteht.
 
+## Verschlüsselung gegenüber AWS — was sie leistet und was nicht
+
+*Ergänzt am 13.10.2026 auf Frage der Kanzlei: „Wird gegenüber AWS verschlüsselt
+oder ist es eine sichere Umgebung?"*
+
+**Die Antwort ist: eine sichere Umgebung mit verschlüsselter Ablage — nicht
+eine Verschlüsselung, die AWS aussperrt.** Beides trifft zu, aber auf
+verschiedene Stellen des Programms, und die Unterscheidung ist die ganze
+Sache. Sie steht hier, damit niemand aus „KMS-verschlüsselt" an anderer Stelle
+dieser Unterlage schließt, der Auftragsverarbeiter könne den Inhalt nicht
+lesen.
+
+### Was verschlüsselt ist: alles, was liegen bleibt
+
+| Was | Wo | Wie |
+|---|---|---|
+| Aktengedächtnis | S3-Bucket der Kanzlei, Frankfurt | `ServerSideEncryption: aws:kms` mit `SSEKMSKeyId` der Kanzlei |
+| Dokumentauszüge der Sitzung | derselbe Weg | ebenso |
+| Ein PDF, das nur über S3 zu erkennen ist | derselbe Weg | ebenso |
+
+Belegstellen im Programm: `gedaechtnis/aws.py`, `speicher/aws.py`,
+`ocr/textract.py`. **Ohne `JUSPERFECT_KMS_SCHLUESSEL_ID` startet die Anwendung
+im Echtbetrieb nicht** (`config.py`); die Verschlüsselung lässt sich nicht
+versehentlich abschalten. Das ist dieselbe Fail-closed-Regel wie beim
+Schutzgeländer.
+
+**Was dieser Schlüssel leistet.** Die Objekte sind nur mit `kms:Decrypt` auf
+genau diesen Schlüssel lesbar. Über dessen Schlüsselrichtlinie verfügt die
+Kanzlei; sie kann ihn sperren oder löschen, und dann sind die Objekte
+unlesbar, endgültig, auch für AWS. Jede Entschlüsselung steht in CloudTrail.
+Gegen Fehlkonfiguration eines Buckets, gegen einen fremden Zugriff auf die
+Ablage und gegen Personal des Auftragsverarbeiters ohne Schlüsselrecht ist das
+eine wirksame Maßnahme.
+
+**Was dieser Schlüssel nicht leistet.** Er liegt **in AWS**, im Dienst KMS. Es
+ist der Schlüssel der Kanzlei, aber nicht einer, den AWS nie gesehen hat. Eine
+Verschlüsselung, die den Auftragsverarbeiter technisch aussperrt, hieße: Der
+Schlüssel liegt außerhalb seiner Reichweite und das Programm verschlüsselt,
+**bevor** etwas hinausgeht (clientseitige Verschlüsselung oder ein externer
+Schlüsselspeicher). **So ist jusperfect nicht gebaut.** Wer eine solche Zusage
+braucht, braucht eine andere Bauweise — und für den Modellweg unten gibt es
+sie überhaupt nicht.
+
+### Was nicht verschlüsselt sein kann: die Verarbeitung
+
+Ein Modell muss den Text **lesen**, um ihn zu beantworten; eine Texterkennung
+muss das Bild **sehen**, um es zu erkennen. Verschlüsselter Inhalt ist für
+beide ohne Nutzen. Daraus folgt:
+
+* **Auf dem Weg hin** verschlüsselt (TLS), ja.
+* **Während der Verarbeitung** liegt der Inhalt bei AWS im Arbeitsspeicher
+  **im Klartext** — bei Bedrock wie bei Textract.
+
+Das ist keine Schwäche dieses Programms, sondern die Natur der Sache: Jede
+Lösung, die einen fremden Rechner rechnen lässt, hat diese Stelle. Rechtlich
+ist der Vorgang damit **Auftragsverarbeitung** und nicht „verschlüsselt und
+deshalb ohne Personenbezug".
+
+**Die Maßnahme an dieser Stelle ist deshalb keine Verschlüsselung, sondern
+Mengenbegrenzung.** Zum Modell gehen genau drei Dinge: die Systemanweisung,
+die **vom Bearbeiter ausgewählten Passagen** und die Aufgabe
+(`providers/bedrock.py`). Nicht die ganze Akte, nicht Dokumentkennungen, nicht
+Nutzer- oder Sitzungskennungen. Das Anhaken im Dokumentfenster ist deshalb
+keine Bequemlichkeit, sondern die wirksamste Maßnahme, die der Bearbeiter in
+der Hand hat: **Was nicht angehakt ist, sieht das Modell nie.**
+
+Was im Dokumenttext an Namen, Beträgen und Daten steht, geht dagegen mit. Das
+ist der Zweck der Auswertung; bewertet ist es in `DSFA-ENTWURF.md`,
+Abschnitt 3.2.
+
+### Was diese Unterlage nicht belegen kann
+
+**Was AWS vertraglich zusagt, steht nicht im Quelltext.** Belegbar ist von
+hier aus nur, *was das Programm sendet und wie es ablegt*. Ob und wie lange
+AWS Inhalte aufbewahren oder verwenden darf, steht im
+Auftragsverarbeitungsvertrag und in den Dienstbedingungen — und für die
+KI-Dienste in der **AI-services-Opt-out-Richtlinie**, die bis heute aussteht
+(Befund F12, `DSFA-ENTWURF.md` `[KANZLEI 19]`, Anleitung in
+`AWS-ZWEI-HANDGRIFFE.md`, Handgriff 2). Solange sie nicht nachgewiesen und
+datiert abgelegt ist, darf keine Unterlage eine Nicht-Speicherung behaupten.
+
+### Ein Satz für die Unterrichtung
+
+> Akteninhalt wird bei AWS in Frankfurt im Auftrag der Kanzlei verarbeitet. Die
+> Übertragung ist verschlüsselt; die dauerhafte Ablage ist mit einem Schlüssel
+> der Kanzlei verschlüsselt, über den die Kanzlei allein verfügt. Zur
+> Verarbeitung selbst liegt der Inhalt beim Auftragsverarbeiter
+> unverschlüsselt vor — eine Verschlüsselung, die ihn aussperrt, ist bei einer
+> Modellverarbeitung technisch nicht möglich. Übermittelt werden nur die vom
+> Bearbeiter ausgewählten Passagen, nicht die Akte.
+
+Dieser Satz ist technisch belegt. Ob er für die Unterrichtung der Betroffenen
+genügt und welche Rechtsgrundlage daneben zu nennen ist, ist eine Frage der
+Kanzlei und keine des Programms.
+
 ## Technische Leitplanken in AWS
 
 - KMS-Schlüssel mit Rotation für DynamoDB, S3, Protokolle und Geheimnis.

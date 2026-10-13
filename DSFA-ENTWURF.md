@@ -16,9 +16,10 @@ Maßnahmen* dagegen im Programm stehen — jede mit Fundstelle.
 verbleibende Risiko tragbar ist und ob die Aufsichtsbehörde nach Art. 36
 einzuschalten ist, kann nur ein Jurist entscheiden, der das Mandatsgeschäft
 kennt. Diese Stellen sind mit **[KANZLEI n]** gekennzeichnet; es sind
-**neunzehn**, und sie stehen am Ende noch einmal in einer Liste. Eine davon ist
-entschieden: **Nr. 18** am 05.10.2026. Sie bleibt stehen und durchgestrichen —
-eine Stelle, die verschwindet, sieht aus, als hätte es sie nie gegeben.
+**zwanzig** — Nr. 20 ist am 13.10.2026 dazugekommen —, und sie stehen am Ende
+noch einmal in einer Liste. Eine davon ist entschieden: **Nr. 18** am
+05.10.2026. Sie bleibt stehen und durchgestrichen — eine Stelle, die
+verschwindet, sieht aus, als hätte es sie nie gegeben.
 
 **Die Zahlen und Befunde stehen woanders.** Jede technische Angabe hier ist aus
 `DSFA-ANGABEN.md` übernommen, wo sie mit Datum und Fundstelle steht. Bei
@@ -68,7 +69,7 @@ Risikobewertung gebraucht wird.
 | Schritt | Was verlässt die Kanzlei | Wohin |
 |---|---|---|
 | Dokumente lesen | nichts | — |
-| Gescannte Seite erkennen | **ein Bild je Seite** | AWS Textract, Frankfurt. Verarbeitet, **nicht gespeichert** |
+| Gescannte Seite erkennen | **ein Bild je Seite** | AWS Textract, Frankfurt. Verarbeitet; **ob gespeichert wird, ist offen** — siehe `[KANZLEI 19]` |
 | Frage, Analyse, Entwurf | **die ausgewählten Passagen** als Text | AWS Bedrock, Frankfurt, über das EU-Inferenzprofil |
 | Schutzgeländer | **Frage und Antwort**, nicht der Akteninhalt | `eu.guardrail.v1:0`, verteilt auf europäische Regionen |
 | Aktengedächtnis sichern | **Dokumenttexte und Abgeleitetes** | S3-Bucket der Kanzlei, Frankfurt, SSE-KMS |
@@ -131,6 +132,63 @@ hat. Das ist nicht nur vorgesehen, sondern technisch gebunden: Die Freigabe ist
 an Nutzer, Akte, Textprüfsumme und Vorgang gekoppelt (HMAC,
 `security/approval.py`); ein geänderter Text, eine fremde Akte oder eine
 nachgebaute Signatur werden abgewiesen (`tests/test_freigabe.py`).
+
+### 2.4 Verschlüsselung gegenüber dem Auftragsverarbeiter
+
+*Ergänzt am 13.10.2026 auf Frage der Kanzlei. Die technische Darstellung steht
+in `SICHERHEIT.md`, Abschnitt „Verschlüsselung gegenüber AWS"; hier steht, was
+für die Risikobewertung daraus folgt.*
+
+**Es ist eine sichere Umgebung mit verschlüsselter Ablage, nicht eine
+Verschlüsselung, die den Auftragsverarbeiter aussperrt.** Diese Unterscheidung
+trägt mehrere Risiken dieses Abschnitts, und sie wird häufig verwechselt:
+
+| | Zustand bei AWS |
+|---|---|
+| Übertragung | verschlüsselt (TLS) |
+| Dauerhafte Ablage (S3) | verschlüsselt mit dem KMS-Schlüssel der Kanzlei |
+| **Verarbeitung im Modell (Bedrock)** | **Klartext** |
+| **Verarbeitung in der Texterkennung (Textract)** | **Klartext** |
+
+**Warum die beiden letzten Zeilen nicht anders sein können.** Ein Modell muss
+den Text lesen, um ihn zu beantworten; eine Texterkennung muss das Bild sehen.
+Verschlüsselter Inhalt ist für beide ohne Nutzen. Es gibt an dieser Stelle
+keine Bauweise, die es anders macht — auch keine andere Software.
+
+**Was der KMS-Schlüssel deshalb bedeutet, und was nicht.** Er schützt die
+Ablage wirksam: Ohne `kms:Decrypt` auf diesen Schlüssel ist kein Objekt
+lesbar, die Kanzlei verfügt allein über die Schlüsselrichtlinie, kann ihn
+sperren oder löschen, und jede Entschlüsselung steht in CloudTrail. Er liegt
+aber **im Dienst KMS bei AWS** — es ist der Schlüssel der Kanzlei, nicht
+einer, den AWS nie gesehen hat.
+
+> **Daraus folgt für diese Unterlage:** Die Verarbeitung ist
+> **Auftragsverarbeitung** nach Art. 28 DSGVO und **nicht** ein Vorgang, dem
+> durch Verschlüsselung der Personenbezug genommen wäre. Keine Maßnahme dieses
+> Abschnitts darf als „AWS kann den Inhalt nicht lesen" gelesen werden. Wo in
+> dieser Unterlage „verschlüsselt" steht, ist die **Ablage** gemeint.
+
+**Die Maßnahme an der offenen Stelle ist Mengenbegrenzung, nicht
+Verschlüsselung.** Zum Modell gehen die Systemanweisung, die **vom Bearbeiter
+ausgewählten Passagen** und die Aufgabe — nicht die Akte (Abschnitt 2.1,
+`providers/bedrock.py`). Damit ist die Auswahl im Dokumentfenster die
+wirksamste Maßnahme in der Hand des Bearbeiters: Was nicht angehakt ist, sieht
+das Modell nie. Sie ist in Abschnitt 3.3 als Datenminimierung geführt und
+gehört in die Einweisung.
+
+**Was von hier aus nicht belegbar ist.** Was AWS vertraglich zusagt, steht
+nicht im Programm. Belegbar ist nur, *was das Programm sendet und wie es
+ablegt*. Die Aufbewahrung beim Auftragsverarbeiter hängt am
+Auftragsverarbeitungsvertrag und — für die KI-Dienste — an der
+**AI-services-Opt-out-Richtlinie**, die weiter aussteht. Sie ist der Grund,
+warum die Textract-Zeile in Abschnitt 2.1 heute „offen" sagt und nicht mehr
+„nicht gespeichert".
+
+**[KANZLEI 20]** — zu entscheiden und festzuhalten: ob die Kanzlei es bei
+dieser Bauweise belässt. Die Alternative wäre eine Verarbeitung auf eigener
+Hardware ohne Auftragsverarbeiter; deren Preis an Qualität, Kosten und
+Betriebsaufwand ist nicht gemessen und darf hier nicht behauptet werden
+(siehe `[KANZLEI 4]` und die Gegenlesung zu Abschnitt 3.2 vom 12.10.2026).
 
 ---
 
@@ -438,7 +496,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 
 ---
 
-## 8. Die neunzehn Stellen für die Kanzlei auf einen Blick
+## 8. Die zwanzig Stellen für die Kanzlei auf einen Blick
 
 | Nr. | Was zu entscheiden ist | Abschnitt |
 |---|---|---|
@@ -461,6 +519,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 17 | Verbleibendes Risiko, Art. 36, Beteiligung des DSB, Überprüfungsfrist | 7 |
 | ~~18~~ | ~~Sollen Aktenzeichen und Dokumenttitel an das Modell gehen?~~ **Entschieden am 05.10.2026: Dateiname nein, Art des Schriftstücks ja, Aktenzeichen nur beim Entwurf** | 2.1 |
 | 19 | Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen | R6 |
+| 20 | Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt? | 2.4 |
 
 ---
 

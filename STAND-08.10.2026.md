@@ -110,7 +110,7 @@ Sie gelten weiter und sind keine Empfehlungen.
 | Was | Wo | Anmerkung |
 |---|---|---|
 | **Opt-out-Richtlinie für die KI-Dienste** | AWS Organizations | Befund F12. Schritt für Schritt in `AWS-ZWEI-HANDGRIFFE.md`. Das Konto gehört zu keiner Organisation; eine anzulegen ist der erste Schritt. |
-| 19 Stellen bewerten | `DSFA-ENTWURF.md` | Art. 35 DSGVO. Dringendste: die Löschfrist, die heute nie von selbst beginnt. |
+| 20 Stellen bewerten | `DSFA-ENTWURF.md` | Art. 35 DSGVO. Dringendste: die Löschfrist, die heute nie von selbst beginnt. |
 | 9 Stellen bewerten | `DATENSCHUTZHINWEISE-ENTWURF.md` | Art. 13. Hängt an einer Frage: Einwilligung oder nicht. |
 | 13 Stellen bewerten | `VERARBEITUNGSVERZEICHNIS-ENTWURF.md` | Art. 30. Ziffer 6.2 steht jetzt gemessen fest. |
 

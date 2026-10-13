@@ -162,7 +162,7 @@ der zwölf Behebungen die Lücke nur verschiebt.
    geraten.
 2. **Die Rechtsunterlagen** (`DSFA-ENTWURF.md`,
    `DATENSCHUTZHINWEISE-ENTWURF.md`, `VERARBEITUNGSVERZEICHNIS-ENTWURF.md`)
-   sind Entwürfe; **41 Stellen** sind als `[KANZLEI n]` offen gelassen und von
+   sind Entwürfe; **42 Stellen** sind als `[KANZLEI n]` offen gelassen und von
    der Kanzlei zu bewerten, nicht von der Entwicklung.
 3. **Zugriff je Bearbeiter.** Technisch vorhanden, in der Kanzlei nicht
    eingeschaltet: Alle eingetragenen Nutzer sehen alle Akten. Bewusst so, und
@@ -292,10 +292,10 @@ Prüfsumme je Dokument — mit allem, was daran hängt?
 
 ### Frage 5 — Die Rechtsdokumentation
 
-`DSFA-ENTWURF.md` (Art. 35 DSGVO, 19 Stellen),
+`DSFA-ENTWURF.md` (Art. 35 DSGVO, 20 Stellen),
 `DATENSCHUTZHINWEISE-ENTWURF.md` (Art. 13, 9 Stellen) und
 `VERARBEITUNGSVERZEICHNIS-ENTWURF.md` (Art. 30, 13 Stellen) sind
-Entwürfe der Entwicklung. **41 Stellen sind als `[KANZLEI n]` offen gelassen**,
+Entwürfe der Entwicklung. **42 Stellen sind als `[KANZLEI n]` offen gelassen**,
 weil sie eine rechtliche Bewertung verlangen; sie stehen am Ende jeder Datei in
 einer Liste.
 
