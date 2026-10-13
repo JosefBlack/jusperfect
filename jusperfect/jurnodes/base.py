@@ -195,6 +195,26 @@ class JurNodesAdapter(Protocol):
     def dokument_laden(self, akte_id: str, dokument_id: str) -> tuple[Dokument, bytes]: ...
     def beteiligte(self, akte_id: str) -> list[Beteiligter]: ...
     def fristen(self, akte_id: str) -> list[Frist]: ...
+    def inhalte_vergessen(self, akte_id: str | None = None,
+                          dokument_id: str | None = None) -> None:
+        """Gepufferten Akteninhalt aus dem Arbeitsspeicher hergeben.
+
+        **Befund N10 der dritten Zweitpruefung vom 12.10.2026.** Der
+        HTTP-Adapter haelt zerlegte Mailtexte und Anlagen als Python-Objekte
+        ausserhalb des Sitzungsspeichers - auch solche, die beim Aufbau der
+        Dokumentliste geholt und nie ausgewaehlt wurden. Der Sitzungsschluss
+        entfernte sie nicht.
+
+        > Ein gezielter Loeschvorgang kann sich nicht auf den Sitzungsspeicher
+        > beschraenken, wenn daneben neue Inhaltskopien bestehen.
+
+        Deshalb gehoert dieser Griff in den Vertrag und nicht in einen
+        Adapter: Wer Inhalt puffert, muss ihn auch hergeben koennen. Ein
+        Adapter ohne eigenen Puffer tut nichts - und sagt das, statt die
+        Methode fehlen zu lassen.
+        """
+        ...
+
     def vermerk_schreiben(self, akte_id: str, titel: str, text: str, freigabe: Freigabe) -> str:
         """Legt einen Vermerk/Entwurf in der Akte ab und gibt dessen Kennung zurück.
 

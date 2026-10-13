@@ -56,6 +56,21 @@ NUR_POSTFACH = (
 PROTOKOLLE = ("imaplib", "smtplib", "poplib", "aiosmtplib", "exchangelib")
 
 
+#: Die eine Datei, die diese Pfade nennen **muss** - weil sie sie verbietet.
+#:
+#: Befund N09 der dritten Zweitpruefung vom 12.10.2026: Das Verbot stand
+#: allein in dieser Pruefdatei, also im Quelltext. Die Pfade sind aber
+#: einstellbar (`JUSPERFECT_JURNODES_ENDPUNKTE`) - wer dort einen reinen
+#: Postfachpfad eintrug, bekam ihn gesendet, und diese Pruefung blieb gruen.
+#:
+#: Seit dem 13.10.2026 steht das Verbot im Programm: `Endpunkte.NUR_POSTFACH`
+#: und `postfach_ausschliessen()`. Damit nennt `http_adapter.py` die drei
+#: Pfade - dasselbe Muster wie bei der Datei des Herstellers, die selbst einen
+#: gesperrten Namen fuehrt. Statt der Textsuche prueft `DieVorgabeIstSauber`
+#: unten, was in den Pfaden tatsaechlich **eingestellt** ist.
+VERBIETET_SIE = {"http_adapter.py"}
+
+
 def _python_dateien() -> list[Path]:
     return [p for p in QUELLE.rglob("*.py") if "__pycache__" not in p.parts]
 
@@ -64,6 +79,8 @@ class DasProgrammRuftKeinenPostfachAufruf(unittest.TestCase):
 
     def test_die_drei_reinen_postfachaufrufe_stehen_nirgends(self):
         for pfad in _python_dateien():
+            if pfad.name in VERBIETET_SIE:
+                continue
             text = pfad.read_text(encoding="utf-8")
             for aufruf in NUR_POSTFACH:
                 with self.subTest(datei=pfad.name, aufruf=aufruf):
@@ -140,3 +157,122 @@ class DieVorgabeStehtInDenUnterlagen(unittest.TestCase):
             self.assertIn(recht, text)
         self.assertIn("in welchem sich alle Akten befinden", text,
                       "Der Grund gehört dazu, nicht nur die Regel.")
+
+
+class DieVorgabeIstSauber(unittest.TestCase):
+    """Was eingestellt **ist**, nicht was im Quelltext steht — Befund N09."""
+
+    def test_kein_vorgabepfad_fuehrt_in_ein_postfach(self):
+        from dataclasses import fields
+
+        from jusperfect.jurnodes.http_adapter import Endpunkte
+
+        vorgabe = Endpunkte()
+        for feld in fields(vorgabe):
+            wert = getattr(vorgabe, feld.name)
+            if not isinstance(wert, str):
+                continue
+            with self.subTest(feld=feld.name):
+                self.assertNotIn("postbox", wert.lower())
+                self.assertNotIn("/" + wert.strip().strip("/").lower(), NUR_POSTFACH)
+
+    def test_das_programm_fuehrt_dieselbe_liste(self):
+        """Zwei Listen, die auseinanderlaufen, sind schlimmer als eine."""
+        from jusperfect.jurnodes.http_adapter import Endpunkte
+
+        self.assertEqual(set(NUR_POSTFACH), set(Endpunkte.NUR_POSTFACH))
+
+    def test_ein_eingestellter_postfachpfad_wird_abgewiesen(self):
+        from jusperfect.config import KonfigurationsFehler
+        from jusperfect.jurnodes.http_adapter import Endpunkte
+
+        for pfad in ("/bea/postbox/search", "bea/search", "/BEA/Folder/Search",
+                     "/mail/postbox/download"):
+            with self.subTest(pfad=pfad):
+                with self.assertRaises(KonfigurationsFehler) as fehler:
+                    Endpunkte(akten_suche=pfad).postfach_ausschliessen("einer Probe")
+                self.assertIn("Postfach", str(fehler.exception))
+
+    def test_auch_der_adapter_prueft_beim_bauen(self):
+        """Nicht nur die Datei: Der Satz Pfade, mit dem gesprochen wird."""
+        import httpx
+
+        from jusperfect.config import KonfigurationsFehler
+        from jusperfect.jurnodes.http_adapter import Endpunkte, HttpJurNodesAdapter
+        from jusperfect.security.approval import Freigabestelle
+
+        böse = Endpunkte.__new__(Endpunkte)      # ohne die Pruefung im Konstruktor
+        object.__setattr__(böse, "__dict__", dict(Endpunkte().__dict__))
+        with self.assertRaises(KonfigurationsFehler):
+            HttpJurNodesAdapter(
+                "https://beispiel.invalid", "k", Freigabestelle(),
+                transport=httpx.MockTransport(
+                    lambda a: httpx.Response(200, json={})),
+                benutzer="u",
+                endpunkte=Endpunkte(akten_suche="/bea/postbox/search"))
+
+    def test_eine_datei_mit_postfachpfad_wird_abgewiesen(self, ):
+        """Der Weg, auf dem es tatsaechlich hereinkaeme."""
+        import json as _json
+        import tempfile
+
+        from jusperfect.config import KonfigurationsFehler
+        from jusperfect.jurnodes.http_adapter import Endpunkte
+
+        with tempfile.TemporaryDirectory() as ordner:
+            datei = Path(ordner) / "endpunkte.json"
+            datei.write_text(_json.dumps({"akten_suche": "/bea/search"}),
+                             encoding="utf-8")
+            with self.assertRaises(KonfigurationsFehler) as fehler:
+                Endpunkte.aus_datei(datei)
+            self.assertIn("Postfach", str(fehler.exception))
+
+
+class GemessenAmTatsaechlichenAufruf(unittest.TestCase):
+    """Nicht am Quelltext, nicht an der Einstellung — am Transport.
+
+    Die Empfehlung des Prüfers, wörtlich: *„Eine Zusage braucht einen Test am
+    tatsächlichen Ausgang."* Hier läuft der echte Adapter gegen einen
+    Ersatz-Transport, der jeden Pfad mitschreibt, den er wirklich bekommt.
+    """
+
+    def _gefragt(self) -> list[str]:
+        import httpx
+
+        from jusperfect.jurnodes.http_adapter import HttpJurNodesAdapter
+        from jusperfect.security.approval import Freigabestelle
+
+        pfade: list[str] = []
+
+        def server(anfrage: httpx.Request) -> httpx.Response:
+            pfade.append(anfrage.url.path)
+            if anfrage.url.path.endswith("/record"):
+                return httpx.Response(200, json={"identifier": "rec-1",
+                                                 "fileFolderId": 7})
+            return httpx.Response(200, json={"elements": [], "pagesTotal": 1})
+
+        adapter = HttpJurNodesAdapter(
+            "https://beispiel.invalid", "k", Freigabestelle(),
+            transport=httpx.MockTransport(server), benutzer="u",
+            korrespondenz=True)
+        adapter.akten_suchen("")
+        adapter.dokumente("rec-1")
+        adapter.beteiligte("rec-1")
+        adapter.fristen("rec-1")
+        return pfade
+
+    def test_kein_aufruf_geht_an_ein_postfach(self):
+        pfade = self._gefragt()
+        self.assertTrue(pfade, "Es wurde gar nichts gefragt — dann prüft das nichts.")
+        for pfad in pfade:
+            with self.subTest(pfad=pfad):
+                self.assertNotIn("postbox", pfad.lower())
+                self.assertNotIn(pfad.lower(), NUR_POSTFACH)
+
+    def test_gefragt_wird_nur_was_erwartet_ist(self):
+        """Eine Positivliste: Ein neuer Aufruf soll hier auffallen."""
+        erlaubt = {"/record/search", "/record", "/file-system/folder/content",
+                   "/relation/search", "/todo/search", "/correspondence/search"}
+        unerwartet = sorted({p for p in self._gefragt()} - erlaubt)
+        self.assertEqual([], unerwartet,
+                         "Das Programm fragt einen Pfad, der hier nicht steht.")

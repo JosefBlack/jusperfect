@@ -944,6 +944,12 @@ def _sitzung_antwort(d: Dienste, sitzung: Any) -> dict[str, Any]:
         "mail_ausgelassen": dict(getattr(d.adapter, "letzte_mail_ausgelassen", {})),
         # Angehaengte Nachrichten, deren Text mitgekommen ist (Befund N03).
         "mail_nachrichten": getattr(d.adapter, "letzte_mail_nachrichten", 0),
+        # Die Akte nennt keinen Dateiordner. Dann fehlen die Dateien - aber
+        # die E-Akte steht trotzdem da (Befund N07). Eine leere Liste sieht
+        # sonst aus wie "die Akte ist leer" und heisst "ich habe nicht
+        # nachgesehen".
+        "akte_ohne_dateiordner": bool(
+            getattr(d.adapter, "letzte_akte_ohne_dateiordner", False)),
         "beteiligte": [x.model_dump() for x in d.sitzungen.beteiligte(sitzung)],
         "fristen": [x.model_dump() for x in d.sitzungen.fristen(sitzung)],
         "gedaechtnis": d.gedaechtnis.uebersicht(d.gedaechtnis.lesen(sitzung.akte_id)),

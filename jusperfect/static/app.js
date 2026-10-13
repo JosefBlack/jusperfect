@@ -769,6 +769,18 @@ function explorerStarten(initial) {
     // und niemand sah es. Angezeigt wurden allein die angenommenen Anlagen,
     // und die sahen vollstaendig aus. Das Bild einer Signatur zaehlt hier
     // nicht mit - es ist kein Verlust, nur Rauschen in der Warnung.
+    // Die Akte nennt keinen Dateiordner (Befund N07). Dann fehlen die
+    // Dateien, und das muss oben stehen - sonst sieht die Liste aus wie eine
+    // Akte, in der nur die E-Akte liegt.
+    if (sitzung.akte_ohne_dateiordner) {
+      eakteHinweis.hidden = false;
+      const satz = "Diese Akte nennt in jur|nodes keinen Dateiordner. "
+        + "Die Dateien der Akte fehlen deshalb in dieser Liste; was aus der "
+        + "E-Akte kommt, steht vollständig da. Bitte in jur|nodes nachsehen.";
+      eakteHinweis.textContent = eakteHinweis.textContent
+        ? satz + " — " + eakteHinweis.textContent : satz;
+    }
+
     const aus = sitzung.mail_ausgelassen || {};
     const verluste = Object.entries(aus)
       .filter(([grund, n]) => n > 0 && !grund.startsWith("eingebettetes Bild"))

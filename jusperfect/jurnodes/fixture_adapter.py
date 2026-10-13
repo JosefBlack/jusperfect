@@ -120,5 +120,14 @@ class FixtureJurNodesAdapter:
     def gedaechtnis_ablegen(self, akte_id: str, rohdaten: bytes) -> None:
         gedaechtnisdatei.ablegen(self._ordner(akte_id), rohdaten, self._schreibbar)
 
+    def inhalte_vergessen(self, akte_id: str | None = None,
+                          dokument_id: str | None = None) -> None:
+        """Nichts zu tun: Dieser Adapter puffert keinen Akteninhalt.
+
+        Steht hier ausdruecklich und nicht als fehlende Methode - sonst waere
+        beim naechsten Adapter nicht zu erkennen, ob der Puffer vergessen
+        wurde oder keiner da ist (Befund N10).
+        """
+
     def gedaechtnis_loeschen(self, akte_id: str) -> None:
         gedaechtnisdatei.loeschen(self._ordner(akte_id), self._schreibbar)

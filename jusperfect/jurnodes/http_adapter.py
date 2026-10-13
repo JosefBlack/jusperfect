@@ -111,7 +111,9 @@ class Endpunkte:
         einzelner Pfad richtigstellen, ohne die übrigen abzuschreiben.
         """
         if not pfad:
-            return cls()
+            vorgabe = cls()
+            vorgabe.postfach_ausschliessen()
+            return vorgabe
         datei = Path(pfad)
         if not datei.is_file():
             raise KonfigurationsFehler(
@@ -139,7 +141,57 @@ class Endpunkte:
         if falsch:
             raise KonfigurationsFehler(
                 f"Diese Einträge in {datei} sind keine brauchbaren Pfade: {', '.join(falsch)}.")
-        return cls(**{k: v.strip() for k, v in daten.items()})
+        endpunkte = cls(**{k: v.strip() for k, v in daten.items()})
+        endpunkte.postfach_ausschliessen(str(datei))
+        return endpunkte
+
+    #: Aufrufe, die es nur fuer das Postfach gibt. Dieselbe Liste wie in
+    #: ``tests/test_kein_postfach.py``, und hier gehoert sie ins Programm:
+    #: Ein Test prueft den Quelltext, diese Pruefung prueft, was eingestellt
+    #: ist.
+    NUR_POSTFACH = ("/bea/postbox/search", "/bea/folder/search", "/bea/search")
+
+    def postfach_ausschliessen(self, woher: str = "der Vorgabe im Programm") -> None:
+        """Kein eingestellter Pfad darf in ein Postfach fuehren. Fail closed.
+
+        **Befund N09 der dritten Zweitpruefung vom 12.10.2026.** Das
+        Postfachverbot war allein durch einen Test ueber den **Quelltext**
+        gesichert: Er suchte die drei ausgeschriebenen Pfade in den
+        Python-Dateien. Die Pfade sind aber **einstellbar** - genau dafuer gibt
+        es ``JUSPERFECT_JURNODES_ENDPUNKTE``. Wer dort fuer die Aktensuche
+        einen reinen Postfachpfad eintrug, bekam ihn gesendet, und der
+        Quelltexttest blieb gruen.
+
+        > Eine Zusage, die am Quelltext haengt, haelt nicht, wenn die Zahl aus
+        > einer Datei kommt.
+
+        Geprueft wird deshalb hier, beim Einlesen, und zwar **zweierlei**:
+
+        * die drei reinen Postfachaufrufe, Zeichen fuer Zeichen;
+        * jeder Pfad, in dem ueberhaupt ``postbox`` vorkommt. Das ist weiter
+          als noetig und mit Absicht: Welche Pfade der Hersteller morgen
+          dazunimmt, weiss hier niemand, und die Hausregel lautet nicht "nicht
+          diese drei", sondern **kein Postfachzugriff**.
+
+        Was diese Pruefung nicht kann: Die rechteabhaengige Doppelfunktion von
+        ``POST /mail/download`` - derselbe Pfad holt je Schluessel eine
+        Nachricht aus der Akte oder eine aus dem Postfach. Das haengt an den
+        Rechten des Schluessels und ist serverseitig und organisatorisch zu
+        sichern (``schnittstelle/ANFRAGE-HERSTELLER.md``).
+        """
+        for feld in fields(self):
+            wert = getattr(self, feld.name)
+            if not isinstance(wert, str):
+                continue
+            geputzt = "/" + wert.strip().strip("/").lower()
+            if geputzt in self.NUR_POSTFACH or "postbox" in geputzt:
+                raise KonfigurationsFehler(
+                    f"Der Eintrag {feld.name!r} steht auf {wert.strip()!r} (aus "
+                    f"{woher}). Dieser Pfad fuehrt in das Postfach, in dem die "
+                    f"Post aller Mandate liegt. jusperfect spricht ausschliesslich "
+                    f"mit der Akte: Alle Mails und Vermerke stehen in der E-Akte, "
+                    f"und ein Postfach auszulesen waere ein Blick in fremde "
+                    f"Mandate. Siehe SICHERHEIT.md.")
 
 
 def _erstes(daten: Mapping[str, Any], *namen: str, standard: Any = "") -> Any:
@@ -609,6 +661,10 @@ class HttpJurNodesAdapter:
             raise KonfigurationsFehler("Die jur|nodes-URL muss mit https:// beginnen.")
         if not token:
             raise KonfigurationsFehler("Kein jur|nodes-Schlüssel vorhanden.")
+        # Die Pfade, mit denen wirklich gesprochen wird - gleich, ob sie aus
+        # der Vorgabe, aus einer Datei oder von einem Aufrufer kommen. Befund
+        # N09: Geprueft war nur der Quelltext, und die Pfade sind einstellbar.
+        endpunkte.postfach_ausschliessen()
         self._endpunkte = endpunkte
         self._freigabestelle = freigabestelle
         self._korrespondenz = korrespondenz
@@ -632,8 +688,37 @@ class HttpJurNodesAdapter:
         #: Brieftext und jede Anlage; sie ein zweites Mal zu holen, waere ein
         #: zweiter Aufruf fuer dasselbe Paket. Begrenzt durch
         #: ``mail_grenze_bytes`` je Mail und ``mail_gesamt_bytes`` je Akte.
-        self._mails: dict[str, Zerlegt] = {}
+        #: kennung -> (Zeitpunkt des Holens, Zerlegtes). Der Zeitpunkt gehoert
+        #: dazu: Befund N10 der dritten Zweitpruefung vom 12.10.2026 - dieser
+        #: Puffer haelt Klartext aus Mails und Anlagen als Python-Objekte
+        #: AUSSERHALB des Sitzungsspeichers, und der Sitzungsschluss entfernte
+        #: ihn nicht. Auch `_puffer_leeren()` und `schliessen()` leerten ihn
+        #: nicht; geleert wurde er allein beim Wechsel der Akte.
+        #:
+        #: "Ein gezielter Loeschvorgang kann sich nicht auf den
+        #: Sitzungsspeicher beschraenken, wenn daneben neue Inhaltskopien
+        #: bestehen." Jetzt hat er drei Enden: den Sitzungsschluss, das
+        #: Vergessen eines Dokuments und eine Frist.
+        self._mails: dict[str, tuple[float, Zerlegt]] = {}
         self._mails_akte: str = ""
+        #: Wie viele Bytes fuer DIESE Akte schon geholt wurden - ueber alle
+        #: Aufrufe, nicht je Aufruf.
+        #:
+        #: Befund N06: `verbraucht` war eine oertliche Zaehlung in
+        #: `_mail_dokumente` und begann bei jedem Listenaufbau wieder bei null.
+        #: Wer die Liste zweimal aufbaute, holte zweimal 100 MB. Und
+        #: `dokument_laden()` holte eine wegen Budget ausgelassene Mail ueber
+        #: `_mail_teil()` ohne jede Pruefung nach.
+        self._mail_konto: int = 0
+        #: Mails, die fuer DIESE Akte am Gesamtmass gescheitert sind.
+        #:
+        #: Beim Bauen des Kontos aufgefallen: Ohne dieses Gedaechtnis fragte
+        #: jeder neue Listenaufbau dieselben Mails wieder an. Die Bytes blieben
+        #: begrenzt - der Abbruch geschieht an der Kopfzeile -, aber es waren
+        #: Aufrufe ohne jede Aussicht, und die Meldung beim Nachladen nannte
+        #: dann "budget" statt zu sagen, dass das Gesamtmass der Akte erreicht
+        #: ist. Wer einmal nicht hineinpasst, passt nicht hinein.
+        self._mail_abgelehnt: set[str] = set()
         self._mail_grenze = int(mail_grenze_mb) * 1024 * 1024
         self._mail_gesamt = int(mail_gesamt_mb) * 1024 * 1024
         self._client = httpx.Client(
@@ -952,6 +1037,72 @@ class HttpJurNodesAdapter:
         self._kurzpuffer.clear()
         self._liste_puffer = ("", 0.0, [])
 
+    # ── Der Mailpuffer und seine Lebensdauer (Befund N10) ──────────────────
+
+    def _mail_aus_puffer(self, akte_id: str, kennung: str) -> "Zerlegt | None":
+        """Die gepufferte Zerlegung - wenn sie zur Akte gehoert und frisch ist."""
+        if self._mails_akte != akte_id:
+            return None
+        eintrag = self._mails.get(kennung)
+        if eintrag is None:
+            return None
+        stand, zerlegt = eintrag
+        if time.monotonic() - stand >= self.MAIL_PUFFER_SEKUNDEN:
+            del self._mails[kennung]
+            return None
+        return zerlegt
+
+    def _mail_puffern(self, akte_id: str, kennung: str, zerlegt: "Zerlegt") -> None:
+        if self._mails_akte != akte_id:
+            self._mails.clear()
+            self._mails_akte = akte_id
+            self._mail_konto = 0
+            self._mail_abgelehnt.clear()
+        self._mails[kennung] = (time.monotonic(), zerlegt)
+
+    def _mails_abgelaufene_entfernen(self) -> None:
+        """Was die Frist ueberschritten hat, geht - auch ohne Zugriff darauf.
+
+        Sonst laege der Klartext einer Mail, die niemand mehr anfasst, bis zum
+        Ende des Vorgangs im Speicher.
+        """
+        jetzt = time.monotonic()
+        for kennung in [k for k, (stand, _) in self._mails.items()
+                        if jetzt - stand >= self.MAIL_PUFFER_SEKUNDEN]:
+            del self._mails[kennung]
+
+    def inhalte_vergessen(self, akte_id: str | None = None,
+                          dokument_id: str | None = None) -> None:
+        """Den gepufferten Klartext hergeben - ganz oder fuer ein Dokument.
+
+        Befund N10. Aufgerufen beim Sitzungsschluss, beim Vergessen eines
+        einzelnen Dokuments und beim Schliessen des Adapters.
+
+        ``clear()`` ist dabei **logisches** Entfernen, keine garantierte
+        Nullung des Python-Speichers - das steht hier, weil eine Zusage, die
+        mehr behauptet, als sie halten kann, schlimmer ist als keine.
+        """
+        if dokument_id and dokument_id.startswith(MAIL_VORSATZ):
+            rest = dokument_id[len(MAIL_VORSATZ):]
+            kennung = rest.partition(ANHANG_TRENNER)[0]
+            self._mails.pop(kennung, None)
+            return
+        if akte_id is not None and self._mails_akte != akte_id:
+            return
+        self._mails.clear()
+        self._mails_akte = ""
+        self._mail_konto = 0
+        self._mail_abgelehnt.clear()
+
+    #: Wie lange der Klartext einer Mail im Arbeitsspeicher bleiben darf.
+    #:
+    #: Eine Stunde, nicht die sieben Tage der Sitzung: Der Puffer ist dafuer
+    #: da, dass die Dokumentliste und das anschliessende Laden dieselbe `.eml`
+    #: nicht zweimal holen muessen. Was eine Stunde liegt, wird in dieser
+    #: Sitzung nicht mehr gebraucht - und Klartext aus einer Akte soll nicht
+    #: laenger im Speicher stehen als er gebraucht wird (Befund N10).
+    MAIL_PUFFER_SEKUNDEN = 3600
+
     #: Wie tief in Unterordner hinabgestiegen wird.
     #:
     #: Gemessen am 25.09.2026 in der Kanzlei: eine Akte mit 29 Dateien im
@@ -998,6 +1149,9 @@ class HttpJurNodesAdapter:
     letzte_mail_ausgelassen: dict[str, int] = field(default_factory=dict)
     #: Angehaengte Nachrichten, deren Text mit in die Dokumente kam (N03).
     letzte_mail_nachrichten: int = 0
+    #: Die Akte nennt keinen Dateiordner - dann fehlen die Dateien, aber nicht
+    #: die E-Akte. Befund N07 der dritten Zweitpruefung vom 12.10.2026.
+    letzte_akte_ohne_dateiordner: bool = False
 
     def _ordner_durchgehen(self, wurzel: Any) -> list[tuple[str, Mapping[str, Any]]]:
         """Alle Eintraege einer Akte - auch die in Unterordnern.
@@ -1061,11 +1215,30 @@ class HttpJurNodesAdapter:
         nennt eine ``fileFolderId``; deren Inhalt wird getrennt abgefragt und
         enthaelt Ordner und Dateien gemischt. Nur die Dateien zaehlen hier.
         """
+        self.letzte_akte_ohne_dateiordner = False
         roh = self._roh_akte(akte_id)
         ordner_id = roh.get("fileFolderId")
-        if not ordner_id:
-            return []
-        eintraege = self._ordner_durchgehen(ordner_id)
+        # **Befund N07 der dritten Zweitpruefung vom 12.10.2026.** Hier stand
+        # ``return []`` - und damit war auch die E-Akte weg, obwohl sie an
+        # einem voellig anderen Weg haengt (``POST /correspondence/search``
+        # mit ``recordIdentifier``, kein Ordner). Statt einer erkennbaren
+        # Luecke erschien eine leere Akte.
+        #
+        # Die Beschreibung des Herstellers kennzeichnet ``fileFolderId`` als
+        # nicht erforderlich, sagt aber zugleich, sie werde bei Aktenanlage
+        # automatisch vergeben; ein Echtfall ist nicht belegt. Das aendert
+        # nichts: Zwei unabhaengige Lesewege duerfen nicht aneinander haengen,
+        # und eine leere Liste ist die schlechteste aller Antworten - sie sieht
+        # aus wie "die Akte ist leer" und heisst "ich habe nicht nachgesehen".
+        ordner: list[tuple[str, Mapping[str, Any]]] = []
+        if ordner_id:
+            ordner = self._ordner_durchgehen(ordner_id)
+        else:
+            # Kein Protokolleintrag: Diese Datei fuehrt keinen Protokollkanal,
+            # und eine Aktenkennung gehoert nicht in einen. Der Zaehler geht
+            # denselben Weg wie die uebrigen - ueber web.py in die Anzeige.
+            self.letzte_akte_ohne_dateiordner = True
+        eintraege = ordner
         # Die Akte nennt einen ZWEITEN Ordner: den fuer die Korrespondenz.
         #
         # Eingebaut am 25.09.2026. Aus der Kanzlei: "er muss auch die Mails
@@ -1240,9 +1413,11 @@ class HttpJurNodesAdapter:
         if self._mails_akte != akte_id:
             self._mails.clear()
             self._mails_akte = akte_id
+            self._mail_konto = 0
+            self._mail_abgelehnt.clear()
+        self._mails_abgelaufene_entfernen()
 
         dokumente: list[Dokument] = []
-        verbraucht = 0
         for eintrag in eintraege:
             if str(eintrag.get("type", "")).lower() != "mail":
                 continue
@@ -1251,24 +1426,33 @@ class HttpJurNodesAdapter:
                 self.letzte_korrespondenz_ohne_inhalt += 1
                 continue
             kennung = str(kennung)
-            zerlegt = self._mails.get(kennung)
+            zerlegt = self._mail_aus_puffer(akte_id, kennung)
             if zerlegt is None:
-                if verbraucht >= self._mail_gesamt:
+                # Das Konto, nicht eine Zaehlung dieses Aufrufs (Befund N06).
+                # Schon Gepuffertes zaehlt nicht erneut - es wurde bezahlt, als
+                # es geholt wurde.
+                if (self._mail_konto >= self._mail_gesamt
+                        or kennung in self._mail_abgelehnt):
                     self.letzte_mails_ueber_budget += 1
                     dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
                                                        grund="budget"))
                     continue
-                zerlegt, groesse, grund = self._mail_holen(kennung)
-                verbraucht += groesse
+                zerlegt, groesse, grund = self._mail_holen(
+                    kennung, rest=self._mail_gesamt - self._mail_konto)
+                self._mail_konto += groesse
+                if grund == "budget":
+                    self._mail_abgelehnt.add(kennung)
                 if zerlegt is None:
                     if grund == "zu_gross":
                         self.letzte_mails_zu_gross += 1
+                    elif grund == "budget":
+                        self.letzte_mails_ueber_budget += 1
                     else:
                         self.letzte_mails_ohne_antwort += 1
                     dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
                                                        grund=grund))
                     continue
-                self._mails[kennung] = zerlegt
+                self._mail_puffern(akte_id, kennung, zerlegt)
 
             # Was diese Mail an Teilen verloren hat, steht in ihrer eigenen
             # Zeile - dort sucht man es, wenn eine Anlage fehlt. Die Summe
@@ -1287,7 +1471,8 @@ class HttpJurNodesAdapter:
                 self.letzte_mail_anhaenge += 1
         return dokumente
 
-    def _mail_holen(self, kennung: str) -> tuple[Zerlegt | None, int, str]:
+    def _mail_holen(self, kennung: str,
+                    rest: int | None = None) -> tuple[Zerlegt | None, int, str]:
         """Eine ``.eml`` holen und zerlegen - mit der Groessengrenze davor.
 
         Die Grenze wird an ``Content-Length`` geprueft, **bevor** die Bytes
@@ -1295,6 +1480,13 @@ class HttpJurNodesAdapter:
         sie da sind, und ein Abbruch an dieser Stelle kostet nur sie. Nennt
         der Server keine Laenge, wird mitgezaehlt und bei Ueberschreitung
         abgebrochen.
+
+        ``rest`` ist, was vom Aktenkonto noch uebrig ist. Befund N06 der
+        dritten Zweitpruefung: Hier galt allein die Grenze je Mail. Die letzte
+        Mail wurde deshalb **voll** uebernommen, auch wenn sie den Rest
+        ueberschritt - bei 20 MB je Mail konnte die Akte so um bis zu 20 MB
+        ueber ihr Gesamtmass hinausgehen. Jetzt gilt die kleinere der beiden
+        Grenzen, und der Grund sagt, welche gegriffen hat.
         """
         koerper = {"mailIdentifier": kennung}
         try:
@@ -1305,15 +1497,22 @@ class HttpJurNodesAdapter:
                                          ) as antwort:
                     if antwort.status_code >= 400:
                         return None, 0, "status"
+                    # Die kleinere der beiden Grenzen - und der Grund dazu.
+                    grenze, grund = self._mail_grenze, "zu_gross"
+                    if rest is not None and rest < grenze:
+                        grenze, grund = max(rest, 0), "budget"
                     gemeldet = antwort.headers.get("content-length")
-                    if gemeldet and gemeldet.isdigit() and int(gemeldet) > self._mail_grenze:
-                        return None, 0, "zu_gross"
+                    if gemeldet and gemeldet.isdigit() and int(gemeldet) > grenze:
+                        return None, 0, grund
                     teile: list[bytes] = []
                     gelesen = 0
                     for stueck in antwort.iter_bytes():
                         gelesen += len(stueck)
-                        if gelesen > self._mail_grenze:
-                            return None, gelesen, "zu_gross"
+                        if gelesen > grenze:
+                            # Gelesen ist gelesen: Die Bytes sind ueber die
+                            # Leitung gegangen und zaehlen auf dem Konto, auch
+                            # wenn der Inhalt verworfen wird.
+                            return None, gelesen, grund
                         teile.append(stueck)
         except httpx.HTTPError:
             # Eine Mail, die nicht kommt, kostet nicht die uebrigen.
@@ -1399,18 +1598,32 @@ class HttpJurNodesAdapter:
         der Puffer leer - etwa weil das Programm zwischendurch neu gestartet
         wurde -, wird sie einmal nachgeholt.
         """
-        rest = dokument_id[len(MAIL_VORSATZ):]
-        kennung, _, nummer = rest.partition(ANHANG_TRENNER)
-        zerlegt = self._mails.get(kennung) if self._mails_akte == akte_id else None
+        teil = dokument_id[len(MAIL_VORSATZ):]
+        kennung, _, nummer = teil.partition(ANHANG_TRENNER)
+        zerlegt = self._mail_aus_puffer(akte_id, kennung)
         if zerlegt is None:
-            zerlegt, _, grund = self._mail_holen(kennung)
+            # Befund N06: Hier wurde ohne jede Pruefung nachgeholt. Eine Mail,
+            # die beim Listenaufbau wegen des Budgets ausgelassen worden war,
+            # kam auf diesem Weg doch herein - die Warnung in ihrer Zeile und
+            # die tatsaechliche Verfuegbarkeit widersprachen einander.
+            if self._mails_akte == akte_id and (
+                    self._mail_konto >= self._mail_gesamt
+                    or kennung in self._mail_abgelehnt):
+                raise DokumentNichtGefunden(
+                    "Diese E-Mail ist nicht geladen: Die Akte hat ihr Gesamtmaß "
+                    f"von {self._mail_gesamt // (1024 * 1024)} MB erreicht. In "
+                    "der Dokumentliste steht sie mit Betreff und Datum.")
+            rest = (self._mail_gesamt - self._mail_konto
+                    if self._mails_akte == akte_id else None)
+            zerlegt, groesse, grund = self._mail_holen(kennung, rest=rest)
+            if self._mails_akte == akte_id:
+                self._mail_konto += groesse
+                if grund == "budget":
+                    self._mail_abgelehnt.add(kennung)
             if zerlegt is None:
                 raise DokumentNichtGefunden(
                     f"Der Inhalt dieser E-Mail ist nicht zu holen ({grund or 'unbekannt'}).")
-            if self._mails_akte != akte_id:
-                self._mails.clear()
-                self._mails_akte = akte_id
-            self._mails[kennung] = zerlegt
+            self._mail_puffern(akte_id, kennung, zerlegt)
 
         if not nummer:
             return zerlegt.text.encode("utf-8")
@@ -1472,6 +1685,10 @@ class HttpJurNodesAdapter:
         return str(_erstes(daten, "id", "vermerkId", "kennung", standard="ohne-kennung"))
 
     def schliessen(self) -> None:
+        # Der Mailpuffer zuerst: Befund N10 - hier stand nur der Client, und
+        # der Klartext der Mails ueberlebte das Schliessen.
+        self.inhalte_vergessen()
+        self._puffer_leeren()
         self._client.close()
 
     # ── Das Aktengedächtnis in der Akte ─────────────────────────────────────

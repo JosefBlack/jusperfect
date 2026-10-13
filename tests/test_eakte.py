@@ -672,3 +672,78 @@ class DerVerlustErreichtDieAnzeige(unittest.TestCase):
         self.assertEqual(1, adapter.letzte_mail_nachrichten)
         mail = next(d for d in dokumente if d.id == f"{MAIL_VORSATZ}m-1")
         self.assertNotIn("nicht alles übernommen", mail.titel)
+
+
+# ── Befund N07 der dritten Zweitprüfung vom 12.10.2026 ─────────────────────
+#
+# Fehlt der Akte die `fileFolderId`, stand in `dokumente()` ein `return []` —
+# und damit war auch die **E-Akte** weg, obwohl sie an einem völlig anderen
+# Weg hängt: `POST /correspondence/search` mit `recordIdentifier`, kein
+# Ordner. Statt einer erkennbaren Lücke erschien eine leere Akte.
+#
+# Zwei unabhängige Lesewege dürfen nicht aneinander hängen. Und eine leere
+# Liste ist die schlechteste aller Antworten: Sie sieht aus wie „die Akte ist
+# leer" und heißt „ich habe nicht nachgesehen".
+#
+# Die Herstellerbeschreibung kennzeichnet das Feld als nicht erforderlich,
+# sagt aber zugleich, es werde bei Aktenanlage automatisch vergeben; ein
+# Echtfall ist nicht belegt. Das ändert am Kontrollfluss nichts.
+
+class _ServerOhneDateiordner(_Server):
+    """Wie `_Server`, nur nennt die Akte keinen Dateiordner."""
+
+    def __call__(self, anfrage: httpx.Request) -> httpx.Response:
+        if anfrage.url.path.endswith("/record"):
+            self.gefragt.append(f"{anfrage.method} {anfrage.url.path}")
+            return httpx.Response(200, json={"identifier": AKTE,
+                                             "correspondenceFolderId": 9})
+        return super().__call__(anfrage)
+
+
+class OhneDateiordnerBleibtDieEAkteLesbar(unittest.TestCase):
+    def test_die_vermerke_kommen_trotzdem(self):
+        server = _ServerOhneDateiordner([_eintrag("note", referenceNote=17)],
+                                        vermerke={"17": {"id": 17, "type": "memo",
+                                                         "content": "Ein Vermerk.",
+                                                         "contentType": "text",
+                                                         "record": AKTE}})
+        dokumente = _adapter(server).dokumente(AKTE)
+        self.assertTrue([d for d in dokumente if d.id.startswith(VERMERK_VORSATZ)],
+                        "Ohne Dateiordner fehlt auch die E-Akte.")
+
+    def test_die_korrespondenz_wird_ueberhaupt_gefragt(self):
+        """Vorher kam der Aufruf nicht einmal zustande."""
+        server = _ServerOhneDateiordner()
+        _adapter(server).dokumente(AKTE)
+        self.assertIn("POST /correspondence/search", server.gefragt)
+
+    def test_das_fehlen_wird_gemeldet(self):
+        """Sonst sieht die Liste aus wie eine Akte, in der nur Mails liegen."""
+        server = _ServerOhneDateiordner()
+        adapter = _adapter(server)
+        adapter.dokumente(AKTE)
+        self.assertTrue(adapter.letzte_akte_ohne_dateiordner)
+
+    def test_mit_dateiordner_bleibt_die_meldung_aus(self):
+        """Eine Warnung an jeder Akte wäre keine Warnung."""
+        server = _Server()
+        adapter = _adapter(server)
+        adapter.dokumente(AKTE)
+        self.assertFalse(adapter.letzte_akte_ohne_dateiordner)
+
+    def test_der_zaehler_wird_bei_jedem_lesen_neu_gesetzt(self):
+        """Sonst trüge die nächste Akte die Warnung der vorigen.
+
+        Der Kurzpuffer wird dazwischen geleert — sonst käme die Antwort der
+        Akte aus ihm, und dann prüft das hier den Puffer und nicht den
+        Zähler.
+        """
+        server = _ServerOhneDateiordner()
+        adapter = _adapter(server)
+        adapter.dokumente(AKTE)
+        self.assertTrue(adapter.letzte_akte_ohne_dateiordner)
+        adapter._client = httpx.Client(base_url="https://beispiel.invalid",
+                                       transport=httpx.MockTransport(_Server()))
+        adapter._puffer_leeren()
+        adapter.dokumente(AKTE)
+        self.assertFalse(adapter.letzte_akte_ohne_dateiordner)

@@ -79,6 +79,14 @@ class Sitzungsdienst:
         sitzung = self._speicher.sitzung_lesen(sitzung_id)
         if sitzung is not None and sitzung.nutzer_id == identitaet.nutzer_id:
             self._speicher.sitzung_loeschen(sitzung_id)
+            # Befund N10 der dritten Zweitpruefung vom 12.10.2026: Hier stand
+            # nur das Loeschen der Sitzung. Der Adapter hielt daneben den
+            # Klartext der Mails und ihrer Anlagen - auch den von Mails, die
+            # beim Aufbau der Liste geholt und nie ausgewaehlt wurden. Nach dem
+            # Schliessen war die Sitzung weg und der Mailtext noch da.
+            #
+            # Ein Loeschen, das eine Kopie stehen laesst, ist keines.
+            self._adapter.inhalte_vergessen(sitzung.akte_id)
             ereignis(_log, "sitzung_geschlossen", sitzung=sitzung_id, dokumente=len(sitzung.geladen))
 
     def dialog_merken(self, identitaet: Identitaet, sitzung_id: str,
@@ -253,6 +261,10 @@ class Sitzungsdienst:
         if len(sitzung.geladen) != vorher:
             self._speicher.text_loeschen(sitzung.id, dokument_id)
             self._speicher.sitzung_ablegen(sitzung)
+            # Und die Kopie im Adapter (Befund N10). Bei einer Mail liegt dort
+            # ihr Klartext samt Anlagen; ein "der Text wird geloescht", das
+            # eine zweite Kopie stehen laesst, waere nicht wahr.
+            self._adapter.inhalte_vergessen(sitzung.akte_id, dokument_id)
             ereignis(_log, "dokument_entfernt", sitzung=sitzung.id, dokument=dokument_id)
         return sitzung
 
