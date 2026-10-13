@@ -71,11 +71,21 @@ class DieVorlageLiegtAusserhalb(unittest.TestCase):
                 f"{ort} liegt im Programmordner")
 
     def test_ohne_vorlage_sagt_die_meldung_wohin_sie_gehoert(self):
-        """Eine Fehlermeldung, die nur „fehlt" sagt, hilft niemandem."""
-        with self.assertRaises(BriefbogenFehler) as f:
-            briefbogen.erzeugen("Text", None) if briefbogen.finden() is None else None
-            raise BriefbogenFehler("übersprungen: auf diesem Rechner liegt eine Vorlage")
+        """Eine Fehlermeldung, die nur „fehlt" sagt, hilft niemandem.
+
+        Hier stand eine Prüfung, die sich selbst übersprang, wenn auf dem
+        Rechner eine Vorlage lag - und dann grün war, ohne etwas geprüft zu
+        haben. Eine Prüfung, die vom Rechner abhängt, auf dem sie läuft, ist
+        keine. Jetzt wird der Ort gesetzt, statt ihn vorzufinden.
+        """
+        with TemporaryDirectory() as ordner:
+            alt = briefbogen.orte
+            briefbogen.orte = lambda: (Path(ordner) / "gibtesnicht.docx",)
+            self.addCleanup(lambda: setattr(briefbogen, "orte", alt))
+            with self.assertRaises(BriefbogenFehler) as f:
+                briefbogen.erzeugen("Text")
         self.assertIn(briefbogen.DATEINAME, str(f.exception))
+        self.assertIn("BRIEFBOGEN-HINTERLEGEN.bat", str(f.exception))
 
 
 class DerBriefbogenBleibtUnberuehrt(unittest.TestCase):
@@ -268,10 +278,29 @@ class WasAufDemBlattSteht(unittest.TestCase):
 
     def test_die_fundstellen_kommen_nicht_mit(self):
         """Sie sind der Weg zum Beleg im Programm. In einem Schreiben an die
-        Gegenseite haetten sie nichts zu suchen."""
+        Gegenseite haetten sie nichts zu suchen.
+
+        **Dieser Test war von Anfang an gruen und prueffte nichts:** Sein
+        Beispieltext enthielt keine einzige Belegmarke. Der Entwurf ging bis
+        zum 13.10.2026 mitsamt seinen ``[Q: …]`` auf den Briefbogen. Gefunden
+        durch die Frage aus der Kanzlei, ob der Entwurf „nicht gleich das
+        fertige Schreiben" sein koenne.
+        """
         from jusperfect.web import briefbogentext
-        blatt = briefbogentext(self._entwurf(text="Der Vertrag wurde geschlossen."))
+        blatt = briefbogentext(self._entwurf(
+            text="Der Vertrag wurde geschlossen [Q: D1-S1-P1]. "
+                 "Mehr steht nicht fest [Q: D2-S1-P1]."))
         self.assertFalse(re.search(r"D\d+-S\d+-P\d+", blatt), blatt)
+        self.assertNotIn("[Q:", blatt)
+        self.assertIn("Der Vertrag wurde geschlossen.", blatt)
+
+    def test_der_satzbau_bleibt_heil(self):
+        """„geschlossen [Q: …]." darf nicht zu „geschlossen ." werden."""
+        from jusperfect.web import briefbogentext
+        blatt = briefbogentext(self._entwurf(
+            text="Der Vertrag wurde geschlossen [Q: D1-S1-P1]."))
+        self.assertIn("geschlossen.", blatt)
+        self.assertNotIn(" .", blatt)
 
 
 class DerGefuehrteWeg(unittest.TestCase):
@@ -300,6 +329,119 @@ class DerGefuehrteWeg(unittest.TestCase):
         block = block[:block.index("// ── Aus einer Anweisung")]
         self.assertIn("a.download", block)
         self.assertIn("revokeObjectURL", block)
+
+
+class DasBlattAnsehenOhneWord(unittest.TestCase):
+    """Aus der Kanzlei am 13.10.2026: „Kann der Entwurf nicht gleich das
+    fertige Schreiben mit Briefkopf angeben? Schließlich muss auch optisch
+    zum Teil aktualisiert werden."
+
+    Die Ansicht wird aus der Vorlage GELESEN und nicht nachgezeichnet. Diese
+    Prüfungen halten fest, was gelesen wird - und dass der Entwurf im fertigen
+    Dokument unter dem Briefkopf anfängt und nicht quer durch ihn.
+    """
+
+    def setUp(self):
+        self._ordner = TemporaryDirectory()
+        self.addCleanup(self._ordner.cleanup)
+        self.vorlage = _vorlage(self._ordner.name)
+
+    def test_seitenmass_und_raender_kommen_aus_der_datei(self):
+        bild = briefbogen.seitenbild(self.vorlage)
+        self.assertAlmostEqual(bild["raender_mm"]["oben"], 25.0, places=1)
+        self.assertAlmostEqual(bild["raender_mm"]["links"], 25.0, places=1)
+
+    def test_ohne_vorlage_sagt_die_ansicht_wohin_die_datei_gehoert(self):
+        alt = briefbogen.orte
+        briefbogen.orte = lambda: (Path(self._ordner.name) / "gibtesnicht.docx",)
+        self.addCleanup(lambda: setattr(briefbogen, "orte", alt))
+        with self.assertRaises(BriefbogenFehler) as f:
+            briefbogen.seitenbild()
+        self.assertIn(briefbogen.DATEINAME, str(f.exception))
+        self.assertIn("BRIEFBOGEN-HINTERLEGEN.bat", str(f.exception))
+
+    def test_ein_bild_kommt_nur_heraus_wenn_es_im_paket_liegt(self):
+        """Sonst waere dieser Weg ein Pfad, den der Browser bestimmt."""
+        inhalt, art = briefbogen.bild_lesen("word/media/image1.png", self.vorlage)
+        self.assertTrue(inhalt.startswith(b"\x89PNG"))
+        self.assertEqual(art, "image/png")
+        for versuch in ("../../etc/passwd", "word/document.xml.bak", "/etc/passwd"):
+            with self.subTest(versuch=versuch):
+                with self.assertRaises(BriefbogenFehler):
+                    briefbogen.bild_lesen(versuch, self.vorlage)
+
+
+class DerEntwurfFaengtUnterDemBriefkopfAn(unittest.TestCase):
+    """**Ein Fehler, der erst auf dem Papier aufgefallen waere.**
+
+    ``erzeugen`` ersetzte den leeren Rumpf der Vorlage durch den Entwurf - und
+    der begann damit am oberen Rand, also quer durch das Anschriftenfeld, das
+    auf einem Briefbogen weit ins Blatt reicht. In Word sieht man das erst,
+    wenn man es ausdruckt.
+
+    Der Vorlauf wird jetzt aus dem Briefkopf selbst berechnet: bis unter das
+    unterste Stueck, das im Textspalt steht. Eine Falzmarke am Blattrand
+    schiebt nichts.
+    """
+
+    def _vorlage_mit(self, ordner: str, kopf_xml: str) -> Path:
+        ort = Path(ordner) / briefbogen.DATEINAME
+        with zipfile.ZipFile(ort, "w") as paket:
+            paket.writestr("[Content_Types].xml", "<Types/>")
+            paket.writestr(briefbogen.RUMPF, RUMPF_XML)
+            paket.writestr("word/_rels/document.xml.rels",
+                           '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                           '<Relationship Id="rId7" Type="header" Target="header1.xml"/>'
+                           "</Relationships>")
+            paket.writestr("word/header1.xml", kopf_xml)
+        return ort
+
+    def _kopf(self, x_mm: float, y_mm: float, breite_mm: float, hoehe_mm: float) -> str:
+        e = briefbogen.EMU_JE_MM
+        return (
+            '<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+            "<w:p><w:r><w:drawing><wp:anchor>"
+            f'<wp:positionH relativeFrom="page"><wp:posOffset>{int(x_mm * e)}</wp:posOffset></wp:positionH>'
+            f'<wp:positionV relativeFrom="page"><wp:posOffset>{int(y_mm * e)}</wp:posOffset></wp:positionV>'
+            f'<wp:extent cx="{int(breite_mm * e)}" cy="{int(hoehe_mm * e)}"/>'
+            "<w:txbxContent><w:p><w:r><w:t>Anschrift</w:t></w:r></w:p></w:txbxContent>"
+            "</wp:anchor></w:drawing></w:r></w:p></w:hdr>")
+
+    def test_ein_anschriftenfeld_im_textspalt_schiebt_den_text_herunter(self):
+        with TemporaryDirectory() as ordner:
+            # Satzspiegel 25..185 mm; der Kasten reicht bis 110 mm hinunter.
+            vorlage = self._vorlage_mit(ordner, self._kopf(120.0, 20.0, 60.0, 90.0))
+            bild = briefbogen.seitenbild(vorlage)
+        erwartet = 110.0 + briefbogen.ABSTAND_NACH_KOPF_MM - 25.0
+        self.assertAlmostEqual(bild["vorlauf_mm"], erwartet, places=0)
+
+    def test_eine_falzmarke_am_blattrand_schiebt_nichts(self):
+        with TemporaryDirectory() as ordner:
+            vorlage = self._vorlage_mit(ordner, self._kopf(5.0, 99.0, 6.0, 0.0))
+            bild = briefbogen.seitenbild(vorlage)
+        self.assertEqual(bild["vorlauf_mm"], 0.0)
+
+    def test_der_abstand_steht_als_ein_wert_im_dokument(self):
+        """Keine geschaetzten Leerzeilen: Zwei zuviel schieben den Brief auf
+        die zweite Seite."""
+        with TemporaryDirectory() as ordner:
+            vorlage = self._vorlage_mit(ordner, self._kopf(120.0, 20.0, 60.0, 90.0))
+            roh = briefbogen.erzeugen("Sehr geehrte Damen und Herren", vorlage)
+        with zipfile.ZipFile(BytesIO(roh)) as paket:
+            rumpf = paket.read(briefbogen.RUMPF).decode("utf-8")
+        treffer = re.search(r'<w:spacing w:before="(\d+)"/>', rumpf)
+        self.assertIsNotNone(treffer, rumpf[:600])
+        erwartet = round((110.0 + briefbogen.ABSTAND_NACH_KOPF_MM - 25.0) * briefbogen.TWIPS_JE_MM)
+        self.assertAlmostEqual(int(treffer.group(1)), erwartet, delta=30)
+        self.assertEqual(rumpf.count("<w:spacing"), 1, "Nur der erste Absatz bekommt ihn.")
+
+    def test_ohne_briefkopf_im_textspalt_bleibt_alles_wie_bisher(self):
+        with TemporaryDirectory() as ordner:
+            vorlage = _vorlage(ordner)
+            roh = briefbogen.erzeugen("Sehr geehrte Damen und Herren", vorlage)
+        with zipfile.ZipFile(BytesIO(roh)) as paket:
+            rumpf = paket.read(briefbogen.RUMPF).decode("utf-8")
+        self.assertNotIn("<w:spacing", rumpf)
 
 
 class UeberDenWeb(unittest.TestCase):

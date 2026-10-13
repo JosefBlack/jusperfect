@@ -16,6 +16,22 @@ from jusperfect.services.fundstelle import treffer_finden
 ZITAT_RE = re.compile(r"\[Q:\s*([^\]]+?)\s*\]")
 
 
+def ohne_belege(text: str) -> str:
+    """Der Text ohne die Belegmarken ``[Q: …]``.
+
+    Fuer alles, was das Haus verlaesst. Die Marken sind das Werkzeug der
+    Pruefung - im Programm anklickbar, auf einem Schreiben an die Gegenseite
+    ein Fremdkoerper. Der Auftragstext sagt es dem Modell auch so: „die
+    Kanzlei entfernt sie nach der Pruefung."
+
+    Das Leerzeichen davor faellt mit, der Satzpunkt dahinter bleibt stehen.
+    """
+    sauber = ZITAT_RE.sub("", text)
+    # "geschlossen . Mehr" -> "geschlossen. Mehr"
+    sauber = re.sub(r"[ \t]+([.,;:!?)])", r"\1", sauber)
+    return re.sub(r"[ \t]{2,}", " ", sauber)
+
+
 def bis_zum_letzten_beleg(roh: str) -> str:
     """Der Teil eines Rohtextes, der mit einer abgeschlossenen Aussage endet.
 

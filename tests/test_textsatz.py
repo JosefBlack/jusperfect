@@ -43,9 +43,21 @@ def test_jede_modellantwort_geht_durch_den_satz(app: str) -> None:
     Chatkarte. Geprüft wird, DASS der Text durch ``antworttext`` geht - nicht,
     in welches Element.
     """
-    for stelle in ("antwort.text", "qa.antwort", "g.lebenssachverhalt", "e.text",
-                   't.kernaussage || ""', "entwurfVorschautext"):
+    for stelle in ("antwort.text", "qa.antwort", "g.lebenssachverhalt",
+                   't.kernaussage || ""'):
         assert re.search(rf"antworttext\([A-Za-z]+, {re.escape(stelle)}\)", app), stelle
+    # Der Entwurf geht seit dem 13.10.2026 ueber `entwurfInhalt` - einmal als
+    # Fliesstext, einmal auf dem Blatt. Beide Wege muessen durch den Satz.
+    for stelle in ("e.text", "entwurfVorschautext"):
+        assert f"entwurfInhalt({stelle})" in app, stelle
+    block = app[app.index("function entwurfInhalt("):app.index("function entwurfKnoepfe(")]
+    assert "antworttext(block, text)" in block
+    # Das Blatt geht NICHT durch `antworttext`: Es setzt Zeile fuer Zeile,
+    # genau wie services/briefbogen.py die Word-Datei baut. Ein Absatz, den
+    # der Satz zusammenzieht, stuende dort anders als auf dem Papier.
+    blatt = app[app.index("function blattBauen("):][:9000]
+    assert "antworttext(koerper" not in blatt
+    assert "ohneBelege(text)" in blatt
 
 
 def test_kein_innerhtml_im_satz(app: str) -> None:

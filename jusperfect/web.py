@@ -35,6 +35,7 @@ from jusperfect.security.identitaet import Identitaet, NichtAngemeldet, aus_cogn
 from jusperfect.security.protokoll import MAX_WERT_LAENGE, ereignis, protokoll, stoerung
 from jusperfect.services.analyse import AktenZuGross, AnalyseFehler, Analysedienst
 from jusperfect.services.fundstelle import treffer_finden
+from jusperfect.services.quellen import ohne_belege
 from jusperfect.services.auftraege import AuftragFehler, Auftragsdienst
 from jusperfect.services.auftragsvorschlag import Vorschlagsdienst, VorschlagFehler
 from jusperfect.services.ausgang import Ausgang
@@ -1102,6 +1103,34 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
                 "dateiname": briefbogen.DATEINAME,
                 "ordner": str(briefbogen.orte()[0].parent)}
 
+    @app.get("/api/briefbogen/ansicht")
+    def briefbogen_ansicht(ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Das Blatt, wie es aussieht - gelesen aus der Vorlage der Kanzlei.
+
+        Aus der Kanzlei am 13.10.2026: „Kann der Entwurf nicht gleich das
+        fertige Schreiben mit Briefkopf angeben? Schließlich muss auch
+        optisch zum Teil aktualisiert werden."
+
+        Es wird nichts nachgezeichnet: Seitenmaß, Ränder, die festgesetzten
+        Stücke des Kopfes und ihre Texte kommen aus der Datei. Ändert die
+        Kanzlei ihren Briefbogen, ändert sich diese Ansicht mit.
+        """
+        d.berechtigungen.nutzer(ident)
+        return briefbogen.seitenbild()
+
+    @app.get("/api/briefbogen/bild")
+    def briefbogen_bild(teil: str, ident: Identitaet = Depends(identitaet)) -> Response:
+        """Ein Bild aus der Vorlage - Logo, Marke, was der Kopf eben trägt.
+
+        ``teil`` kommt aus der Ansicht zurück und geht unverändert wieder
+        hinein; gelesen wird nur, was das Paket selbst auflistet.
+        """
+        d.berechtigungen.nutzer(ident)
+        inhalt, art = briefbogen.bild_lesen(teil)
+        # Ein Briefbogen ändert sich selten; der Browser darf ihn behalten.
+        return Response(content=inhalt, media_type=art,
+                        headers={"Cache-Control": "private, max-age=600"})
+
     @app.get("/api/entwuerfe/{entwurf_id}/briefbogen")
     def entwurf_auf_briefbogen(entwurf_id: str,
                                ident: Identitaet = Depends(identitaet)) -> Response:
@@ -1253,12 +1282,20 @@ def briefbogentext(entwurf: Any) -> str:
 
     Die Fundstellen kommen nicht mit. Sie sind der Weg zum Beleg im
     Programm; in einem Schreiben an die Gegenseite haetten sie nichts zu
-    suchen.
+    suchen - der Auftragstext sagt dem Modell dasselbe: „die Kanzlei
+    entfernt sie nach der Pruefung."
+
+    **Hier stand das nur im Text und nicht im Code.** Bis zum 13.10.2026
+    ging der Entwurf mitsamt seinen ``[Q: …]`` auf den Briefbogen; die
+    Pruefung dazu gab es, nur enthielt ihr Beispieltext keine einzige Marke
+    und war deshalb von Anfang an gruen. Aus der Kanzlei kam die Frage, ob
+    der Entwurf „nicht gleich das fertige Schreiben" sein koenne - und das
+    war der Grund, warum er es nicht war.
     """
     zeilen: list[str] = []
     if entwurf.betreff:
         zeilen += [entwurf.betreff, ""]
-    zeilen.append(entwurf.text)
+    zeilen.append(ohne_belege(entwurf.text))
     if entwurf.hinweise:
         zeilen += ["", "---", "Hinweise aus der Belegprüfung (nicht Teil des Schreibens):"]
         zeilen += [f"- {h}" for h in entwurf.hinweise]

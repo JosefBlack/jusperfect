@@ -353,6 +353,63 @@ class DieOberflaecheZeigtDasFenster(unittest.TestCase):
                         self.JS.index("function entwurfKnoepfe")]
         self.assertIn("nur, was schon geprüft ist", block)
 
+    def test_die_spalte_bleibt_offen_wenn_nur_die_vorschau_offen_ist(self):
+        """Wer alles andere zuklappt und nur die Vorschau offenlässt, bekam
+        eine Spalte in „nur-leiste" - und die blendet ihre Fenster aus. Der
+        Entwurf war unsichtbar, obwohl sein Knopf gedrückt war."""
+        block = self.JS[self.JS.index("function fensterAnwenden"):]
+        treffer = re.search(r'const offen = \[([^\]]*)\]', block)
+        self.assertIsNotNone(treffer, block[:400])
+        namen = set(re.findall(r'"([a-z]+)"', treffer.group(1)))
+        self.assertEqual(namen, {"chronologie", "gedaechtnis", "entwurf", "belege"})
+
+    def test_es_gibt_die_wahl_zwischen_text_und_blatt(self):
+        """Aus der Kanzlei: „Kann der Entwurf nicht gleich das fertige
+        Schreiben mit Briefkopf angeben?" - beides hat seinen Zweck: Der
+        Fließtext ist zum Lesen und Ändern da, das Blatt zum Abschätzen."""
+        block = self.JS[self.JS.index("function entwurfAnsichtWahl"):
+                        self.JS.index("function entwurfInhalt")]
+        self.assertIn('"text", "Text"', block)
+        self.assertIn('"blatt", "Blatt"', block)
+
+    def test_auf_dem_blatt_stehen_keine_belegmarken(self):
+        """Dort steht, was hinausgeht. Im Fließtext bleiben sie: Dort wird
+        geprüft."""
+        blatt = self.JS[self.JS.index("function blattBauen"):][:9000]
+        self.assertIn("ohneBelege(text)", blatt)
+        fliess = self.JS[self.JS.index("function entwurfInhalt"):
+                         self.JS.index("function entwurfKnoepfe")]
+        self.assertIn("antworttext(block, text)", fliess)
+
+    def test_das_blatt_bricht_die_zeilen_wie_die_word_datei(self):
+        """`antworttext` setzt zwei Zeilen hintereinander zu einem Absatz
+        zusammen, Word macht daraus zwei. Dann sähe die Ansicht anders aus
+        als das Blatt - der eine Fehler, den eine Ansicht nicht machen darf."""
+        blatt = self.JS[self.JS.index("function blattBauen"):][:9000]
+        self.assertNotIn("antworttext(koerper", blatt)
+        self.assertIn('.split("\\n")', blatt)
+
+    def test_das_blatt_ist_weiss_und_bleibt_weiss(self):
+        """Papier ist weiß. Wer hier die Länge eines Schreibens abschätzt,
+        soll dasselbe sehen wie auf dem Papier - auch im dunklen Bild."""
+        css = (WURZEL / "jusperfect" / "static" / "styles.css").read_text(encoding="utf-8")
+        block = css[css.index(".blatt {"):css.index(".blatt-stueck")]
+        self.assertIn("#ffffff", block)
+
+    def test_das_blatt_sagt_dass_word_es_anders_setzen_kann(self):
+        """Eine Ansicht, die sich für die Wahrheit ausgibt, ist schlimmer als
+        gar keine."""
+        block = self.JS[self.JS.index("function entwurfInhalt"):
+                        self.JS.index("function entwurfKnoepfe")]
+        self.assertIn("Das Blatt baut Word", block)
+
+    def test_das_blatt_wird_auf_die_fensterbreite_gerechnet(self):
+        """Ein Blatt, das man nicht ganz sieht, sagt über die Länge nichts
+        aus - und die Länge ist der Grund, warum es dasteht."""
+        block = self.JS[self.JS.index("function blattBauen"):]
+        self.assertIn("ResizeObserver", block[:6000])
+        self.assertIn("transform = `scale(", block[:6000])
+
     def test_der_strom_bleibt_nicht_in_entsteht_stehen(self):
         """Auch wenn es schiefging - sonst wartet das Fenster für immer."""
         block = self.JS[self.JS.index("async function entwurfStromLesen"):

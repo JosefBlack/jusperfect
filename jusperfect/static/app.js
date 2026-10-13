@@ -1794,7 +1794,14 @@ function fensterAnwenden() {
   }
   const rechts = $("spalte-rechts");
   if (rechts) {
-    const offen = ["chronologie", "gedaechtnis", "belege"].some(
+    // Alle Fenster dieser Spalte, nicht drei von vieren.
+    //
+    // Hier standen drei Namen, und das Vorschaufenster kam am 13.10.2026
+    // als viertes dazu. Wer alles andere zuklappte und nur die Vorschau
+    // offenliess, bekam eine Spalte in "nur-leiste" - und die blendet ihre
+    // Fenster aus. Der Entwurf war dann unsichtbar, obwohl sein Knopf
+    // gedrueckt war. Gefunden im Browser, nicht im Prueflauf.
+    const offen = ["chronologie", "gedaechtnis", "entwurf", "belege"].some(
       (n) => fensterStand[n] && (n !== "gedaechtnis" || K.gedaechtnisAktiv));
     // Die Spalte bleibt stehen, auch wenn alle drei Fenster zu sind: Seit dem
     // 13.10.2026 traegt sie oben die Funktionen (Analyse, Entwurf,
@@ -4220,6 +4227,190 @@ let entwurfLaeuft = "";
 let entwurfVorschautext = "";
 /** Schreibt der Chat Aenderungen am Entwurf statt Fragen an die Akte? */
 let entwurfAendernAn = false;
+/** "text" oder "blatt" - als Fliesstext oder auf dem Briefbogen. */
+let entwurfAnsicht = "text";
+/** Das Seitenbild des Briefbogens, einmal geholt. `false` = keiner da. */
+let blattBild = null;
+
+// ── Das Blatt ──────────────────────────────────────────────────────────────
+//
+// Aus der Kanzlei am 13.10.2026: "Kann der Entwurf nicht gleich das fertige
+// Schreiben mit Briefkopf angeben? Schliesslich muss auch optisch zum Teil
+// aktualisiert werden."
+//
+// Richtig, und es war ein echter Mangel: Wie lang der Brief ist, wo er
+// umbricht, ob er in das Anschriftenfeld laeuft - all das sah man erst nach
+// dem Herunterladen in Word, und jede Aenderung kostete denselben Weg noch
+// einmal.
+//
+// WAS HIER STEHT, IST EINE ANSICHT UND KEIN ZWEITER BRIEFBOGEN. Seitenmass,
+// Raender, die festgesetzten Stuecke des Kopfes und ihre Texte kommen aus der
+// Datei der Kanzlei. Nachgezeichnet ist nichts; aendert sie ihren Briefbogen,
+// aendert sich die Ansicht mit. Was Word daraus setzt, bleibt die Wahrheit -
+// und das sagt die Ansicht auch.
+
+//: Bildpunkte je Millimeter im ungeskalierten Blatt. Nur ein Massstab: Das
+//: fertige Blatt wird am Ende auf die Fensterbreite gerechnet.
+const BLATT_PX_JE_MM = 4;
+
+//: Ein Punkt sind 0,3528 Millimeter.
+const MM_JE_PUNKT = 0.3528;
+
+//: Schon geholte Bilder des Briefbogens, je Teil eine Objekt-Adresse.
+const blattBilder = new Map();
+
+/** Ein Bild des Briefbogens holen - MIT Anmeldung.
+ *
+ * Ein `<img src="…">` traegt keine eigenen Kopfzeilen: Weder die Kennung
+ * des Bearbeiters im oertlichen Betrieb noch das Zugangstoken im
+ * AWS-Betrieb gingen mit, und der Server antwortete mit 401. Das Blatt
+ * stand dann ohne Logo da - ohne dass irgendwo stuende, warum.
+ *
+ * Deshalb derselbe Weg wie bei jedem anderen Aufruf: holen, als Blob
+ * behalten, und dem Bild eine Objekt-Adresse geben. Einmal je Bild.
+ */
+async function blattBildQuelle(teil) {
+  if (blattBilder.has(teil)) return blattBilder.get(teil);
+  const antwort = await fetch(
+    K.apiBasis + "/api/briefbogen/bild?teil=" + encodeURIComponent(teil),
+    { headers: kopfzeilen() });
+  if (!antwort.ok) throw new Error(`Bild ${antwort.status}`);
+  const adresse = URL.createObjectURL(await antwort.blob());
+  blattBilder.set(teil, adresse);
+  return adresse;
+}
+
+/** Der Text ohne Belegmarken - wie ihn auch die Word-Datei bekommt. */
+function ohneBelege(text) {
+  return String(text || "")
+    .replace(/\[Q:[^\]]*\]/g, "")
+    .replace(/[ \t]+([.,;:!?)])/g, "$1")
+    .replace(/[ \t]{2,}/g, " ");
+}
+
+async function blattBildHolen() {
+  if (blattBild !== null) return blattBild;
+  try {
+    blattBild = await api("GET", "/api/briefbogen/ansicht");
+  } catch (e) {
+    blattBild = false;
+    blattFehler = e.message;
+  }
+  return blattBild;
+}
+
+/** Warum es kein Blatt gibt - der Satz sagt, wohin die Vorlage gehoert. */
+let blattFehler = "";
+
+function blattSchrift(b) {
+  // Die Vorlage nennt eine Schrift; der Browser hat sie vielleicht nicht.
+  // Deshalb eine Reihe, die mit der genannten anfaengt und auf einer
+  // Serifenschrift endet - eine Ansicht in Arial saehe anders lang aus.
+  const name = (b.grundschrift && b.grundschrift.name) || "";
+  return (name ? `"${name}", ` : "") + '"Times New Roman", Times, serif';
+}
+
+function blattZeile(zeile, grund_pt, mm) {
+  const z = document.createElement("div");
+  z.className = "blatt-zeile";
+  z.textContent = zeile.text || "\u00a0";
+  const pt = zeile.groesse_pt || grund_pt;
+  z.style.fontSize = (pt * MM_JE_PUNKT * mm) + "px";
+  z.style.lineHeight = "1.25";
+  if (zeile.fett) z.style.fontWeight = "600";
+  if (zeile.ausrichtung === "mitte") z.style.textAlign = "center";
+  else if (zeile.ausrichtung === "rechts") z.style.textAlign = "right";
+  return z;
+}
+
+/** Das Blatt bauen: Briefkopf aus der Vorlage, darunter der Entwurf. */
+function blattBauen(b, text) {
+  const mm = BLATT_PX_JE_MM;
+  const grund = (b.grundschrift && b.grundschrift.groesse_pt) || 10;
+  const buehne = document.createElement("div"); buehne.className = "blatt-buehne";
+  const blatt = document.createElement("div"); blatt.className = "blatt";
+  blatt.style.width = (b.seite_mm.breite * mm) + "px";
+  blatt.style.height = (b.seite_mm.hoehe * mm) + "px";
+  blatt.style.fontFamily = blattSchrift(b);
+
+  for (const stueck of (b.stuecke || [])) {
+    const el = document.createElement("div");
+    if (stueck.art === "fluss") {
+      // Der Fluss steht im Satzspiegel; die Fusszeile haengt unten.
+      el.className = "blatt-fluss";
+      el.style.left = (b.raender_mm.links * mm) + "px";
+      el.style.width = ((b.seite_mm.breite - b.raender_mm.links - b.raender_mm.rechts) * mm) + "px";
+      if (stueck.fuss) el.style.bottom = (8 * mm) + "px";
+      else el.style.top = (b.raender_mm.kopf * mm) + "px";
+      for (const zeile of stueck.zeilen) el.appendChild(blattZeile(zeile, grund, mm));
+      blatt.appendChild(el);
+      continue;
+    }
+    el.style.left = (stueck.x_mm * mm) + "px";
+    el.style.top = (stueck.y_mm * mm) + "px";
+    el.style.width = (stueck.breite_mm * mm) + "px";
+    if (stueck.art === "bild") {
+      const bild = document.createElement("img");
+      bild.className = "blatt-bild";
+      bild.alt = "";
+      blattBildQuelle(stueck.bild).then((adresse) => { bild.src = adresse; })
+        .catch(() => { /* ein Bild weniger; das Blatt steht trotzdem */ });
+      bild.style.width = "100%";
+      bild.style.height = (stueck.hoehe_mm * mm) + "px";
+      el.className = "blatt-stueck";
+      el.appendChild(bild);
+    } else if (stueck.art === "linie") {
+      el.className = "blatt-linie";
+    } else {
+      el.className = "blatt-stueck";
+      el.style.height = (stueck.hoehe_mm * mm) + "px";
+      for (const zeile of stueck.zeilen) el.appendChild(blattZeile(zeile, grund, mm));
+    }
+    blatt.appendChild(el);
+  }
+
+  // Der Entwurf selbst - an derselben Stelle, an der ihn auch die Word-Datei
+  // beginnt: `vorlauf_mm` kommt aus demselben Aufruf.
+  const koerper = document.createElement("div"); koerper.className = "blatt-koerper";
+  // Auf dem Blatt steht, was hinausgeht - und das sind die Belegmarken
+  // nicht. Im Fliesstext bleiben sie: Dort wird geprueft.
+  koerper.style.left = (b.raender_mm.links * mm) + "px";
+  koerper.style.top = ((b.raender_mm.oben + (b.vorlauf_mm || 0)) * mm) + "px";
+  koerper.style.width = ((b.seite_mm.breite - b.raender_mm.links - b.raender_mm.rechts) * mm) + "px";
+  koerper.style.fontSize = (grund * MM_JE_PUNKT * mm) + "px";
+  // Zeile fuer Zeile, genau wie `_absatz` in services/briefbogen.py die
+  // Word-Datei baut. NICHT ueber `antworttext`: Der setzt zwei Zeilen
+  // hintereinander zu einem Absatz zusammen, Word macht daraus zwei. Dann
+  // saehe die Ansicht anders aus als das Blatt - und das ist der eine
+  // Fehler, den eine Ansicht nicht machen darf.
+  for (const zeile of ohneBelege(text).replace(/\r\n/g, "\n").split("\n")) {
+    const z = document.createElement("div");
+    z.className = "blatt-zeile";
+    z.textContent = zeile.trim() ? zeile : "\u00a0";
+    koerper.appendChild(z);
+  }
+  blatt.appendChild(koerper);
+
+  buehne.appendChild(blatt);
+  // Auf die Fensterbreite rechnen. Ein Blatt, das man nicht ganz sieht, sagt
+  // ueber die Laenge nichts aus - und die Laenge ist der Grund, warum es
+  // dasteht.
+  const anpassen = () => {
+    const breite = buehne.clientWidth || buehne.parentElement?.clientWidth || 0;
+    if (!breite) return;
+    const faktor = breite / (b.seite_mm.breite * mm);
+    blatt.style.transform = `scale(${faktor})`;
+    buehne.style.height = (b.seite_mm.hoehe * mm * faktor) + "px";
+  };
+  requestAnimationFrame(anpassen);
+  if (typeof ResizeObserver === "function") {
+    const beobachter = new ResizeObserver(anpassen);
+    beobachter.observe(buehne);
+  } else {
+    window.addEventListener("resize", anpassen);
+  }
+  return buehne;
+}
 
 function entwurfFensterOeffnen() {
   if (!fensterStand.entwurf) fensterOeffnen("entwurf");
@@ -4275,11 +4466,7 @@ function entwurfFensterZeichnen() {
     erklaerung.textContent = "Es erscheint nur, was schon geprüft ist: Eine Aussage wird "
       + "sichtbar, sobald sie abgeschlossen ist und ihr Beleg steht.";
     ziel.appendChild(erklaerung);
-    if (entwurfVorschautext) {
-      const block = document.createElement("div"); block.className = "entwurf-text";
-      antworttext(block, entwurfVorschautext);
-      ziel.appendChild(block);
-    }
+    if (entwurfVorschautext) ziel.appendChild(entwurfInhalt(entwurfVorschautext));
     return;
   }
 
@@ -4296,17 +4483,60 @@ function entwurfFensterZeichnen() {
   kopf.textContent = e.betreff;
   ziel.appendChild(kopf);
 
+  if (!nebenfenster) ziel.appendChild(entwurfAnsichtWahl());
+
   const hb = hinweiseBlock((e.hinweise || []).concat(["Entwurf – anwaltliche Prüfung erforderlich."]));
   if (hb) ziel.appendChild(hb);
 
-  const block = document.createElement("div"); block.className = "entwurf-text";
-  antworttext(block, e.text);
-  ziel.appendChild(block);
+  ziel.appendChild(entwurfInhalt(e.text));
 
   // Im Nebenfenster keine Knoepfe: Es ist ein Spiegel, keine zweite
   // Arbeitsflaeche. In einer Mandatsakte muss klar sein, WO gearbeitet wird.
   if (!nebenfenster) ziel.appendChild(entwurfKnoepfe(e));
   ziel.appendChild(fusszeile(e));
+}
+
+/** Fliesstext oder Blatt - die Wahl steht oben im Fenster. */
+function entwurfAnsichtWahl() {
+  const leiste = document.createElement("div"); leiste.className = "entwurf-ansicht";
+  for (const [wert, wort, erklaerung] of [
+      ["text", "Text", "Nur der Wortlaut – gut zum Lesen und Ändern"],
+      ["blatt", "Blatt", "Auf dem Briefbogen der Kanzlei – so lang wird das Schreiben"]]) {
+    const knopf = document.createElement("button");
+    knopf.type = "button";
+    knopf.className = "mini leise" + (entwurfAnsicht === wert ? " an" : "");
+    knopf.textContent = wort;
+    knopf.title = erklaerung;
+    knopf.setAttribute("aria-pressed", String(entwurfAnsicht === wert));
+    knopf.addEventListener("click", () => mitKnopf(null, async () => {
+      entwurfAnsicht = wert;
+      if (wert === "blatt") await blattBildHolen();
+      entwurfFensterZeichnen();
+    }));
+    leiste.appendChild(knopf);
+  }
+  return leiste;
+}
+
+/** Der Entwurfstext - als Fliesstext oder auf dem Blatt. */
+function entwurfInhalt(text) {
+  if (entwurfAnsicht === "blatt" && blattBild) {
+    const rahmen = document.createElement("div"); rahmen.className = "blatt-rahmen";
+    rahmen.appendChild(blattBauen(blattBild, text));
+    const satz = document.createElement("p"); satz.className = "blatt-fuss-hinweis";
+    satz.textContent = "Ansicht, gesetzt aus Ihrer Word-Vorlage (" + (blattBild.datei || "")
+      + "). Das Blatt baut Word; Zeilenumbruch und Schriftschnitt können geringfügig abweichen.";
+    rahmen.appendChild(satz);
+    return rahmen;
+  }
+  const block = document.createElement("div"); block.className = "entwurf-text";
+  if (entwurfAnsicht === "blatt" && blattBild === false) {
+    const satz = document.createElement("p"); satz.className = "entwurf-leer";
+    satz.textContent = blattFehler || "Es ist kein Briefbogen hinterlegt.";
+    block.appendChild(satz);
+  }
+  antworttext(block, text);
+  return block;
 }
 
 function entwurfKnoepfe(e) {
