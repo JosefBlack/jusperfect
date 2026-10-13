@@ -3868,3 +3868,71 @@ Aktenzeichen.
 
 **Die Regel wirkt nur, wenn sie gemessen wird.** Dreimal hintereinander hat sie
 heute gemessen, wo ich versagt habe.
+
+---
+
+## 13.10.2026 — der Lauf an Ihrem Server, und ein Fehler in meiner Auskunft
+
+Die Kanzlei hat den Prüfbogen mit dem neuen Stand laufen lassen, **vor** dem
+Anlegen der Sperrliste. Alle vier Berichtigungen stehen so da, wie sie sollen
+— jetzt nicht mehr an meinem Nachbau, sondern am echten Server:
+
+| Stelle | In der Ausgabe |
+|---|---|
+| die Mails | `✓ Davon E-Mails (type=mail): 22` samt dem Satz vom 08.10. |
+| das Urteil | die Obergrenzen als entschieden, „Draussen bleiben nur beA und Post" |
+| die Fassung | „Es gibt keine neuere Fassung als 1.0.2" |
+| die fünf Ordner | `!` statt `✗`, „KORRESPONDENZbaum", „Das ist KEIN Mangel" |
+
+### Dabei ein Fehler in meiner Auskunft, und er hätte Geld gekostet
+
+Ich habe der Kanzlei **zweimal** gesagt, sie solle zum Nachsehen der
+Sperrliste `PRUEFBOGEN.bat` starten — in der Hilfeseite, im Schlusstext des
+Anlegeprogramms und im Gespräch. **Das ist der Messlauf über die große
+Testakte und kostet einige Euro.**
+
+Der Grund dafür war strukturell, nicht nur Unachtsamkeit: Die **Suche** stand
+bis heute nur in `tests/test_keine_echten_akten.py`. Nachsehen konnte also
+nur, wer pytest hat — und der einzige Doppelklick, der irgendetwas prüft,
+heißt eben Prüfbogen.
+
+> Eine Auskunft, die Geld kostet, holt sich niemand. Und ein Riegel, den
+> niemand nachsieht, ist keiner.
+
+Also liegt die Suche jetzt im Programm: `jusperfect/sperrliste.py` mit
+`dateien()`, `muster()`, `treffer()` und `pruefen()`. **`SPERRLISTE-PRUEFEN.bat`**
+ruft sie — ohne pytest, ohne Modellaufruf, ohne Verbindung nach außen. Die
+Prüfung benutzt dieselben Funktionen; eine Quelle, nicht zwei.
+
+Was sie sagt, in drei Fällen:
+
+| Lage | Rückgabe |
+|---|---|
+| Liste da, nichts gefunden | **0** — „Beides sauber" |
+| ein gesperrter Name gefunden | **1** — mit der Liste der Dateien |
+| keine Liste, oder sie ist leer | **2** — kein stilles Ja |
+
+### Und ein achtes Mal dasselbe Muster, klein
+
+Das Probewort für den Fall „kommt nicht vor" stand im ersten Entwurf
+ausgeschrieben in der Prüfdatei — und die Suche fand es, dort. Dasselbe Muster
+wie bei den Probestücken der Aktenzeichen am 12.10.2026: *Wer einen Fund
+beschreibt, schreibt ihn hin.* Jetzt ist es zusammengesetzt.
+
+### Nachgelesen in der Ausgabe, was sonst noch neu ist
+
+* **Der Aktenstatus im ganzen Bestand**, Wort und Anzahl: 300 Akten
+  angesehen, **290 archiviert, 10 laufend**. Daran hängt die Aufbewahrung
+  (Ziffer 6.2), und es ist die erste Messung dazu am Echtbestand.
+* **Keine der 55 Dateien nennt ihre Akte.** Die Felder einer Datei sind
+  `addedDate, deleted, fileExtension, fileName, folderId, identifier,
+  postmark, size, tags, type` — kein `recordIdentifier`. Die Prüfung aus
+  Befund F08 kann dort also **nichts entscheiden**, und der Bogen sagt das
+  auch. Was trägt, ist die Prüfung eine Ebene höher: Die Antwort von
+  `GET /record` muss die angefragte Akte nennen, und eine Datei muss in dem
+  Ordner liegen, dessen Inhalt gefragt war.
+* **Der Dateibaum ist sauber:** keine Zeile über zu alte Ordner dort, nur im
+  Korrespondenzbaum — genau die Trennung, die heute eingebaut wurde.
+
+**2037 Prüfungen grün**, eine übersprungen. Nachgemessen über alle 304
+Dateien: kein gesperrter Name, kein echtes Aktenzeichen.

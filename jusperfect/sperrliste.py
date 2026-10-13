@@ -248,14 +248,181 @@ def main() -> int:
     _sagen("✓", f"{anzahl} Wort/Woerter stehen in der Liste.")
     _sagen(" ", f"Ort: {ort}")
     print()
-    _sagen(" ", "Zum Nachsehen: PRUEFBOGEN.bat starten. Steht am Ende KEIN")
-    _sagen(" ", "Hinweis auf eine fehlende Sperrliste, hat der Prueflauf sie")
-    _sagen(" ", "gefunden und sucht wieder nach Namen.")
+    # Berichtigt am 13.10.2026: Hier stand PRUEFBOGEN.bat. Das ist der
+    # Messlauf ueber die grosse Testakte und kostet einige Euro - eine
+    # Auskunft, die Geld kostet, holt sich niemand.
+    _sagen(" ", "Zum Nachsehen: SPERRLISTE-PRUEFEN.bat. Sie durchsucht den")
+    _sagen(" ", "Programmordner nach den Namen und kostet nichts.")
     print()
     _sagen("!", "Auf dem ZWEITEN Kanzleirechner dasselbe noch einmal - die")
     _sagen(" ", "Liste liegt je Rechner und wird nicht mitgeschickt.")
     return 0
 
 
+
+
+# ── Die Suche selbst, und warum sie hier steht ─────────────────────────────
+#
+# Sie stand bis zum 13.10.2026 nur in `tests/test_keine_echten_akten.py`. Das
+# hiess: Nachsehen konnte nur, wer pytest hat. Und ich habe der Kanzlei
+# zweimal gesagt, sie solle dafür `PRUEFBOGEN.bat` starten — das ist der
+# Messlauf über die große Testakte und **kostet einige Euro**. Eine Auskunft,
+# die Geld kostet, holt sich niemand, und ein Riegel, den niemand nachsieht,
+# ist keiner.
+#
+# Deshalb liegt die Suche jetzt im Programm. `SPERRLISTE-PRUEFEN.bat` ruft
+# sie, ohne pytest und ohne einen einzigen Modellaufruf. Die Prüfung
+# darüber benutzt dieselbe Funktion — eine Quelle, nicht zwei.
+
+#: Die Aktenzeichen der Kanzlei: D wie Dortschy, T wie Thunert, drei Ziffern,
+#: Jahr. Was so aussieht, gehoert zu einer echten Akte des Hauses.
+#:
+#: Die Regel in einem Satz: Ein Aktenzeichen im Bestand beginnt mit X.
+AKTENZEICHEN = __import__("re").compile(r"\b[DT]-\d{3}-\d{4}\b")
+
+#: Die Datei des Herstellers wird nicht angefasst - ihre Beispiele sind seine.
+#: Sie fuehrt selbst einen der gesperrten Namen; deshalb steht sie hier.
+UNBERUEHRT = frozenset({"schnittstelle/jurnodes-api-1.0.2.json"})
+
+#: Was nie zum Bestand gehoert - Arbeitsspuren, nicht Programm.
+NICHT_BESTAND = frozenset({
+    ".git", "__pycache__", ".pytest_cache", ".venv", "venv", "node_modules",
+    ".jusperfect-gedaechtnis", "build", "dist",
+})
+
+
+def dateien() -> list[str]:
+    """Jede Datei des Bestands, relativ zum Programmordner.
+
+    **Zuerst git, dann der Ordner.** Ein Paket fuer einen Dritten enthaelt
+    kein ``.git``, und dort ist ein echter Name am teuersten - genau dort
+    brach die Suche am 12.10.2026 ab.
+
+    ``--others`` ist seit dem 13.10.2026 dabei: ``git ls-files`` allein nennt
+    nur, was git schon **kennt**, also keine neu angelegte Datei. Und die neue
+    Datei ist die, in der der Fehler frisch ist. ``--exclude-standard`` laesst
+    aus, was in ``.gitignore`` steht, sonst liefe die Suche durch ``.venv``.
+    """
+    import os
+    import subprocess
+
+    try:
+        roh = subprocess.run(
+            ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+            cwd=PROGRAMMORDNER, capture_output=True, text=True,
+            check=True).stdout.split()
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        roh = []
+        for ordner, unter, gefunden in os.walk(PROGRAMMORDNER):
+            unter[:] = [u for u in unter if u not in NICHT_BESTAND]
+            for name in gefunden:
+                roh.append(str(Path(ordner, name)
+                               .relative_to(PROGRAMMORDNER).as_posix()))
+    return [n for n in roh if n not in UNBERUEHRT]
+
+
+def muster(liste: tuple[str, ...]) -> tuple:
+    """Als ganzes Wort, Gross- und Kleinschreibung zaehlt.
+
+    Viele deutsche Nachnamen sind auch gewoehnliche Woerter: "sauer" ist ein
+    Adjektiv, "Sauerstoff" ein Gas. Ohne Wortgrenze waere jeder zweite Satz
+    ein Treffer und die Pruefung nach einer Woche abgeschaltet.
+    """
+    import re as _re
+
+    return tuple(_re.compile(rf"\b{_re.escape(w)}\b") for w in liste)
+
+
+def treffer(gesucht: tuple) -> dict[str, list[str]]:
+    """Welche Datei welches Muster traegt. Leer heisst: nichts gefunden."""
+    gefunden: dict[str, list[str]] = {}
+    for name in dateien():
+        try:
+            text = (PROGRAMMORDNER / name).read_text(encoding="utf-8")
+        except (UnicodeDecodeError, IsADirectoryError, FileNotFoundError, OSError):
+            continue
+        dabei = [m.pattern for m in gesucht if m.search(text)]
+        if dabei:
+            gefunden[name] = dabei
+    return gefunden
+
+
+def pruefen() -> int:
+    """Nachsehen - ohne pytest, ohne Kosten, ohne einen Modellaufruf."""
+    print()
+    print("=" * 62)
+    print("   Steht ein echter Name oder ein echtes Aktenzeichen im")
+    print("   Programmordner?")
+    print("=" * 62)
+    print()
+    bestand = dateien()
+    _sagen(" ", f"{len(bestand)} Dateien angesehen - versionierte und neue.")
+    print()
+
+    # Das Aktenzeichenmuster braucht keine Liste und laeuft immer.
+    nummern = treffer((AKTENZEICHEN,))
+    if nummern:
+        _sagen("✗", f"ECHTE AKTENZEICHEN in {len(nummern)} Datei(en):")
+        for name in sorted(nummern):
+            _sagen(" ", f"     {name}")
+        _sagen(" ", "Ein Aktenzeichen beginnt hier mit X - die Kanzlei")
+        _sagen(" ", "fuehrt D und T.")
+    else:
+        _sagen("✓", "Kein echtes Aktenzeichen (Muster D-nnn-jjjj / T-nnn-jjjj).")
+
+    ort = finden()
+    if ort is None:
+        print()
+        _sagen("!", "KEINE Sperrliste gefunden - nach NAMEN wurde NICHT gesucht.")
+        _sagen(" ", "Gesucht wurde an:")
+        for stelle in orte():
+            _sagen(" ", f"     {stelle}")
+        _sagen(" ", "Anlegen: SPERRLISTE-ANLEGEN.bat")
+        _sagen(" ", "")
+        _sagen(" ", "In einem Pruefpaket fuer einen Dritten ist das der")
+        _sagen(" ", "vorgesehene Zustand. Auf einem Rechner der Kanzlei")
+        _sagen(" ", "fehlt die Datei.")
+        return 2
+
+    try:
+        liste = woerter(ort)
+    except (OSError, UnicodeDecodeError) as fehler:
+        print()
+        _sagen("✗", f"Die Sperrliste liegt da, laesst sich aber nicht lesen: {fehler}")
+        _sagen(" ", f"Ort: {ort}")
+        return 2
+    if not liste:
+        print()
+        _sagen("✗", "Die Sperrliste ist leer - dann prueft sie nichts.")
+        _sagen(" ", f"Ort: {ort}")
+        return 2
+
+    print()
+    _sagen("✓", f"Sperrliste gefunden: {len(liste)} Wort/Woerter.")
+    _sagen(" ", f"Ort: {ort}")
+    for wort in liste:
+        _sagen(" ", f"     {verdeckt(wort)}")
+    print()
+    namen = treffer(muster(liste))
+    if namen:
+        _sagen("✗", f"GESPERRTE NAMEN in {len(namen)} Datei(en):")
+        for name in sorted(namen):
+            _sagen(" ", f"     {name}")
+        print()
+        _sagen(" ", "Diese Dateien bitte berichtigen, BEVOR der Ordner")
+        _sagen(" ", "weitergegeben oder als ZIP heruntergeladen wird.")
+        return 1
+
+    _sagen("✓", "Kein gesperrter Name im Programmordner.")
+    print()
+    if nummern:
+        return 1
+    _sagen(" ", "Beides sauber. Der Ordner darf weitergegeben werden,")
+    _sagen(" ", "soweit es um Namen und Aktenzeichen geht.")
+    return 0
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    import sys
+
+    raise SystemExit(pruefen() if "--pruefen" in sys.argv else main())

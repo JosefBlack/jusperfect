@@ -27,12 +27,20 @@ from pathlib import Path
 import pytest
 
 from jusperfect.sperrliste import (
-    KOPF, PROGRAMMORDNER, SPERRLISTE_NAME, finden, main, orte, schreiben,
-    verdeckt, woerter,
+    KOPF, PROGRAMMORDNER, SPERRLISTE_NAME, dateien, finden, main, orte,
+    pruefen, schreiben, verdeckt, woerter,
 )
 
 #: Erfundene Namen, wie sie in den Testakten vorkommen.
 ERFUNDEN = ("Vellinghausen", "Krämer", "Kraemer")
+
+#: Ein Wort, das im Bestand garantiert NICHT vorkommt — **zusammengesetzt**,
+#: und das ist der Punkt.
+#:
+#: Erster Entwurf am 13.10.2026: Es stand ausgeschrieben da, und die Suche
+#: fand es — in dieser Datei. Dasselbe Muster wie bei den Probestücken der
+#: Aktenzeichen am 12.10.2026: *Wer einen Fund beschreibt, schreibt ihn hin.*
+OHNE_TREFFER = "".join(("Nirgends", "Steht", "Dieses", "Wort"))
 
 
 class TestDieOrteLiegenDraussen:
@@ -208,7 +216,13 @@ class TestDerGefuehrteWeg:
         self._lauf(["Vellinghausen"], monkeypatch, tmp_path)
         ausgabe = capsys.readouterr().out
         assert "ZWEITEN Kanzleirechner" in ausgabe
-        assert "PRUEFBOGEN.bat" in ausgabe
+        # Berichtigt am 13.10.2026: Hier stand PRUEFBOGEN.bat - der Messlauf
+        # ueber die grosse Testakte, der einige Euro kostet. Ich hatte das
+        # zweimal als Weg zum Nachsehen genannt. Eine Auskunft, die Geld
+        # kostet, holt sich niemand. Diese Pruefung hat den falschen Satz
+        # festgehalten und beim Berichtigen angeschlagen.
+        assert "SPERRLISTE-PRUEFEN.bat" in ausgabe
+        assert "PRUEFBOGEN.bat" not in ausgabe, "Der kostet Geld."
 
     def test_er_zeigt_eine_vorhandene_liste_verdeckt(self, monkeypatch, tmp_path,
                                                      capsys) -> None:
@@ -219,21 +233,100 @@ class TestDerGefuehrteWeg:
         assert "Vellinghausen" not in ausgabe
 
 
-class TestDieStartdatei:
+class TestNachsehenOhneKosten:
+    """`SPERRLISTE-PRUEFEN.bat` — und warum es sie gibt.
+
+    Die Suche stand bis zum 13.10.2026 nur in
+    `tests/test_keine_echten_akten.py`. Nachsehen konnte also nur, wer pytest
+    hat — und ich habe der Kanzlei zweimal gesagt, sie solle dafür
+    `PRUEFBOGEN.bat` starten. Das ist der Messlauf über die große Testakte und
+    **kostet einige Euro**.
+
+    > Eine Auskunft, die Geld kostet, holt sich niemand. Und ein Riegel, den
+    > niemand nachsieht, ist keiner.
+    """
+
+    def test_ohne_liste_sagt_sie_das_und_meldet_es(self, monkeypatch, tmp_path,
+                                                  capsys) -> None:
+        monkeypatch.setattr("jusperfect.sperrliste.orte",
+                            lambda: (tmp_path / SPERRLISTE_NAME,))
+        assert pruefen() == 2, "Ohne Liste ist das Ergebnis kein stilles Ja."
+        ausgabe = capsys.readouterr().out
+        assert "KEINE Sperrliste gefunden" in ausgabe
+        assert "SPERRLISTE-ANLEGEN.bat" in ausgabe
+
+    def test_mit_sauberem_bestand_sagt_sie_ja(self, monkeypatch, tmp_path,
+                                              capsys) -> None:
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, [OHNE_TREFFER])
+        monkeypatch.setattr("jusperfect.sperrliste.orte", lambda: (datei,))
+        assert pruefen() == 0
+        ausgabe = capsys.readouterr().out
+        assert "Kein gesperrter Name im Programmordner" in ausgabe
+        assert "Kein echtes Aktenzeichen" in ausgabe
+
+    def test_ein_treffer_wird_gemeldet_und_zaehlt_als_fehler(self, monkeypatch,
+                                                             tmp_path, capsys) -> None:
+        """Mit einem erfundenen Namen, der nachweislich im Bestand steht."""
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, ["Vellinghausen"])
+        monkeypatch.setattr("jusperfect.sperrliste.orte", lambda: (datei,))
+        assert pruefen() == 1
+        ausgabe = capsys.readouterr().out
+        assert "GESPERRTE NAMEN" in ausgabe
+        assert "berichtigen" in ausgabe
+
+    def test_eine_leere_liste_ist_ein_fehler_und_kein_ja(self, monkeypatch,
+                                                         tmp_path, capsys) -> None:
+        datei = tmp_path / SPERRLISTE_NAME
+        datei.write_text("# nur Erklaerung\n", encoding="utf-8")
+        monkeypatch.setattr("jusperfect.sperrliste.orte", lambda: (datei,))
+        assert pruefen() == 2
+        assert "ist leer" in capsys.readouterr().out
+
+    def test_sie_nennt_die_woerter_nicht_im_wortlaut(self, monkeypatch, tmp_path,
+                                                    capsys) -> None:
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, [OHNE_TREFFER])
+        monkeypatch.setattr("jusperfect.sperrliste.orte", lambda: (datei,))
+        pruefen()
+        assert OHNE_TREFFER not in capsys.readouterr().out
+
+    def test_die_suche_sieht_den_ganzen_bestand(self) -> None:
+        """Eine leere Dateiliste macht jede Suche grün."""
+        assert len(dateien()) > 100
+
+    def test_die_herstellerdatei_bleibt_aussen(self) -> None:
+        """Ihre Beispiele sind seine, und sie führt selbst einen der Namen."""
+        assert "schnittstelle/jurnodes-api-1.0.2.json" not in dateien()
+
+
+class TestDieStartdateien:
     @staticmethod
-    def _bat() -> str:
-        pfad = Path(__file__).resolve().parent.parent / "SPERRLISTE-ANLEGEN.bat"
+    def _bat(name: str = "SPERRLISTE-ANLEGEN.bat") -> str:
+        pfad = Path(__file__).resolve().parent.parent / name
         return io.open(pfad, encoding="utf-8").read()
 
     def test_sie_ist_da(self) -> None:
         assert self._bat()
 
-    def test_sie_hat_windows_zeilenenden(self) -> None:
+    @pytest.mark.parametrize("name", ["SPERRLISTE-ANLEGEN.bat",
+                                      "SPERRLISTE-PRUEFEN.bat"])
+    def test_sie_haben_windows_zeilenenden(self, name: str) -> None:
         """Ohne CRLF stolpert cmd.exe — deshalb steht es in .gitattributes."""
-        pfad = Path(__file__).resolve().parent.parent / "SPERRLISTE-ANLEGEN.bat"
+        pfad = Path(__file__).resolve().parent.parent / name
         rohe = pfad.read_bytes()
         assert b"\r\n" in rohe
         assert rohe.count(b"\n") == rohe.count(b"\r\n")
+
+    def test_die_probe_ruft_den_pruefmodus(self) -> None:
+        assert "--pruefen" in self._bat("SPERRLISTE-PRUEFEN.bat")
+
+    def test_die_probe_sagt_dass_sie_nichts_kostet(self) -> None:
+        """Der Grund, warum es sie gibt: Die Auskunft darf nichts kosten."""
+        text = self._bat("SPERRLISTE-PRUEFEN.bat")
+        assert "kostet nichts" in text
+        assert "kein Modellaufruf" in text
 
     def test_sie_ruft_das_programm(self) -> None:
         assert "-m jusperfect.sperrliste" in self._bat()
