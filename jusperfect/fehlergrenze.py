@@ -75,7 +75,7 @@ import sys
 from typing import Any, Callable
 
 from jusperfect.security.protokoll import (
-    MAX_WERT_LAENGE, ereignis, kurzkennung, protokoll,
+    MAX_WERT_LAENGE, ereignis, kurzkennung, protokoll, stoerung,
 )
 
 _log = protokoll("fehlergrenze")
@@ -289,7 +289,11 @@ class Fehlergrenze:
             await self._app(scope, receive, merken)
         except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
             nummer = secrets.token_hex(4)
-            ereignis(_log, "fehler_abgefangen",
+            # `stoerung` und nicht `ereignis`: Diese eine Zeile MUSS im
+            # schwarzen Fenster ankommen - sie ist das Einzige, was zu der
+            # Vorgangsnummer in der Antwort gehoert. Auf INFO entstand sie und
+            # ging nirgendwohin; siehe `stoerung`.
+            stoerung(_log, "fehler_abgefangen",
                      verfahren=str(scope.get("method", "")),
                      nummer=nummer,
                      # Gekuerzt, weil das Protokoll lange Werte abweist - und
@@ -301,7 +305,12 @@ class Fehlergrenze:
                 return
             status, satz = self._status_fuer(fehler)
             if status >= 500:
-                satz = f"{satz} Vorgangsnummer {nummer}."
+                # Die Nummer allein half nicht weiter: Am 13.10.2026 stand sie
+                # auf dem Schirm der Kanzlei, und niemand wusste, wohin damit.
+                # Jetzt steht der Weg daneben.
+                satz = (f"{satz} Vorgangsnummer {nummer}. Im schwarzen Fenster "
+                        f"des Servers steht eine Zeile mit dieser Nummer - sie "
+                        f"nennt die Ursache.")
             await self._antworten(send, status, satz)
 
     @staticmethod

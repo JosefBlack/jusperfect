@@ -4225,3 +4225,77 @@ FAILED tests/test_sperrliste.py::…::test_mit_sauberem_bestand_sagt_sie_ja
 
 Die elfte Wiederholung — und die erste, die eine Maschine gefunden hat und nicht
 ich. Dafür ist die Prüfung da.
+
+---
+
+## 13.10.2026 — „interner Fehler 2e2e3bd1" — die Nummer kam an, die Zeile nicht
+
+**Aus der Kanzlei:** „Zip heruntergeladen, Akte öffnen nicht möglich Vorgang
+wurde abgebrochen interner Fehler 2e2e3bd1."
+
+### Was die Meldung bedeutet
+
+| Teil | Woher |
+|---|---|
+| „Interner Fehler. Der Vorgang wurde abgebrochen." | `UNBEKANNT` in `jusperfect/fehlergrenze.py` — der Satz für eine Ausnahme, die **keinem bekannten Fehlertyp** entspricht. Ein Konfigurations-, jur\|nodes-, AWS- oder Speicherfehler hätte einen eigenen, lesbaren Satz. |
+| `2e2e3bd1` | `secrets.token_hex(4)` in der Fehlergrenze — die Vorgangsnummer, die Antwort und Protokollzeile verbinden soll. |
+
+Also ein **Programmfehler in unserem Code**, nicht eine Abweisung des Servers.
+
+### Und die Zeile dazu gab es nicht
+
+`tests/test_fehlergrenze.py` hält seit dem 05.10.2026 fest, dass die Nummer in
+Antwort **und** Protokoll steht — eine Klasse heißt dort
+`DieVorgangsnummerVerbindetAntwortUndProtokoll`, mit dem Satz „Ohne sie wäre
+‚inhaltsfrei' gleichbedeutend mit ‚unauffindbar'". Gemessen wurde das mit
+`assertLogs(level=INFO)`, also mit einer Stufe, **die der Test selbst setzt**.
+
+Gemessen, wie es im Betrieb aussieht:
+
+```
+effective level: 30 (INFO=20, WARNING=30)
+isEnabledFor(INFO): False
+```
+
+* Uvicorn richtet nur seine eigenen Kanäle ein; der Wurzelkanal bleibt leer.
+* Ohne Empfänger greift `logging.lastResort` — und der nimmt erst ab WARNUNG.
+* `ereignis()` schrieb auf INFO.
+
+**Die Zeile entstand und ging nirgendwohin.** Die Nummer war die ganze Zeit
+unauffindbar, und der Test, der das ausschließen sollte, hat sich die Bedingung
+selbst hergestellt, unter der er bestand.
+
+> Ein Test, der die Stufe setzt, prüft den Kanal. Was im Fenster steht, prüft
+> er nicht.
+
+### Berichtigt
+
+1. `jusperfect/security/protokoll.py`: neben `ereignis()` steht jetzt
+   `stoerung()` — dieselben Feldprüfungen, aber auf **ERROR**. Nur die
+   abgefangene Störung geht diesen Weg; alles andere bleibt leise.
+2. `jusperfect/fehlergrenze.py`: die Fehlergrenze nimmt `stoerung()`.
+3. Die Antwort sagt jetzt auch, **wohin** mit der Nummer: „Im schwarzen Fenster
+   des Servers steht eine Zeile mit dieser Nummer — sie nennt die Ursache."
+4. `tests/test_vorgangsnummer_kommt_an.py`, sieben Prüfungen: in einem **eigenen
+   Prozess**, mit Uvicorns eigener Protokolleinrichtung und ohne jede Stufe von
+   Hand. Gegenprobe gemacht — mit `ereignis()` statt `stoerung()` fällt sie:
+   `AssertionError: '781fc981' not found in ''`.
+
+Was dort weiter gilt: kein Traceback, kein Wortlaut der Ausnahme, kein Pfad und
+keine Aktenkennung. In der Zeile stehen Verfahren, Nummer und die **Kette der
+Ausnahmetypen samt Codestellen**.
+
+### Beiläufig berichtigt: eine Anzeige, die nicht stimmte
+
+`START-JURNODES.bat` schrieb beim Start fest „Gedaechtnis: AUS (siehe
+Erklaerung in dieser Datei)" — während oben seit dem 01.10.2026
+`JUSPERFECT_GEDAECHTNIS=aws` steht. Der Bearbeiter las AUS, und das Gedächtnis
+lief. Jetzt wird der eingestellte Wert angezeigt, mit dem Ablageort.
+
+Eine Anzeige, die nicht mitgeführt wird, ist schlechter als keine.
+
+### Offen
+
+**Die Ursache des Fehlers selbst.** 2062 Prüfungen sind grün, der Fehler tritt
+an Ihrem Server auf und bei den erfundenen Akten nicht — er hängt an echten
+Daten. Gebraucht wird die eine Zeile aus dem schwarzen Fenster.

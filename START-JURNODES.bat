@@ -336,7 +336,15 @@ echo   Schnittstelle:   %JUSPERFECT_JURNODES_URL%
 echo   Benutzer:        %JURNODES_API_USER%
 echo   Schutzgelaender: %JUSPERFECT_GUARDRAIL_ID%
 echo   Modell:          %JUSPERFECT_MODELL_ID%
-echo   Gedaechtnis:     AUS (siehe Erklaerung in dieser Datei)
+REM Was hier bis zum 13.10.2026 stand: "AUS (siehe Erklaerung in dieser
+REM Datei)" - und zwar fest, waehrend oben seit dem 01.10.2026 "aws"
+REM gesetzt ist. Der Bearbeiter las also AUS und das Gedaechtnis lief.
+REM Eine Anzeige, die nicht mitgefuehrt wird, ist schlechter als keine.
+set "STAND_GED=%JUSPERFECT_GEDAECHTNIS%"
+if /i "%STAND_GED%"=="aus" set "STAND_GED=AUS - jede Akte wird bei jeder Sitzung neu gelesen"
+if /i "%STAND_GED%"=="aws" set "STAND_GED=AWS - Ablage %JUSPERFECT_GEDAECHTNIS_BUCKET%"
+if /i "%STAND_GED%"=="akte" set "STAND_GED=in der Akte selbst"
+echo   Gedaechtnis:     %STAND_GED%
 echo   Kostenbremse:    %JUSPERFECT_MONATSBUDGET_EUR% EUR im Monat
 echo.
 set "FASSUNG=unbekannt"
