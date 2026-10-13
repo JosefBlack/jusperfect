@@ -1965,6 +1965,39 @@ async function gedaechtnisEinlesen() {
   const g = (sitzung && sitzung.gedaechtnis) || {};
   const gesamt = (g.eintraege || []).length;
   const offenAmAnfang = g.offene_dokumente || 0;
+  // Null offene Dokumente heisst ZWEIERLEI, und die beiden sind das
+  // Gegenteil voneinander.
+  //
+  // Aus der Kanzlei am 13.10.2026, nach dem Verwerfen: "Aktengedaechtnis ist
+  // leer - Akte einlesen fuehrt zu dem Ergebnis: Akte ist schon eingelesen."
+  //
+  // Hier stand EIN Satz fuer beide Faelle. Liegt nichts im Gedaechtnis, ist
+  // nichts offen - und das sah aus wie "fertig", waehrend in Wahrheit noch
+  // gar nichts angefangen hatte. Genau nach einem Verwerfen, also genau
+  // dann, wenn der Bearbeiter weitermachen will.
+  //
+  // `offene_dokumente` zaehlt, was IM Gedaechtnis liegt und noch nicht
+  // verarbeitet ist. Dokumente kommen durch das Anhaken hinein, nicht durch
+  // das Einlesen - das baut aus ihnen den Lebenssachverhalt. Wer das nicht
+  // weiss, klickt hier und bekommt eine Antwort, die ihn wegschickt.
+  if (!gesamt) {
+    // Der Hinweis muss GELESEN werden, bevor etwas aufgeht: Das
+    // Auswahlfenster ist ein modaler Dialog und legte sich sonst ueber die
+    // Meldung, die ihn erklaert.
+    const weg = [
+      "Im Aktengedächtnis liegt noch kein Dokument.",
+      "",
+      "„Akte einlesen“ baut den Lebenssachverhalt aus dem, was im Gedächtnis",
+      "liegt. Hinein kommen die Dokumente durch das Anhaken – im Fenster",
+      "„Auswahl“, links in der Liste der Akte.",
+      "",
+      "Nach einem Verwerfen ist das Gedächtnis leer; dann fängt es hier an.",
+      "",
+      "Das Fenster „Auswahl“ jetzt öffnen?",
+    ];
+    if (confirm(weg.join("\n"))) gedaechtnisExplorerOeffnen();
+    return;
+  }
   if (!offenAmAnfang) { melden("Es ist schon alles eingelesen."); return; }
   const zeichen = g.zeichen || 0;
   const grenze = K.maxPassagenZeichen || 160000;

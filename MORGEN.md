@@ -4988,3 +4988,52 @@ cmd **und** durch PowerShell, und eine der beiden stolpert darüber sicher.
 die Verknüpfung selbst — sie fragen nach dem Ziel, nicht nach dem Vorhandensein.
 
 2168 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026 — „Akte ist schon eingelesen", gesagt zu einem leeren Gedächtnis
+
+Aus der Kanzlei, unmittelbar nach dem Verwerfen:
+
+> „Gedächtnis wurde verworfen, dauerte 10 Sekunden — Aktengedächtnis ist leer —
+> Taste ‚Akte einlesen' führt zu dem Ergebnis: Akte ist schon eingelesen."
+
+Das Verwerfen geht jetzt in zehn Sekunden statt in Minuten — die Berichtigung
+von vorhin wirkt. Und dahinter stand gleich der nächste Fehler.
+
+### „Nichts offen" heißt zweierlei
+
+`offene_dokumente` zählt, was **im Gedächtnis liegt** und noch nicht
+verarbeitet ist. Ist das Gedächtnis leer, ist nichts offen. Die Oberfläche
+hatte für diese Null nur **einen** Satz:
+
+```js
+if (!offenAmAnfang) { melden("Es ist schon alles eingelesen."); return; }
+```
+
+Also „fertig", während noch gar nichts angefangen hatte — und zwar **genau
+nach einem Verwerfen**, also genau dann, wenn der Bearbeiter weitermachen
+will. Der Weg war nicht verbaut; er war mit einem Satz zugestellt, der das
+Gegenteil sagte.
+
+| Was dasteht | Was es heißt |
+|---|---|
+| Gedächtnis leer, nichts offen | **Es hat noch nicht angefangen** |
+| Gedächtnis voll, nichts offen | Es ist fertig |
+
+### Und die Sache dahinter, die niemand wissen kann
+
+**Dokumente kommen durch das Anhaken ins Gedächtnis, nicht durch das
+Einlesen.** Das Einlesen baut aus ihnen den Lebenssachverhalt. Wer das nicht
+weiß — und woher sollte er —, klickt nach dem Verwerfen auf „Akte einlesen"
+und wird weggeschickt.
+
+Jetzt steht dort, was zu tun ist, und das Fenster „Auswahl" geht auf **Rückfrage**
+auf: Es ist ein modaler Dialog und legte sich sonst über die Erklärung, die
+ihn erklärt.
+
+`tests/test_leeres_gedaechtnis_ist_nicht_fertig.py`, sieben Prüfungen —
+darunter die, dass der neue Zweig **vor** dem alten Satz greift. Genau daran
+hing es.
+
+2175 Prüfungen grün, eine übersprungen.
