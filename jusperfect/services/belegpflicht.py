@@ -109,6 +109,42 @@ def _einheiten(koerper: str) -> list[str]:
 UNBELEGT_HINWEIS = "Aussage ohne belastbaren Beleg entfernt (genannt: —)."
 
 
+def unbelegt_satz(verworfen: int, genannt: list[str]) -> str:
+    """EINE Zeile fuer alle zurueckgehaltenen Aussagen, nicht eine je Aussage.
+
+    Aus der Kanzlei am 13.10.2026:
+
+        „Aussage ohne belastbaren Beleg entfernt (genannt: —)." steht im
+        Programm und nimmt unnoetig Platz weg – vielleicht lieber zaehlen
+        oder ganz weglassen, da man die Aussage sowieso nicht anklicken kann.
+
+    Hier stand eine Zeile je zurueckgehaltener Aussage, bei fuenfzehn also
+    fuenfzehnmal derselbe Satz. Eine Stelle las sich sogar
+    ``hinweise += [UNBELEGT_HINWEIS] * vorlauf_verworfen`` - die Wiederholung
+    war ausgeschrieben.
+
+    **Weggelassen wird sie trotzdem nicht.** Dass etwas zurueckgehalten wurde,
+    ist die Belegpflicht selbst; eine Antwort, die stillschweigend kuerzer
+    wird, waere genau der Zustand, den dieses Programm verhindert. Gezaehlt
+    wird also, wie es die Kanzlei vorgeschlagen hat.
+
+    Was dabei bleibt: die Kennungen, die das Modell GENANNT hat, obwohl es sie
+    nicht gibt. Das ist kein Rauschen, sondern der Nachweis einer Erfindung.
+    Ein Gedankenstrich dagegen sagt nichts und faellt weg.
+    """
+    if verworfen <= 0:
+        return ""
+    satz = ("Eine Aussage wurde" if verworfen == 1
+            else f"{verworfen} Aussagen wurden") + " ohne belastbaren Beleg entfernt."
+    echte = sorted({g for g in genannt if g and g != "—"})
+    if echte:
+        satz += (" Dabei war eine Fundstelle genannt, die es nicht gibt: "
+                 if len(echte) == 1 else
+                 " Dabei waren Fundstellen genannt, die es nicht gibt: ")
+        satz += ", ".join(echte) + "."
+    return satz
+
+
 def _marken_glaetten(text: str) -> str:
     """Mehrere Marken hintereinander werden eine; eine Marke bekommt Luft."""
     text = re.sub(rf"(?:{re.escape(ENTFERNT)}\s*){{2,}}", ENTFERNT + " ", text)
@@ -170,6 +206,8 @@ def aussage_fail_closed(text: str, index: dict[str, Passage],
     # den Leser darin suchen zu lassen.
     aussagen: dict[str, str] = {}
     verworfen = 0
+    #: Was das Modell als Beleg genannt hat, obwohl es die Stelle nicht gibt.
+    genannt_gesammelt: list[str] = []
     hat_gueltig = False
     letzte = 0
     for m in ZITAT_RE.finditer(text):
@@ -183,7 +221,6 @@ def aussage_fail_closed(text: str, index: dict[str, Passage],
             teile.append(vorlauf)
         if vorlauf_verworfen:
             verworfen += vorlauf_verworfen
-            hinweise += [UNBELEGT_HINWEIS] * vorlauf_verworfen
         kennungen = [k.strip() for k in m.group(1).split(",") if k.strip()]
         gueltig = [k for k in kennungen if k in index]
         traegt = bool(gueltig) and (len(gueltig) == len(kennungen) or not verlangt_alle)
@@ -198,13 +235,14 @@ def aussage_fail_closed(text: str, index: dict[str, Passage],
             # seine Stelle tritt eine sichtbare Marke.
             teile.append(ENTFERNT)
             verworfen += 1
-            genannt = ", ".join(kennungen) or "—"
-            hinweise.append(f"Aussage ohne belastbaren Beleg entfernt (genannt: {genannt}).")
+            genannt_gesammelt.extend(kennungen)
         letzte = m.end()
 
     if not hat_gueltig:
+        schluss = [x for x in (unbelegt_satz(verworfen, genannt_gesammelt),) if x]
         return Belegergebnis(VERZICHT, [],
-                             hinweise + ["Keine Aussage war belegt; die Antwort wurde zurückgehalten."],
+                             hinweise + schluss
+                             + ["Keine Aussage war belegt; die Antwort wurde zurückgehalten."],
                              verworfen)
 
     # Was nach dem letzten Beleg noch kommt.
@@ -227,7 +265,9 @@ def aussage_fail_closed(text: str, index: dict[str, Passage],
     if nachsatz.strip():
         teile.append(ENTFERNT)
         verworfen += 1
-        hinweise.append("Aussage ohne belastbaren Beleg entfernt (genannt: —).")
+    satz = unbelegt_satz(verworfen, genannt_gesammelt)
+    if satz:
+        hinweise.append(satz)
 
     neuer_text = "".join(teile)
     # Mehrere zurückgehaltene Abschnitte hintereinander werden zu einer Marke.
@@ -330,6 +370,7 @@ def entwurf_fail_closed(text: str, index: dict[str, Passage]) -> Belegergebnis:
     hinweise: list[str] = []
     aussagen: dict[str, str] = {}
     verworfen = 0
+    genannt_gesammelt: list[str] = []
     letzte = 0
     for m in ZITAT_RE.finditer(text):
         stuecke = _einheiten(text[letzte:m.start()])
@@ -345,10 +386,12 @@ def entwurf_fail_closed(text: str, index: dict[str, Passage]) -> Belegergebnis:
         else:
             teile.append(ENTFERNT)
             verworfen += 1
-            genannt = ", ".join(kennungen) or "—"
-            hinweise.append(f"Aussage ohne belastbaren Beleg entfernt (genannt: {genannt}).")
+            genannt_gesammelt.extend(kennungen)
         letzte = m.end()
     teile.append(text[letzte:])
+    satz = unbelegt_satz(verworfen, genannt_gesammelt)
+    if satz:
+        hinweise.append(satz)
 
     neuer_text = "".join(teile)
     neuer_text = _marken_glaetten(neuer_text)
