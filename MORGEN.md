@@ -4156,3 +4156,72 @@ Repository wird der erste hochgeschobene Zweig automatisch die Vorgabe. Es
 wurde nur `2.0` hochgeschoben, und die API sagt jetzt `"default_branch": "2.0"`.
 
 Kein `main` mehr, nichts umzustellen, keine Fehlermeldung.
+
+---
+
+## 13.10.2026 — „können wir das löschen" — das ganze Aktengedächtnis einer Akte
+
+**Aus der Kanzlei:** Eine Akte habe bereits eine Arbeitsakte mit falschen
+Unterlagen, ob man die löschen könne.
+
+### Was ich nachgesehen habe, bevor ich etwas gebaut habe
+
+| Frage | Befund | Stelle |
+|---|---|---|
+| Hilft `GEDAECHTNIS-LEEREN.bat`? | **Nein.** Die Datei leert den lokalen Ordner `.jusperfect-gedaechtnis`. Bei Ihnen steht `JUSPERFECT_GEDAECHTNIS=aws`; das Gedächtnis liegt im Eimer `dortschy-thunert-jusperfect-aktengedaechtnis`. | `START-JURNODES.bat` |
+| Hilft „Sitzung schließen"? | **Nein.** Beim nächsten Öffnen legt `bei_eroeffnen` **jedes** Dokument des Gedächtnisses wieder in `sitzung.geladen`. Was falsch im Gedächtnis steht, kommt zurück. | `jusperfect/services/gedaechtnis.py:151` |
+| Gab es den Löschweg? | **Ja, in der Schnittstelle** — `DELETE /api/akten/{akte_id}/gedaechtnis`, mit Berechtigungsprüfung, seit dem Anfang. | `jusperfect/web.py:632` |
+| Gab es einen Knopf dafür? | **Nein.** Angeschlossen waren nur das einzelne Dokument und die einzelne Frage. | `jusperfect/static/app.js` |
+
+> Eine Funktion ohne Weg dorthin ist keine. Das ist dasselbe Muster wie am
+> 12.10. bei der Ordnergliederung: gebaut, wo ich es gesucht hätte, und nicht
+> dort, wo gearbeitet wird.
+
+### Was jetzt da ist
+
+Oben im Gedächtnisfenster, neben **Auswahl**, steht **„Gedächtnis verwerfen"** —
+als einziger Knopf der Leiste in `--rot`, damit er nicht aussieht wie einer, der
+etwas holt.
+
+1. Die Rückfrage **zählt vorher ab**, was herausfällt: Dokumentauszüge mit
+   Umfang, gespeicherte Fragen, Zeitstrahleinträge, Lebenssachverhalt, Analyse.
+   Sie schätzt nicht.
+2. Dann `DELETE /api/akten/{akte}/gedaechtnis`.
+3. **Danach wird die offene Arbeitsakte aufgeräumt.** Die schon offene Sitzung
+   trägt die Auszüge noch — `bei_eroeffnen` hat sie beim Öffnen hineingelegt.
+   Entfernt werden nur die, die wirklich im Gedächtnis standen; was ohne
+   Gedächtnis dazugeholt wurde, bleibt liegen. (Dieselbe Erwägung wie bei
+   Befund F02.3 der Zweitprüfung vom 05.10.2026: ein Fenster, das zeigt, was es
+   nicht mehr hat.)
+4. **Die Akte in jur|nodes bleibt unberührt.** Gelöscht wird nur, was sich
+   jusperfect gemerkt hat. Das Programm schreibt dort nichts.
+
+Zurück kommt es mit **Akte einlesen**.
+
+### Warum ganz und nicht dokumentweise
+
+Das Gedächtnis führt **Dokumentnummern** mit. Ist es **vor dem 08.10.2026**
+entstanden, kennt es die Mails und ihre Anlagen nicht — seit dem 08.10. stehen
+die mit in der Liste. Die Nummern verschieben sich damit, und ein gespeicherter
+Beleg „D47" zeigt auf ein anderes Dokument als damals. Das lässt sich nicht
+dokumentweise richten; so ein Gedächtnis muss neu entstehen.
+
+### Geprüft
+
+`tests/test_gedaechtnis_ganz_verwerfen.py`, neun Prüfungen. Die erste hält den
+**Grund** fest: Sitzung schließen, neu öffnen — das Dokument liegt wieder in der
+Arbeitsakte. Nach dem Verwerfen ist die neue Sitzung leer, das Gedächtnis nicht
+mehr vorhanden, und die Dokumentliste aus jur|nodes unverändert vollständig.
+
+### Und noch einmal dasselbe Muster
+
+Der erste Entwurf der Funktion zitierte Ihre Frage **samt Aktenzeichen** in den
+Kommentar. Diesmal hat es die Sperre selbst gefunden, vor dem Hochschieben:
+
+```
+FAILED tests/test_keine_echten_akten.py::…::test_nirgends_im_ganzen_programmordner
+FAILED tests/test_sperrliste.py::…::test_mit_sauberem_bestand_sagt_sie_ja
+```
+
+Die elfte Wiederholung — und die erste, die eine Maschine gefunden hat und nicht
+ich. Dafür ist die Prüfung da.

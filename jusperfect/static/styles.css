@@ -1032,3 +1032,19 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
   font-size: 12.5px; line-height: 1.5; }
 .analyse-veraltet > div { flex: 1 1 14rem; min-width: 0; }
 .analyse-veraltet .mini { flex: none; }
+
+
+/* Ein Knopf, der etwas wegnimmt, soll nicht aussehen wie einer, der etwas
+   holt. Nicht rot und schreiend - das macht aus einer Warnung Tapete -,
+   sondern als einziger in der Leiste eine andere Farbe. */
+/* --rot und --rot-hell, nicht eigene Farben: die beiden sind fuer den
+   dunklen Hintergrund mitgefuehrt. Ein selbst gesetztes Rosa waere dort
+   eine Leuchtflaeche. */
+.mini.gefahr {
+  border-color: var(--rot);
+  color: var(--rot);
+}
+.mini.gefahr:hover {
+  background: var(--rot-hell);
+  border-color: var(--rot);
+}

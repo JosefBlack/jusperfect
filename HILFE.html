@@ -543,6 +543,7 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
     <tr><td><strong>Akte einlesen</strong></td><td>liest die ganze Akte Portion für Portion ein und bildet daraus Lebenssachverhalt und Zeitstrahl</td><td>mehrere Modellaufrufe – es wird vorher gefragt</td></tr>
     <tr><td><strong>Auswahl</strong></td><td>öffnet das Fenster: links die Akte, rechts was im Gedächtnis liegt</td><td>nichts</td></tr>
     <tr><td><strong>Anhalten</strong></td><td>bricht das Einlesen ab; Gelesenes bleibt</td><td>–</td></tr>
+    <tr><td><strong>Gedächtnis verwerfen</strong></td><td>wirft das <em>ganze</em> Gedächtnis dieser Akte weg – es wird vorher gefragt</td><td>nichts; das <em>neue</em> Einlesen danach kostet</td></tr>
   </table>
   <p>Vor dem Einlesen sagt das Programm, wie viele Dokumente noch fehlen, wie viele Zeichen
   das sind und mit wie vielen Aufrufen zu rechnen ist. <strong>Erst dann wird gerechnet.</strong></p>
@@ -591,8 +592,30 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
     und Zeitstrahleinträge nicht wieder. Lesen Sie die Rückfrage.</p>
   </div>
   <p>Die Akte in jur|nodes bleibt dabei unberührt. Entfernt wird nur, was sich jusperfect
-  gemerkt hat. Alles auf einmal wegwerfen geht nur bei den <strong>erfundenen</strong>
-  Testakten, mit <code>GEDAECHTNIS-LEEREN.bat</code>.</p>
+  gemerkt hat.</p>
+
+  <h3>Das ganze Gedächtnis einer Akte wegwerfen<span class="marke fertig">seit 13.10.2026</span></h3>
+  <p>Oben im Gedächtnisfenster, neben <strong>Auswahl</strong>:
+  <strong>„Gedächtnis verwerfen"</strong>. Damit fällt alles weg, was zu
+  <em>dieser einen</em> Akte gespeichert ist – Dokumentauszüge, Lebenssachverhalt,
+  Zeitstrahl, frühere Fragen und Antworten, die gespeicherte Analyse. Die Rückfrage zählt
+  es vorher ab.</p>
+  <table>
+    <tr><th>Frage</th><th>Antwort</th></tr>
+    <tr><td>Reicht nicht <strong>Sitzung schließen</strong>?</td><td><strong>Nein.</strong> Beim nächsten Öffnen legt das Programm jedes Dokument des Gedächtnisses wieder in die Arbeitsakte. Was falsch im Gedächtnis steht, kommt zurück.</td></tr>
+    <tr><td>Was ist mit der Akte in jur|nodes?</td><td>Sie bleibt <strong>unberührt</strong>. Weggeworfen wird nur, was sich jusperfect gemerkt hat.</td></tr>
+    <tr><td>Und die offene Arbeitsakte?</td><td>Die Dokumente, die aus dem Gedächtnis kamen, verschwinden im selben Schritt aus der linken Spalte. Was Sie in dieser Sitzung von Hand dazugeholt haben, bleibt.</td></tr>
+    <tr><td>Wie kommt es zurück?</td><td>Mit <strong>Akte einlesen</strong>. Das kostet Modellaufrufe, bei Scans zusätzlich die Texterkennung.</td></tr>
+  </table>
+  <div class="merksatz">
+    <p><strong>Wann das der richtige Weg ist:</strong> wenn das Gedächtnis als Ganzes nicht
+    mehr passt – etwa weil es vor dem 08.10.2026 entstanden ist. Damals kamen die E-Mails
+    und ihre Anlagen als eigene Dokumente hinzu; seitdem sind die
+    <strong>Dokumentnummern verschoben</strong>, und ein alter Beleg „D47" zeigt auf ein
+    anderes Dokument als damals. Dokumentweise lässt sich das nicht richten.</p>
+  </div>
+  <p>Bei den <strong>erfundenen</strong> Testakten geht es weiter auch mit
+  <code>GEDAECHTNIS-LEEREN.bat</code> – das betrifft nur den Testbetrieb ohne jur|nodes.</p>
 
   <h3>Der Zeitstrahl</h3>
   <p>Rechts <strong>Chronologie ›</strong>. Er ist <strong>ohne Modellaufruf gefüllt</strong>:
@@ -752,8 +775,9 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
 
   <div class="merksatz">
     <p><strong>Gelöscht wird das Gedächtnis nur über den Abschluss der Akte</strong> – oder
-    von Hand, einzeln, über „vergessen". Eine Bearbeitungspause löscht nie etwas, auch nach
-    neun Monaten nicht. Maßgeblich ist allein der Aktenstatus in jur|nodes.</p>
+    von Hand: einzeln über „vergessen", ganz über „Gedächtnis verwerfen". Eine
+    Bearbeitungspause löscht nie etwas, auch nach neun Monaten nicht. Maßgeblich ist allein
+    der Aktenstatus in jur|nodes.</p>
   </div>
 </section>
 

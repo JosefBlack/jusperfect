@@ -2316,6 +2316,98 @@ async function gedaechtnisDokumentVergessen(e) {
          + (nach.length ? ` Mit entfallen: ${nach.join(", ")}.` : ""));
 }
 
+/** Das GANZE Aktengedaechtnis dieser Akte verwerfen.
+ *
+ * Aus der Kanzlei am 13.10.2026: Eine Akte habe bereits eine Arbeitsakte mit
+ * falschen Unterlagen - ob man die loeschen koenne.
+ *
+ * **Einzeln ging das, ganz nicht.** Der Loeschweg bestand in der Schnittstelle
+ * (`DELETE /api/akten/{akte}/gedaechtnis`) und hatte keinen Knopf. Eine
+ * Funktion ohne Weg dorthin ist keine.
+ *
+ * **Und „Sitzung schliessen" hilft hier nicht**, auch wenn es so aussieht:
+ * Beim naechsten Oeffnen legt `bei_eroeffnen` jedes Dokument des Gedaechtnisses
+ * wieder in die Arbeitsakte. Was falsch im Gedaechtnis steht, kommt also
+ * zurueck. Heraus muss es aus dem Gedaechtnis.
+ *
+ * Warum ein ganzes Verwerfen ueberhaupt gebraucht wird, und nicht nur das
+ * einzelne Vergessen: Das Gedaechtnis fuehrt **Dokumentnummern** mit. Ist es
+ * vor dem 08.10.2026 entstanden, kennt es die Mails und ihre Anlagen nicht -
+ * und seitdem stehen die mit in der Liste. Die Nummern verschieben sich damit,
+ * und ein Beleg „D47" zeigt auf ein anderes Dokument als damals. Das laesst
+ * sich nicht dokumentweise richten; so ein Gedaechtnis muss neu entstehen.
+ */
+async function gedaechtnisGanzVerwerfen() {
+  if (!sitzung) return;
+  const g = (sitzung && sitzung.gedaechtnis) || {};
+  const eintraege = g.eintraege || [];
+  const a = sitzung.sitzung.akte;
+  if (!g.vorhanden) {
+    melden(`Zu ${a.aktenzeichen} ist noch kein Aktengedächtnis gespeichert.`);
+    return;
+  }
+  // Was weg ist, soll vor dem Klick dastehen - nicht danach. Dieselbe
+  // Erwaegung wie beim einzelnen Vergessen darueber.
+  const teile = [
+    `Das ganze Aktengedächtnis von ${a.aktenzeichen} verwerfen?`,
+    "",
+    "Das fällt heraus:",
+    `· ${eintraege.length} Dokumentauszug/-auszüge – ${umfangKurz(g.zeichen || 0)}`,
+  ];
+  if (g.fragen)
+    teile.push(`· ${g.fragen} gespeicherte Frage(n) samt Antwort`);
+  if ((g.chronologie || []).length)
+    teile.push(`· ${g.chronologie.length} Eintrag/Einträge im Zeitstrahl`);
+  if (g.lebenssachverhalt)
+    teile.push("· der Lebenssachverhalt");
+  if (g.analyse)
+    teile.push("· die gespeicherte Analyse der Akte");
+  teile.push(
+    "",
+    "Die Akte in jur|nodes bleibt unberührt. Verworfen wird nur, was sich",
+    "jusperfect gemerkt hat.",
+    "",
+    "Zurücklegen heißt: die Akte neu einlesen. Das kostet Modellaufrufe,",
+    "bei Scans zusätzlich die Texterkennung. Das Abgeleitete oben kommt",
+    "dadurch nicht wieder.",
+    "",
+    "Verwerfen?");
+  if (!confirm(teile.join("\n"))) return;
+  const akte = encodeURIComponent(sitzung.sitzung.akte_id);
+  await api("DELETE", `/api/akten/${akte}/gedaechtnis`);
+  // Die offene Sitzung traegt die Auszuege noch: `bei_eroeffnen` hat sie beim
+  // Oeffnen aus dem Gedaechtnis in die Arbeitsakte gelegt. Ein Verwerfen, das
+  // sie dort stehen laesst, nimmt genau das nicht weg, worum es ging - und
+  // das Fenster zeigte weiter, was es nicht mehr hat (dieselbe Erwaegung wie
+  // bei Befund F02.3 der Zweitpruefung vom 05.10.2026).
+  //
+  // Nur die, die wirklich im Gedaechtnis standen. Beim Laden schreibt
+  // `dokumente_laden` sofort mit, das sind also im Regelfall alle. Nicht
+  // dabei ist ein Dokument, dessen Mitschreiben fehlgeschlagen ist oder das
+  // ohne Gedaechtnis geladen wurde - das Verwerfen betrifft es nicht, und
+  // es darf deshalb auch nicht aus der Arbeitsakte verschwinden.
+  const ausDemGedaechtnis = new Set(eintraege.map((e) => e.dokument_id));
+  for (const dok of (sitzung.sitzung.geladen || []).slice()) {
+    if (!ausDemGedaechtnis.has(dok.dokument_id)) continue;
+    const pfad = dok.dokument_id.split("/").map(encodeURIComponent).join("/");
+    sitzung = await api("DELETE", `/api/sitzungen/${sitzung.sitzung.id}/dokumente/${pfad}`);
+  }
+  // Einmal frisch holen, auch wenn nichts zu entfernen war: der
+  // Gedaechtnisteil der Antwort stammt vom Server und ist jetzt leer.
+  sitzung = await api("GET", `/api/sitzungen/${sitzung.sitzung.id}`);
+  await passagenLaden();
+  // Der Zeitstrahl der Oberflaeche traegt die Eintraege aus der Analyse
+  // getrennt mit. Bliebe er stehen, zeigte das Fenster einen Zeitstrahl zu
+  // einem Gedaechtnis, das es nicht mehr gibt.
+  chronoAusAnalyse = [];
+  gedExplorerZeichnen();
+  gedaechtnisFensterZeigen();
+  chronologieZeigen();
+  ladeStatus();
+  melden(`Das Aktengedächtnis von ${a.aktenzeichen} ist verworfen. `
+         + `„Akte einlesen" baut es neu auf.`);
+}
+
 /** Eine gespeicherte Frage samt Antwort aus dem Gedaechtnis nehmen.
  *
  * Der Server loescht nach STELLE in der Liste. Deshalb wird hier zuerst
@@ -3967,6 +4059,9 @@ document.addEventListener("DOMContentLoaded", () => {
   $("chrono-aktualisieren").addEventListener("click", (ev) =>
     mitKnopf(ev.currentTarget, chronologieAktualisieren));
   $("ged-oeffnen").addEventListener("click", () => gedaechtnisExplorerOeffnen());
+  const ganzWeg = $("ged-ganz-loeschen");
+  if (ganzWeg) ganzWeg.addEventListener(
+    "click", (ev) => mitKnopf(ev.currentTarget, gedaechtnisGanzVerwerfen));
   $("ged-inhalt").addEventListener("toggle", gedInhaltSchalterMerken);
   $("ged-alle-fehlenden").addEventListener("click", () => {
     // Nur die sichtbaren. Wer nach "Gegner" filtert und dann hier klickt,
