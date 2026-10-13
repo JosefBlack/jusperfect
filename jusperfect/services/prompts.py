@@ -512,6 +512,52 @@ def aufgabe_entwurf(art: EntwurfArt, anweisung: str, empfaenger: str, muster: st
     return "\n".join(zeilen)
 
 
+def aufgabe_entwurf_ueberarbeiten(art: EntwurfArt, anweisung: str, bisher: str) -> str:
+    """Einen vorhandenen Entwurf nach einer Anweisung aus dem Chat ändern.
+
+    Aus der Kanzlei am 13.10.2026: „Hier wäre dann ein Vorschaufenster sehr
+    schön, in welchem der Entwurf nach und nach entsteht und durch den Chat
+    geändert werden kann."
+
+    Zwei Dinge unterscheiden diese Aufgabe von ``aufgabe_entwurf``:
+
+    1. **Der bisherige Entwurf steht dabei** – sonst schriebe das Modell ein
+       neues Schreiben statt einer Änderung, und jede Runde verlöre, was in
+       der vorigen mühsam richtig geworden war.
+    2. **Die Belege müssen mitwandern.** Ein Satz, der unverändert bleibt,
+       behält seinen Beleg; ein neuer Satz braucht einen. Ohne diesen Hinweis
+       kommt eine glatte Fassung ohne ``[Q: …]`` zurück, und die Belegpflicht
+       hält sie vollständig zurück – für den Bearbeiter sieht das aus, als
+       habe die Änderung das Schreiben gelöscht.
+    """
+    return "\n".join([
+        "AUFGABE: ENTWURF ÜBERARBEITEN",
+        f"ART: {ENTWURF_BEZEICHNUNG[art]}",
+        f"ÄNDERUNGSWUNSCH DER KANZLEI: {anweisung.strip()}",
+        "",
+        "Hier ist der bisherige Entwurf. Ändern Sie ihn nach dem Wunsch oben und "
+        "lassen Sie alles andere so, wie es ist – Wortlaut, Reihenfolge, Anrede, "
+        "Grußformel. Schreiben Sie kein neues Schreiben.",
+        "",
+        "--- BISHERIGER ENTWURF ---",
+        bisher.strip(),
+        "--- ENDE DES BISHERIGEN ENTWURFS ---",
+        "",
+        "Die Belege [Q: ...] am Satzende gehören zum Entwurf und müssen "
+        "erhalten bleiben: Ein Satz, den Sie unverändert übernehmen, behält "
+        "seinen Beleg; ein Satz, den Sie umformulieren, behält den Beleg der "
+        "Aussage, aus der er stammt; eine neue Sachverhaltsangabe braucht "
+        "einen eigenen Beleg aus dem mitgelieferten Material. Eine Aussage "
+        "ohne tragenden Beleg entfällt, und ein Entwurf ganz ohne Beleg wird "
+        "nicht ausgegeben.",
+        "",
+        "Keine Fristen berechnen, keine Rechtsprechung zitieren. Stellen, die "
+        "der Anwalt entscheiden muss, mit [PRÜFEN: ...] kennzeichnen.",
+        "",
+        'Antworten Sie nur mit JSON: {"betreff": "...", "text": "..."}',
+    ])
+
+
 def aufgabe_auftragsvorschlag(art: EntwurfArt, anweisung: str, rechtsgebiet: str = "") -> str:
     """Aus einer einmaligen Anweisung einen wiederverwendbaren Auftrag machen.
 

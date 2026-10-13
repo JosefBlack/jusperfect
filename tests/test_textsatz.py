@@ -36,9 +36,16 @@ def test_die_muster_stehen_fest(app: str, muster: str) -> None:
 
 
 def test_jede_modellantwort_geht_durch_den_satz(app: str) -> None:
-    """Wer eine Antwort künftig ohne Satz einsetzt, lässt die Sternchen zurück."""
-    for stelle in ("antwort.text", "qa.antwort", "g.lebenssachverhalt", "e.text", 't.kernaussage || ""'):
-        assert f"antworttext(inhalt, {stelle})" in app or f"antworttext(antwortText, {stelle})" in app, stelle
+    """Wer eine Antwort künftig ohne Satz einsetzt, lässt die Sternchen zurück.
+
+    Wohin gesetzt wird, ist gleichgültig: Seit dem 13.10.2026 setzt das
+    Vorschaufenster den Entwurf in einen eigenen Block statt in die
+    Chatkarte. Geprüft wird, DASS der Text durch ``antworttext`` geht - nicht,
+    in welches Element.
+    """
+    for stelle in ("antwort.text", "qa.antwort", "g.lebenssachverhalt", "e.text",
+                   't.kernaussage || ""', "entwurfVorschautext"):
+        assert re.search(rf"antworttext\([A-Za-z]+, {re.escape(stelle)}\)", app), stelle
 
 
 def test_kein_innerhtml_im_satz(app: str) -> None:

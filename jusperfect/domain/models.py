@@ -335,6 +335,32 @@ class EntwurfStatus(str, Enum):
     VERWORFEN = "verworfen"
 
 
+class Entwurfsfassung(BaseModel):
+    """Eine fruehere Fassung eines Entwurfs - und wodurch sie abgeloest wurde.
+
+    Aus der Kanzlei am 13.10.2026: „Hier waere dann ein Vorschaufenster sehr
+    schoen, in welchem der Entwurf nach und nach entsteht und durch den Chat
+    geaendert werden kann."
+
+    Wer ueber den Chat aendert, aendert ohne Netz: Das Modell schreibt den
+    Entwurf neu, und die vorige Fassung waere weg. Deshalb wird sie hier
+    aufgehoben, samt der Anweisung, die zu ihrer Abloesung gefuehrt hat -
+    sonst steht am Ende eine Fassung da, von der niemand mehr weiss, warum
+    sie so aussieht.
+    """
+    nummer: int
+    betreff: str
+    text: str
+    #: Was der Bearbeiter gesagt hat. Leer bei der ersten Fassung.
+    anweisung: str = ""
+    abgeloest_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+#: So viele Vorfassungen werden aufgehoben. Mehr waere ein Archiv im
+#: Sitzungsspeicher; ein Entwurf ist bis zur Freigabe etwas Fluechtiges.
+MAX_VORFASSUNGEN = 10
+
+
 class Entwurf(BaseModel):
     id: str
     akte_id: str
@@ -349,6 +375,11 @@ class Entwurf(BaseModel):
     jurnodes_referenz: str | None = None
     modell: str = ""
     kosten: Kosten = Field(default_factory=Kosten)
+    #: Die laufende Nummer der jetzigen Fassung. Faengt bei 1 an.
+    fassung: int = 1
+    #: Die frueheren, aelteste zuerst. Gehen nicht nach jur|nodes und nicht
+    #: in die Freigabevorlage - freigegeben wird, was dasteht.
+    vorfassungen: list[Entwurfsfassung] = Field(default_factory=list)
 
 
 class Nutzer(BaseModel):

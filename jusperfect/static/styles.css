@@ -250,6 +250,10 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .spalte.rechts { display: flex; flex-direction: column; gap: 1px; background: var(--linie); }
 .spalte.rechts > .fenster { flex: 1 1 0; }
 .spalte.rechts > .fenster.belege { flex: 1.2 1 0; }
+/* Das Vorschaufenster bekommt den doppelten Anteil: Dort entsteht der
+   Entwurf, dort wird er gelesen und geaendert. In drei gleichen Dritteln
+   stand davon eine Zeile. */
+.spalte.rechts > .fenster.entwurf { flex: 2.4 1 0; }
 /* Die Uebersicht ist kurz und fest: sechs Zeilen, die nicht mitwachsen sollen. */
 .spalte.rechts > .fenster.gedaechtnis { flex: 0 0 auto; }
 .fenster { background: var(--grund); display: flex; flex-direction: column; min-height: 0; }
@@ -426,7 +430,10 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .bib-kopf { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
 .bib-gebiet { font-size: 12px; color: var(--gedaempft); }
 .bib-kopf .mini { margin-left: auto; }
-.bib-liste { display: flex; flex-direction: column; gap: 5px; max-height: 118px; overflow-y: auto; }
+/* Zwei Zeilen hoch, der Rest wird gerollt: Die Leiste ist ein Griffbrett,
+   keine Liste. Bei vier Gruppen und neununddreissig Prompts waere sie sonst
+   hoeher als der Chat darueber. */
+.bib-liste { display: flex; flex-direction: column; gap: 5px; max-height: 96px; overflow-y: auto; }
 /* Eine Zeile je Gruppe: das Rechtsgebiet der Akte, danach die
    Gerichtsmuster. Innerhalb einer Gruppe darf umbrochen werden, zwischen
    zwei Gruppen nie - sonst stuende ein Gerichtsmuster mitten zwischen den
@@ -451,6 +458,27 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
    etwas dasteht, das man nie eingetippt hat. */
 .bib-chip.mitgeliefert { background: var(--flaeche-2); border-style: dashed; }
 .bib-hinweis { margin: 6px 0 0; font-size: 12px; color: var(--amber); }
+
+/* Der Umschalter ueber dem Eingabefeld: Was getippt wird, aendert den
+   Entwurf. Deutlich sichtbar - ein Modus, den man nicht sieht, ist der
+   teuerste von allen. */
+.entwurf-modus { display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  padding: 7px 12px; border: 1px solid var(--akzent); border-radius: 10px;
+  background: var(--akzent-hell); font-size: 12px; color: var(--tinte); }
+.entwurf-modus .mini { margin-left: auto; white-space: nowrap; }
+
+/* Das Vorschaufenster. */
+.entwurf-vorschau { flex: 1; overflow: auto; padding: 14px 16px; background: var(--flaeche); }
+.entwurf-betreff { font-weight: 600; margin-bottom: 10px; }
+.entwurf-leer { font-size: 13px; color: var(--gedaempft); margin: 0 0 10px; }
+.entwurf-laeuft { font-size: 13px; color: var(--akzent); margin: 0 0 4px; }
+.entwurf-text { font-size: 14px; line-height: 1.55; }
+.entwurf-text p { margin: 0 0 10px; }
+.entwurf-knoepfe { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 10px;
+  padding-top: 12px; border-top: 1px solid var(--linie); }
+/* Der Aendern-Knopf, solange der Modus laeuft: Er sagt denselben Zustand
+   noch einmal, dort wo man ihn eingeschaltet hat. */
+.entwurf-knoepfe .mini.an { border-color: var(--akzent); background: var(--akzent-hell); color: var(--tinte); }
 
 .frage-form { display: flex; gap: 8px; padding: 8px; border: 1px solid var(--linie);
   border-radius: 14px; background: var(--flaeche); box-shadow: 0 4px 20px rgba(0,0,0,.09); }

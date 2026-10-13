@@ -35,7 +35,11 @@ from jusperfect.services.fristen import (
 from jusperfect.services.belegpflicht import (
     aussage_fail_closed, eintraege_fail_closed, feld_fail_closed,
 )
-from jusperfect.services.quellen import index_bauen, quellen_aus_kennungen
+from jusperfect.services.quellen import (
+    bis_zum_letzten_beleg as _bis_zum_letzten_beleg,
+    index_bauen,
+    quellen_aus_kennungen,
+)
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -43,21 +47,6 @@ M = TypeVar("M", bound=BaseModel)
 KEINE_KERNAUSSAGE = (
     "Zu diesem Dokument liegt keine belegte Kernaussage vor; die Eingangsprüfung "
     "wurde insoweit zurückgehalten.")
-
-
-def _bis_zum_letzten_beleg(roh: str) -> str:
-    """Der Teil des Rohtextes, der mit einer abgeschlossenen Aussage endet.
-
-    Der Auftragstext verlangt, dass jede Tatsachenaussage mit ``[Q: …]``
-    endet. Solange kein vollständiger Beleg dasteht, ist die Aussage nicht
-    fertig – und was nicht fertig ist, ist nicht zu prüfen.
-    """
-    from jusperfect.services.quellen import ZITAT_RE
-
-    letzter = None
-    for letzter in ZITAT_RE.finditer(roh):
-        pass
-    return roh[:letzter.end()] if letzter else ""
 
 
 def _vorschau_pruefen(text: str, index: dict, fristen) -> str:

@@ -204,11 +204,19 @@ def test_alle_pfeile_zeigen_in_dieselbe_richtung(html: str) -> None:
     Dokument nach links, rechts an Chronologie, Gedächtnis und Belegen nach
     rechts. Logisch gedacht, in der Kanzlei aber nicht so gelesen: Wer links
     das Zeichen „‹" als „zu" gelernt hat, erwartet rechts dasselbe Zeichen und
-    nicht dessen Spiegelbild. Vier Pfeile, eine Bedeutung.
+    nicht dessen Spiegelbild. Ein Zeichen, eine Bedeutung.
+
+    Seit dem 13.10.2026 sind es fünf: Das Vorschaufenster ist dazugekommen.
+    Geprüft wird deshalb, dass **jedes** Fenster genau einen Pfeil hat und
+    alle dasselbe Zeichen tragen - nicht eine feste Zahl, die beim nächsten
+    Fenster wieder nachgezogen werden müsste.
     """
-    pfeile = re.findall(r'data-fenster-zu="[a-z]+"[^>]*>(.)</button>', html, re.S)
-    assert len(pfeile) == 4, pfeile
-    assert set(pfeile) == {"‹"}, pfeile
+    paare = re.findall(r'data-fenster-zu="([a-z]+)"[^>]*>(.)</button>', html, re.S)
+    namen = [n for n, _ in paare]
+    fenster = re.findall(r'data-fenster="([a-z]+)"', html)
+    assert sorted(namen) == sorted(fenster), (namen, fenster)
+    assert len(namen) == len(set(namen)), namen
+    assert {z for _, z in paare} == {"‹"}, paare
 
 
 # ── Der Inhalt des Aktengedächtnisses: einschaltbar, nicht aufgedrängt ──────

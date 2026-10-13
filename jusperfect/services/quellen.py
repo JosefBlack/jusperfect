@@ -16,6 +16,24 @@ from jusperfect.services.fundstelle import treffer_finden
 ZITAT_RE = re.compile(r"\[Q:\s*([^\]]+?)\s*\]")
 
 
+def bis_zum_letzten_beleg(roh: str) -> str:
+    """Der Teil eines Rohtextes, der mit einer abgeschlossenen Aussage endet.
+
+    Der Auftragstext verlangt, dass jede Tatsachenaussage mit ``[Q: …]``
+    endet. Solange kein vollständiger Beleg dasteht, ist die Aussage nicht
+    fertig – und was nicht fertig ist, ist nicht zu prüfen.
+
+    Steht hier und nicht bei einem der beiden Aufrufer: Frage und Entwurf
+    strömen beide, und beide dürfen nur Geprüftes zeigen (Befund F05 der
+    Zweitprüfung, 05.10.2026). Eine zweite Abschrift wäre eine zweite
+    Stelle, an der diese Regel auseinanderlaufen kann.
+    """
+    letzter = None
+    for letzter in ZITAT_RE.finditer(roh):
+        pass
+    return roh[:letzter.end()] if letzter else ""
+
+
 def index_bauen(passagen: list[Passage]) -> dict[str, Passage]:
     return {p.kennung: p for p in passagen}
 

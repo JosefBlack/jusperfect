@@ -303,7 +303,23 @@ class DerGefuehrteWeg(unittest.TestCase):
 
 
 class UeberDenWeb(unittest.TestCase):
+    """Der ganze Weg, so wie die Kanzlei ihn geht.
+
+    Hier stand zuerst nur eine Prüfung auf 404. Das genügte nicht: Der
+    erfolgreiche Weg schrieb eine Protokollzeile mit dem Feldnamen
+    ``entwurf`` - und der ist verboten (``security/protokoll.py``). Der
+    Download hätte in der Kanzlei mit „interner Fehler" geendet, und keine
+    Prüfung hätte es gesagt. Seitdem wird der Weg gegangen, nicht nur
+    abgewiesen.
+    """
+
+    #: Ein belegter Satz - sonst gibt die Belegpflicht den Entwurf nicht aus.
+    BELEGT = "Der Sachstand ist festgehalten [Q: D1-S1-P1]."
+
     def setUp(self):
+        import json as _json
+
+        from jusperfect.providers.base import Nutzung, ProviderAntwort
         from tests.hilfen import client, dienste
 
         self._ordner = TemporaryDirectory()
@@ -312,7 +328,28 @@ class UeberDenWeb(unittest.TestCase):
         self._alt = briefbogen.orte
         briefbogen.orte = lambda: (self.vorlage,)     # type: ignore[assignment]
         self.addCleanup(lambda: setattr(briefbogen, "orte", self._alt))
-        self.c = client(dienste())
+
+        class _Provider:
+            modell_id = "skript"
+
+            def fragen(self, system, material, aufgabe, *, max_tokens=8000, modell_id=None):
+                return ProviderAntwort(
+                    text=_json.dumps({"betreff": "Egal", "text": UeberDenWeb.BELEGT}),
+                    nutzung=Nutzung(1000, 200), modell=self.modell_id)
+
+            def fragen_stream(self, system, material, aufgabe, *, max_tokens=8000, modell_id=None):
+                yield self.fragen(system, material, aufgabe)
+
+        self.c = client(dienste(provider=_Provider()))
+
+    def _entwurf(self):
+        sid = self.c.post("/api/sitzungen",
+                          json={"akte_id": "VU-2026-0042"}).json()["sitzung"]["id"]
+        self.c.post(f"/api/sitzungen/{sid}/dokumente", json={"dokument_ids": ["D-001"]})
+        antwort = self.c.post(f"/api/sitzungen/{sid}/entwuerfe",
+                              json={"art": "rsv", "anweisung": "Deckung anfragen"})
+        self.assertEqual(antwort.status_code, 201, antwort.text)
+        return antwort.json()
 
     def test_der_stand_sagt_ob_und_wohin(self):
         daten = self.c.get("/api/briefbogen").json()
@@ -321,6 +358,26 @@ class UeberDenWeb(unittest.TestCase):
 
     def test_ein_unbekannter_entwurf_gibt_404(self):
         self.assertEqual(self.c.get("/api/entwuerfe/gibtesnicht/briefbogen").status_code, 404)
+
+    def test_der_entwurf_kommt_als_word_datei_heraus(self):
+        e = self._entwurf()
+        antwort = self.c.get(f"/api/entwuerfe/{e['id']}/briefbogen")
+        self.assertEqual(antwort.status_code, 200, antwort.text[:400])
+        self.assertIn("wordprocessingml", antwort.headers["content-type"])
+        self.assertIn(".docx", antwort.headers["content-disposition"])
+        with zipfile.ZipFile(BytesIO(antwort.content)) as paket:
+            self.assertIn("word/header1.xml", paket.namelist())
+            rumpf = paket.read(briefbogen.RUMPF).decode("utf-8")
+        self.assertIn("Der Sachstand ist festgehalten", rumpf)
+        self.assertIn("<w:sectPr>", rumpf)
+
+    def test_ohne_hinterlegten_briefbogen_kommt_kein_serverfehler(self):
+        """Sondern der Satz, der sagt, wohin die Datei gehört."""
+        briefbogen.orte = lambda: (Path(self._ordner.name) / "gibtesnicht.docx",)  # type: ignore[assignment]
+        e = self._entwurf()
+        antwort = self.c.get(f"/api/entwuerfe/{e['id']}/briefbogen")
+        self.assertEqual(antwort.status_code, 422, antwort.text[:400])
+        self.assertIn(briefbogen.DATEINAME, antwort.json()["fehler"])
 
 
 if __name__ == "__main__":

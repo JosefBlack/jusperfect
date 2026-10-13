@@ -241,6 +241,10 @@ class ReferenzenWaehlen(BaseModel):
     namen: list[str] = Field(default_factory=list, max_length=20)
 
 
+class EntwurfAendern(BaseModel):
+    anweisung: str = Field(max_length=4000)
+
+
 class EntwurfBearbeiten(BaseModel):
     betreff: str = Field(default="", max_length=400)
     text: str = Field(min_length=1, max_length=60000)
@@ -981,6 +985,87 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
                                         muster)
         return _entwurf_antwort(entwurf)
 
+    def _entwurf_strom(schritte, woher: str):
+        """Der gemeinsame Strom von Erstellen und Ändern.
+
+        Dieselbe Form wie bei der Frage: `fortschritt`, `geprueft`, `fertig`,
+        `fehler`. Das Vorschaufenster kommt damit mit einem Leser aus.
+        """
+        def strom():
+            try:
+                for art, wert in schritte():
+                    if art == "fortschritt":
+                        # Nur die Zeichenzahl: dass gearbeitet wird, nicht was
+                        # dasteht (Befund F05 der Zweitpruefung, 05.10.2026).
+                        yield json.dumps({"type": "fortschritt", "zeichen": wert}) + "\n"
+                    elif art == "geprueft":
+                        yield json.dumps({"type": "geprueft", "text": wert}, ensure_ascii=False) + "\n"
+                    else:
+                        yield json.dumps({"type": "fertig", "entwurf": _entwurf_antwort(wert)},
+                                         ensure_ascii=False, default=str) + "\n"
+            except Exception as exc:  # nach Beginn des Stroms bleibt nur ein Ereignis
+                for typ, _status in _abbildung:
+                    if isinstance(exc, typ):
+                        yield json.dumps({"type": "fehler", "detail": str(exc)}) + "\n"
+                        return
+                yield json.dumps(
+                    {"type": "fehler", "detail": _unerwartet_im_strom(exc, woher)}
+                ) + "\n"
+
+        return StreamingResponse(strom(), media_type="application/x-ndjson")
+
+    @app.post("/api/sitzungen/{sitzung_id}/entwuerfe/stream")
+    def entwurf_anlegen_stream(sitzung_id: str, daten: EntwurfAnlegen,
+                               ident: Identitaet = Depends(identitaet)) -> StreamingResponse:
+        """Der Entwurf entsteht im Vorschaufenster, Stück für Stück.
+
+        Aus der Kanzlei am 13.10.2026: „Hier wäre dann ein Vorschaufenster
+        sehr schön, in welchem der Entwurf nach und nach entsteht."
+
+        Auth und „Sitzung nicht gefunden" werden hier, vor dem Strom,
+        entschieden - so bekommt der Aufrufer noch einen sauberen Statuscode.
+        """
+        sitzung = d.sitzungen.laden(ident, sitzung_id)
+        passagen = d.sitzungen.passagen(sitzung)
+        beteiligte = d.sitzungen.beteiligte(sitzung)
+        fristen = d.sitzungen.fristen(sitzung)
+        muster = daten.muster
+        if daten.auftrag:
+            muster = d.auftraege.laden(daten.auftrag).material or muster
+        return _entwurf_strom(
+            lambda: d.entwuerfe.erstellen_stream(ident, sitzung, passagen, daten.art,
+                                                 daten.anweisung, daten.empfaenger,
+                                                 beteiligte, fristen, muster),
+            "entwurf")
+
+    @app.post("/api/sitzungen/{sitzung_id}/entwuerfe/{entwurf_id}/aendern/stream")
+    def entwurf_aendern_stream(sitzung_id: str, entwurf_id: str, daten: EntwurfAendern,
+                               ident: Identitaet = Depends(identitaet)) -> StreamingResponse:
+        """Den Entwurf über den Chat ändern - die vorige Fassung bleibt.
+
+        Die Sitzung steht im Pfad: Aus ihr kommen die Passagen, an denen die
+        neue Fassung belegt wird. Dass sie zur selben Akte gehört wie der
+        Entwurf, wird hier geprüft und nicht angenommen - sonst würde ein
+        Entwurf an den Dokumenten einer fremden Akte belegt.
+        """
+        sitzung = d.sitzungen.laden(ident, sitzung_id)
+        entwurf = d.entwuerfe.lesen(ident, entwurf_id)
+        if entwurf.akte_id != sitzung.akte_id:
+            raise HTTPException(404, "Der Entwurf gehört nicht zu dieser Akte.")
+        passagen = d.sitzungen.passagen(sitzung)
+        beteiligte = d.sitzungen.beteiligte(sitzung)
+        fristen = d.sitzungen.fristen(sitzung)
+        return _entwurf_strom(
+            lambda: d.entwuerfe.ueberarbeiten_stream(ident, sitzung, passagen, entwurf_id,
+                                                     daten.anweisung, beteiligte, fristen),
+            "entwurf-aendern")
+
+    @app.post("/api/entwuerfe/{entwurf_id}/zuruecknehmen")
+    def entwurf_zuruecknehmen(entwurf_id: str,
+                              ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Eine Fassung zurück. Ohne diesen Weg wäre jede Änderung endgültig."""
+        return _entwurf_antwort(d.entwuerfe.zuruecknehmen(ident, entwurf_id))
+
     @app.post("/api/sitzungen/{sitzung_id}/auftragsvorschlag")
     def auftragsvorschlag(sitzung_id: str, daten: AuftragsvorschlagAnfrage,
                           ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
@@ -1028,7 +1113,7 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         """
         entwurf = d.entwuerfe.lesen(ident, entwurf_id)
         inhalt = briefbogen.erzeugen(briefbogentext(entwurf))
-        ereignis(_log, "entwurf_auf_briefbogen", entwurf=entwurf.id,
+        ereignis(_log, "entwurf_auf_briefbogen", entwurf_id=entwurf.id,
                  nutzer=ident.nutzer_id, bytes=len(inhalt))
         name = f"Entwurf-{entwurf.id}.docx"
         return Response(

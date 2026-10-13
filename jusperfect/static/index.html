@@ -236,6 +236,14 @@
         <div id="bib-liste" class="bib-liste"></div>
         <p id="bib-hinweis" class="bib-hinweis" hidden></p>
       </div>
+      <!-- Der Umschalter: Was unten getippt wird, aendert den Entwurf statt
+           die Akte zu befragen. Er steht hier und nicht nur im
+           Vorschaufenster, weil er hier wirkt - und weil ein Modus, den man
+           nicht sieht, der teuerste von allen ist. -->
+      <div id="entwurf-modus" class="entwurf-modus" hidden>
+        <span id="entwurf-modus-text"></span>
+        <button type="button" id="entwurf-modus-aus" class="mini leise">Zurück zu Fragen</button>
+      </div>
       <form id="frage-form" class="frage-form">
         <textarea id="frage" rows="2" placeholder="Frage an die Akte … (Eingabetaste fragt, Umschalt+Eingabe macht eine neue Zeile)"></textarea>
         <button id="senden" class="knopf" type="submit">Fragen</button>
@@ -298,6 +306,13 @@
         <button type="button" data-fenster="chronologie" class="mini leise fensterknopf">Chronologie</button>
         <button type="button" data-fenster="gedaechtnis" class="mini leise fensterknopf" hidden>Gedächtnis</button>
         <button type="button" data-fenster="belege" class="mini leise fensterknopf">Belege</button>
+        <!-- Das Vorschaufenster. Aus der Kanzlei am 13.10.2026: "Hier waere
+             dann ein Vorschaufenster sehr schoen, in welchem der Entwurf nach
+             und nach entsteht und durch den Chat geaendert werden kann."
+             Der Knopf steht fest da, auch ohne Entwurf - dann sagt das
+             Fenster, wie einer entsteht. Ein Knopf, der erscheint und wieder
+             verschwindet, sieht aus wie ein Fehler. -->
+        <button type="button" data-fenster="entwurf" class="mini leise fensterknopf">Vorschau</button>
       </span>
   </div>
     <section class="fenster chronologie" id="fenster-chronologie">
@@ -353,6 +368,25 @@
         <button type="button" id="ged-abbrechen" class="mini leise">Anhalten</button>
       </div>
     </section>
+    <!-- Das Vorschaufenster: hier entsteht der Entwurf und hier wird er
+         geaendert. Es steht ueber den Belegen, weil der Entwurf die Arbeit
+         ist und die Belege das Werkzeug dazu. -->
+    <section class="fenster entwurf" id="fenster-entwurf">
+      <div class="spalte-kopf">
+        <span class="kopf-links">
+          <button type="button" class="fenster-zu" data-fenster-zu="entwurf"
+                  title="Vorschau ausblenden" aria-label="Vorschau ausblenden">‹</button>
+          <button type="button" class="fenster-los" data-fenster-los="entwurf"
+                  title="Vorschau in einem eigenen Fenster öffnen – für den zweiten Bildschirm"
+                  aria-label="Vorschau in einem eigenen Fenster öffnen">⧉</button>
+          <span>Vorschau</span>
+        </span>
+        <span class="kopf-rechts">
+          <span id="entwurf-fassung" class="beleg-stand"></span>
+        </span></div>
+      <div id="entwurf-vorschau" class="entwurf-vorschau"></div>
+    </section>
+
     <section class="fenster belege" id="fenster-belege">
       <div class="spalte-kopf">
         <span class="kopf-links">

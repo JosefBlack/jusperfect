@@ -1356,6 +1356,7 @@ async function arbeitsflaecheOeffnen() {
   threadWillkommen();
   gedaechtnisImThreadZeigen();
   await bibliothekLaden();
+  entwurfFensterZeichnen();
   await gespeicherteAnalyseZeigen();
   zeigeBelege();
 }
@@ -1586,12 +1587,16 @@ const FENSTER = {
   dokument: "spalte-dokument",
   chronologie: "fenster-chronologie",
   gedaechtnis: "gedaechtnis-fenster",
+  entwurf: "fenster-entwurf",
   belege: "fenster-belege",
 };
 
 // Voreinstellung: wie bisher, nur ohne das Gedaechtnisfenster - das ist neu
 // und soll sich niemandem aufdraengen, der es nicht eingeschaltet hat.
-let fensterStand = { dokument: true, chronologie: true, gedaechtnis: false, belege: true };
+// Das Vorschaufenster faengt zu an: Es hat erst etwas zu zeigen, wenn ein
+// Entwurf entsteht - und dann macht es sich selbst auf.
+let fensterStand = { dokument: true, chronologie: true, gedaechtnis: false,
+                     entwurf: false, belege: true };
 
 // ── Nebenfenster: ein Fenster auf den zweiten Bildschirm ────────────────────
 //
@@ -1644,6 +1649,7 @@ function nebenfensterGleichziehen() {
       was: "stand", sitzung, gedaechtnisAktiv: !!K.gedaechtnisAktiv,
       chronoAusAnalyse, passagenIndex,
       belegKennungen: [...belegKennungen], belegQuellen,
+      entwurfStand, entwurfLaeuft, entwurfVorschautext,
     });
   } catch (e) { /* ein Fenster weniger, kein Grund anzuhalten */ }
 }
@@ -1705,6 +1711,9 @@ function alsNebenfensterEinrichten() {
       passagenIndex = inhalt.passagenIndex || {};
       belegKennungen = new Set(inhalt.belegKennungen || []);
       belegQuellen = inhalt.belegQuellen || {};
+      entwurfStand = inhalt.entwurfStand || null;
+      entwurfLaeuft = inhalt.entwurfLaeuft || "";
+      entwurfVorschautext = inhalt.entwurfVorschautext || "";
       nebenfensterZeichnen();
     } else if (inhalt.was === "hallo") {
       // Das Hauptfenster ist (wieder) da. Noch einmal um den Stand bitten -
@@ -1714,6 +1723,7 @@ function alsNebenfensterEinrichten() {
       sitzung = null;
       chronoAusAnalyse = []; passagenIndex = {};
       belegKennungen = new Set(); belegQuellen = {};
+      entwurfStand = null; entwurfLaeuft = ""; entwurfVorschautext = "";
       nebenfensterZeichnen();
     }
   };
@@ -1744,6 +1754,7 @@ function nebenfensterZeichnen() {
     else if (nebenfenster === "belege") zeigeBelege();
     else if (nebenfenster === "gedaechtnis") gedaechtnisFensterZeigen();
     else if (nebenfenster === "dokument") dokumentspalteZeichnen();
+    else if (nebenfenster === "entwurf") entwurfFensterZeichnen();
   } catch (e) {
     // Ein Spiegel, der sich am Zeichnen verschluckt, darf nicht das ganze
     // Fenster mitnehmen - nebenan wird weitergearbeitet.
@@ -3180,8 +3191,13 @@ async function frageStellen() {
   const frage = $("frage").value.trim();
   if (!frage) return;
   $("frage").value = "";
-  letzteGestellteFrage = frage;
   bibHinweis("");
+  // Der Chat aendert den Entwurf, wenn der Umschalter an ist. Sichtbar
+  // umgeschaltet und nicht heimlich: Wer eine Frage tippt und damit
+  // versehentlich seinen Entwurf umschreibt, hat den Entwurf verloren, den
+  // er gerade richtig bekommen hatte.
+  if (entwurfAendernAn && entwurfStand) return entwurfAendern(frage);
+  letzteGestellteFrage = frage;
   nutzerkarte(frage);
   const karte = threadKarte("ai");
   const who = document.createElement("div"); who.className = "who"; who.textContent = "jusperfect";
@@ -4180,41 +4196,255 @@ async function auftragVorbelegen(name) {
   if (a.hat_material) melden(`Auftrag „${a.label}" – Material wird als Hintergrund mitgegeben.`);
 }
 
-async function entwurfStarten(art, anweisung, empfaenger, auftrag) {
-  const e = await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/entwuerfe`, { art, anweisung, empfaenger, auftrag: auftrag || "" });
-  belegeMerken(e.quellen);
-  const karte = threadKarte("ai");
-  const titel = document.createElement("div"); titel.className = "titelzeile"; titel.textContent = "Entwurf: " + e.betreff; karte.appendChild(titel);
-  const inhalt = document.createElement("div"); inhalt.className = "inhalt";
-  const hb = hinweiseBlock((e.hinweise || []).concat(["Entwurf – anwaltliche Prüfung erforderlich."])); if (hb) inhalt.appendChild(hb);
-  antworttext(inhalt, e.text);
-  karte.appendChild(inhalt);
-  const fuss = fusszeile(e);
-  const frei = document.createElement("button"); frei.className = "mini"; frei.textContent = "Freigeben und in jurnodes ablegen";
-  frei.addEventListener("click", () => mitKnopf(frei, async () => {
-    if (!confirm("Diesen von der KI vorbereiteten Entwurf als Vermerk in die jurnodes-Akte schreiben?")) return;
-    // Die Pruefsumme deckt seit dem 05.10.2026 Akte, Art, Betreff UND Text ab.
-    // Vorher nur den Text - ein in einem anderen Fenster geaenderter Betreff
-    // ging damit ungesehen in den Vermerk (Befund F06 der Zweitpruefung).
-    const f = await api("POST", `/api/entwuerfe/${e.id}/freigabe`, { bestaetigung: true, freigabe_pruefsumme: e.freigabe_pruefsumme });
-    frei.replaceWith(Object.assign(document.createElement("span"), { textContent: `In jurnodes abgelegt (${f.jurnodes_referenz || ""})` }));
-  }));
-  fuss.appendChild(frei);
-  // Auf den Briefbogen der Kanzlei.
-  //
-  // Aus der Kanzlei am 13.10.2026: "Entwurf-Funktion funktioniert noch
-  // nicht, jur|nodes lehnt ab, was ich erstmal nicht so schlimm finde.
-  // Koennen wir hier einen Briefbogen hinterlegen?" Das ist der Weg um
-  // jur|nodes herum: Der Entwurf geht als Word-Datei auf den echten
-  // Briefbogen, und was damit geschieht, entscheidet der Bearbeiter.
-  //
-  // Der Knopf steht immer da, auch ohne hinterlegten Briefbogen - dann sagt
-  // der Klick, wohin die Datei gehoert. Ein Knopf, der nur erscheint, wenn
-  // alles schon eingerichtet ist, erklaert nie, wie man dorthin kommt.
+// ── Das Vorschaufenster ────────────────────────────────────────────────────
+//
+// Aus der Kanzlei am 13.10.2026: "Hier waere dann ein Vorschaufenster sehr
+// schoen, in welchem der Entwurf nach und nach entsteht und durch den Chat
+// geaendert werden kann."
+//
+// Beides steht hier. Der Entwurf entsteht stueckweise (Strom), und der Chat
+// kann ihn aendern - sichtbar umgeschaltet, nicht heimlich: Wer eine Frage
+// tippt und damit versehentlich seinen Entwurf umschreibt, hat den Entwurf
+// verloren, den er gerade richtig bekommen hatte.
+//
+// Es stroemt NUR GEPRUEFTES. Dieselbe Regel wie bei der Frage (Befund F05 der
+// Zweitpruefung, 05.10.2026): Bis zur ersten abgeschlossenen, belegten
+// Aussage steht nur da, DASS gearbeitet wird. Ein Text, der erst dasteht und
+// dann verschwindet, ist gezeigt worden.
+
+/** Der Entwurf, der im Vorschaufenster steht. */
+let entwurfStand = null;
+/** "" | "entsteht" | "aendert" - was gerade laeuft. */
+let entwurfLaeuft = "";
+/** Der gepruefte Zwischenstand waehrend des Stroms. */
+let entwurfVorschautext = "";
+/** Schreibt der Chat Aenderungen am Entwurf statt Fragen an die Akte? */
+let entwurfAendernAn = false;
+
+function entwurfFensterOeffnen() {
+  if (!fensterStand.entwurf) fensterOeffnen("entwurf");
+}
+
+/** Der Umschalter ueber dem Eingabefeld - sichtbar, nie stillschweigend. */
+function entwurfModusZeigen() {
+  const leiste = $("entwurf-modus");
+  if (!leiste) return;
+  const an = entwurfAendernAn && !!entwurfStand;
+  leiste.hidden = !an;
+  if (!an) return;
+  $("entwurf-modus-text").textContent =
+    `Änderung am Entwurf „${entwurfStand.betreff}“ – was hier steht, ändert den Entwurf, es ist keine Frage an die Akte.`;
+  const feld = $("frage");
+  if (feld) feld.placeholder = "Was soll am Entwurf anders werden? (Eingabetaste ändert)";
+  // Auch der Knopf sagt es. Er stand auf "Fragen", waehrend darueber stand,
+  // dass hier nicht gefragt wird - und der Knopf ist das Letzte, was man
+  // vor dem Abschicken ansieht.
+  const senden = $("senden");
+  if (senden) senden.textContent = "Ändern";
+}
+
+function entwurfModusAus() {
+  entwurfAendernAn = false;
+  const feld = $("frage");
+  if (feld) feld.placeholder = "Frage an die Akte … (Eingabetaste fragt, Umschalt+Eingabe macht eine neue Zeile)";
+  const senden = $("senden");
+  if (senden) senden.textContent = "Fragen";
+  entwurfModusZeigen();
+  entwurfFensterZeichnen();
+}
+
+/** Das Vorschaufenster zeichnen - aus `entwurfStand` und sonst nichts. */
+function entwurfFensterZeichnen() {
+  const ziel = $("entwurf-vorschau");
+  if (!ziel) return;
+  ziel.replaceChildren();
+  const marke = $("entwurf-fassung");
+  if (marke) {
+    marke.textContent = entwurfStand
+      ? (entwurfStand.fassung > 1 ? `Fassung ${entwurfStand.fassung}` : "Fassung 1")
+      : "";
+  }
+
+  if (entwurfLaeuft) {
+    const zeile = document.createElement("p"); zeile.className = "entwurf-laeuft";
+    zeile.textContent = entwurfLaeuft === "aendert"
+      ? "Der Entwurf wird geändert …"
+      : "Der Entwurf entsteht …";
+    ziel.appendChild(zeile);
+    const erklaerung = document.createElement("p"); erklaerung.className = "entwurf-leer";
+    erklaerung.textContent = "Es erscheint nur, was schon geprüft ist: Eine Aussage wird "
+      + "sichtbar, sobald sie abgeschlossen ist und ihr Beleg steht.";
+    ziel.appendChild(erklaerung);
+    if (entwurfVorschautext) {
+      const block = document.createElement("div"); block.className = "entwurf-text";
+      antworttext(block, entwurfVorschautext);
+      ziel.appendChild(block);
+    }
+    return;
+  }
+
+  if (!entwurfStand) {
+    const leer = document.createElement("p"); leer.className = "entwurf-leer";
+    leer.textContent = "Noch kein Entwurf. Oben rechts auf „Entwurf“ – er entsteht dann hier, "
+      + "Stück für Stück, und lässt sich von hier aus über den Chat ändern.";
+    ziel.appendChild(leer);
+    return;
+  }
+
+  const e = entwurfStand;
+  const kopf = document.createElement("div"); kopf.className = "entwurf-betreff";
+  kopf.textContent = e.betreff;
+  ziel.appendChild(kopf);
+
+  const hb = hinweiseBlock((e.hinweise || []).concat(["Entwurf – anwaltliche Prüfung erforderlich."]));
+  if (hb) ziel.appendChild(hb);
+
+  const block = document.createElement("div"); block.className = "entwurf-text";
+  antworttext(block, e.text);
+  ziel.appendChild(block);
+
+  // Im Nebenfenster keine Knoepfe: Es ist ein Spiegel, keine zweite
+  // Arbeitsflaeche. In einer Mandatsakte muss klar sein, WO gearbeitet wird.
+  if (!nebenfenster) ziel.appendChild(entwurfKnoepfe(e));
+  ziel.appendChild(fusszeile(e));
+}
+
+function entwurfKnoepfe(e) {
+  const leiste = document.createElement("div"); leiste.className = "entwurf-knoepfe";
+  const fertig = e.status && e.status !== "entwurf";
+
+  if (!fertig) {
+    const aendern = document.createElement("button");
+    aendern.className = "mini" + (entwurfAendernAn ? " an" : "");
+    aendern.textContent = entwurfAendernAn ? "Ändern: an" : "Über den Chat ändern";
+    aendern.title = entwurfAendernAn
+      ? "Zurück zu Fragen an die Akte"
+      : "Was Sie unten tippen, ändert dann den Entwurf statt die Akte zu befragen";
+    aendern.addEventListener("click", () => {
+      entwurfAendernAn = !entwurfAendernAn;
+      entwurfModusZeigen();
+      entwurfFensterZeichnen();
+      if (entwurfAendernAn) $("frage").focus();
+    });
+    leiste.appendChild(aendern);
+
+    if ((e.vorfassungen || []).length) {
+      const zurueck = document.createElement("button"); zurueck.className = "mini leise";
+      zurueck.textContent = `Zurück zu Fassung ${e.vorfassungen[e.vorfassungen.length - 1].nummer}`;
+      zurueck.title = "Die Änderung zurücknehmen – der Text von vorhin steht wieder da";
+      zurueck.addEventListener("click", () => mitKnopf(zurueck, entwurfZuruecknehmen));
+      leiste.appendChild(zurueck);
+    }
+
+    const frei = document.createElement("button"); frei.className = "mini";
+    frei.textContent = "Freigeben und in jurnodes ablegen";
+    frei.addEventListener("click", () => mitKnopf(frei, () => entwurfFreigeben(e)));
+    leiste.appendChild(frei);
+  }
+
   const brief = document.createElement("button"); brief.className = "mini";
   brief.textContent = "Auf Briefbogen (Word)";
   brief.addEventListener("click", () => mitKnopf(brief, () => briefbogenHolen(e.id)));
-  fuss.appendChild(brief);
+  leiste.appendChild(brief);
+  return leiste;
+}
+
+async function entwurfFreigeben(e) {
+  if (!confirm("Diesen von der KI vorbereiteten Entwurf als Vermerk in die jurnodes-Akte schreiben?")) return;
+  // Die Pruefsumme deckt seit dem 05.10.2026 Akte, Art, Betreff UND Text ab.
+  // Vorher nur den Text - ein in einem anderen Fenster geaenderter Betreff
+  // ging damit ungesehen in den Vermerk (Befund F06 der Zweitpruefung).
+  const f = await api("POST", `/api/entwuerfe/${e.id}/freigabe`,
+                      { bestaetigung: true, freigabe_pruefsumme: e.freigabe_pruefsumme });
+  entwurfStand = f;
+  entwurfModusAus();
+  nebenfensterGleichziehen();
+  melden(`In jurnodes abgelegt (${f.jurnodes_referenz || ""}).`);
+}
+
+async function entwurfZuruecknehmen() {
+  entwurfStand = await api("POST", `/api/entwuerfe/${entwurfStand.id}/zuruecknehmen`);
+  belegeMerken(entwurfStand.quellen);
+  entwurfFensterZeichnen();
+  nebenfensterGleichziehen();
+  melden(`Zurück bei Fassung ${entwurfStand.fassung}.`);
+}
+
+/** Der gemeinsame Leser fuer beide Stroeme - Entstehen und Aendern. */
+async function entwurfStromLesen(pfad, rumpf, was) {
+  entwurfLaeuft = was;
+  entwurfVorschautext = "";
+  entwurfFensterOeffnen();
+  entwurfFensterZeichnen();
+  nebenfensterGleichziehen();
+  try {
+    const resp = await fetch(K.apiBasis + pfad, {
+      method: "POST", headers: kopfzeilen(), body: JSON.stringify(rumpf),
+    });
+    if (!resp.ok || !resp.body) {
+      let f = null; try { f = await resp.json(); } catch (e) { /* kein JSON */ }
+      throw new Error((f && f.fehler) || `Fehler ${resp.status}`);
+    }
+    const leser = resp.body.getReader();
+    const entschluessler = new TextDecoder();
+    let puffer = "", fertig = null, fehler = null;
+    for (;;) {
+      const { value, done } = await leser.read();
+      if (done) break;
+      puffer += entschluessler.decode(value, { stream: true });
+      const zeilen = puffer.split("\n");
+      puffer = zeilen.pop();
+      for (const zeile of zeilen) {
+        if (!zeile.trim()) continue;
+        let ereignis = null;
+        try { ereignis = JSON.parse(zeile); } catch (e) { continue; }
+        if (ereignis.type === "geprueft") {
+          entwurfVorschautext = ereignis.text;
+          entwurfFensterZeichnen();
+          nebenfensterGleichziehen();
+        } else if (ereignis.type === "fertig") {
+          fertig = ereignis.entwurf;
+        } else if (ereignis.type === "fehler") {
+          fehler = ereignis.detail;
+        }
+      }
+    }
+    if (fehler) throw new Error(fehler);
+    if (!fertig) throw new Error("Der Entwurf kam nicht vollständig an.");
+    entwurfStand = fertig;
+    belegeMerken(fertig.quellen);
+    return fertig;
+  } finally {
+    // Auch wenn es schiefging: Das Fenster darf nicht in "entsteht …"
+    // stehenbleiben. Was dasteht, ist dann die letzte gute Fassung.
+    entwurfLaeuft = "";
+    entwurfVorschautext = "";
+    entwurfFensterZeichnen();
+    nebenfensterGleichziehen();
+    ladeStatus();
+  }
+}
+
+async function entwurfStarten(art, anweisung, empfaenger, auftrag) {
+  const e = await entwurfStromLesen(
+    `/api/sitzungen/${sitzung.sitzung.id}/entwuerfe/stream`,
+    { art, anweisung, empfaenger, auftrag: auftrag || "" }, "entsteht");
+  // Eine Zeile im Chat, damit der Verlauf weiss, dass hier etwas geschah -
+  // der Entwurf selbst steht im Vorschaufenster und nicht zweimal.
+  const karte = threadKarte("ai");
+  const titel = document.createElement("div"); titel.className = "titelzeile";
+  titel.textContent = "Entwurf: " + e.betreff; karte.appendChild(titel);
+  const inhalt = document.createElement("div"); inhalt.className = "inhalt";
+  const p = document.createElement("p");
+  p.textContent = "Der Entwurf steht im Vorschaufenster rechts. Dort lässt er sich "
+    + "über den Chat ändern, auf den Briefbogen setzen und freigeben.";
+  inhalt.appendChild(p);
+  karte.appendChild(inhalt);
+  const fuss = document.createElement("div"); fuss.className = "fuss";
+  const hin = document.createElement("button"); hin.className = "mini";
+  hin.textContent = "Zum Entwurf";
+  hin.addEventListener("click", () => { entwurfFensterOeffnen(); entwurfFensterZeichnen(); });
+  fuss.appendChild(hin);
   // Aus der Kanzlei: "Ich denke auch einen Wissenstempel bauen, dass sich KI
   // gleiche Vorgaenge merkt." Der Weg dorthin faengt hier an - bei der
   // Anweisung, die gerade getippt wurde. Ohne Anweisung gibt es nichts zu
@@ -4226,7 +4456,22 @@ async function entwurfStarten(art, anweisung, empfaenger, auftrag) {
     fuss.appendChild(merk);
   }
   karte.appendChild(fuss);
-  ladeStatus();
+}
+
+/** Der Chat aendert den Entwurf. Die vorige Fassung bleibt erhalten. */
+async function entwurfAendern(anweisung) {
+  const vorher = entwurfStand;
+  nutzerkarte(anweisung);
+  const e = await entwurfStromLesen(
+    `/api/sitzungen/${sitzung.sitzung.id}/entwuerfe/${vorher.id}/aendern/stream`,
+    { anweisung }, "aendert");
+  const karte = threadKarte("ai");
+  const inhalt = document.createElement("div"); inhalt.className = "inhalt";
+  const p = document.createElement("p");
+  p.textContent = `Entwurf geändert – Fassung ${e.fassung}. Er steht im Vorschaufenster; `
+    + `„Zurück zu Fassung ${e.fassung - 1}“ nimmt die Änderung zurück.`;
+  inhalt.appendChild(p);
+  karte.appendChild(inhalt);
 }
 
 /** Den Entwurf als Word-Datei auf dem Briefbogen holen.
@@ -4360,6 +4605,11 @@ async function sitzungSchliessen() {
     try { await api("DELETE", `/api/sitzungen/${sitzung.sitzung.id}`); } catch (e) { /* abgelaufen */ }
   }
   sitzung = null; passagenIndex = {}; belegKennungen = new Set(); belegQuellen = {}; chronoAusAnalyse = [];
+  // Der Entwurf gehoert zu dieser Akte. Bliebe er stehen, waere beim
+  // naechsten Oeffnen ein Entwurf im Fenster, der zu einer anderen Akte
+  // gehoert - bei Mandatsakten die gefaehrlichste Art von Anzeige.
+  entwurfStand = null; entwurfLaeuft = ""; entwurfVorschautext = "";
+  entwurfModusAus();
   // Den Nebenfenstern sagen, dass hier nichts mehr offen ist. Sonst
   // zeigten sie weiter eine Akte, die geschlossen wurde - und das waere
   // bei Mandatsakten die gefaehrlichste Art von Anzeige.
@@ -4513,6 +4763,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   $("frage-form").addEventListener("submit", (ev) => { ev.preventDefault(); mitKnopf($("senden"), frageStellen); });
   $("bib-neu").addEventListener("click", bibNeu);
+  $("entwurf-modus-aus").addEventListener("click", entwurfModusAus);
   $("prompt-dialog").addEventListener("close", () => {
     if ($("prompt-dialog").returnValue === "ablegen") mitKnopf(null, bibAblegen);
   });
