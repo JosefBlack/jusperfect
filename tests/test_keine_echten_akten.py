@@ -66,15 +66,15 @@ ECHT = re.compile(r"\b[DT]-\d{3}-\d{4}\b")
 #: Sie fuehrt selbst einen der gesperrten Namen; deshalb steht sie hier.
 UNBERUEHRT = {"schnittstelle/jurnodes-api-1.0.2.json"}
 
-#: Wo die Liste der gesperrten Namen liegt — **ausserhalb des
+#: Wo die Liste der gesperrten Namen liegt - **ausserhalb des
 #: Programmordners**, und das ist der ganze Punkt.
 #:
 #: **Befund N01 der dritten Zweitpruefung vom 12.10.2026.** Hier standen die
-#: echten Namen. Sie mussten irgendwo stehen, denn die Pruefung unten muss
-#: wissen, wonach sie sucht - und ausgeschrieben haetten sie die Pruefung
-#: durch sich selbst durchfallen lassen, weil sie jede Datei des Bestands
-#: liest, auch diese. Mein Ausweg war, sie zerlegt hinzuschreiben und in der
-#: Zeile darunter zusammenzusetzen.
+#: echten Namen. Sie mussten irgendwo stehen, denn diese Pruefung muss wissen,
+#: wonach sie sucht - und ausgeschrieben haetten sie sie durch sich selbst
+#: durchfallen lassen, weil sie jede Datei des Bestands liest, auch diese.
+#: Mein Ausweg war, sie zerlegt hinzuschreiben und in der Zeile darunter
+#: zusammenzusetzen.
 #:
 #: Das war kein Ausweg. Die Namen standen damit weiter im Bestand, nur in
 #: zwei Stuecken - und die Kommentare sagten dazu, wer Mandant und wer Gegner
@@ -84,47 +84,21 @@ UNBERUEHRT = {"schnittstelle/jurnodes-api-1.0.2.json"}
 #:
 #: **Entscheidung der Kanzlei vom 13.10.2026 (Variante A):** Die Namen kommen
 #: aus dem Repository heraus in eine Datei, die nur auf den Rechnern der
-#: Kanzlei liegt. Dort laeuft die Pruefung vollstaendig. In einem Paket fuer
-#: einen Dritten ist die Liste nicht dabei - dann prueft diese Datei nur noch
-#: das Aktenzeichenmuster **und sagt das**, damit niemand ein gruenes
-#: Ergebnis fuer "keine Namen gefunden" haelt.
+#: Kanzlei liegt.
 #:
-#: Gesucht wird an zwei festen Orten, beide **neben** oder **ueber** dem
-#: Programmordner, nie darin: Eine Datei im Programmordner kaeme in jedes ZIP.
-#: Keine Einstellung, keine Umgebungsvariable - zu konfigurieren gibt es hier
-#: nichts, und die Pruefungen erben seit Befund N08 ohnehin keine Umgebung.
-SPERRLISTE_NAME = "jusperfect-sperrwoerter.txt"
-SPERRLISTE_ORTE = (WURZEL.parent / SPERRLISTE_NAME,
-                   Path.home() / SPERRLISTE_NAME)
+#: **Wo sie liegt, sagt das Programm und nicht diese Pruefung.** Zwei Listen
+#: von Orten, die auseinanderlaufen koennen, waeren derselbe Fehler wie zwei
+#: Zaehler fuer dieselbe Sache (Befund N04): Der Weg steht in
+#: ``jusperfect/sperrliste.py``, und ``SPERRLISTE-ANLEGEN.bat`` legt die Datei
+#: dort an - mit der richtigen Zeichenkodierung, die Notepad nach Laune
+#: verfehlt.
+from jusperfect.sperrliste import (          # noqa: E402 - nach WURZEL
+    SPERRLISTE_NAME, finden as sperrliste, orte as SPERRLISTE_ORTE_FN,
+    woerter as gesperrte_woerter,
+)
 
-
-def sperrliste() -> Path | None:
-    """Die Datei mit den gesperrten Namen - oder None, wenn es keine gibt."""
-    for ort in SPERRLISTE_ORTE:
-        try:
-            if ort.is_file():
-                return ort
-        except OSError:                 # ein Pfad, den dieses System nicht mag
-            continue
-    return None
-
-
-def gesperrte_woerter() -> tuple[str, ...]:
-    """Ein Wort je Zeile; ``#`` beginnt einen Kommentar, Leerzeilen zaehlen nicht.
-
-    **Faellt die Datei aus, faellt die Pruefung aus** - nicht still gruen. Eine
-    Liste, die sich nicht lesen laesst, ist etwas anderes als keine Liste: Im
-    ersten Fall ist etwas kaputt, im zweiten ist es Absicht.
-    """
-    ort = sperrliste()
-    if ort is None:
-        return ()
-    woerter = []
-    for zeile in ort.read_text(encoding="utf-8").splitlines():
-        zeile = zeile.split("#", 1)[0].strip()
-        if zeile:
-            woerter.append(zeile)
-    return tuple(woerter)
+#: Dieselben Orte, als Tupel - fuer die Pruefungen unten.
+SPERRLISTE_ORTE = SPERRLISTE_ORTE_FN()
 
 
 def muster(woerter: tuple[str, ...]) -> tuple[re.Pattern[str], ...]:
@@ -148,9 +122,25 @@ def _dateien() -> list[str]:
 
     Eine Prüfung, die nur im Entwicklungsverzeichnis läuft, prüft das Paket
     nicht. Sie fällt deshalb auf einen Lauf über den Ordner zurück.
+
+    **``--others`` seit dem 13.10.2026, und das war eine Lücke.** ``git
+    ls-files`` allein nennt nur, was git schon **kennt** — eine **neu
+    angelegte** Datei also nicht. Beim Bauen von
+    ``SPERRLISTE-ANLEGEN.bat`` stand ein echter Name in einer neuen Datei, und
+    mein Nachlauf vor dem Einchecken ging darüber hinweg: Er hat sie nicht
+    gelesen, weil git sie noch nicht kannte.
+
+    > Eine Suche, die eine Datei nicht sieht, ist dort nicht grün — sie ist
+    > blind. Und die neue Datei ist genau die, in der der Fehler frisch ist.
+
+    ``--others --exclude-standard`` nimmt die unversionierten dazu, lässt aber
+    aus, was in ``.gitignore`` steht — sonst liefe die Suche durch
+    ``.venv`` und über jedes Fremdpaket darin.
     """
     try:
-        roh = subprocess.run(["git", "ls-files"], cwd=WURZEL, capture_output=True,
+        roh = subprocess.run(["git", "ls-files", "--cached", "--others",
+                              "--exclude-standard"],
+                             cwd=WURZEL, capture_output=True,
                              text=True, check=True).stdout.split()
     except (subprocess.CalledProcessError, FileNotFoundError, OSError):
         roh = []
@@ -312,6 +302,29 @@ class KeinEchtesAktenzeichenImBestand(unittest.TestCase):
         self.assertFalse(ECHT.search("Der Lauf an X-100-2026 ergab"),
                          "Eine erfundene Nummer darf sie nicht fangen.")
         self.assertFalse(ECHT.search("X-003-2025"))
+
+    def test_eine_neue_datei_wird_mitgelesen(self):
+        """Die Lücke vom 13.10.2026: `git ls-files` kennt nur Versioniertes.
+
+        Beim Bauen von `SPERRLISTE-ANLEGEN.bat` stand ein echter Name in einer
+        neu angelegten Datei, und der Nachlauf vor dem Einchecken ging darüber
+        hinweg — er hat sie nicht gelesen, weil git sie noch nicht kannte. Die
+        neue Datei ist aber genau die, in der der Fehler frisch ist.
+        """
+        neu = WURZEL / "zzz-probe-neue-datei.txt"
+        neu.write_text("Nur eine Probe.\n", encoding="utf-8")
+        try:
+            self.assertIn("zzz-probe-neue-datei.txt", _dateien(),
+                          "Eine neue, noch nicht versionierte Datei wird "
+                          "übersehen - dort ist die Suche blind, nicht grün.")
+        finally:
+            neu.unlink()
+
+    def test_was_in_gitignore_steht_bleibt_aussen(self):
+        """Sonst liefe die Suche durch `.venv` und jedes Fremdpaket darin."""
+        dateien = _dateien()
+        self.assertFalse([n for n in dateien if n.startswith(".venv/")], )
+        self.assertFalse([n for n in dateien if "__pycache__" in n])
 
     def test_die_pruefung_laeuft_auch_ohne_git(self):
         """Im Prüfpaket gibt es kein `.git` — dort muss sie erst recht greifen.

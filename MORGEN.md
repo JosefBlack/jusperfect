@@ -3786,3 +3786,85 @@ ihnen fallen gegen den vorigen Stand durch.**
 
 Damit ist am Programm nichts mehr offen, was aus der dritten Zweitprüfung oder
 aus dem Lauf vom 12.10.2026 stammt.
+
+---
+
+## 13.10.2026 — die Sperrliste legt sich selbst an, und zweimal fiel ich noch hinein
+
+Aus der Kanzlei: „sperrliste anlegen". Anlegen kann ich sie nicht — sie liegt
+auf den Rechnern der Kanzlei. Also ein Programm, das es tut:
+**`SPERRLISTE-ANLEGEN.bat`** und `jusperfect/sperrliste.py`.
+
+**Warum ein Programm und nicht eine Anleitung.** Mehrfach gelernt: Ein
+Nichtprogrammierer soll keine Datei mit der richtigen Zeichenkodierung an
+einem abgezählten Pfad anlegen müssen. Notepad hängt ein zweites `.txt` an und
+speichert nach Laune in ANSI.
+
+> Ein Umlaut in ANSI heißt: **Die Prüfung findet den Namen nicht und ist
+> grün.** Die stillste Art, einen Riegel unwirksam zu machen.
+
+Das Programm fragt, schreibt selbst, liest zurück und zählt nach. Dabei
+bestätigt es **verdeckt** — erster Buchstabe und Länge, `V............ (13
+Zeichen)` —, damit ein Blick auf den Bildschirm genügt und ein Bildschirmfoto
+nichts verrät. Ein Wort unter drei Zeichen weist es ab: Es steckte in zu
+vielen gewöhnlichen Wörtern, und eine Prüfung, die immer rot ist, wird nach
+einer Woche abgeschaltet.
+
+**Der Ort steht jetzt einmal im Programm**, nicht auch in der Prüfung. Zwei
+Listen von Orten, die auseinanderlaufen können, wären derselbe Fehler wie zwei
+Zähler für dieselbe Sache (Befund N04).
+
+### Und dann zweimal dasselbe Muster, in dieser Arbeit
+
+**Das sechste Mal.** In `HILFE.html` und im Programm stand als Beispiel für die
+beiden Umlaut-Schreibweisen ausgerechnet **der echte Name** — in der Zeile, die
+das Muster erklärt.
+
+**Das siebte Mal.** In `tests/test_sperrliste.py` stand als kurzes Beispiel für
+die verdeckte Anzeige **die echte Abkürzung des Gegners** — in der Prüfdatei
+des Mechanismus selbst.
+
+Beide Male hat es **nicht meine Aufmerksamkeit** gefangen, sondern ein Nachlauf
+mit der Liste über alle Dateien. Mein blinder Fleck ist dabei immer derselbe:
+Ein Name, der als *Beispiel* dasteht, fühlt sich nicht an wie ein Name — und
+ein dreibuchstabiges Kürzel überhaupt nicht.
+
+### Die dritte Lücke war der Nachlauf selbst
+
+Beim ersten der beiden Funde ging mein Nachlauf über die neue Datei **hinweg**:
+
+```
+git ls-files              -> 300 Dateien | sperrliste.py dabei: False
+git ls-files --cached --others --exclude-standard
+                          -> 303 Dateien | sperrliste.py dabei: True
+```
+
+`git ls-files` nennt nur, was git schon **kennt**. Eine **neu angelegte** Datei
+also nicht — und die neue Datei ist genau die, in der der Fehler frisch ist.
+
+> Eine Suche, die eine Datei nicht sieht, ist dort nicht grün — sie ist blind.
+
+`_dateien()` nimmt jetzt `--others --exclude-standard` dazu: die
+unversionierten mit, das Ignorierte draußen, sonst liefe die Suche durch
+`.venv`. Zwei Prüfungen messen beides.
+
+Dass dieselbe Lücke in `jusperfect/sperrliste.py` nicht angeschlagen hat, war
+**Zufall**: Dort steht der Name hinter `„`, und in meinem ersten Entwurf
+unmittelbar hinter einem Buchstaben der Escape-Folge — damit fand `\bName\b`
+keine Wortgrenze. Ein Riegel, der durch Zufall hält, hält nicht.
+
+### Stand
+
+**2027 Prüfungen grün, eine übersprungen.** Nachgemessen über alle **303**
+Dateien, versionierte und neue: kein gesperrter Name, kein echtes
+Aktenzeichen.
+
+| Siebenmal in drei Tagen | Gefangen von |
+|---|---|
+| 1–3 (11./12.10.) | der Kanzlei und meiner Aufmerksamkeit |
+| 4 (12.10.) | der neuen Namensprüfung |
+| 5 (13.10., in der Änderung, die sie entfernen sollte) | dem Nachlauf |
+| 6 und 7 (13.10., Hilfeseite und Prüfdatei) | dem Nachlauf |
+
+**Die Regel wirkt nur, wenn sie gemessen wird.** Dreimal hintereinander hat sie
+heute gemessen, wo ich versagt habe.

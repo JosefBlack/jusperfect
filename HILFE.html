@@ -1033,7 +1033,37 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
     <tr><td><code>JURNODES-ZUGANG.bat</code></td><td>Adresse, Benutzer und Schlüssel von jur|nodes hinterlegen</td></tr>
     <tr><td><code>JURNODES-PRUEFEN.bat</code></td><td>Antwortet die Schnittstelle? Befund in <code>jurnodestest.txt</code></td></tr>
     <tr><td><code>ORDNER-PRUEFEN.bat</code></td><td>Taugt der Aktenordner? Befund in <code>ordnerpruefung.txt</code></td></tr>
+    <tr><td><code>SPERRLISTE-ANLEGEN.bat</code><span class="marke fertig">seit 13.10.2026</span></td><td>Namen hinterlegen, die nie im Programmordner stehen dürfen – <strong>einmal je Rechner</strong></td></tr>
   </table>
+
+  <h3>Die Sperrliste<span class="marke fertig">seit 13.10.2026</span></h3>
+  <p>Am 11.10.2026 standen echte Namen aus echten Akten im Programmordner. Dagegen
+  gibt es seit dem 12.10.2026 einen Prüflauf, der jede Datei danach durchsucht –
+  nur muss er wissen, <strong>nach welchen Namen</strong>.</p>
+  <p>Diese Namen standen bis zum 13.10.2026 im Programm selbst. Damit standen sie
+  weiter dort, wo sie nicht hingehören, und sind so in einem Prüfpaket aus dem Haus
+  gegangen. <strong>Der Riegel war selbst das Leck.</strong></p>
+  <p>Seitdem liegt die Liste <strong>neben</strong> dem Programmordner und nicht
+  darin – sonst wäre sie in jeder ZIP:</p>
+  <table>
+    <tr><th>Wo</th><th>Was dann geprüft wird</th></tr>
+    <tr><td>Auf Ihren Rechnern, Liste vorhanden</td><td>Aktenzeichen <strong>und</strong> Namen</td></tr>
+    <tr><td>In einem Prüfpaket für einen Dritten</td><td>nur Aktenzeichen – und der Lauf <strong>sagt das</strong></td></tr>
+  </table>
+  <p><strong>Anlegen:</strong> Doppelklick auf <code>SPERRLISTE-ANLEGEN.bat</code>,
+  dann die Namen eintippen – einen je Zeile, fertig mit einer leeren Zeile.
+  Umlaute bitte in <strong>beiden</strong> Schreibweisen (einmal <code>Kraemer</code>,
+  einmal <code>Krämer</code>): In Dateinamen steht oft die eine, im Text die andere.</p>
+  <p>Das Programm zeigt beim Eintippen nur den ersten Buchstaben und die Länge an –
+  <em>M......... (10 Zeichen)</em>. So verrät ein Bildschirmfoto nichts.</p>
+  <div class="merksatz">
+    <p><strong>Einmal je Rechner.</strong> Die Liste wird nicht mitgeschickt und
+    nicht abgeglichen. Wer sie nur auf einem Rechner anlegt, hält den anderen für
+    geprüft, und er ist es nicht.</p>
+    <p><strong>Nicht in den Programmordner kopieren</strong>, nicht in eine ZIP
+    legen, nicht weitergeben. Eine Sicherung Ihres Benutzerordners nimmt sie mit –
+    das ist in Ordnung, solange die Sicherung im Haus bleibt.</p>
+  </div>
 
   <h3>Ausprobieren und messen</h3>
   <table>
