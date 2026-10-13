@@ -792,6 +792,28 @@ function explorerStarten(initial) {
       eakteHinweis.textContent = eakteHinweis.textContent
         ? eakteHinweis.textContent + " — " + satz : satz;
     }
+
+    // Eintraege, an denen das Aufbauen der Liste gescheitert ist.
+    //
+    // Aus der Kanzlei am 13.10.2026: „Akte oeffnen nicht moeglich Vorgang
+    // wurde abgebrochen interner Fehler". Ein einziger unerwarteter Eintrag
+    // riss das Oeffnen der ganzen Akte mit - 54 Dokumente waren in Ordnung
+    // und keines zu sehen. Jetzt faellt dieser eine aus und steht hier.
+    //
+    // Die Kette ist Programmtext: Ausnahmetypen und Codestellen, kein
+    // Wortlaut und keine Aktenkennung. Sie steht hier, weil der Bearbeiter
+    // sie weitergeben kann - sonst muesste er das schwarze Fenster lesen.
+    const kaputt = sitzung.eintraege_mit_fehler || {};
+    const anzahl = Object.values(kaputt).reduce((a, b) => a + b, 0);
+    if (anzahl) {
+      eakteHinweis.hidden = false;
+      const satz = `${anzahl} Eintrag/Einträge dieser Akte ließen sich nicht `
+        + `einlesen und fehlen in der Liste. Die übrigen sind vollständig. `
+        + `Bitte diese Angabe weitergeben: ${Object.entries(kaputt)
+            .map(([kette, n]) => `${n}× ${kette}`).join(" | ")}`;
+      eakteHinweis.textContent = eakteHinweis.textContent
+        ? satz + " — " + eakteHinweis.textContent : satz;
+    }
   }
   $("explorer-uebernehmen").textContent = initial ? "Arbeitsfläche öffnen" : "Übernehmen";
   // Erst leeren, dann zeichnen. Umgekehrt zeigte der Explorer die Liste noch
@@ -2342,6 +2364,38 @@ async function gedaechtnisGanzVerwerfen() {
   const g = (sitzung && sitzung.gedaechtnis) || {};
   const eintraege = g.eintraege || [];
   const a = sitzung.sitzung.akte;
+  // Der Fall, fuer den dieser Knopf am 13.10.2026 gebraucht wurde: Das
+  // Gedaechtnis ist da und nicht zu lesen. Dann steht hier keine Zahl - aber
+  // der Weg ist derselbe, und nur dieser eine funktioniert noch, weil das
+  // Loeschen nicht liest.
+  if (g.unlesbar) {
+    const weg = [
+      `Das Aktengedächtnis von ${a.aktenzeichen} verwerfen?`,
+      "",
+      "Es lässt sich nicht mehr einlesen; wie viel darin liegt, ist deshalb",
+      "nicht zu sagen. Verworfen wird es trotzdem vollständig.",
+      "",
+      "Die Akte in jur|nodes bleibt unberührt.",
+      "",
+      "Danach baut „Akte einlesen\u201c es neu auf. Das kostet Modellaufrufe,",
+      "bei Scans zusätzlich die Texterkennung.",
+      "",
+      "Verwerfen?",
+    ];
+    if (!confirm(weg.join("\n"))) return;
+    const akteId = encodeURIComponent(sitzung.sitzung.akte_id);
+    await api("DELETE", `/api/akten/${akteId}/gedaechtnis`);
+    sitzung = await api("GET", `/api/sitzungen/${sitzung.sitzung.id}`);
+    await passagenLaden();
+    chronoAusAnalyse = [];
+    gedExplorerZeichnen();
+    gedaechtnisFensterZeigen();
+    chronologieZeigen();
+    ladeStatus();
+    melden(`Das Aktengedächtnis von ${a.aktenzeichen} ist verworfen. `
+           + `\u201eAkte einlesen" baut es neu auf.`);
+    return;
+  }
   if (!g.vorhanden) {
     melden(`Zu ${a.aktenzeichen} ist noch kein Aktengedächtnis gespeichert.`);
     return;

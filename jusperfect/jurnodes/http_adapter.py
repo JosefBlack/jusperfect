@@ -24,6 +24,8 @@ from typing import Any
 import httpx
 
 from jusperfect.config import Einstellungen, KonfigurationsFehler
+from jusperfect.fehlergrenze import ausnahmekette
+from jusperfect.security.protokoll import MAX_WERT_LAENGE
 from jusperfect.jurnodes.mail import Anhang as MailAnhang
 from jusperfect.jurnodes.mail import Zerlegt, zerlegen
 from jusperfect.domain.models import Akte, Beteiligter, Dokument, Frist
@@ -1153,6 +1155,34 @@ class HttpJurNodesAdapter:
     #: die E-Akte. Befund N07 der dritten Zweitpruefung vom 12.10.2026.
     letzte_akte_ohne_dateiordner: bool = False
 
+    #: Eintraege, an denen das Aufbauen der Liste gescheitert ist:
+    #: Ausnahmekette -> Anzahl.
+    #:
+    #: Aus der Kanzlei am 13.10.2026: „Akte oeffnen nicht moeglich Vorgang
+    #: wurde abgebrochen interner Fehler 2e2e3bd1." Ein einziger Eintrag, an
+    #: dem etwas unerwartet war, riss das Oeffnen der ganzen Akte mit - 54 von
+    #: 55 Dokumenten waren in Ordnung und keines davon zu sehen.
+    #:
+    #: Dieselbe Lehre wie am 25.09.2026 beim LADEN der Dokumente: Ein
+    #: Teilfehler darf die uebrigen nicht kosten. Dort war sie gezogen, beim
+    #: AUFBAUEN der Liste nicht.
+    #:
+    #: Der Schluessel ist die Ausnahmekette - Typen und Codestellen, kein
+    #: Wortlaut und keine Aktenkennung (`fehlergrenze.ausnahmekette`). Sie
+    #: darf deshalb bis in die Anzeige gehen, und genau dort gehoert sie hin:
+    #: Der Bearbeiter sieht, dass etwas fehlt, und kann sagen, was.
+    letzte_eintraege_mit_fehler: dict[str, int] = field(default_factory=dict)
+
+    def _eintrag_gescheitert(self, fehler: Exception) -> None:
+        """Einen gescheiterten Eintrag merken, statt die Akte zu verlieren.
+
+        Gezaehlt wird nach Ausnahmekette: Fuenf Eintraege, die an derselben
+        Stelle scheitern, sind ein Befund und nicht fuenf.
+        """
+        kette = ausnahmekette(fehler)[:MAX_WERT_LAENGE]
+        self.letzte_eintraege_mit_fehler[kette] = (
+            self.letzte_eintraege_mit_fehler.get(kette, 0) + 1)
+
     def _ordner_durchgehen(self, wurzel: Any) -> list[tuple[str, Mapping[str, Any]]]:
         """Alle Eintraege einer Akte - auch die in Unterordnern.
 
@@ -1216,6 +1246,7 @@ class HttpJurNodesAdapter:
         enthaelt Ordner und Dateien gemischt. Nur die Dateien zaehlen hier.
         """
         self.letzte_akte_ohne_dateiordner = False
+        self.letzte_eintraege_mit_fehler = {}
         roh = self._roh_akte(akte_id)
         ordner_id = roh.get("fileFolderId")
         # **Befund N07 der dritten Zweitpruefung vom 12.10.2026.** Hier stand
@@ -1232,7 +1263,15 @@ class HttpJurNodesAdapter:
         # aus wie "die Akte ist leer" und heisst "ich habe nicht nachgesehen".
         ordner: list[tuple[str, Mapping[str, Any]]] = []
         if ordner_id:
-            ordner = self._ordner_durchgehen(ordner_id)
+            # Auch das Durchgehen selbst: Faellt es aus, bleibt die E-Akte.
+            # Dieselbe Erwaegung wie bei N07 - zwei unabhaengige Lesewege
+            # duerfen nicht aneinander haengen.
+            try:
+                ordner = self._ordner_durchgehen(ordner_id)
+            except JurNodesFehler:
+                raise
+            except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
+                self._eintrag_gescheitert(fehler)
         else:
             # Kein Protokolleintrag: Diese Datei fuehrt keinen Protokollkanal,
             # und eine Aktenkennung gehoert nicht in einen. Der Zaehler geht
@@ -1288,7 +1327,12 @@ class HttpJurNodesAdapter:
             # die Datei gar nicht.
             if isinstance(roh, Mapping) and ist_gedaechtnis_datei(self._ganzer_name(roh)):
                 continue
-            dokumente.append(dokument_aus_json(akte_id, roh, ordner=pfad))
+            # Ein Eintrag, an dem etwas unerwartet ist, kostet nicht die
+            # uebrigen 54. Gezaehlt wird er, damit er sichtbar fehlt.
+            try:
+                dokumente.append(dokument_aus_json(akte_id, roh, ordner=pfad))
+            except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
+                self._eintrag_gescheitert(fehler)
         if self._korrespondenz:
             dokumente += self._vermerke(akte_id)
         return dokumente
@@ -1360,6 +1404,12 @@ class HttpJurNodesAdapter:
             # sie aus, kostet das nicht die Dokumente des Dateisystems.
             self.letzte_korrespondenz_ohne_inhalt = -1
             return []
+        except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
+            # Nicht nur der gemeldete Fehler des Servers: auch eine Antwort
+            # in einer Gestalt, mit der hier niemand gerechnet hat.
+            self.letzte_korrespondenz_ohne_inhalt = -1
+            self._eintrag_gescheitert(fehler)
+            return []
         dokumente: list[Dokument] = []
         for eintrag in eintraege:
             if not isinstance(eintrag, Mapping):
@@ -1375,7 +1425,10 @@ class HttpJurNodesAdapter:
                 if art not in ("file", "", "mail"):
                     self.letzte_korrespondenz_ohne_inhalt += 1
                 continue
-            dokumente.append(vermerk_als_dokument(akte_id, nummer, eintrag))
+            try:
+                dokumente.append(vermerk_als_dokument(akte_id, nummer, eintrag))
+            except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
+                self._eintrag_gescheitert(fehler)
         dokumente += self._mail_dokumente(akte_id, eintraege)
         return dokumente
 
@@ -1421,55 +1474,71 @@ class HttpJurNodesAdapter:
         for eintrag in eintraege:
             if str(eintrag.get("type", "")).lower() != "mail":
                 continue
-            kennung = eintrag.get("referenceMail")
-            if not kennung:
-                self.letzte_korrespondenz_ohne_inhalt += 1
-                continue
-            kennung = str(kennung)
-            zerlegt = self._mail_aus_puffer(akte_id, kennung)
-            if zerlegt is None:
-                # Das Konto, nicht eine Zaehlung dieses Aufrufs (Befund N06).
-                # Schon Gepuffertes zaehlt nicht erneut - es wurde bezahlt, als
-                # es geholt wurde.
-                if (self._mail_konto >= self._mail_gesamt
-                        or kennung in self._mail_abgelehnt):
-                    self.letzte_mails_ueber_budget += 1
-                    dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
-                                                       grund="budget"))
-                    continue
-                zerlegt, groesse, grund = self._mail_holen(
-                    kennung, rest=self._mail_gesamt - self._mail_konto)
-                self._mail_konto += groesse
-                if grund == "budget":
-                    self._mail_abgelehnt.add(kennung)
-                if zerlegt is None:
-                    if grund == "zu_gross":
-                        self.letzte_mails_zu_gross += 1
-                    elif grund == "budget":
-                        self.letzte_mails_ueber_budget += 1
-                    else:
-                        self.letzte_mails_ohne_antwort += 1
-                    dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
-                                                       grund=grund))
-                    continue
-                self._mail_puffern(akte_id, kennung, zerlegt)
-
-            # Was diese Mail an Teilen verloren hat, steht in ihrer eigenen
-            # Zeile - dort sucht man es, wenn eine Anlage fehlt. Die Summe
-            # ueber die Akte steht zusaetzlich oben in der Liste.
-            dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
-                                               zerlegt.mime_typ,
-                                               verlust=zerlegt.gruende()))
-            for grund, anzahl in zerlegt.ausgelassen.items():
-                if anzahl:
-                    self.letzte_mail_ausgelassen[grund] = (
-                        self.letzte_mail_ausgelassen.get(grund, 0) + anzahl)
-            self.letzte_mail_nachrichten += zerlegt.nachrichten
-            for nr, anhang in enumerate(zerlegt.anhaenge):
-                dokumente.append(anhang_als_dokument(akte_id, kennung, nr,
-                                                     anhang, eintrag))
-                self.letzte_mail_anhaenge += 1
+            # Eine Mail, die sich nicht zerlegen laesst, kostet nicht die
+            # Akte. Aus der Kanzlei am 13.10.2026 kam genau dieser Fall als
+            # "Akte oeffnen nicht moeglich": Eine .eml mit einem Teil, mit dem
+            # hier niemand gerechnet hat, und das Oeffnen brach ab.
+            try:
+                self._eine_mail(akte_id, eintrag, dokumente)
+            except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
+                self._eintrag_gescheitert(fehler)
         return dokumente
+
+    def _eine_mail(self, akte_id: str, eintrag: Mapping[str, Any],
+                   dokumente: list[Dokument]) -> None:
+        """Eine Mail der E-Akte in Dokumente verwandeln - Brieftext und Anlagen.
+
+        Steht fuer sich, damit ``_mail_dokumente`` sie einzeln absichern kann:
+        Was hier schiefgeht, betrifft diese Mail und nicht die Akte.
+        """
+        kennung = eintrag.get("referenceMail")
+        if not kennung:
+            self.letzte_korrespondenz_ohne_inhalt += 1
+            return
+        kennung = str(kennung)
+        zerlegt = self._mail_aus_puffer(akte_id, kennung)
+        if zerlegt is None:
+            # Das Konto, nicht eine Zaehlung dieses Aufrufs (Befund N06).
+            # Schon Gepuffertes zaehlt nicht erneut - es wurde bezahlt, als
+            # es geholt wurde.
+            if (self._mail_konto >= self._mail_gesamt
+                    or kennung in self._mail_abgelehnt):
+                self.letzte_mails_ueber_budget += 1
+                dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
+                                                   grund="budget"))
+                return
+            zerlegt, groesse, grund = self._mail_holen(
+                kennung, rest=self._mail_gesamt - self._mail_konto)
+            self._mail_konto += groesse
+            if grund == "budget":
+                self._mail_abgelehnt.add(kennung)
+            if zerlegt is None:
+                if grund == "zu_gross":
+                    self.letzte_mails_zu_gross += 1
+                elif grund == "budget":
+                    self.letzte_mails_ueber_budget += 1
+                else:
+                    self.letzte_mails_ohne_antwort += 1
+                dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
+                                                   grund=grund))
+                return
+            self._mail_puffern(akte_id, kennung, zerlegt)
+
+        # Was diese Mail an Teilen verloren hat, steht in ihrer eigenen
+        # Zeile - dort sucht man es, wenn eine Anlage fehlt. Die Summe
+        # ueber die Akte steht zusaetzlich oben in der Liste.
+        dokumente.append(mail_als_dokument(akte_id, kennung, eintrag,
+                                           zerlegt.mime_typ,
+                                           verlust=zerlegt.gruende()))
+        for grund, anzahl in zerlegt.ausgelassen.items():
+            if anzahl:
+                self.letzte_mail_ausgelassen[grund] = (
+                    self.letzte_mail_ausgelassen.get(grund, 0) + anzahl)
+        self.letzte_mail_nachrichten += zerlegt.nachrichten
+        for nr, anhang in enumerate(zerlegt.anhaenge):
+            dokumente.append(anhang_als_dokument(akte_id, kennung, nr,
+                                                 anhang, eintrag))
+            self.letzte_mail_anhaenge += 1
 
     def _mail_holen(self, kennung: str,
                     rest: int | None = None) -> tuple[Zerlegt | None, int, str]:

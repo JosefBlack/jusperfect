@@ -950,13 +950,42 @@ def _sitzung_antwort(d: Dienste, sitzung: Any) -> dict[str, Any]:
         # nachgesehen".
         "akte_ohne_dateiordner": bool(
             getattr(d.adapter, "letzte_akte_ohne_dateiordner", False)),
+        # Eintraege, an denen das Aufbauen der Liste gescheitert ist:
+        # Ausnahmekette -> Anzahl. Die Kette traegt Typen und Codestellen,
+        # keinen Wortlaut und keine Aktenkennung - sie darf angezeigt werden.
+        #
+        # Aus der Kanzlei am 13.10.2026: "Akte oeffnen nicht moeglich". Ein
+        # einziger unerwarteter Eintrag riss das Oeffnen mit. Jetzt faellt
+        # dieser eine aus und steht hier - der Bearbeiter sieht, dass etwas
+        # fehlt, und kann sagen, was.
+        "eintraege_mit_fehler": dict(
+            getattr(d.adapter, "letzte_eintraege_mit_fehler", {})),
         "beteiligte": [x.model_dump() for x in d.sitzungen.beteiligte(sitzung)],
         "fristen": [x.model_dump() for x in d.sitzungen.fristen(sitzung)],
-        "gedaechtnis": d.gedaechtnis.uebersicht(d.gedaechtnis.lesen(sitzung.akte_id)),
+        "gedaechtnis": _gedaechtnis_uebersicht(d, sitzung),
         # Was eine Frage mit den geladenen Dokumenten ungefähr kostet. Der
         # Umfang steht schon in der Sitzung; es wird nichts nachgelesen.
         "kostenschaetzung": _kostenschaetzung(d, sitzung),
     }
+
+
+def _gedaechtnis_uebersicht(d: Dienste, sitzung: Any) -> dict[str, Any]:
+    """Die Uebersicht - und wenn sie nicht zu lesen ist, dann das.
+
+    Aus der Kanzlei am 13.10.2026: "Akte oeffnen nicht moeglich". Ein
+    Gedaechtnis, das sich nicht mehr einlesen laesst, machte auch diese
+    Antwort unmoeglich - und damit war die Akte nicht nur ohne Erinnerung,
+    sondern ueberhaupt nicht zu oeffnen. Die Oberflaeche braucht die
+    Uebersicht fuer jedes Fenster.
+
+    Hier steht deshalb der ehrliche Ersatz: nichts vorhanden, dazu der Grund
+    (``unlesbar``). Genau dort steht in der Oberflaeche der Weg hinaus, und
+    "Gedaechtnis verwerfen" braucht die Uebersicht nicht - es loescht.
+    """
+    try:
+        return d.gedaechtnis.uebersicht(d.gedaechtnis.lesen(sitzung.akte_id))
+    except GedaechtnisFehler as fehler:
+        return d.gedaechtnis.uebersicht(None) | {"unlesbar": str(fehler)}
 
 
 def _kostenschaetzung(d: Dienste, sitzung: Any) -> dict[str, Any]:

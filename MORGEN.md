@@ -4299,3 +4299,78 @@ Eine Anzeige, die nicht mitgeführt wird, ist schlechter als keine.
 **Die Ursache des Fehlers selbst.** 2062 Prüfungen sind grün, der Fehler tritt
 an Ihrem Server auf und bei den erfundenen Akten nicht — er hängt an echten
 Daten. Gebraucht wird die eine Zeile aus dem schwarzen Fenster.
+
+---
+
+## 13.10.2026 — gehärtet, während die Ursache noch unbekannt ist
+
+Die Kanzlei ist am Handy, der Fehler ist nicht gelesen. Statt zu warten, habe
+ich das gemacht, was unabhängig von seiner Ursache richtig ist: **dafür zu
+sorgen, dass ein einzelner Fehler nicht die ganze Akte kostet.**
+
+Der Satz „Interner Fehler. Der Vorgang wurde abgebrochen." heißt: eine Ausnahme,
+die keinem bekannten Fehlertyp entspricht. Zwei Stellen im Weg zum Öffnen
+hatten keinen Schutz davor — und an beiden war die Lehre im Haus längst
+gezogen, nur eine Schleife weiter.
+
+### 1. Das Aufbauen der Dokumentliste
+
+Beim **Laden** eines Dokuments hat jedes seinen eigenen Versuch — gezogen am
+25.09.2026, nachdem aus der Kanzlei kam: „es wird auch immer nur ein Dokument in
+das Aktengedaechtnis uebernommen." Das erste ging durch, beim zweiten warf der
+Adapter, die Schleife brach ab, und achtundzwanzig Dokumente fehlten lautlos.
+
+Beim **Aufbauen der Liste** gab es das nicht. Ein einziger Eintrag, an dem
+etwas unerwartet war, riss das Öffnen der ganzen Akte mit: 54 von 55
+Dokumenten in Ordnung und keines davon zu sehen.
+
+Jetzt hat jeder Eintrag seinen eigenen Versuch — die Dateien des Ordnerbaums,
+die Vermerke, jede Mail mit ihren Anlagen, und das Korrespondenzverzeichnis
+selbst. Was ausfällt, **steht in der Anzeige**: Zahl und Ausnahmekette
+(`letzte_eintraege_mit_fehler`, Kette → Anzahl). Fünf Einträge, die an
+derselben Stelle scheitern, sind ein Befund und nicht fünf.
+
+Die Kette ist Programmtext — Ausnahmetypen und Codestellen, kein Wortlaut, kein
+Pfad, keine Aktenkennung. Sie darf deshalb bis in die Oberfläche gehen, und
+genau dort gehört sie hin: Der Bearbeiter kann sie weitergeben, ohne das
+schwarze Fenster zu lesen.
+
+`tests/test_ein_eintrag_kostet_nicht_die_akte.py`, elf Prüfungen, mit der
+Gegenprobe: ohne die Absicherung fliegt derselbe Fall wieder hinaus.
+
+### 2. Das Lesen des Aktengedächtnisses
+
+Für das misslungene **Sichern** war die Lehre am 25.09.2026 gezogen: „Ein
+misslungenes Sichern darf das Oeffnen einer Akte nicht verhindern" steht
+wörtlich in `_nachtragen`. Für das **Lesen** stand sie nirgends.
+
+Jetzt gilt sie dort auch:
+
+| Was | Vorher | Jetzt |
+|---|---|---|
+| Ein Gedächtnis, das sich nicht einlesen lässt | „Interner Fehler", Akte blieb zu | Die Akte **geht auf**, ohne Erinnerung, mit Hinweis |
+| Der Hinweis | — | nennt die Stelle und den Weg: „Gedächtnis verwerfen", dann „Akte einlesen" |
+| Die Sitzungsantwort | scheiterte mit | liefert die Übersicht als `vorhanden: false` plus `unlesbar` |
+| Sichern / Einlesen | hätten überschrieben | **brechen ab** (422, lesbarer Satz) |
+| Verwerfen | — | geht, denn es liest nicht, es löscht |
+
+Das Nicht-Überschreiben ist der Punkt, an dem ich beinahe falsch gebaut hätte:
+Ein Schreiben auf ein Gedächtnis, das wir nicht lesen konnten, überschreibt den
+einzigen Stand, an dem sich noch feststellen lässt, was ihm fehlte. Alle
+schreibenden Wege gehen durch `_gelesen` und brechen deshalb dort ab, bevor
+etwas abgelegt wird — ohne eine zusätzliche Sperre, die man vergessen könnte.
+
+Ein Gedächtnis einer **anderen** Akte bleibt dagegen eine Sperre und soll eine
+bleiben: Fremde Schriftstücke in einer Arbeitsakte sind teurer als fehlende.
+
+`tests/test_gedaechtnis_unlesbar.py`, elf Prüfungen.
+
+### Was das für den Fall aus der Kanzlei heißt
+
+**Die Akte sollte sich jetzt öffnen lassen** — entweder ganz, oder mit einer
+Zeile, die sagt, was fehlt und was weitergegeben werden soll. Sicher ist das
+nicht: Ob der Fehler an einer dieser beiden Stellen liegt, ist nicht gemessen,
+sondern geschlossen. Liegt er woanders, kommt dieselbe Meldung wieder — dann
+aber mit der Zeile im schwarzen Fenster, die es seit heute gibt.
+
+2084 Prüfungen grün, eine übersprungen.

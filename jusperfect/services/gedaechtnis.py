@@ -20,14 +20,15 @@ from jusperfect.domain.models import (
 )
 from jusperfect.gedaechtnis.base import GedaechtnisFehler, GedaechtnisSpeicher
 from jusperfect.security.identitaet import Identitaet
-from jusperfect.security.protokoll import ereignis, protokoll
+from jusperfect.fehlergrenze import ausnahmekette
+from jusperfect.security.protokoll import MAX_WERT_LAENGE, ereignis, protokoll
 from jusperfect.services import prompts
 from jusperfect.services.ausgang import Ausgang, Ausgangskontext
 from jusperfect.services.belegpflicht import VERZICHT, aussage_fail_closed
 from jusperfect.services.passagen import budget_anwenden, passagen_bilden
 from jusperfect.services.quellen import index_bauen
 from jusperfect.services.chronologie import gleicher_vorgang
-from jusperfect.speicher.base import SitzungsSpeicher
+from jusperfect.speicher.base import SitzungsSpeicher, SpeicherFehler
 
 _log = protokoll("gedaechtnis")
 
@@ -137,7 +138,38 @@ class Gedaechtnisdienst:
         """
         if self._speicher is None:
             return None
-        g = self._speicher.lesen(akte_id)
+        try:
+            g = self._speicher.lesen(akte_id)
+        except (GedaechtnisFehler, SpeicherFehler):
+            # Ein gemeldeter Fehler des Speichers hat seinen eigenen Satz und
+            # seinen eigenen Status. Hier geht es um den anderen Fall.
+            raise
+        except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
+            # Ein Gedaechtnis, das sich nicht mehr einlesen laesst.
+            #
+            # Aus der Kanzlei am 13.10.2026: "Akte oeffnen nicht moeglich
+            # Vorgang wurde abgebrochen interner Fehler 2e2e3bd1." Was hier
+            # unerwartet scheitert, kam vorher als Programmfehler heraus: eine
+            # Nummer ohne Satz, und die Akte blieb zu.
+            #
+            # Jetzt ist es ein Fehler MIT Satz - und mit dem Weg hinaus. Der
+            # Weg ist nicht theoretisch: "Gedaechtnis verwerfen" liest das
+            # Gedaechtnis nicht, es loescht es; danach baut "Akte einlesen" es
+            # neu auf.
+            #
+            # Und es ist ein Fehler, nicht ein stilles Weiter: Ein Schreiben
+            # auf ein Gedaechtnis, das wir nicht lesen konnten, wuerde den
+            # einzigen Stand ueberschreiben, an dem sich noch feststellen
+            # laesst, was ihm fehlte. Alle schreibenden Wege gehen durch diese
+            # Stelle und brechen deshalb hier ab, bevor sie etwas ablegen.
+            raise GedaechtnisFehler(
+                "Das Aktengedächtnis dieser Akte lässt sich nicht mehr "
+                "einlesen. Die Akte selbst ist unberührt; in jur|nodes ist "
+                "nichts geschehen. Der Weg hinaus: im Gedächtnisfenster "
+                "„Gedächtnis verwerfen“, danach „Akte einlesen“ – das "
+                "Gedächtnis entsteht dann neu. Bitte diese Angabe weitergeben: "
+                f"{ausnahmekette(fehler)[:MAX_WERT_LAENGE]}"
+            ) from fehler
         if g is not None and self._nummern_sichern(g):
             self._letzter_sicherungsfehler = self._nachtragen(g, "nummern")
             if not self._letzter_sicherungsfehler:
@@ -149,8 +181,28 @@ class Gedaechtnisdienst:
         return self._speicher.auflisten() if self._speicher else []
 
     def bei_eroeffnen(self, sitzung: Sitzung) -> Sitzung:
-        """Rehydriert bekannte Texte in die neue, weiterhin flüchtige Sitzung."""
-        g = self.lesen(sitzung.akte_id)
+        """Rehydriert bekannte Texte in die neue, weiterhin flüchtige Sitzung.
+
+        **Ein Gedächtnis, das sich nicht einlesen lässt, darf das Öffnen einer
+        Akte nicht verhindern.** Dasselbe gilt seit dem 25.09.2026 für das
+        misslungene *Sichern* (siehe `_nachtragen`); für das *Lesen* war es
+        nicht gezogen, und am 13.10.2026 blieb eine Akte deshalb zu.
+
+        Das Gedächtnis ist eine Arbeitshilfe, keine Bedingung: Die Dokumente
+        stehen in jur|nodes, und die Akte lässt sich auch ohne jede Erinnerung
+        bearbeiten. Verschluckt wird der Fehler nicht - er steht als Hinweis
+        in der Oberfläche, mit dem Weg hinaus.
+
+        Geschrieben wird dann nichts: Jeder schreibende Weg liest zuerst, und
+        `_gelesen` bricht dort ab, bevor etwas abgelegt wird. Ein Gedächtnis,
+        das wir nicht lesen konnten, überschreiben wir nicht.
+        """
+        try:
+            g = self.lesen(sitzung.akte_id)
+        except GedaechtnisFehler as fehler:
+            sitzung.hinweise.append(str(fehler))
+            ereignis(_log, "gedaechtnis_nicht_gelesen", akte=sitzung.akte_id)
+            return sitzung
         if g is None:
             return sitzung
         if g.akte_id != sitzung.akte_id:
