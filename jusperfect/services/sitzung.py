@@ -287,7 +287,28 @@ class Sitzungsdienst:
             roh = self._speicher.text_lesen(sitzung.id, geladen.dokument_id)
             if roh is None:
                 raise SitzungNichtGefunden("Die Dokumenttexte sind abgelaufen. Bitte Dokumente erneut laden.")
-            seiten = [Seite.model_validate(s) for s in json.loads(roh)]
+            # Ein abgelegter Text, der sich nicht mehr lesen laesst.
+            #
+            # Der abgelaufene Text hatte seinen Satz, dieser nicht: Er kam als
+            # "Interner Fehler" heraus, und zwar bei JEDEM Fenster, denn die
+            # Passagen holt die Oberflaeche beim Oeffnen. Ein Dokument machte
+            # damit die ganze Arbeitsflaeche unbenutzbar.
+            #
+            # Still ausgelassen wird es NICHT. Die Belegpflicht beruht darauf,
+            # dass jede Aussage auf eine Passage zeigt; ein Dokument, das aus
+            # dem Material verschwindet und in der Liste bleibt, waere genau
+            # die Luecke, die dieses Programm verhindern soll. Also derselbe
+            # Weg wie beim abgelaufenen Text: erneut laden.
+            try:
+                seiten = [Seite.model_validate(s) for s in json.loads(roh)]
+            except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
+                ereignis(_log, "dokumenttext_unlesbar", sitzung=sitzung.id,
+                         dokument=geladen.dokument_id)
+                raise SitzungNichtGefunden(
+                    f"Der abgelegte Text von „{geladen.titel}“ lässt sich nicht "
+                    "mehr lesen. Bitte das Dokument im Explorer abwählen und "
+                    "erneut laden. Die Akte in jur|nodes ist unberührt."
+                ) from fehler
             dokument = Dokument(id=geladen.dokument_id, akte_id=sitzung.akte_id, titel=geladen.titel, dateiname="")
             ergebnis.extend(passagen_bilden(nr, dokument, seiten))
         return ergebnis

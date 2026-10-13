@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import secrets
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +23,7 @@ from jusperfect import __version__
 from jusperfect.config import Einstellungen, KonfigurationsFehler
 from jusperfect.domain.models import EntwurfArt, Kosten
 from jusperfect.fehlergrenze import (
-    UNBEKANNT, Fehlergrenze, protokolle_eindaemmen,
+    UNBEKANNT, Fehlergrenze, ausnahmekette, protokolle_eindaemmen,
 )
 from jusperfect.jurnodes.base import AkteNichtGefunden, DokumentNichtGefunden, JurNodesAdapter, JurNodesFehler
 from jusperfect.modellprotokoll import Befund, beim_start_pruefen
@@ -31,7 +32,7 @@ from jusperfect.providers.base import GuardrailEingriff, LLMProvider, ProviderFe
 from jusperfect.security.approval import FreigabeUngueltig, Freigabestelle, text_pruefsumme
 from jusperfect.security.berechtigungen import Berechtigungen, UnbekannterNutzer, ZugriffVerweigert
 from jusperfect.security.identitaet import Identitaet, NichtAngemeldet, aus_cognito_ereignis, aus_kopfzeile
-from jusperfect.security.protokoll import ereignis, protokoll
+from jusperfect.security.protokoll import MAX_WERT_LAENGE, ereignis, protokoll, stoerung
 from jusperfect.services.analyse import AktenZuGross, AnalyseFehler, Analysedienst
 from jusperfect.services.fundstelle import treffer_finden
 from jusperfect.services.auftraege import AuftragFehler, Auftragsdienst
@@ -712,7 +713,18 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
                     if isinstance(exc, typ):
                         yield json.dumps({"type": "fehler", "detail": str(exc)}) + "\n"
                         return
-                yield json.dumps({"type": "fehler", "detail": "Interner Fehler. Der Vorgang wurde abgebrochen."}) + "\n"
+                # Hier stand der Satz ohne Nummer und ohne Protokollzeile.
+                #
+                # Die Fehlergrenze gibt bei einem unerwarteten Fehler eine
+                # Vorgangsnummer heraus und schreibt eine Zeile dazu - aber
+                # sie sieht diesen Fehler nie: Der Strom hat begonnen, die
+                # Antwort ist unterwegs, und was hier geschieht, bleibt in
+                # dieser Schleife. Aus der Kanzlei am 13.10.2026 kam der Satz
+                # mit einer Nummer; waere er aus einer Frage gekommen, haette
+                # er nicht einmal die gehabt.
+                yield json.dumps(
+                    {"type": "fehler", "detail": _unerwartet_im_strom(exc, "frage")}
+                ) + "\n"
 
         return StreamingResponse(strom(), media_type="application/x-ndjson")
 
@@ -967,6 +979,25 @@ def _sitzung_antwort(d: Dienste, sitzung: Any) -> dict[str, Any]:
         # Umfang steht schon in der Sitzung; es wird nichts nachgelesen.
         "kostenschaetzung": _kostenschaetzung(d, sitzung),
     }
+
+
+def _unerwartet_im_strom(fehler: Exception, woher: str) -> str:
+    """Ein unerwarteter Fehler mitten im Strom - mit Nummer und Protokollzeile.
+
+    Die Fehlergrenze kann hier nicht helfen: Der Strom hat begonnen, die
+    Antwort ist unterwegs, und mehr als ein letztes Ereignis geht nicht
+    hinaus. Damit fehlte diesem Weg genau das, was den anderen
+    wiederauffindbar macht - eine Nummer und eine Zeile im Fenster.
+
+    Hinaus geht kein Wortlaut: ``str(fehler)`` kann ein Stueck der Akte
+    tragen. Die Kette traegt Typen und Codestellen.
+    """
+    nummer = secrets.token_hex(4)
+    stoerung(_log, "fehler_im_strom", woher=woher, nummer=nummer,
+             kette=ausnahmekette(fehler)[:MAX_WERT_LAENGE])
+    return (f"{UNBEKANNT} Vorgangsnummer {nummer}. Im schwarzen Fenster des "
+            f"Servers steht eine Zeile mit dieser Nummer - sie nennt die "
+            f"Ursache.")
 
 
 def _gedaechtnis_uebersicht(d: Dienste, sitzung: Any) -> dict[str, Any]:

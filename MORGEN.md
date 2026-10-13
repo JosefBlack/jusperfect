@@ -4443,3 +4443,47 @@ die **zwölfte** Wiederholung, und die zweite an diesem Tag, die
 lassen ist nicht Vorsicht, sondern das Einzige, was hier funktioniert.
 
 2105 Prüfungen grün, eine übersprungen.
+
+### 3. Dieselbe Härtung an den übrigen Wegen
+
+Beim Nachsehen fielen zwei Wege auf, die **noch weniger** hergaben als der
+Abbruch vom Vormittag.
+
+**Die Frage, mitten im Strom.** Die Fehlergrenze sieht diesen Fehler nie: Der
+Strom hat begonnen, die Antwort ist unterwegs, und was in der Schleife
+geschieht, bleibt dort. Herausging:
+
+```
+Interner Fehler. Der Vorgang wurde abgebrochen.
+```
+
+**Ohne Nummer.** Wäre der Fall aus der Kanzlei von einer Frage gekommen statt
+vom Öffnen, hätte er nicht einmal die Nummer gehabt, mit der sich etwas
+anfangen lässt. Jetzt vergibt dieser Weg seine eigene (`fehler_im_strom`,
+Stufe ERROR, mit Kette) und sagt wie überall, wohin damit.
+
+**Der abgelegte Dokumenttext.** Ein *abgelaufener* Text hatte seinen Satz
+(„Bitte Dokumente erneut laden"), ein *unlesbarer* nicht — der kam als
+„Interner Fehler" heraus, und zwar bei **jedem** Fenster: Die Passagen holt
+die Oberfläche beim Öffnen. Ein Dokument machte damit die ganze
+Arbeitsfläche unbenutzbar. Jetzt nennt der Satz das Dokument beim Titel und
+sagt, dass jur|nodes unberührt ist.
+
+**Still ausgelassen wird es nicht** — und das ist hier die eigentliche
+Entscheidung. Die Belegpflicht beruht darauf, dass jede Aussage auf eine
+Passage zeigt. Ein Dokument, das aus dem Material verschwindet und in der
+Liste stehen bleibt, wäre genau die Lücke, die dieses Programm verhindern
+soll. Beim *Aufbauen der Liste* ist Weitermachen richtig, beim *Material einer
+Antwort* nicht. Dieselbe Lehre führt hier zum umgekehrten Ergebnis, und das
+ist kein Widerspruch: Dort fehlt ein Eintrag sichtbar, hier führe eine Antwort
+in die Irre.
+
+Die nicht-strömenden Wege — Analyse, Zeitstrahl, Entwürfe — gehen durch die
+Fehlergrenze und haben seit heute Vormittag Nummer **und** Zeile; dort war
+nichts nachzutragen.
+
+`tests/test_unerwartet_bleibt_lesbar.py`, zehn Prüfungen. Darunter die
+Gegenprobe, dass ein **bekannter** Fehler seinen eigenen Satz behält und keine
+Nummer bekommt — eine Nummer an jedem Fehler wäre keine Nummer.
+
+2115 Prüfungen grün, eine übersprungen.
