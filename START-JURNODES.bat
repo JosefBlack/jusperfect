@@ -9,10 +9,14 @@ echo ==================================================
 echo    jusperfect - ECHTE AKTEN ueber die Schnittstelle
 echo ==================================================
 echo.
-echo Diese Datei arbeitet mit dem echten Aktenbestand ueber die
-echo REST-Schnittstelle von jur^|nodes. Fuer den Weg ueber das
-echo eingebundene Laufwerk ist START-KANZLEI.bat da, fuer die
-echo erfundenen Testakten START-AWS.bat.
+echo Diese Datei arbeitet mit den ECHTEN Akten der Kanzlei, ueber
+echo die Schnittstelle von jur^|nodes. Sie ist der taegliche Weg;
+echo START.bat daneben tut genau dasselbe.
+echo.
+echo Die uebrigen START-Dateien sind NICHT fuer Ihre Akten:
+echo    START-AWS.bat       erfundene Testakten, mit echter KI
+echo    START-DEMO.bat      Vorfuehrung, ohne KI und ohne Kosten
+echo    START-KANZLEI.bat   echte Akten ueber ein eingebundenes Laufwerk
 echo.
 
 REM ===================================================================
