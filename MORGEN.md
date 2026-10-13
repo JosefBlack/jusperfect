@@ -4054,3 +4054,57 @@ Das ist der erste der zehn Fälle, in dem die Reihenfolge gehalten hat. Mehr
 beweist es nicht — aber es beweist, dass sie hält.
 
 **2045 Prüfungen grün.**
+
+---
+
+## 13.10.2026 — Vorgeschichte bereinigt, und dieselbe Grenze wie am 12.10.
+
+Auf Anweisung der Kanzlei. **Zuerst gemessen, was betroffen ist**, statt
+pauschal zu bereinigen:
+
+```
+90 Commits werden durchgesehen ...
+Betroffene Commits: 1
+  720b2f3 2026-10-13  HILFE.html  (Wort [0])
+```
+
+**Ein** Commit, **eine** Datei, **ein** Wort. Die übrigen 89 sind sauber — das
+bestätigt beiläufig, dass die Bereinigung vom 12.10.2026 gehalten hat.
+
+Umgeschrieben mit `filter-branch --tree-filter` über die beiden letzten
+Commits, und die Prüfung, die dabei zählt:
+
+| Gemessen | Ergebnis |
+|---|---|
+| Baum von HEAD vorher / nachher | **identisch** — der Arbeitsstand ist derselbe |
+| Arbeitsverzeichnis | sauber, keine Abweichung |
+| Betroffene Commits danach | **0** von 90 |
+| Prüfungen | 2045 grün |
+| `refs/original`, Reflog, unerreichbare Objekte | entfernt, 0 |
+| Alte Commits lokal abrufbar | **nein** — „could not get object info" |
+
+### Und dieselbe Grenze wie am 12.10., gemessen statt angenommen
+
+Nach dem erzwungenen Hochschieben in ein frisches Verzeichnis gefetcht, beide
+alten Commits einzeln über ihre Kennung:
+
+```
+--- 054c85d…  ABRUFBAR
+--- 720b2f3…  ABRUFBAR
+```
+
+Und im abgerufenen Objekt steht der Name noch. **Ein erzwungenes Hochschieben
+entfernt bei GitHub nichts** — es verschiebt nur, wohin der Zweig zeigt. Die
+alten Objekte bleiben über ihre vierzigstellige Kennung erreichbar, bis GitHub
+selbst aufräumt.
+
+Genau das war am 12.10.2026 der Befund, und erst das **Löschen des
+Repositorys** hat damals „repository not found" ergeben. Daran hat sich nichts
+geändert; es steht hier noch einmal, weil eine Bereinigung, die man für
+vollständig hält, schlechter ist als eine, deren Grenze man kennt.
+
+**Was damit erreicht ist:** Wer den Zweig liest, den Ordner klont oder eine ZIP
+herunterlädt, bekommt den Namen nicht. **Was nicht erreicht ist:** Wer die
+vierzigstellige Kennung des alten Commits kennt, kann ihn abrufen. Das
+Repository ist privat; die Kennungen stehen in diesem Gespräch und sonst
+nirgends.
