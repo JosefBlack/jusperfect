@@ -117,13 +117,29 @@ KOPF = """\
 """
 
 
-def schreiben(ort: Path, neue: list[str]) -> tuple[Path, int]:
+def schreiben(ort: Path, neue: list[str],
+              ersetzen: bool = False) -> tuple[Path, int]:
     """Die Liste schreiben - Kopf, dann je Wort eine Zeile.
 
     Vorhandene Woerter bleiben; doppelte werden einmal geschrieben. Gibt den
     Ort und die Zahl der Woerter zurueck.
+
+    ``ersetzen`` wirft das Vorhandene weg und schreibt nur die neuen Woerter.
+
+    **Aus der Kanzlei am 13.10.2026: „Ich habe jetzt die falschen Woerter
+    eingetragen, kann ich das aendern?"** Konnte man nicht. Dieses Programm
+    kannte nur Hinzufuegen - und ein Wort, das einmal drinstand, blieb drin.
+
+    Der Ausweg war, die Datei im Explorer zu loeschen und neu anzufangen. Das
+    geht, aber es ist kein Ausweg, den man jemandem anbieten sollte: Ein
+    Werkzeug, das seinen eigenen Fehler nicht zuruecknehmen kann, schickt den
+    Benutzer an Stellen, an denen er mehr kaputt machen kann als die eine
+    Zeile - und der naheliegende Griff daneben, die Datei im Notepad zu
+    berichtigen, speichert sie womoeglich in der falschen Zeichenkodierung.
+    Dann steht dort Buchstabensalat, die Suche findet nichts, und der
+    Prueflauf ist gruen, obwohl er blind ist.
     """
-    bestand = list(woerter(ort)) if ort.is_file() else []
+    bestand = [] if ersetzen else (list(woerter(ort)) if ort.is_file() else [])
     for wort in neue:
         wort = wort.strip()
         if wort and wort not in bestand:
@@ -160,6 +176,7 @@ def main() -> int:
     print("  daneben und nicht darin.")
     print()
 
+    ersetzen = False
     vorhanden = finden()
     if vorhanden is not None:
         try:
@@ -173,10 +190,34 @@ def main() -> int:
         _sagen(" ", f"Ort: {vorhanden}")
         for wort in bestand:
             _sagen(" ", f"     {verdeckt(wort)}")
-        print()
-        print("  Was jetzt eingegeben wird, kommt dazu. Doppeltes wird einmal")
-        print("  geschrieben. Soll nichts dazukommen: einfach Eingabetaste.")
         ziel = vorhanden
+        print()
+        print("  [1] Ergaenzen - was jetzt eingegeben wird, kommt dazu.")
+        print("  [2] Neu anfangen - die Liste oben wird weggeworfen.")
+        print()
+        print("      [2] ist der Weg, wenn ein Wort falsch eingetippt wurde.")
+        print("      Ein Wort einzeln herausnehmen kann dieses Programm nicht;")
+        print("      bei vier Woertern ist Neueingeben schneller als jede")
+        print("      Zeilenverwaltung.")
+        print()
+        try:
+            wahl = input("  1 oder 2 (Eingabetaste = 1): ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            _sagen("!", "Abgebrochen. Es wurde nichts geaendert.")
+            return 1
+        if wahl == "2":
+            ersetzen = True
+            print()
+            _sagen("!", f"Die {len(bestand)} vorhandenen Woerter werden "
+                        f"weggeworfen. Geben Sie ALLE ein, die gelten sollen.")
+        elif wahl in ("", "1"):
+            _sagen(" ", "Ergaenzen. Doppeltes wird einmal geschrieben.")
+        else:
+            print()
+            _sagen("!", f"\u201e{wahl[:20]}\u201c ist weder 1 noch 2. "
+                        f"Es wurde nichts geaendert.")
+            return 1
     else:
         ziel = orte()[0]
         _sagen(" ", "Es gibt noch keine Liste. Sie wird angelegt unter:")
@@ -220,6 +261,12 @@ def main() -> int:
         _sagen("✓", f"     uebernommen: {verdeckt(eingabe)}")
 
     if not neue:
+        if ersetzen:
+            # Nicht stillschweigend alles wegwerfen: Wer "neu anfangen" waehlt
+            # und dann nichts eingibt, hat sich vertippt oder es sich anders
+            # ueberlegt. Eine leere Liste prueft nichts.
+            _sagen("!", "Kein Wort eingegeben - die Liste bleibt unveraendert.")
+            return 1
         if vorhanden is not None:
             _sagen(" ", "Nichts dazugekommen. Die Liste bleibt, wie sie war.")
             return 0
@@ -228,7 +275,7 @@ def main() -> int:
 
     print()
     try:
-        ort, anzahl = schreiben(ziel, neue)
+        ort, anzahl = schreiben(ziel, neue, ersetzen=ersetzen)
     except OSError as fehler:
         _sagen("✗", f"Die Liste liess sich nicht schreiben: {fehler}")
         _sagen(" ", f"Versucht wurde: {ziel}")

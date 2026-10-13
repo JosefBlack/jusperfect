@@ -3936,3 +3936,62 @@ beschreibt, schreibt ihn hin.* Jetzt ist es zusammengesetzt.
 
 **2037 Prüfungen grün**, eine übersprungen. Nachgemessen über alle 304
 Dateien: kein gesperrter Name, kein echtes Aktenzeichen.
+
+---
+
+## 13.10.2026 — „Ich habe jetzt die falschen Wörter eingetragen, kann ich das ändern?"
+
+Konnte man nicht. Das Anlegeprogramm vom Nachmittag kannte **nur Hinzufügen** —
+ein Wort, das einmal drinstand, blieb drin.
+
+Mein erster Rat war: Datei im Explorer löschen, neu anfangen. Das geht. Aber es
+ist kein Rat, den man jemandem geben sollte:
+
+> Ein Werkzeug, das seinen eigenen Fehler nicht zurücknehmen kann, schickt den
+> Benutzer an Stellen, an denen er mehr kaputt machen kann als die eine Zeile.
+
+Und der naheliegende Griff daneben — die Datei im Notepad berichtigen —
+speichert sie womöglich in der falschen Zeichenkodierung. Dann steht dort
+Buchstabensalat statt des Namens, die Suche findet nichts, und **der Prüflauf
+ist grün, obwohl er blind ist.** Genau die Falle, derer wegen das Anlegen
+überhaupt programmiert wurde.
+
+Jetzt fragt das Programm, wenn schon eine Liste da ist:
+
+```
+  [1] Ergaenzen - was jetzt eingegeben wird, kommt dazu.
+  [2] Neu anfangen - die Liste oben wird weggeworfen.
+```
+
+Eingabetaste bleibt **[1]** — die Taste, die man im Zweifel drückt, darf nicht
+die Liste leeren. Eine andere Eingabe als 1 oder 2 ändert **nichts**: lieber
+nichts tun als raten, was gemeint war. Und wer [2] wählt und dann nichts
+eingibt, bekommt seine alte Liste zurück, nicht eine leere — eine leere Liste
+prüft nichts.
+
+### Dabei die erste Messung mit den echten vier Wörtern
+
+Beim Nachspielen lag die richtige Liste einen Moment in diesem Behälter. Damit
+ließ sich erstmals messen, was bisher nur behauptet war:
+
+```
+     303 Dateien angesehen - versionierte und neue.
+  ✓  Kein echtes Aktenzeichen (Muster D-nnn-jjjj / T-nnn-jjjj).
+  ✓  Sperrliste gefunden: 4 Wort/Woerter.
+  ✓  Kein gesperrter Name im Programmordner.
+     Beides sauber.
+```
+
+Die Liste ist danach aus dem Behälter gelöscht; sie gehört auf die Rechner der
+Kanzlei und nirgends sonst.
+
+### Und eine Zahl, die ich geschätzt statt gezählt habe
+
+Ich habe der Kanzlei die verdeckten Anzeigen der vier Wörter genannt, um sie
+vergleichen zu können — mit **falschen Längen**: `(7)` und `(8)`, richtig sind
+`(6)` und `(7)`. Wer nach meiner Tabelle sucht, findet seine eigenen Einträge
+nicht wieder und hält sie für fehlend. Dasselbe Muster wie bei der 20-MB-Grenze
+heute früh: **geschätzt, wo zu zählen war.**
+
+**2043 Prüfungen grün.** Gegenprobe: 6 der neuen fallen gegen den vorigen
+Stand durch.

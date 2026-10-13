@@ -173,9 +173,14 @@ class TestDerGefuehrteWeg:
     def _lauf(self, eingaben: list[str], monkeypatch, tmp_path: Path):
         monkeypatch.setattr("jusperfect.sperrliste.orte",
                             lambda: (tmp_path / SPERRLISTE_NAME,))
-        folge = iter(eingaben + [""])
-        monkeypatch.setattr("builtins.input", lambda *a: next(folge))
+        # Nach den vorgegebenen Eingaben immer eine leere Zeile, nie eine
+        # StopIteration: Seit dem 13.10.2026 fragt `main()` bei vorhandener
+        # Liste zuerst nach Ergaenzen oder Neuanfang, und ein Helfer, der an
+        # einer Frage mehr zerbricht, prueft das Programm nicht mehr.
+        folge = iter(eingaben)
+        monkeypatch.setattr("builtins.input", lambda *a: next(folge, ""))
         return main()
+
 
     def test_er_legt_die_liste_an(self, monkeypatch, tmp_path, capsys) -> None:
         assert self._lauf(["Vellinghausen", "Krämer"], monkeypatch, tmp_path) == 0
@@ -231,6 +236,85 @@ class TestDerGefuehrteWeg:
         ausgabe = capsys.readouterr().out
         assert "schon eine Liste mit 1 Wort" in ausgabe
         assert "Vellinghausen" not in ausgabe
+
+
+class TestEinFalschEingetipptesWort:
+    """Aus der Kanzlei am 13.10.2026: „Ich habe jetzt die falschen Woerter
+    eingetragen, kann ich das aendern?"
+
+    **Konnte man nicht.** Das Programm kannte nur Hinzufügen — ein Wort, das
+    einmal drinstand, blieb drin. Der Ausweg war, die Datei im Explorer zu
+    löschen und neu anzufangen.
+
+    Das geht, aber es ist kein Ausweg, den man jemandem anbieten sollte: Ein
+    Werkzeug, das seinen eigenen Fehler nicht zurücknehmen kann, schickt den
+    Benutzer an Stellen, an denen er mehr kaputt machen kann als die eine
+    Zeile. Und der naheliegende Griff daneben — die Datei im Notepad
+    berichtigen — speichert sie womöglich in der falschen Zeichenkodierung.
+    Dann steht dort Buchstabensalat, die Suche findet nichts, und **der
+    Prüflauf ist grün, obwohl er blind ist.**
+    """
+
+    def _lauf(self, eingaben: list[str], monkeypatch, tmp_path: Path):
+        monkeypatch.setattr("jusperfect.sperrliste.orte",
+                            lambda: (tmp_path / SPERRLISTE_NAME,))
+        # Nach den vorgegebenen Eingaben immer eine leere Zeile, nie eine
+        # StopIteration: Seit dem 13.10.2026 fragt `main()` bei vorhandener
+        # Liste zuerst nach Ergaenzen oder Neuanfang, und ein Helfer, der an
+        # einer Frage mehr zerbricht, prueft das Programm nicht mehr.
+        folge = iter(eingaben)
+        monkeypatch.setattr("builtins.input", lambda *a: next(folge, ""))
+        return main()
+
+    def test_neu_anfangen_wirft_das_falsche_weg(self, monkeypatch, tmp_path,
+                                                capsys) -> None:
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, ["Falschgetippt", "AuchFalsch"])
+        assert self._lauf(["2", "Vellinghausen"], monkeypatch, tmp_path) == 0
+        assert woerter(datei) == ("Vellinghausen",)
+
+    def test_ergaenzen_bleibt_die_vorgabe(self, monkeypatch, tmp_path,
+                                          capsys) -> None:
+        """Eingabetaste darf nicht die Liste leeren."""
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, ["Vellinghausen"])
+        assert self._lauf(["", "Krämer"], monkeypatch, tmp_path) == 0
+        assert woerter(datei) == ("Vellinghausen", "Krämer")
+
+    def test_eine_andere_eingabe_aendert_nichts(self, monkeypatch, tmp_path,
+                                                capsys) -> None:
+        """Lieber nichts tun als raten, was gemeint war."""
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, ["Vellinghausen"])
+        assert self._lauf(["7"], monkeypatch, tmp_path) == 1
+        assert woerter(datei) == ("Vellinghausen",)
+        assert "weder 1 noch 2" in capsys.readouterr().out
+
+    def test_neu_anfangen_ohne_eingabe_leert_nicht(self, monkeypatch, tmp_path,
+                                                   capsys) -> None:
+        """Wer „neu anfangen" wählt und dann nichts eingibt, hat sich vertippt
+        oder es sich anders überlegt. Eine leere Liste prüft nichts."""
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, ["Vellinghausen"])
+        assert self._lauf(["2"], monkeypatch, tmp_path) == 1
+        assert woerter(datei) == ("Vellinghausen",)
+
+    def test_es_sagt_vorher_dass_es_wegwirft(self, monkeypatch, tmp_path,
+                                             capsys) -> None:
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, ["Vellinghausen", "Krämer"])
+        self._lauf(["2", "Schulz"], monkeypatch, tmp_path)
+        ausgabe = capsys.readouterr().out
+        assert "2 vorhandenen Woerter werden" in ausgabe
+        assert "Neu anfangen" in ausgabe
+
+    def test_schreiben_mit_ersetzen_liest_das_alte_nicht(self, tmp_path) -> None:
+        """Die Funktion darunter, unmittelbar gemessen."""
+        datei = tmp_path / SPERRLISTE_NAME
+        schreiben(datei, ["Vellinghausen"])
+        _, anzahl = schreiben(datei, ["Krämer"], ersetzen=True)
+        assert anzahl == 1
+        assert woerter(datei) == ("Krämer",)
 
 
 class TestNachsehenOhneKosten:
