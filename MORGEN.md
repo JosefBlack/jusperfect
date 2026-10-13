@@ -3627,3 +3627,101 @@ weiter geführt.
 | Kanzlei | die Sperrliste auf beiden Rechnern anlegen |
 | Programm | N06, N07, N09, N10 — die vier nachrangigen Befunde |
 | Programm | die vier veralteten Stellen im Prüfbogen |
+
+---
+
+## 13.10.2026 — N06, N07, N09 und N10: die vier nachrangigen Befunde
+
+Damit sind alle zwölf Befunde der dritten Zweitprüfung abgearbeitet. Bei
+dreien von vier derselbe Satz: **Eine Zusage, die an einer örtlichen Zählung,
+an einem Quelltext oder an der Sorgfalt des Aufrufers hängt, hält nicht.**
+
+### N06 — die 100-MB-Grenze war keine Obergrenze
+
+`verbraucht` war eine **örtliche** Zählung und begann bei jedem Listenaufbau
+wieder bei null. Wer die Liste zweimal aufbaute, holte zweimal 100 MB. Die
+letzte Mail wurde voll übernommen, auch wenn sie den Rest überschritt — bei 20
+MB je Mail konnte die Akte um bis zu 20 MB über ihr Gesamtmaß hinausgehen.
+
+Am teuersten war das Dritte: `dokument_laden()` holte eine wegen des Budgets
+ausgelassene Mail **ohne jede Prüfung** nach.
+
+> Die Warnung in ihrer Zeile und die tatsächliche Verfügbarkeit widersprachen
+> einander. Eine Warnung, die nicht stimmt, ist schlimmer als keine.
+
+Jetzt ein **Byte-Konto je Akte** über alle Aufrufe. Gepuffertes zählt nicht
+erneut — es wurde bezahlt, als es geholt wurde. Beim Strömen gilt die kleinere
+der beiden Grenzen, und der Grund sagt, welche gegriffen hat.
+
+**Beim Bauen aufgefallen:** Ohne ein Gedächtnis für die Abgewiesenen fragte
+jeder neue Listenaufbau dieselben Mails wieder an. Die Bytes blieben begrenzt
+— der Abbruch geschieht an der Kopfzeile —, aber es waren Aufrufe ohne
+Aussicht. *Wer einmal nicht hineinpasst, passt nicht hinein.*
+
+### N07 — ein fehlender Dateiordner nahm die E-Akte mit
+
+Fehlte der Akte die `fileFolderId`, stand dort `return []`. Damit war auch die
+**E-Akte** weg, obwohl sie an einem völlig anderen Weg hängt — `POST
+/correspondence/search` mit `recordIdentifier`, kein Ordner.
+
+> Zwei unabhängige Lesewege dürfen nicht aneinander hängen. Und eine leere
+> Liste ist die schlechteste aller Antworten: Sie sieht aus wie „die Akte ist
+> leer" und heißt „ich habe nicht nachgesehen".
+
+### N09 — das Postfachverbot hing am Quelltext
+
+Es war allein durch einen Test über die **Python-Dateien** gesichert. Die
+Pfade sind aber einstellbar — das ist der Zweck von
+`JUSPERFECT_JURNODES_ENDPUNKTE`. Am alten Stand gemessen:
+
+```
+GESENDET an: ['/bea/postbox/search']
+```
+
+Ein reiner Postfachpfad als Aktensuche eingetragen, und der Aufruf ging
+hinaus. Der Quelltexttest blieb grün.
+
+Jetzt prüft `Endpunkte` selbst — beim Einlesen der Datei, bei der Vorgabe und
+beim Bauen des Adapters, also an dem Satz Pfade, mit dem **wirklich**
+gesprochen wird. Und nicht nur die drei bekannten Pfade, sondern **jeder**, in
+dem `postbox` vorkommt: Welche Pfade der Hersteller morgen dazunimmt, weiß
+hier niemand, und die Hausregel lautet nicht „nicht diese drei", sondern
+**kein Postfachzugriff**.
+
+Dazu die Prüfung, die der Prüfer ausdrücklich verlangt hat — *„Eine Zusage
+braucht einen Test am tatsächlichen Ausgang"*: Der echte Adapter läuft gegen
+einen Ersatz-Transport, der jeden Pfad mitschreibt, und die Pfade müssen in
+einer Positivliste stehen. Ein neuer Aufruf fällt dort auf.
+
+### N10 — der Mailpuffer überlebte den Sitzungsschluss
+
+Der Adapter hielt zerlegte Mailtexte und Anlagen als Python-Objekte außerhalb
+des Sitzungsspeichers — auch die von Mails, die beim Aufbau der Liste geholt
+und **nie ausgewählt** wurden. Weder der Sitzungsschluss noch
+`_puffer_leeren()` noch `schliessen()` entfernten sie.
+
+Jetzt hat der Puffer **drei Enden**: den Sitzungsschluss, das Vergessen eines
+einzelnen Dokuments und eine Frist von einer Stunde. Der Griff dazu steht im
+**Vertrag** der Adapter und nicht in einem von ihnen: Wer Inhalt puffert, muss
+ihn hergeben können. Die beiden Adapter ohne eigenen Puffer sagen
+ausdrücklich, dass sie keinen haben — sonst wäre beim nächsten nicht zu
+erkennen, ob der Puffer vergessen wurde oder keiner da ist.
+
+**Ausdrücklich nicht behauptet:** `clear()` ist logisches Entfernen, keine
+garantierte Nullung von Python-Speicher. Prozessspeicher, Auslagerungsdatei
+und Absturzabbild sind davon unberührt. Das gehört in die technische
+Datenschutzbeschreibung und nicht in eine Zusage im Code.
+
+### Stand
+
+**1988 Prüfungen grün, eine übersprungen.** Gegenprobe gegen den vorigen
+Stand: 13 der 14 neuen Prüfungen zu N06/N10 fallen durch, alle 5 zu N07,
+7 zu N09.
+
+| Befund | Stand |
+|---|---|
+| N01 bis N12 | **alle behoben** |
+| N05 | fällt mit dem Umbau zu N03 weg, ohne eine Zeile dafür |
+| `[KANZLEI 19]`, `[KANZLEI 20]` | bei der Kanzlei |
+| Sperrliste auf beiden Rechnern | bei der Kanzlei |
+| die vier veralteten Stellen im Prüfbogen | offen |
