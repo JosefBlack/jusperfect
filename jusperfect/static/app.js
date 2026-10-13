@@ -2071,6 +2071,20 @@ function hinweisImThread(text) {
 
 function gedaechtnisExplorerOeffnen() {
   gedAuswahl = new Set();
+  // Erst das Suchfeld leeren, dann zeichnen.
+  //
+  // Aus der Kanzlei am 13.10.2026: „das Programm hat aber dann nur 2
+  // Dokumente eingelesen, und zwar die, die ich vorher ausgewaehlt hatte."
+  //
+  // Ein stehengebliebener Filter ist hier teurer als anderswo: Die Liste
+  // zeigt dann vier von hundert Dokumenten, „alle fehlenden" hakt genau
+  // diese vier an, und der Bearbeiter sieht nicht, warum. Er bezahlt das
+  // Einlesen und bekommt vier Dokumente.
+  //
+  // Im Dokumentfenster ist das seit dem 12.10.2026 berichtigt - mit
+  // demselben Satz im Kommentar. Hier stand es nicht: Zwei Fenster, die
+  // dasselbe tun, und die Verbesserung nur im einen.
+  const suche = $("ged-suche"); if (suche) suche.value = "";
   gedInhaltSchalterLaden();
   gedExplorerZeichnen();
   $("ged-dialog").showModal();
@@ -2530,15 +2544,46 @@ async function gedaechtnisFrageVergessen(f) {
   melden("Die Frage ist nicht mehr im Aktengedächtnis.");
 }
 
+/** Die angehakten Dokumente holen - mit dem Balken, den es laengst gibt.
+ *
+ * Aus der Kanzlei am 13.10.2026: „Bei Auswahl dauert es lange, bis eingelesen
+ * wird. Es waere gut, wenn hier angezeigt wird, dass das Programm arbeitet."
+ *
+ * Hier stand EIN Aufruf ueber alle angehakten Dokumente. Der holt jede Datei,
+ * schickt jeden Scan durch die Texterkennung und schreibt alles ins
+ * Gedaechtnis - bei einer ganzen Akte Minuten, und auf dem Schirm geschah
+ * nichts. Der Dialog war zu, und es gab keinen Knopf mehr, an dem ein
+ * Wartekreis haette haengen koennen.
+ *
+ * **Der Weg dafuer war schon da.** `dokumenteInPortionenLesen` ist seit dem
+ * 29.09.2026 genau das: Portion fuer Portion, mit Balken, Zeitschaetzung und
+ * „Anhalten". Das Dokumentfenster nimmt ihn; dieses Fenster tat es nicht.
+ *
+ * > Eine zweite Stelle, die dasselbe tut, hat die Verbesserung der ersten
+ * > nicht. Das ist kein neuer Satz - er steht seit dem 25.09.2026 in
+ * > `tests/test_starter.py`, nur fuer Startdateien.
+ *
+ * Gemeldet wird danach, was WIRKLICH ankam: Hier stand die Zahl der
+ * Angehakten, auch wenn ein Scan unlesbar war und gar nicht hineinkam.
+ */
 async function gedaechtnisAufnehmen() {
   if (!gedAuswahl.size) { melden("Nichts ausgewählt."); return; }
   const ids = [...gedAuswahl];
-  sitzung = await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/dokumente`, { dokument_ids: ids });
+  const vorher = ((sitzung.gedaechtnis || {}).eintraege || []).length;
+  await dokumenteInPortionenLesen(ids);
   gedAuswahl = new Set();
   await passagenLaden();
   gedaechtnisFensterZeigen();
   chronologieZeigen();
-  melden(`${ids.length} Dokument(e) ins Gedächtnis aufgenommen.`);
+  ladeStatus();
+  schaetzungZeigen(sitzung.kostenschaetzung);
+  const dazu = Math.max(0, ((sitzung.gedaechtnis || {}).eintraege || []).length - vorher);
+  melden(dazu === ids.length
+    ? `${dazu} Dokument(e) ins Gedächtnis aufgenommen.`
+    : `${dazu} von ${ids.length} Dokument(en) ins Gedächtnis aufgenommen.`);
+  // Was nicht hineinkam, hat einen Grund, und der steht in den Hinweisen der
+  // Sitzung - nicht in einer Meldung, die nach drei Sekunden weg ist.
+  if (dazu !== ids.length) hinweiseZeigen(sitzung.sitzung.hinweise || []);
 }
 
 async function chronologieAktualisieren() {

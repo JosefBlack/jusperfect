@@ -5037,3 +5037,68 @@ darunter die, dass der neue Zweig **vor** dem alten Satz greift. Genau daran
 hing es.
 
 2175 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026 — das Fenster „Auswahl" hatte zwei Verbesserungen nicht, die es gibt
+
+Zwei Meldungen aus der Kanzlei, kurz nacheinander:
+
+> „Bei Auswahl dauert es lange, bis eingelesen wird. Es wäre gut, wenn hier
+> angezeigt wird, dass das Programm arbeitet."
+
+> „Nach einiger Zeit geht doch das Akte einlesen — das Programm hat aber dann
+> nur 2 Dokumente eingelesen, und zwar die, die ich vorher ausgewählt hatte."
+
+Beides führt auf dasselbe zurück: **Es gibt zwei Fenster, die Dokumente in die
+Akte holen, und das eine hat die Verbesserungen des anderen nicht bekommen.**
+
+### 1. Kein Zeichen, dass gearbeitet wird
+
+Hinter „Ausgewählte aufnehmen" stand **ein** Aufruf über alle angehakten
+Dokumente. Der holt jede Datei, schickt jeden Scan durch die Texterkennung und
+schreibt alles ins Gedächtnis — bei einer ganzen Akte Minuten. Der Dialog war
+zu, es gab keinen Knopf mehr, an dem ein Wartekreis hätte hängen können, und
+auf dem Schirm geschah nichts.
+
+`dokumenteInPortionenLesen` tut genau das Richtige — Portion für Portion, mit
+Balken, Zeitschätzung und „Anhalten" — **seit dem 29.09.2026**. Das
+Dokumentfenster nimmt diesen Weg; das Gedächtnisfenster tat es nicht.
+
+### 2. Der stehengebliebene Filter
+
+Das Suchfeld des Fensters wurde beim Öffnen **nicht geleert**. Steht dort noch
+ein Wort von vorhin, zeigt die Liste vier von hundert Dokumenten, „alle
+fehlenden" hakt genau diese vier an — und der Bearbeiter sieht nicht, warum.
+Er bezahlt das Einlesen und bekommt vier Dokumente.
+
+Im Dokumentfenster ist genau das **seit dem 12.10.2026 berichtigt**, mit
+diesem Kommentar darüber:
+
+> „Erst leeren, dann zeichnen. Umgekehrt zeigte der Explorer die Liste noch
+> nach dem Filter der VORIGEN Akte, waehrend das Suchfeld daneben schon leer
+> aussah."
+
+Hier stand es nicht.
+
+> Dieselbe Lehre zweimal an einem Fenster: Eine zweite Stelle, die dasselbe
+> tut, hat die Verbesserung der ersten nicht. Für Startdateien steht das seit
+> dem 25.09.2026 als Prüfung im Bestand — für Fenster gab es sie nicht.
+
+### 3. Und die Meldung zählte das Falsche
+
+„5 Dokument(e) ins Gedächtnis aufgenommen" war die Zahl der **angehakten** —
+auch wenn ein Scan unlesbar war und gar nicht hineinkam. Jetzt wird vorher und
+nachher verglichen; gehen die Zahlen auseinander, steht beides da und die
+Hinweise der Sitzung werden gezeigt. Dort steht der Grund.
+
+**Ob das die Erklärung für die zwei Dokumente ist, ist nicht gemessen.** Der
+Filter passt zur Beschreibung („die, die ich vorher ausgewählt hatte"), aber
+es kann auch an übersprungenen Dokumenten liegen — unlesbare Scans, Mails über
+dem Gesamtmaß. Das sagt der nächste Lauf: Die Zahlen gehen dann auseinander,
+und die Hinweise nennen den Grund.
+
+`tests/test_auswahl_zeigt_dass_sie_arbeitet.py`, zwölf Prüfungen — darunter
+die, dass **beide** Fenster denselben Leseweg nehmen.
+
+2187 Prüfungen grün, eine übersprungen.
