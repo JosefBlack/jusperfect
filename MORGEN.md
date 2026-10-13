@@ -5102,3 +5102,40 @@ und die Hinweise nennen den Grund.
 die, dass **beide** Fenster denselben Leseweg nehmen.
 
 2187 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026, abends — die fremden Dokumente sind weg
+
+Aus der Kanzlei, nach dem vollständigen Neueinlesen:
+
+> „Die Akten 2022 und 2023 sind nicht mehr vorhanden."
+
+**Damit ist der schwerste Fund des Tages erledigt.** Das Gedächtnis dieser
+Akte stammte aus der Zeit vor dem 05.10.2026, als das Programm den falschen
+Ordnerbaum las; die siebzehn Dokumente aus 2022/2023 gehörten zu einem
+fremden Mandat und lagen seitdem im Gedächtnis dieser Akte — also auch im
+AWS-Eimer. Verworfen, neu eingelesen, nachgesehen: nur noch 2026.
+
+Der Weg dahin, zum Mitschreiben, weil er aus lauter eigenen Fehlern bestand:
+
+| Was im Weg stand | Woran es lag |
+|---|---|
+| Die Akte ging nicht auf | `field()` in einer Klasse, die keine Dataclass ist |
+| Die E-Akte fehlte ganz | Die erste Seitenanfrage nannte ihre Seite nicht |
+| Das Verwerfen schien zu hängen | Ein Aufruf je Dokument statt einem |
+| „Akte einlesen" sagte „schon eingelesen" | Zwei Bedeutungen von „nichts offen", ein Satz |
+| Das Aufnehmen zeigte nichts an | Der Fortschrittsbalken war da, aber nur im anderen Fenster |
+
+Fünf Hindernisse, alle von mir, bis die eine richtige Frage beantwortet war.
+
+### Und was die Kanzlei danach gesagt hat
+
+> „Der Chat steht im Vordergrund. Der Rest ist nur Hilfsmittel."
+
+Das ist der Satz, an dem sich die Oberfläche künftig messen lassen muss. Als
+Erstes sind die fünf angezeigten Fragen gefallen: Gespeichert waren hundert.
+
+Offen und ausdrücklich **nicht** entschieden: die beiden Fenster „Arbeitsakte"
+und „Auswahl". Die Kanzlei dazu: *„Ich finde die Auswahl rechts und links als
+Vergleich eigentlich nicht schlecht."* Der Zweispalter bleibt also.
