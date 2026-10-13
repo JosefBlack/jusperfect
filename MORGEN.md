@@ -4921,3 +4921,70 @@ Eine Prüfung, die nur „die Arbeitsakte ist leer" misst, wäre auch vorher gr�
 gewesen — sie war es ja.
 
 2163 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026 — `START-JUSPERFECT.bat`, und die Verknüpfung zeigte auf die falschen Akten
+
+Aus der Kanzlei: „Gedächtnis verworfen, Akte eingelesen — keine Dokumente von
+2022 mehr."
+
+**Minuten später berichtigt, von der Kanzlei selbst:** „Was ich oben geschrieben
+habe, stimmt nicht - ich habe alle Haken gesetzt und das Programm schreibt,
+dass es einliest." Das Einlesen läuft noch; der Befund steht also **aus**.
+
+Festgehalten ist bisher nur: Das Gedächtnis ist verworfen, und das Verwerfen
+hat gewirkt — es liegt nicht mehr im AWS-Eimer. Ob die neu eingelesene Akte
+frei von den fremden Dokumenten ist, sagt erst die Liste nach dem Lauf.
+
+> Beinahe hätte hier „erledigt" gestanden, weil ich eine Zwischenmeldung für
+> ein Ergebnis genommen habe. Dasselbe Muster wie dreimal an diesem Tag, nur
+> andersherum: Diesmal war es eine gute Nachricht, die ich nicht nachgeprüft
+> hätte.
+
+Dazu: „bitte benenne den startbutton start-jusperfect und erstelle auch die
+Möglichkeit einer Verknüpfung."
+
+### Umbenannt
+
+`START.bat` → **`START-JUSPERFECT.bat`**. „START" unterscheidet in einem
+Ordner voller START-Dateien nichts; der Programmname tut es.
+
+### Und dabei fiel etwas Schlimmeres auf
+
+Die Verknüpfung gab es längst — `VERKNUEPFUNG.bat` legt zwei auf dem
+Schreibtisch an. Nur zeigte die erste, schlicht **„jusperfect"** genannte, auf
+**`START-AWS.bat`**: auf die **erfundenen Testakten**.
+
+Wer sie vom Schreibtisch nahm — und sie ist das Erste, was man dort findet —,
+arbeitete mit Akten, die es nicht gibt. Gemerkt hätte man es erst an den Namen
+darin.
+
+Und es gab eine Prüfung dafür:
+
+```python
+def test_beide_betriebsarten_bekommen_eine(self):
+    self.assertIn("START-AWS.bat", t)
+    self.assertIn("START-DEMO.bat", t)
+```
+
+> Sie fragte, **ob** eine Datei genannt wird, nicht **welche**. Grün war sie
+> deshalb von Anfang an. Das ist dieselbe Form wie beim erfundenen Server, der
+> das Gegenteil des echten tat: Eine Prüfung, die das Falsche misst, ist
+> schlechter als keine — sie macht ruhig.
+
+Jetzt führt „jusperfect" zu `START-JUSPERFECT.bat` und damit zu den echten
+Akten; „jusperfect (Demo, ohne KI)" bleibt daneben. Die Beschreibung der
+ersten sagt es ausdrücklich: *die ECHTEN Akten der Kanzlei, Kosten je Akte*.
+
+**Wer die Verknüpfung vor dem 13.10.2026 angelegt hat, muss
+`VERKNUEPFUNG.bat` einmal erneut ausführen** — sonst zeigt sein Symbol weiter
+auf die Testakten. Das steht jetzt auch in `HILFE.html`.
+
+Nebenbei entfernt: ein `|` in der Beschreibung der Verknüpfung. Sie geht durch
+cmd **und** durch PowerShell, und eine der beiden stolpert darüber sicher.
+
+`tests/test_start_einstieg.py` jetzt fünfzehn Prüfungen, darunter fünf über
+die Verknüpfung selbst — sie fragen nach dem Ziel, nicht nach dem Vorhandensein.
+
+2168 Prüfungen grün, eine übersprungen.

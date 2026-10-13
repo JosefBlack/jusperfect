@@ -29,8 +29,15 @@ class Verknuepfung(unittest.TestCase):
         self.assertEqual(roh.count(b"\n"), roh.count(b"\r\n"))
 
     def test_beide_betriebsarten_bekommen_eine(self):
+        """Berichtigt am 13.10.2026: die erste fuehrt zu den ECHTEN Akten.
+
+        Hier stand ``START-AWS.bat`` - und die Verknuepfung hiess dabei
+        schlicht "jusperfect". Wer sie vom Schreibtisch nahm, arbeitete mit
+        erfundenen Akten und merkte es erst an den Namen darin. Die Pruefung
+        war gruen: Sie fragte, ob eine Datei genannt wird, nicht welche.
+        """
         t = SKRIPT.read_text(encoding="utf-8")
-        self.assertIn("START-AWS.bat", t)
+        self.assertIn("START-JUSPERFECT.bat", t)
         self.assertIn("START-DEMO.bat", t)
 
     def test_der_name_sagt_was_kostet(self):
@@ -87,7 +94,7 @@ class Verknuepfung(unittest.TestCase):
     def test_es_prueft_den_ordner(self):
         """Im falschen Ordner ausgeführt, legt es keine toten Verknüpfungen an."""
         t = SKRIPT.read_text(encoding="utf-8")
-        self.assertIn('if exist "%ORDNER%\\START-AWS.bat" goto gefunden', t)
+        self.assertIn('if exist "%ORDNER%\\START-JUSPERFECT.bat" goto gefunden', t)
 
 
 class Symbol(unittest.TestCase):

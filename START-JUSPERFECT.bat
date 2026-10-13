@@ -1,6 +1,6 @@
 @echo off
 REM ====================================================================
-REM   START.bat - der Weg zu den ECHTEN Akten der Kanzlei.
+REM   START-JUSPERFECT.bat - der Weg zu den ECHTEN Akten der Kanzlei.
 REM ====================================================================
 REM
 REM Aus der Kanzlei am 13.10.2026: "Warum heisst die Startdatei
@@ -18,6 +18,11 @@ REM Entschieden wurde am 13.10.2026, die Namen zu LASSEN - eine
 REM Verknuepfung auf dem Schreibtisch, ein zweiter Rechner und rund 240
 REM Stellen in den Unterlagen haengen daran - und diese Datei
 REM danebenzulegen. Wer nicht weiss, welche er nehmen soll, nimmt diese.
+REM
+REM Am 13.10.2026 aus der Kanzlei nachgereicht: "bitte benenne den
+REM startbutton start-jusperfect". Vorher hiess sie START.bat - ein Name,
+REM der in einem Ordner voller START-Dateien nichts unterscheidet. Der
+REM Programmname tut es.
 REM
 REM Hier stehen KEINE Einstellungen. Eine zweite Stelle, an der
 REM dieselben Werte stuenden, waere genau der Fehler, den die Pruefungen

@@ -11,7 +11,7 @@ echo ==================================================
 echo.
 echo Diese Datei arbeitet mit den ECHTEN Akten der Kanzlei, ueber
 echo die Schnittstelle von jur^|nodes. Sie ist der taegliche Weg;
-echo START.bat daneben tut genau dasselbe.
+echo START-JUSPERFECT.bat daneben tut genau dasselbe.
 echo.
 echo Die uebrigen START-Dateien sind NICHT fuer Ihre Akten:
 echo    START-AWS.bat       erfundene Testakten, mit echter KI

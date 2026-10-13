@@ -13,9 +13,16 @@ rem der naechsten nicht zu unterscheiden. Diese Verknuepfungen zeigen auf
 rem dieselben Dateien, tragen aber das Programmsymbol und einen Namen, der
 rem sagt, was passiert.
 rem
-rem Zwei, nicht eine: Der Unterschied zwischen "kostet Geld und ruft das
-rem Modell" und "kostet nichts" ist zu wichtig, um hinter einem Symbol zu
+rem Zwei, nicht eine: Der Unterschied zwischen "Ihre echten Akten" und
+rem "zum Ausprobieren" ist zu wichtig, um hinter einem Symbol zu
 rem verschwinden.
+rem
+rem Am 13.10.2026 berichtigt: Die erste Verknuepfung zeigte auf
+rem START-AWS.bat - also auf die ERFUNDENEN Testakten. Sie hiess dabei
+rem schlicht "jusperfect" und war das Erste, was man auf dem Schreibtisch
+rem fand. Wer sie nahm, arbeitete mit Akten, die es nicht gibt, und merkte
+rem es erst an den Namen darin. Jetzt zeigt sie auf START-JUSPERFECT.bat
+rem und damit auf die echten Akten der Kanzlei.
 rem
 rem Ohne Klammernbloecke geschrieben - cmd wertet darin frueher aus, als man
 rem denkt.
@@ -23,11 +30,11 @@ rem denkt.
 set "ORDNER=%CD%"
 set "SYMBOL=%ORDNER%\jusperfect\static\jusperfect.ico"
 
-if exist "%ORDNER%\START-AWS.bat" goto gefunden
+if exist "%ORDNER%\START-JUSPERFECT.bat" goto gefunden
 echo.
-echo   START-AWS.bat wurde nicht gefunden.
+echo   START-JUSPERFECT.bat wurde nicht gefunden.
 echo   Bitte diese Datei im Programmordner ausfuehren - dort, wo auch
-echo   START-AWS.bat und START-DEMO.bat liegen.
+echo   START-JUSPERFECT.bat und START-DEMO.bat liegen.
 echo.
 pause
 exit /b 1
@@ -56,12 +63,12 @@ echo.
 echo   Verknuepfungen werden angelegt ...
 echo.
 
-call :verknuepfen "jusperfect" "START-AWS.bat" "jusperfect starten - echtes Sprachmodell bei AWS, Kosten je Aufruf"
+call :verknuepfen "jusperfect" "START-JUSPERFECT.bat" "jusperfect starten - die ECHTEN Akten der Kanzlei, Kosten je Akte"
 call :verknuepfen "jusperfect (Demo, ohne KI)" "START-DEMO.bat" "jusperfect zum Ausprobieren - erfundene Akten, kein Modell, keine Kosten"
 
 echo.
 echo   Fertig. Wenn etwas fehlt, geht es auch von Hand:
-echo   Rechtsklick auf START-AWS.bat, "Senden an" - "Desktop".
+echo   Rechtsklick auf START-JUSPERFECT.bat, "Senden an" - "Desktop".
 echo   Das Symbol liegt hier: %SYMBOL%
 echo.
 pause
