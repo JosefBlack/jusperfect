@@ -90,10 +90,38 @@ def _tag(eintrag: Mapping[str, Any]) -> str:
     return "ohne Datum"
 
 
+#: Fehlerarten, deren eigener Satz ohne Akteninhalt geschrieben ist.
+#:
+#: Fuer sie gilt dasselbe wie in `web.py::_status_fuer`: Ihr Wortlaut geht an
+#: die Oberflaeche, weil er von uns stammt und nicht von einem fremden Server.
+#: Er nennt den Pfad und den Status - und genau das braucht man hier. Die
+#: Ausnahmekette allein sagt nur die Codestelle, und "JurNodesFehler
+#: (http_adapter.py:821)" beantwortet die Frage nicht, WELCHER Aufruf
+#: abgewiesen wurde.
+#:
+#: Was ihr Wortlaut doch tragen kann, ist die Aktenkennung
+#: (``AkteNichtGefunden``). Sie wird verdeckt, bevor der Satz dasteht.
+EIGENER_SATZ = (JurNodesFehler, KonfigurationsFehler)
+
+
+def _satz(fehler: Exception, akte_id: str) -> str:
+    """Der eigene Satz eines bekannten Fehlers, mit verdeckter Aktenkennung."""
+    from jusperfect.gedaechtnis.base import GedaechtnisFehler
+
+    if not isinstance(fehler, EIGENER_SATZ + (GedaechtnisFehler,)):
+        # Ein unerwarteter Fehler hat keinen geprueften Wortlaut. Er kann ein
+        # Stueck der Akte tragen - dieselbe Erwaegung wie bei einer Abweisung
+        # von AWS (Befund F01 der Zweitpruefung vom 05.10.2026).
+        return ""
+    text = " ".join(str(fehler).split())
+    return text.replace(akte_id, verdeckt(akte_id)) if akte_id else text
+
+
 class Probe:
     """Der Lauf selbst. Zählt mit, damit am Ende ein Urteil dastehen kann."""
 
-    def __init__(self) -> None:
+    def __init__(self, akte_id: str = "") -> None:
+        self.akte_id = akte_id
         self.gut = 0
         self.schlecht = 0
         self.ketten: dict[str, int] = {}
@@ -109,8 +137,12 @@ class Probe:
         except Exception as fehler:  # noqa: BLE001 - genau das ist der Zweck
             self.schlecht += 1
             kette = ausnahmekette(fehler)
-            self.ketten[kette] = self.ketten.get(kette, 0) + 1
-            _sagen(SCHLECHT, f"{was}: {kette}")
+            satz = _satz(fehler, self.akte_id)
+            # Der Satz gehoert zur Kette und nicht an ihre Stelle: Die Kette
+            # sagt, WO es brach, der Satz, WAS der Server geantwortet hat.
+            merkmal = f"{kette} - {satz}" if satz else kette
+            self.ketten[merkmal] = self.ketten.get(merkmal, 0) + 1
+            _sagen(SCHLECHT, f"{was}: {merkmal}")
             return False, None
         self.gut += 1
         return True, ergebnis
@@ -331,7 +363,7 @@ def main(argv: list[str] | None = None, adapter: Any = None) -> int:
             _sagen(SCHLECHT, f"Die Anbindung liess sich nicht herstellen: {fehler}")
             return 2
 
-    probe = Probe()
+    probe = Probe(akte_id)
     _ueberschrift("Die Stammdaten")
     gelungen, _ = probe.versuchen("Akte lesen", lambda: adapter.akte(akte_id))
     if gelungen:

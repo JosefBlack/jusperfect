@@ -4487,3 +4487,96 @@ Gegenprobe, dass ein **bekannter** Fehler seinen eigenen Satz behält und keine
 Nummer bekommt — eine Nummer an jedem Fehler wäre keine Nummer.
 
 2115 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026 — gefunden: ein `field()` in einer Klasse, die keine Dataclass ist
+
+Die Zeile aus dem schwarzen Fenster der Kanzlei — die erste, die es seit heute
+Vormittag überhaupt gibt:
+
+```
+{"ereignis": "fehler_abgefangen", "verfahren": "POST",
+ "nummer": "f732c458", "kette": "builtins.TypeError (web.py:956)"}
+```
+
+`web.py:956` ist:
+
+```python
+"mail_ausgelassen": dict(getattr(d.adapter, "letzte_mail_ausgelassen", {})),
+```
+
+### Die Ursache
+
+`HttpJurNodesAdapter` ist **keine** Dataclass. Ein
+`= field(default_factory=dict)` legt dort keinen leeren Verzeichniswert an,
+sondern lässt ein **`dataclasses.Field`-Objekt** als Klassenattribut stehen.
+Gemessen:
+
+```
+letzte_mail_ausgelassen -> dataclasses.Field
+   dict() wirft TypeError: 'Field' object is not iterable
+```
+
+Geschrieben habe ich das heute Vormittag selbst, bei N04 — und heute
+Nachmittag ein zweites Mal, für `letzte_eintraege_mit_fehler`.
+
+### Warum es tagelang unsichtbar war
+
+`_mail_dokumente` setzt den Zähler **am Objekt**, bevor ihn jemand liest. So
+lange dieser Zweig läuft, liegt über dem Field ein echtes Verzeichnis, und
+niemand sieht etwas. Fällt das Korrespondenzverzeichnis aus, kehrt `_vermerke`
+vorher um, `_mail_dokumente` läuft nie — und das Field steht blank da.
+
+Genau das ist der Zustand am Rechner der Kanzlei. Die Aktenprobe hat ihn
+gemessen:
+
+```
+3× JurNodesFehler (http_adapter.py:821)   — GET, Status >= 400
+1× JurNodesFehler (http_adapter.py:899)   — POST, Status >= 400
+```
+
+Der eine POST ist die Korrespondenzsuche. **Die Akte war nicht zu öffnen, und
+der Grund lag nicht in der Akte** — sondern in einer Zeile, die aussah wie
+„leeres Verzeichnis".
+
+> Ein Fehler, den kein Auge sieht, weil der Quelltext das Richtige *sagt*. Vier
+> Prüfläufe über 2115 Prüfungen gingen daran vorbei — weil in jedem von ihnen
+> die E-Akte antwortete.
+
+### Berichtigt
+
+1. Beide Zähler stehen jetzt im **Erzeuger**, mit einem Hinweis darüber, warum
+   `field()` hier nicht geht.
+2. `_zaehler_zuruecksetzen()`: **alle** Zähler eines Listenaufbaus an einer
+   Stelle, von `dokumente()` als Erstes gerufen. Vorher setzte jeder Zweig die
+   seinen — und ein Zähler, den nur sein eigener Zweig zurücksetzt, ist nicht
+   gesetzt, sobald der Zweig ausfällt, und zählt den vorigen Lauf mit, wenn er
+   es doch war.
+3. `tests/test_zaehler_sind_echte_werte.py`, sieben Prüfungen. Die erste geht
+   **jede Klasse** der vier jur|nodes-Dateien durch und besteht nur, wenn
+   keine ein `dataclasses.Field` als Attribut trägt. Der Mensch liest
+   `field(default_factory=dict)` und denkt „leeres Verzeichnis"; die Maschine
+   sieht es sofort. Gegenprobe gemacht: mit der alten Zeile fällt sie, und mit
+   ihr die Prüfung, die die Sitzungsantwort baut.
+
+### Und die Aktenprobe sagte zu wenig
+
+Ihre erste Ausgabe nannte nur die Codestelle:
+
+```
+3× jusperfect.jurnodes.base.JurNodesFehler (http_adapter.py:821)
+```
+
+Das beantwortet die Frage nicht. An 821 steht „GET mit Status …" — **welcher**
+Pfad, **welcher** Status, das steht im *Satz* des Fehlers, und den hatte ich
+weggelassen. Er darf dastehen: Diese Sätze schreiben wir selbst, sie nennen
+einen fest verdrahteten Pfad und eine Zahl; `web.py::_status_fuer` schickt sie
+seit jeher an die Oberfläche. Was sie doch tragen können, ist die Aktenkennung
+— die wird verdeckt.
+
+**Offen:** Warum der Server dieser Kanzlei vier Aufrufe abweist (nicht 401,
+nicht 403, nicht 404 — also kein Rechteproblem). Das sagt der nächste Lauf der
+Aktenprobe, der jetzt Pfad und Status nennt.
+
+2126 Prüfungen grün, eine übersprungen.

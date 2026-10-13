@@ -170,3 +170,56 @@ class DerAufrufIstDa(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DerSatzDesServersGehoertDazu(unittest.TestCase):
+    """„JurNodesFehler (http_adapter.py:821)" sagt nicht, WELCHER Aufruf.
+
+    Aus der Kanzlei am 13.10.2026, nach dem ersten Lauf dieser Probe:
+
+        3× jusperfect.jurnodes.base.JurNodesFehler (http_adapter.py:821)
+        1× jusperfect.jurnodes.base.JurNodesFehler (http_adapter.py:899)
+
+    Zwei Zeilen, und beide beantworten die Frage nicht: An 821 steht „GET mit
+    Status …", an 899 dasselbe für POST – welcher Pfad und welcher Status, das
+    steht im **Satz** des Fehlers, und den hatte ich weggelassen.
+
+    Er darf dastehen: Diese Sätze schreiben wir selbst, sie nennen einen fest
+    verdrahteten Pfad und eine Zahl. Was sie doch tragen können, ist die
+    Aktenkennung – die wird verdeckt.
+    """
+
+    def _lauf_mit_fehler(self, fehler):
+        class _Kaputt(_ServerVollstaendig):
+            def __call__(self, anfrage):
+                if anfrage.url.path.endswith("/correspondence/search"):
+                    return httpx.Response(405, json={})
+                return super().__call__(anfrage)
+
+        return _lauf(_adapter(_Kaputt()))
+
+    def test_der_pfad_und_der_status_stehen_da(self):
+        _, ausgabe = self._lauf_mit_fehler(None)
+        self.assertIn("/correspondence/search", ausgabe)
+        self.assertIn("405", ausgabe)
+
+    def test_die_codestelle_steht_weiter_daneben(self):
+        """Der Satz sagt, WAS der Server antwortete; die Kette, WO es brach."""
+        _, ausgabe = self._lauf_mit_fehler(None)
+        self.assertIn("JurNodesFehler", ausgabe)
+        self.assertIn("http_adapter.py:", ausgabe)
+
+    def test_eine_aktenkennung_im_satz_wird_verdeckt(self):
+        from jusperfect.jurnodes.base import AkteNichtGefunden
+
+        from jusperfect import aktenprobe as ap
+
+        satz = ap._satz(AkteNichtGefunden(f"Akte {AKTE} nicht gefunden."), AKTE)
+        self.assertNotIn(AKTE, satz)
+        self.assertIn(ap.verdeckt(AKTE), satz)
+
+    def test_ein_unerwarteter_fehler_bekommt_keinen_satz(self):
+        """Sein Wortlaut ist von niemandem geprüft und kann Akteninhalt tragen."""
+        from jusperfect import aktenprobe as ap
+
+        self.assertEqual(ap._satz(ValueError("Mandantin X, 8.400 EUR"), AKTE), "")

@@ -770,6 +770,26 @@ class HttpJurNodesAdapter:
         # Sperre hier ist deshalb kein Beiwerk, sondern die Bedingung dafuer,
         # dass die Anbindung unter Last nicht auseinanderfaellt. Sie gilt fuer
         # jede Anfrage, auch die schreibende.
+
+        # ACHTUNG, und das ist der Fehler vom 13.10.2026: Diese Klasse ist
+        # KEINE Dataclass. Ein `= field(default_factory=dict)` legt hier
+        # deshalb keinen leeren Verzeichniswert an, sondern ein
+        # `dataclasses.Field`-OBJEKT als Klassenattribut - und `dict(...)`
+        # darauf wirft `TypeError: 'Field' object is not iterable`.
+        #
+        # Genau das stand hinter "Akte oeffnen nicht moeglich, interner
+        # Fehler": Solange `_mail_dokumente` lief, ueberschrieb es den Wert am
+        # Objekt, und niemand sah etwas. Fiel das Korrespondenzverzeichnis
+        # aus, kehrte `_vermerke` vorher um - der Zaehler blieb das Field, und
+        # `_sitzung_antwort` stolperte darueber. Die Akte war nicht zu
+        # oeffnen, und der Grund lag nicht in der Akte.
+        #
+        # Deshalb stehen die beiden Zaehler, die kein einfacher Wert sind,
+        # hier im Erzeuger - und `dokumente()` setzt ALLE zurueck, nicht nur
+        # die seines eigenen Zweiges.
+        self.letzte_mail_ausgelassen = {}
+        self.letzte_eintraege_mit_fehler = {}
+
         self._nacheinander = threading.Lock()
 
     @classmethod
@@ -1182,7 +1202,9 @@ class HttpJurNodesAdapter:
     #: Anlage wurde gezaehlt und war nirgends zu sehen. Ein Zaehler, den nur
     #: der Parser kennt, ist kein Zaehler; angezeigt wurden allein die
     #: angenommenen Anlagen, und die sahen vollstaendig aus.
-    letzte_mail_ausgelassen: dict[str, int] = field(default_factory=dict)
+    #:
+    #: Gesetzt wird er im Erzeuger - siehe den Hinweis dort unten.
+    letzte_mail_ausgelassen: dict[str, int]
     #: Angehaengte Nachrichten, deren Text mit in die Dokumente kam (N03).
     letzte_mail_nachrichten: int = 0
     #: Die Akte nennt keinen Dateiordner - dann fehlen die Dateien, aber nicht
@@ -1205,7 +1227,32 @@ class HttpJurNodesAdapter:
     #: Wortlaut und keine Aktenkennung (`fehlergrenze.ausnahmekette`). Sie
     #: darf deshalb bis in die Anzeige gehen, und genau dort gehoert sie hin:
     #: Der Bearbeiter sieht, dass etwas fehlt, und kann sagen, was.
-    letzte_eintraege_mit_fehler: dict[str, int] = field(default_factory=dict)
+    #:
+    #: Gesetzt wird er im Erzeuger - siehe den Hinweis dort unten.
+    letzte_eintraege_mit_fehler: dict[str, int]
+
+    def _zaehler_zuruecksetzen(self) -> None:
+        """Alle Zaehler eines Listenaufbaus auf null - an EINER Stelle.
+
+        Vorher setzte jeder Zweig die seinen: `dokumente()` den Dateiordner,
+        `_vermerke` die Korrespondenz, `_mail_dokumente` die der Mails. Lief
+        ein Zweig nicht, blieb seiner stehen - und einer war nicht einmal
+        gesetzt, sondern ein `dataclasses.Field` (siehe den Erzeuger). Das war
+        der Abbruch vom 13.10.2026.
+
+        Ein Zaehler, den nur sein eigener Zweig zuruecksetzt, zaehlt den
+        vorigen Lauf mit, sobald der Zweig ausfaellt. Hier stehen sie
+        zusammen, und `dokumente()` ruft das als Erstes.
+        """
+        self.letzte_akte_ohne_dateiordner = False
+        self.letzte_eintraege_mit_fehler = {}
+        self.letzte_korrespondenz_ohne_inhalt = 0
+        self.letzte_mails_zu_gross = 0
+        self.letzte_mails_ueber_budget = 0
+        self.letzte_mails_ohne_antwort = 0
+        self.letzte_mail_anhaenge = 0
+        self.letzte_mail_ausgelassen = {}
+        self.letzte_mail_nachrichten = 0
 
     def _eintrag_gescheitert(self, fehler: Exception) -> None:
         """Einen gescheiterten Eintrag merken, statt die Akte zu verlieren.
@@ -1279,8 +1326,7 @@ class HttpJurNodesAdapter:
         nennt eine ``fileFolderId``; deren Inhalt wird getrennt abgefragt und
         enthaelt Ordner und Dateien gemischt. Nur die Dateien zaehlen hier.
         """
-        self.letzte_akte_ohne_dateiordner = False
-        self.letzte_eintraege_mit_fehler = {}
+        self._zaehler_zuruecksetzen()
         roh = self._roh_akte(akte_id)
         ordner_id = roh.get("fileFolderId")
         # **Befund N07 der dritten Zweitpruefung vom 12.10.2026.** Hier stand
@@ -1430,7 +1476,9 @@ class HttpJurNodesAdapter:
         IMAP, kein SMTP, kein beA-Zugang. Die offenen Fragen 1 und 2 betreffen
         nur, wie die E-Akte diese Fassung herausgibt.
         """
-        self.letzte_korrespondenz_ohne_inhalt = 0
+        # Zurueckgesetzt wird in `_zaehler_zuruecksetzen`, nicht hier: Ein
+        # Zaehler, den nur sein eigener Zweig zuruecksetzt, zaehlt den vorigen
+        # Lauf mit, sobald der Zweig ausfaellt.
         try:
             eintraege = self.korrespondenz(akte_id)
         except JurNodesFehler:
@@ -1491,12 +1539,6 @@ class HttpJurNodesAdapter:
         Datum, ohne Inhalt. Ein Programm, das Akteninhalt lautlos weglaesst,
         ist schlimmer als eines, das zu viel zeigt.
         """
-        self.letzte_mails_zu_gross = 0
-        self.letzte_mails_ueber_budget = 0
-        self.letzte_mails_ohne_antwort = 0
-        self.letzte_mail_anhaenge = 0
-        self.letzte_mail_ausgelassen = {}
-        self.letzte_mail_nachrichten = 0
         if self._mails_akte != akte_id:
             self._mails.clear()
             self._mails_akte = akte_id
