@@ -2364,10 +2364,10 @@ async function gedaechtnisGanzVerwerfen() {
   const g = (sitzung && sitzung.gedaechtnis) || {};
   const eintraege = g.eintraege || [];
   const a = sitzung.sitzung.akte;
-  // Der Fall, fuer den dieser Knopf am 13.10.2026 gebraucht wurde: Das
-  // Gedaechtnis ist da und nicht zu lesen. Dann steht hier keine Zahl - aber
-  // der Weg ist derselbe, und nur dieser eine funktioniert noch, weil das
-  // Loeschen nicht liest.
+  // Der Fall, fuer den dieser Knopf gebraucht wurde: Das Gedaechtnis ist da
+  // und nicht zu lesen. Dann steht hier keine Zahl - aber der Weg ist
+  // derselbe, und nur dieser eine funktioniert noch, weil das Loeschen nicht
+  // liest.
   if (g.unlesbar) {
     const weg = [
       `Das Aktengedächtnis von ${a.aktenzeichen} verwerfen?`,
@@ -2377,23 +2377,13 @@ async function gedaechtnisGanzVerwerfen() {
       "",
       "Die Akte in jur|nodes bleibt unberührt.",
       "",
-      "Danach baut „Akte einlesen\u201c es neu auf. Das kostet Modellaufrufe,",
+      "Danach baut „Akte einlesen“ es neu auf. Das kostet Modellaufrufe,",
       "bei Scans zusätzlich die Texterkennung.",
       "",
       "Verwerfen?",
     ];
     if (!confirm(weg.join("\n"))) return;
-    const akteId = encodeURIComponent(sitzung.sitzung.akte_id);
-    await api("DELETE", `/api/akten/${akteId}/gedaechtnis`);
-    sitzung = await api("GET", `/api/sitzungen/${sitzung.sitzung.id}`);
-    await passagenLaden();
-    chronoAusAnalyse = [];
-    gedExplorerZeichnen();
-    gedaechtnisFensterZeigen();
-    chronologieZeigen();
-    ladeStatus();
-    melden(`Das Aktengedächtnis von ${a.aktenzeichen} ist verworfen. `
-           + `\u201eAkte einlesen" baut es neu auf.`);
+    await gedaechtnisWeg();
     return;
   }
   if (!g.vorhanden) {
@@ -2427,27 +2417,31 @@ async function gedaechtnisGanzVerwerfen() {
     "",
     "Verwerfen?");
   if (!confirm(teile.join("\n"))) return;
+  await gedaechtnisWeg();
+}
+
+/** Das Verwerfen selbst - EIN Aufruf, nicht einer je Dokument.
+ *
+ * Aus der Kanzlei am 13.10.2026: „Gedaechtnis verwerfen scheint nicht
+ * abzuschliessen - komme ich auf das Feld, erscheint eine Sanduhr."
+ *
+ * Hier stand eine Schleife: erst das Gedaechtnis loeschen, dann je Dokument
+ * ein DELETE an die Sitzung. Jede dieser Antworten ist eine vollstaendige
+ * Sitzungsantwort, und die liest die Dokumentliste **neu bei jur|nodes** -
+ * Ordnerbaum und Korrespondenzverzeichnis, je Aufruf, und der Hersteller
+ * laesst eine Anfrage je IP-Adresse zugleich zu. Bei fuenfzig Dokumenten
+ * waren das fuenfzig Lesevorgaenge der ganzen Akte fuer einen Klick.
+ *
+ * Der Knopf war dabei nicht haengen geblieben - er arbeitete. Das ist der
+ * unangenehmere Fall: Es sah aus wie ein Fehler und war einer, nur ein
+ * anderer. Jetzt nimmt der Server die Dokumente in einem Zug mit; die
+ * Oberflaeche fragt danach EINMAL den neuen Stand.
+ */
+async function gedaechtnisWeg() {
   const akte = encodeURIComponent(sitzung.sitzung.akte_id);
-  await api("DELETE", `/api/akten/${akte}/gedaechtnis`);
-  // Die offene Sitzung traegt die Auszuege noch: `bei_eroeffnen` hat sie beim
-  // Oeffnen aus dem Gedaechtnis in die Arbeitsakte gelegt. Ein Verwerfen, das
-  // sie dort stehen laesst, nimmt genau das nicht weg, worum es ging - und
-  // das Fenster zeigte weiter, was es nicht mehr hat (dieselbe Erwaegung wie
-  // bei Befund F02.3 der Zweitpruefung vom 05.10.2026).
-  //
-  // Nur die, die wirklich im Gedaechtnis standen. Beim Laden schreibt
-  // `dokumente_laden` sofort mit, das sind also im Regelfall alle. Nicht
-  // dabei ist ein Dokument, dessen Mitschreiben fehlgeschlagen ist oder das
-  // ohne Gedaechtnis geladen wurde - das Verwerfen betrifft es nicht, und
-  // es darf deshalb auch nicht aus der Arbeitsakte verschwinden.
-  const ausDemGedaechtnis = new Set(eintraege.map((e) => e.dokument_id));
-  for (const dok of (sitzung.sitzung.geladen || []).slice()) {
-    if (!ausDemGedaechtnis.has(dok.dokument_id)) continue;
-    const pfad = dok.dokument_id.split("/").map(encodeURIComponent).join("/");
-    sitzung = await api("DELETE", `/api/sitzungen/${sitzung.sitzung.id}/dokumente/${pfad}`);
-  }
-  // Einmal frisch holen, auch wenn nichts zu entfernen war: der
-  // Gedaechtnisteil der Antwort stammt vom Server und ist jetzt leer.
+  const sid = encodeURIComponent(sitzung.sitzung.id);
+  const a = sitzung.sitzung.akte;
+  await api("DELETE", `/api/akten/${akte}/gedaechtnis?sitzung=${sid}`);
   sitzung = await api("GET", `/api/sitzungen/${sitzung.sitzung.id}`);
   await passagenLaden();
   // Der Zeitstrahl der Oberflaeche traegt die Eintraege aus der Analyse

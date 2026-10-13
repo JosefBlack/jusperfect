@@ -4856,3 +4856,68 @@ dasteht. Das geht nur am Schirm:
 `[KANZLEI 19]` AWS-Opt-out, `[KANZLEI 20]` Auftragsverarbeitung.
 **Offen am Programm:** beA und Post — bewusst ungebaut, solange keine Akte mit
 solchen Einträgen vorliegt.
+
+---
+
+## 13.10.2026 — „scheint nicht abzuschließen" — der Knopf hing nicht, er arbeitete
+
+Aus der Kanzlei: „Gedächtnis verwerfen scheint nicht abzuschließen — komme ich
+auf das Feld, erscheint eine Sanduhr."
+
+Der Knopf war **nicht** hängen geblieben. Er arbeitete — und das ist der
+unangenehmere Fall: Es sah aus wie ein Fehler und war einer, nur ein anderer.
+
+### Was dahinterstand
+
+Mein Verwerfen schickte **einen Aufruf je Dokument**:
+
+```js
+for (const dok of sitzung.sitzung.geladen) {
+  sitzung = await api("DELETE", `/api/sitzungen/${id}/dokumente/${pfad}`);
+}
+```
+
+Jede dieser Antworten ist eine vollständige Sitzungsantwort, und die liest die
+Dokumentliste **neu bei jur|nodes** — Ordnerbaum und Korrespondenzverzeichnis,
+je Aufruf. Der Hersteller lässt eine Anfrage je IP-Adresse zugleich zu, also
+laufen sie hintereinander.
+
+Bei fünfzig Dokumenten sind das **fünfzig Lesevorgänge der ganzen Akte für
+einen einzigen Klick.**
+
+> Eine Schleife in der Oberfläche ist nicht dasselbe wie eine Schleife im
+> Programm: Jeder Durchgang kostet hier einen Weg zum Server und zurück. Das
+> habe ich heute Mittag beim Bauen nicht einmal nachgerechnet — bei zwei
+> Testdokumenten fällt es nicht auf.
+
+### Berichtigt
+
+| Vorher | Jetzt |
+|---|---|
+| 1 Aufruf zum Löschen + 1 je Dokument + 1 zum Nachladen | **1 Aufruf zum Löschen + 1 zum Nachladen** |
+| Die Oberfläche räumt die Arbeitsakte auf | Der Server tut es, in einem Zug |
+
+`DELETE /api/akten/{akte}/gedaechtnis?sitzung=…` nimmt die Dokumente der
+Sitzung gleich mit. Welche aus dem Gedächtnis stammen, wird **vor** dem
+Löschen gelesen — danach steht es nirgends mehr. Ist das Gedächtnis unlesbar,
+wird aus der Sitzung nichts genommen: Dann hat `bei_eroeffnen` auch nichts
+hineingelegt, und was dort liegt, hat der Bearbeiter selbst geholt.
+
+Dazu `Sitzungsdienst.dokumente_entfernen` — einmal laden, einmal ablegen,
+einmal antworten.
+
+### Geprüft
+
+`tests/test_gedaechtnis_ganz_verwerfen.py`, jetzt zwölf Prüfungen. Die
+entscheidende zählt **nicht das Ergebnis, sondern die Lesevorgänge**:
+
+```python
+d.adapter.dokumente = mitzaehlen
+c.delete(f"/api/akten/…/gedaechtnis?sitzung={sid}")
+self.assertEqual(gelesen, [])   # das Verwerfen liest die Akte gar nicht
+```
+
+Eine Prüfung, die nur „die Arbeitsakte ist leer" misst, wäre auch vorher grün
+gewesen — sie war es ja.
+
+2163 Prüfungen grün, eine übersprungen.

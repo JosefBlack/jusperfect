@@ -631,9 +631,35 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         return d.gedaechtnis.uebersicht(ergebnis.gedaechtnis) | {"lauf": ergebnis.als_dict()}
 
     @app.delete("/api/akten/{akte_id}/gedaechtnis", status_code=204)
-    def gedaechtnis_loeschen(akte_id: str, ident: Identitaet = Depends(identitaet)) -> None:
+    def gedaechtnis_loeschen(akte_id: str, sitzung: str = "",
+                             ident: Identitaet = Depends(identitaet)) -> None:
+        """Das ganze Aktengedaechtnis verwerfen - und die offene Sitzung mit.
+
+        ``sitzung`` ist freigestellt. Steht sie da, werden aus DIESER Sitzung
+        die Dokumente mitgenommen, die aus dem Gedaechtnis stammen - in einem
+        Zug, nicht in einem Aufruf je Dokument.
+
+        Aus der Kanzlei am 13.10.2026: "Gedaechtnis verwerfen scheint nicht
+        abzuschliessen." Die Oberflaeche schickte einen Aufruf je Dokument,
+        und jede Antwort las die ganze Akte neu bei jur|nodes.
+
+        Welche Dokumente aus dem Gedaechtnis stammen, muss VOR dem Loeschen
+        gelesen werden - danach steht es nirgends mehr. Laesst sich das
+        Gedaechtnis nicht lesen, wird aus der Sitzung nichts genommen: Dann
+        hat `bei_eroeffnen` auch nichts hineingelegt, und was dort liegt, hat
+        der Bearbeiter selbst geholt.
+        """
         d.berechtigungen.pruefen(ident, akte_id)
+        aus_dem_gedaechtnis: list[str] = []
+        try:
+            vorhanden = d.gedaechtnis.lesen(akte_id)
+        except GedaechtnisFehler:
+            vorhanden = None
+        if vorhanden is not None:
+            aus_dem_gedaechtnis = [x.dokument_id for x in vorhanden.dokumente]
         d.gedaechtnis.loeschen(akte_id)
+        if sitzung and aus_dem_gedaechtnis:
+            d.sitzungen.dokumente_entfernen(ident, sitzung, aus_dem_gedaechtnis)
 
     @app.delete("/api/akten/{akte_id}/gedaechtnis/dokumente/{dokument_id}")
     def gedaechtnis_dokument_vergessen(akte_id: str, dokument_id: str,

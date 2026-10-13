@@ -253,6 +253,43 @@ class Sitzungsdienst:
         self._speicher.sitzung_ablegen(sitzung)
         return sitzung
 
+    def dokumente_entfernen(self, identitaet: Identitaet, sitzung_id: str,
+                            dokument_ids: list[str]) -> Sitzung:
+        """Mehrere Dokumente in EINEM Zug aus der Arbeitsakte nehmen.
+
+        **Warum das sein muss, und nicht fuenfzigmal das einzelne.** Aus der
+        Kanzlei am 13.10.2026: "Gedaechtnis verwerfen scheint nicht
+        abzuschliessen - komme ich auf das Feld, erscheint eine Sanduhr."
+
+        Die Oberflaeche schickte einen Aufruf je Dokument. Jede Antwort ist
+        eine vollstaendige Sitzungsantwort, und die liest die Dokumentliste
+        **neu bei jur|nodes** - Ordnerbaum und Korrespondenzverzeichnis, je
+        Aufruf. Der Hersteller laesst eine Anfrage je IP-Adresse zugleich zu,
+        also laufen sie hintereinander. Bei fuenfzig Dokumenten sind das
+        fuenfzig Lesevorgaenge der ganzen Akte fuer einen einzigen Klick.
+
+        > Eine Schleife in der Oberflaeche ist nicht dasselbe wie eine
+        > Schleife im Programm: Jeder Durchgang kostet hier einen Weg zum
+        > Server und zurueck.
+
+        Hier wird einmal geladen, einmal abgelegt und einmal geantwortet.
+        """
+        sitzung = self.laden(identitaet, sitzung_id)
+        weg = {x for x in dokument_ids}
+        bleibt = [g for g in sitzung.geladen if g.dokument_id not in weg]
+        entfernt = [g.dokument_id for g in sitzung.geladen if g.dokument_id in weg]
+        if not entfernt:
+            return sitzung
+        sitzung.geladen = bleibt
+        for dokument_id in entfernt:
+            self._speicher.text_loeschen(sitzung.id, dokument_id)
+            # Und die Kopie im Adapter (Befund N10) - je Dokument, aber ohne
+            # einen Weg nach aussen: Der Puffer liegt in diesem Prozess.
+            self._adapter.inhalte_vergessen(sitzung.akte_id, dokument_id)
+        self._speicher.sitzung_ablegen(sitzung)
+        ereignis(_log, "dokumente_entfernt", sitzung=sitzung.id, anzahl=len(entfernt))
+        return sitzung
+
     def dokument_entfernen(self, identitaet: Identitaet, sitzung_id: str, dokument_id: str) -> Sitzung:
         """Nimmt ein Dokument aus der Arbeitsakte – der Text wird gelöscht."""
         sitzung = self.laden(identitaet, sitzung_id)

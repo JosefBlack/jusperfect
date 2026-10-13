@@ -79,6 +79,54 @@ class VerwerfenWirktDauerhaft(unittest.TestCase):
             danach = c.delete(f"/api/sitzungen/{sid}/dokumente/D-101").json()
             self.assertEqual(danach["sitzung"]["geladen"], [])
 
+    def test_mit_sitzung_wird_die_arbeitsakte_in_EINEM_aufruf_leer(self):
+        """Der Fall aus der Kanzlei: „scheint nicht abzuschließen … Sanduhr."
+
+        Entscheidend ist nicht nur, DASS die Arbeitsakte leer wird, sondern
+        **wie oft die Akte dafür bei jur|nodes gelesen wird**. Vorher war es
+        einmal je Dokument; bei fünfzig Dokumenten fünfzig Lesevorgänge der
+        ganzen Akte für einen Klick.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            d, c, sid = _aufbau(tmp)
+            gelesen = []
+            echtes = d.adapter.dokumente
+
+            def mitzaehlen(akte_id):
+                gelesen.append(akte_id)
+                return echtes(akte_id)
+
+            d.adapter.dokumente = mitzaehlen
+            antwort = c.delete(f"/api/akten/MV-2026-0007/gedaechtnis?sitzung={sid}")
+            self.assertEqual(antwort.status_code, 204, antwort.text)
+            self.assertEqual(
+                gelesen, [],
+                "Das Verwerfen selbst liest die Akte gar nicht - es löscht nur.")
+            self.assertEqual(c.get(f"/api/sitzungen/{sid}").json()["sitzung"]["geladen"], [])
+
+    def test_ohne_sitzung_bleibt_die_offene_arbeitsakte_wie_sie_war(self):
+        """Die Angabe ist freigestellt - und ohne sie wird nichts angefasst."""
+        with tempfile.TemporaryDirectory() as tmp:
+            d, c, sid = _aufbau(tmp)
+            c.delete("/api/akten/MV-2026-0007/gedaechtnis")
+            offen = c.get(f"/api/sitzungen/{sid}").json()
+            self.assertEqual([g["dokument_id"] for g in offen["sitzung"]["geladen"]],
+                             ["D-101"])
+
+    def test_bei_einem_unlesbaren_gedaechtnis_wird_aus_der_sitzung_nichts_genommen(self):
+        """Dann hat `bei_eroeffnen` nichts hineingelegt - was dort liegt, ist eigenes."""
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as tmp:
+            d, c, sid = _aufbau(tmp)
+            with mock.patch.object(type(d.gedaechtnis._speicher), "lesen",
+                                   side_effect=ValueError("erfundenes Unheil")):
+                antwort = c.delete(f"/api/akten/MV-2026-0007/gedaechtnis?sitzung={sid}")
+            self.assertEqual(antwort.status_code, 204, antwort.text)
+            offen = c.get(f"/api/sitzungen/{sid}").json()
+            self.assertEqual([g["dokument_id"] for g in offen["sitzung"]["geladen"]],
+                             ["D-101"])
+
     def test_die_akte_in_jurnodes_bleibt_unberuehrt(self):
         with tempfile.TemporaryDirectory() as tmp:
             d, c, sid = _aufbau(tmp)
@@ -109,28 +157,38 @@ class DerKnopfIstDa(unittest.TestCase):
         css = (STATISCH / "styles.css").read_text(encoding="utf-8")
         self.assertIn(".mini.gefahr", css)
 
+    def _funktion(self, name: str) -> str:
+        teil = self.js[self.js.index(f"async function {name}("):]
+        return teil[:teil.index("\n}\n")]
+
     def test_er_haengt_an_der_funktion_und_die_funktion_am_loeschweg(self):
         self.assertRegex(
             self.js,
             r'\$\("ged-ganz-loeschen"\)[\s\S]{0,200}gedaechtnisGanzVerwerfen')
-        funktion = self.js[self.js.index("async function gedaechtnisGanzVerwerfen"):]
-        funktion = funktion[:funktion.index("\n}\n")]
-        self.assertIn('api("DELETE", `/api/akten/${akte}/gedaechtnis`)', funktion)
+        self.assertIn('api("DELETE", `/api/akten/${akte}/gedaechtnis?sitzung=',
+                      self._funktion("gedaechtnisWeg"))
 
     def test_er_fragt_vorher_und_sagt_was_herausfaellt(self):
-        funktion = self.js[self.js.index("async function gedaechtnisGanzVerwerfen"):]
-        funktion = funktion[:funktion.index("\n}\n")]
-        self.assertLess(funktion.index("confirm("), funktion.index('api("DELETE"'),
+        funktion = self._funktion("gedaechtnisGanzVerwerfen")
+        self.assertLess(funktion.index("confirm("), funktion.index("gedaechtnisWeg()"),
                         "Erst fragen, dann löschen.")
         self.assertIn("Lebenssachverhalt", funktion)
         self.assertIn("Zeitstrahl", funktion)
         self.assertIn("jur|nodes bleibt unberührt", funktion)
 
-    def test_danach_raeumt_er_die_arbeitsakte_der_offenen_sitzung_auf(self):
-        funktion = self.js[self.js.index("async function gedaechtnisGanzVerwerfen"):]
-        funktion = funktion[:funktion.index("\n}\n")]
-        self.assertIn("/dokumente/${pfad}", funktion)
-        self.assertIn("ausDemGedaechtnis.has", funktion)
+    def test_es_ist_genau_EIN_aufruf_und_nicht_einer_je_dokument(self):
+        """Aus der Kanzlei: „scheint nicht abzuschließen … eine Sanduhr."
+
+        Hier stand eine Schleife mit einem DELETE je Dokument. Jede dieser
+        Antworten liest die Dokumentliste **neu bei jur|nodes**, und der
+        Hersteller lässt eine Anfrage je IP-Adresse zugleich zu: Bei fünfzig
+        Dokumenten waren das fünfzig Lesevorgänge der ganzen Akte für einen
+        Klick. Der Knopf war nicht hängen geblieben – er arbeitete.
+        """
+        funktion = self._funktion("gedaechtnisWeg")
+        self.assertEqual(funktion.count('api("DELETE"'), 1, funktion)
+        self.assertNotIn("for (", funktion, "Keine Schleife über die Dokumente.")
+        self.assertNotIn("/dokumente/", funktion)
 
 
 if __name__ == "__main__":
