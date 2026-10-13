@@ -19,8 +19,10 @@ echo Aktengedaechtnis wird nicht einmal gelesen - die Probe muss
 echo auch dann arbeiten, wenn gerade es das Problem ist.
 echo.
 echo In der Ausgabe steht KEIN Akteninhalt: kein Betreff, kein
-echo Dateiname, kein Beteiligter. Kennungen stehen verdeckt. Diese
-echo Ausgabe laesst sich weitergeben.
+echo Dateiname, kein Beteiligter. Kennungen stehen verdeckt.
+echo Weist der Server etwas ab, steht sein Wortlaut dabei - der
+echo kommt von ihm, nicht von hier. Ein Blick darauf vor dem
+echo Weitergeben genuegt.
 echo.
 
 REM Dieselben Angaben wie START-JURNODES.bat - gemessen werden soll ja,

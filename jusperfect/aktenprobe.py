@@ -27,8 +27,11 @@ auch dann arbeiten, wenn gerade das Gedächtnis das Problem ist.
 
 **Die Ausgabe enthält keinen Akteninhalt.** Kein Betreff, kein Dateiname, kein
 Beteiligter, kein Text – nur Art, Richtung, Datum, Anzahlen und im Fehlerfall
-die Ausnahmekette (Typen und Codestellen). Kennungen stehen verdeckt. Diese
-Ausgabe lässt sich weitergeben.
+die Ausnahmekette (Typen und Codestellen). Kennungen stehen verdeckt.
+
+Weist der Server etwas ab, steht **sein** Wortlaut dabei – der kommt von ihm,
+nicht von hier, und genau er sagt oft, was fehlt. Ein Blick darauf vor dem
+Weitergeben genügt; derselbe Weg wie im Prüfbogen der Schnittstelle.
 
 Aufruf:  python -m jusperfect.aktenprobe [--akte AKTENZEICHEN]
 Windows: AKTE-PRUEFEN.bat
@@ -114,6 +117,13 @@ def _satz(fehler: Exception, akte_id: str) -> str:
         # von AWS (Befund F01 der Zweitpruefung vom 05.10.2026).
         return ""
     text = " ".join(str(fehler).split())
+    # Was der Server selbst dazu sagt. Am 13.10.2026 stand im Pruefbogen der
+    # Schnittstelle "Bitte geben Sie eine Seitenzahl > 0 an" - ein Satz, der
+    # eine Fehlersuche ueber zwei Runden beendet haette. Er kommt vom Server,
+    # also steht dabei, dass er von dort kommt.
+    wortlaut = getattr(fehler, "server_wortlaut", "")
+    if wortlaut:
+        text = f"{text} Der Server sagt dazu: {wortlaut}"
     return text.replace(akte_id, verdeckt(akte_id)) if akte_id else text
 
 
@@ -146,6 +156,43 @@ class Probe:
             return False, None
         self.gut += 1
         return True, ergebnis
+
+
+def kennung_suchen(adapter: Any, eingabe: str) -> tuple[str, str]:
+    """Aus dem Aktenzeichen die Kennung machen, mit der die Akte gefragt wird.
+
+    **Der Fehler, der mich am 13.10.2026 zwei Runden gekostet hat.** Die Probe
+    nahm, was eingetippt wurde, und sendete es als ``identifier``. Eingetippt
+    wird aber das AKTENZEICHEN - die Kennung ist eine andere Zeichenfolge, und
+    der Server beantwortete die falsche Angabe mit **405**.
+
+    Daraus habe ich geschlossen, der Server weise einen beschriebenen Aufruf
+    ab, und das der Kanzlei auch so gesagt. Der Pruefbogen der Schnittstelle
+    zeigte an derselben Adresse und derselben Akte Status 200 - er sucht
+    naemlich zuerst (``GET /record/search``) und fragt dann mit der Kennung.
+    Genau das geschieht hier jetzt auch.
+
+    > Zwei Werkzeuge am selben Server, zwei Ergebnisse: Dann hat nicht der
+    > Server zwei Meinungen, sondern eines der Werkzeuge fragt falsch.
+
+    Gibt ``(kennung, hinweis)`` zurueck. Laesst sich nichts finden, bleibt die
+    Eingabe stehen - dann sagt der naechste Schritt, was der Server dazu meint.
+    """
+    try:
+        treffer = adapter.akten_suchen(eingabe)
+    except Exception as fehler:  # noqa: BLE001 - die Suche ist kein Muss
+        return eingabe, (f"Die Aktensuche ging nicht ({type(fehler).__name__}); "
+                         f"gefragt wird mit der Eingabe selbst.")
+    genau = [a for a in treffer if a.aktenzeichen == eingabe or a.id == eingabe]
+    if len(genau) == 1:
+        return genau[0].id, f"Aktenzeichen aufgeloest zu {verdeckt(genau[0].id)}."
+    if len(treffer) == 1:
+        return treffer[0].id, f"Eine Akte gefunden, Kennung {verdeckt(treffer[0].id)}."
+    if not treffer:
+        return eingabe, ("Die Aktensuche kennt diese Eingabe nicht; gefragt "
+                         "wird mit ihr selbst.")
+    return eingabe, (f"Die Aktensuche findet {len(treffer)} Akten dazu - "
+                     f"bitte das vollstaendige Aktenzeichen eingeben.")
 
 
 def _adapter(e: Einstellungen):
@@ -354,7 +401,7 @@ def main(argv: list[str] | None = None, adapter: Any = None) -> int:
     if not akte_id:
         _sagen(SCHLECHT, "Ohne Akte gibt es nichts zu pruefen.")
         return 2
-    _sagen(PUNKT, f"Akte: {verdeckt(akte_id)}")
+    _sagen(PUNKT, f"Eingabe: {verdeckt(akte_id)}")
 
     if adapter is None:
         try:
@@ -362,6 +409,13 @@ def main(argv: list[str] | None = None, adapter: Any = None) -> int:
         except (KonfigurationsFehler, JurNodesFehler) as fehler:
             _sagen(SCHLECHT, f"Die Anbindung liess sich nicht herstellen: {fehler}")
             return 2
+
+    # Erst suchen, dann fragen - wie der Pruefbogen der Schnittstelle.
+    _ueberschrift("Welche Kennung wird gefragt?")
+    kennung, hinweis = kennung_suchen(adapter, akte_id)
+    _sagen(GUT if kennung != akte_id else WARNUNG, hinweis)
+    akte_id = kennung
+    _sagen(PUNKT, f"Gefragt wird mit: {verdeckt(akte_id)}")
 
     probe = Probe(akte_id)
     _ueberschrift("Die Stammdaten")

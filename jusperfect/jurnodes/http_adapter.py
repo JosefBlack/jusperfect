@@ -544,6 +544,33 @@ def _groesse(wert: Any) -> int | None:
         return None
 
 
+def _mit_wortlaut(fehler: JurNodesFehler, antwort: Any) -> JurNodesFehler:
+    """Den Wortlaut des Servers an den Fehler haengen - NICHT in seinen Satz.
+
+    Am 13.10.2026 stand im Pruefbogen der Schnittstelle, an derselben Adresse
+    und derselben Akte::
+
+        mit Platzhalter und page=0: Status 405
+        Der Server sagt dazu: Bitte geben Sie eine Seitenzahl > 0 an
+
+    Dieser Server beantwortet also auch **falsche Angaben** mit 405 und sagt
+    dabei genau, was ihm fehlt. Dieser eine Satz haette eine Fehlersuche ueber
+    zwei Runden beendet - er war da und wurde weggeworfen.
+
+    Er steht trotzdem nicht im Satz des Fehlers: Der geht in die Oberflaeche
+    und ins Protokoll, und was ein fremder Server schreibt, ist von niemandem
+    geprueft. Er haengt am Objekt, und wer ihn braucht - die Aktenprobe, die
+    ein Mensch liest und weitergibt -, holt ihn sich dort.
+    """
+    try:
+        text = " ".join((antwort.text or "")[:400].split())
+    except Exception:  # noqa: BLE001 - ein Wortlaut ist nie eine Bedingung
+        return fehler
+    if text:
+        fehler.server_wortlaut = text[:200]
+    return fehler
+
+
 def _erlaubte_verfahren(antwort: Any) -> str:
     """Was der Server bei 405 selbst als erlaubt nennt - der ``Allow``-Kopf.
 
@@ -870,9 +897,9 @@ class HttpJurNodesAdapter:
             # Aufruf abgewiesen wurde, und in einer Sitzung laufen ein halbes
             # Dutzend. Am 24.09.2026 hat genau das eine Stunde gekostet.
             # Ein Pfad ist fest verdrahtet und enthaelt keinen Akteninhalt.
-            raise JurNodesFehler(
+            raise _mit_wortlaut(JurNodesFehler(
                 f"jur|nodes antwortete auf GET {pfad} mit Status "
-                f"{antwort.status_code}." + _erlaubte_verfahren(antwort))
+                f"{antwort.status_code}." + _erlaubte_verfahren(antwort)), antwort)
         return antwort
 
     def _alle_seiten(self, pfad: str, nicht_gefunden: type[JurNodesFehler],
@@ -949,9 +976,9 @@ class HttpJurNodesAdapter:
                 f"{antwort.status_code}). Dem Schlüssel fehlt der Bereich "
                 f"{bereich_von(pfad) or pfad} oder ein Recht darin.")
         if antwort.status_code >= 400:
-            raise JurNodesFehler(
+            raise _mit_wortlaut(JurNodesFehler(
                 f"jur|nodes antwortete auf POST {pfad} mit Status "
-                f"{antwort.status_code}." + _erlaubte_verfahren(antwort))
+                f"{antwort.status_code}." + _erlaubte_verfahren(antwort)), antwort)
         return antwort
 
     def _alle_seiten_post(self, pfad: str, nicht_gefunden: type[JurNodesFehler],

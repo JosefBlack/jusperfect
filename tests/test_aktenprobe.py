@@ -223,3 +223,119 @@ class DerSatzDesServersGehoertDazu(unittest.TestCase):
         from jusperfect import aktenprobe as ap
 
         self.assertEqual(ap._satz(ValueError("Mandantin X, 8.400 EUR"), AKTE), "")
+
+
+class ErstSuchenDannFragen(unittest.TestCase):
+    """Der Fehler, der zwei Runden gekostet hat – und meine falsche Auskunft.
+
+    Die Probe nahm, was eingetippt wurde, und sendete es als `identifier`.
+    Eingetippt wird aber das **Aktenzeichen**; die Kennung ist eine andere
+    Zeichenfolge. Der Server beantwortete die falsche Angabe mit **405**, und
+    ich habe daraus geschlossen, er weise einen beschriebenen Aufruf ab – und
+    das der Kanzlei auch so gesagt.
+
+    Der Prüfbogen der Schnittstelle zeigte an derselben Adresse und derselben
+    Akte Status 200. Er sucht nämlich zuerst (`GET /record/search`) und fragt
+    dann mit der Kennung.
+
+    > Zwei Werkzeuge am selben Server, zwei Ergebnisse: Dann hat nicht der
+    > Server zwei Meinungen, sondern eines der Werkzeuge fragt falsch.
+    """
+
+    def test_aus_dem_aktenzeichen_wird_die_kennung(self):
+        from jusperfect.aktenprobe import kennung_suchen
+        from jusperfect.domain.models import Akte
+
+        class _Sucht:
+            def akten_suchen(self, begriff):
+                return [Akte(id="FL6BDPWJ940ALEY4BVP0", aktenzeichen="X-100-2026",
+                             bezeichnung="Eine Sache")]
+
+        kennung, hinweis = kennung_suchen(_Sucht(), "X-100-2026")
+        self.assertEqual(kennung, "FL6BDPWJ940ALEY4BVP0")
+        self.assertNotIn("FL6BDPWJ940ALEY4BVP0", hinweis, "Auch hier verdeckt.")
+
+    def test_eine_kennung_bleibt_eine_kennung(self):
+        """Wer die Kennung selbst eintippt, soll sie behalten."""
+        from jusperfect.aktenprobe import kennung_suchen
+        from jusperfect.domain.models import Akte
+
+        class _Sucht:
+            def akten_suchen(self, begriff):
+                return [Akte(id="FL6BDPWJ940ALEY4BVP0", aktenzeichen="X-100-2026",
+                             bezeichnung="Eine Sache")]
+
+        kennung, _ = kennung_suchen(_Sucht(), "FL6BDPWJ940ALEY4BVP0")
+        self.assertEqual(kennung, "FL6BDPWJ940ALEY4BVP0")
+
+    def test_ohne_treffer_bleibt_die_eingabe_und_es_wird_gesagt(self):
+        from jusperfect.aktenprobe import kennung_suchen
+
+        class _Leer:
+            def akten_suchen(self, begriff):
+                return []
+
+        kennung, hinweis = kennung_suchen(_Leer(), "X-999-2026")
+        self.assertEqual(kennung, "X-999-2026")
+        self.assertIn("kennt diese Eingabe nicht", hinweis)
+
+    def test_bei_mehreren_treffern_wird_nicht_geraten(self):
+        from jusperfect.aktenprobe import kennung_suchen
+        from jusperfect.domain.models import Akte
+
+        class _Mehrere:
+            def akten_suchen(self, begriff):
+                return [Akte(id="A1", aktenzeichen="X-100-2026", bezeichnung="a"),
+                        Akte(id="A2", aktenzeichen="X-101-2026", bezeichnung="b")]
+
+        kennung, hinweis = kennung_suchen(_Mehrere(), "X-10")
+        self.assertEqual(kennung, "X-10")
+        self.assertIn("2 Akten", hinweis)
+
+    def test_eine_kaputte_suche_haelt_die_probe_nicht_auf(self):
+        from jusperfect.aktenprobe import kennung_suchen
+
+        class _Kaputt:
+            def akten_suchen(self, begriff):
+                raise RuntimeError("erfundenes Unheil")
+
+        kennung, hinweis = kennung_suchen(_Kaputt(), "X-100-2026")
+        self.assertEqual(kennung, "X-100-2026")
+        self.assertIn("RuntimeError", hinweis)
+        self.assertNotIn("erfundenes Unheil", hinweis)
+
+
+class DerWortlautDesServersStehtDabei(unittest.TestCase):
+    """„Bitte geben Sie eine Seitenzahl > 0 an" – der Satz war da.
+
+    Der Prüfbogen der Schnittstelle zeigt ihn seit jeher; die Aktenprobe warf
+    ihn weg und zeigte nur „Status 405". Dieser eine Satz hätte die
+    Fehlersuche vom 13.10.2026 in einem Schritt beendet.
+    """
+
+    def test_er_steht_in_der_ausgabe(self):
+        class _Mault(_ServerVollstaendig):
+            def __call__(self, anfrage):
+                if anfrage.url.path.endswith("/correspondence/search"):
+                    return httpx.Response(
+                        405, text="Bitte geben Sie eine Seitenzahl > 0 an")
+                return super().__call__(anfrage)
+
+        _, ausgabe = _lauf(_adapter(_Mault()))
+        self.assertIn("Der Server sagt dazu", ausgabe)
+        self.assertIn("Seitenzahl", ausgabe)
+
+    def test_er_steht_nicht_im_satz_des_fehlers_selbst(self):
+        """Der geht in die Oberfläche und ins Protokoll – dort nichts Fremdes."""
+        from jusperfect.jurnodes.base import JurNodesFehler
+
+        class _Mault(_ServerVollstaendig):
+            def __call__(self, anfrage):
+                return httpx.Response(405, text="Fremder Text aus der Ferne")
+
+        adapter = _adapter(_Mault())
+        with self.assertRaises(JurNodesFehler) as gefangen:
+            adapter.akte(AKTE)
+        self.assertNotIn("Fremder Text", str(gefangen.exception))
+        self.assertEqual(getattr(gefangen.exception, "server_wortlaut", ""),
+                         "Fremder Text aus der Ferne")

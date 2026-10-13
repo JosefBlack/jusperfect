@@ -4647,3 +4647,87 @@ Zu vergleichen ist die Zeile „Schnittstelle:", die `START-JURNODES.bat` beim
 Start auf **beiden** Rechnern ausgibt.
 
 2134 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026 — berichtigt: der Server war in Ordnung, meine Probe fragte falsch
+
+Die Kanzlei hat den Prüfbogen der Schnittstelle geschickt, gelaufen am
+**selben Rechner, an derselben Adresse, an derselben Akte**:
+
+```
+→  Akte: GET /record  ?{'identifier': 'FL6BD…'}
+✓  Status 200, 1 Eintrag/Einträge.
+
+   /correspondence/search, Seite 1:
+✓  26 Eintrag/Einträge auf Seite 1, amountTotal 26, pagesTotal 1
+```
+
+**Beide Aufrufe, die ich für abgewiesen erklärt hatte, antworten mit 200.**
+
+### Der Fehler
+
+Der Prüfbogen sucht **zuerst** und fragt **dann**:
+
+```
+→  Aktensuche: GET /record/search  ?{'sign': 'D-…'}   → identifier: FL6BD…
+→  Akte:       GET /record  ?{'identifier': 'FL6BD…'}
+```
+
+Meine Aktenprobe nahm, was eingetippt wurde, und sendete es als
+``identifier``. Eingetippt wird aber das **Aktenzeichen** — die Kennung ist
+eine andere Zeichenfolge. Der Server beantwortete die falsche Angabe mit 405.
+
+Und dass er das tut, stand im selben Prüfbogen, drei Bildschirmseiten weiter
+oben:
+
+```
+✗  mit Platzhalter und page=0: Status 405
+   Der Server sagt dazu: Bitte geben Sie eine Seitenzahl > 0 an
+```
+
+**Dieser Server beantwortet falsche Angaben mit 405** und sagt dabei genau,
+was ihm fehlt.
+
+### Was ich daraus gemacht habe
+
+Ich habe aus „405" geschlossen, der Server weise einen vom Hersteller
+beschriebenen Aufruf ab — und das der Kanzlei so geschrieben, mit Tabelle,
+mit „das ist nicht unser Code" und mit dem Rat, die Adressen beider Rechner
+zu vergleichen. Falsch, und zwar an der teuersten Stelle: Es schickt den
+Mandanten zum Hersteller für einen Fehler, der hier liegt.
+
+> Zwei Werkzeuge am selben Server, zwei Ergebnisse: Dann hat nicht der Server
+> zwei Meinungen, sondern eines der Werkzeuge fragt falsch. Dass der
+> Prüfbogen dieselbe Akte am selben Tag gelesen hatte, stand in der Datei, die
+> ich nicht aufgemacht habe.
+
+### Berichtigt
+
+1. **Die Aktenprobe löst das Aktenzeichen auf**, über `akten_suchen` — genau
+   wie der Prüfbogen. Sie sagt in einer eigenen Zeile, mit welcher Kennung
+   gefragt wird. Findet die Suche nichts oder mehreres, wird **nicht geraten**:
+   Dann steht die Eingabe und der Grund da.
+2. **Der Wortlaut des Servers steht wieder dabei.** Er war da, und ich habe
+   ihn weggeworfen — „Bitte geben Sie eine Seitenzahl > 0 an" hätte zwei
+   Runden erspart. Er hängt am Fehlerobjekt (`server_wortlaut`) und **nicht**
+   in dessen Satz: Der geht in die Oberfläche und ins Protokoll, und was ein
+   fremder Server schreibt, ist von niemandem geprüft. Die Aktenprobe liest
+   ihn dort, und dass er vom Server kommt, steht dabei — derselbe Weg wie im
+   Prüfbogen seit jeher.
+3. Die Zusage der Probe ist entsprechend berichtigt: ihre **eigene** Ausgabe
+   trägt keinen Akteninhalt; der zitierte Satz kommt vom Server, und ein
+   Blick darauf vor dem Weitergeben genügt.
+
+`tests/test_aktenprobe.py` jetzt 24 Prüfungen.
+
+### Was damit auch zum TypeError gesagt ist
+
+Die E-Akte **antwortet** an diesem Rechner. Dass `_mail_dokumente` nie lief —
+die Bedingung für das `Field`-Problem — kann dort also nicht an einer
+abgewiesenen Korrespondenzsuche gelegen haben. Die naheliegende Erklärung ist
+`JUSPERFECT_KORRESPONDENZ=aus` im Windows-Konto dieses Rechners. **Gemessen
+ist das nicht**, und es ändert nichts: Der `TypeError` ist behoben, und die
+Akte geht in beiden Fällen auf.
+
+2141 Prüfungen grün, eine übersprungen.
