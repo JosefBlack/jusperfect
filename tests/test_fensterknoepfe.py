@@ -54,10 +54,16 @@ def test_rechts_schaltet_nur_die_rechte_spalte(leiste: str) -> None:
 
 
 def test_die_reihenfolge_im_quelltext_ist_die_reihenfolge_im_bild(leiste: str) -> None:
-    """Sonst hilft die beste Ausrichtung nichts."""
-    assert (leiste.index('fenster-knoepfe links')
-            < leiste.index('arbeitsknoepfe')
-            < leiste.index('fenster-knoepfe rechts'))
+    """Sonst hilft die beste Ausrichtung nichts.
+
+    Seit dem 13.10.2026 stehen in dieser Leiste nur noch die Fensterknoepfe:
+    links der fuer die Dokumente, rechts die drei fuer die rechte Spalte. Die
+    Arbeitsknoepfe sind in die rechte Spalte gewandert. Aus der Kanzlei: "Der
+    Chat steht im Vordergrund. Die Funktionen sollen waehlbar sein, aber zum
+    rechten Fenster gehoeren."
+    """
+    assert leiste.index('fenster-knoepfe links') < leiste.index('fenster-knoepfe rechts')
+    assert "arbeitsknoepfe" not in leiste, "Die Funktionen gehoeren nicht mehr hierher."
 
 
 def test_der_pfeil_zeigt_zur_spalte(leiste: str) -> None:

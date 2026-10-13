@@ -181,10 +181,37 @@ button, input, textarea, select { font: inherit; color: inherit; }
 #spalte-dokument[hidden], #spalte-rechts[hidden], .fenster[hidden] { display: none !important; }
 
 @media (min-width: 1101px) {
-  .flaeche.ohne-links { grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr); }
-  .flaeche.ohne-rechts { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); }
-  .flaeche.ohne-links.ohne-rechts { grid-template-columns: minmax(0, 1fr); }
+  /* Wer ein Fenster zumacht, gibt den Platz dem CHAT - nicht anteilig allen.
+     Aus der Kanzlei am 13.10.2026: "Beim Schliessen erweitert sich nur das
+     Chatfenster, nicht das Dokumentenfenster."
+
+     Die Zahlen der Grundaufteilung sind 0.8 / 1.6 / 0.85. Faellt eine Spalte
+     weg, bekommt die mittlere deren Anteil dazu - die andere behaelt ihren.
+     Vorher teilten sich beide den frei werdenden Platz, und die Dokumente
+     wurden breiter, obwohl niemand das wollte. */
+  .flaeche.ohne-links { grid-template-columns: minmax(0, 2.4fr) minmax(280px, 0.85fr); }
+  .flaeche.ohne-rechts { grid-template-columns: minmax(0, 0.8fr) minmax(0, 2.45fr) auto; }
+  .flaeche.ohne-links.ohne-rechts { grid-template-columns: minmax(0, 1fr) auto; }
 }
+
+/* Die rechte Spalte, wenn alle drei Fenster zu sind: nur noch ihre Leiste.
+   Sie verschwindet nicht ganz - dann waeren Analyse und Entwurf weg. */
+.spalte.rechts.nur-leiste { background: var(--grund); }
+.spalte.rechts.nur-leiste > .fenster { display: none !important; }
+.rechts-aktionen { flex: none; display: flex; justify-content: flex-end;
+  gap: 6px; padding: 8px 10px; background: var(--flaeche);
+  border-bottom: 1px solid var(--linie); }
+.spalte.rechts.nur-leiste .rechts-aktionen {
+  border-bottom: 0; align-items: flex-start; }
+
+/* Der Chat bleibt in der Mitte, egal wie breit seine Spalte wird.
+   Aus der Kanzlei: "Chat sollte immer in der Mitte stehen und nicht nach
+   links springen." Ohne diese Zeilen rutscht er an den linken Rand, sobald
+   die Dokumentspalte zugeht - und bei zwei Bildschirmen Breite entstuenden
+   Zeilen, die niemand mehr liest. Eine feste Lesebreite loest beides. */
+.spalte.cowork .thread,
+.spalte.cowork .frage-form,
+.spalte.cowork .schaetzung { max-width: 920px; margin-inline: auto; width: 100%; }
 
 /* Der Benutzername ist selbst der Weg zurueck zur Auswahl. */
 /* Der Benutzerknopf. Er stand hier als blasser Text ohne Rahmen und wurde in
@@ -942,7 +969,7 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
    ihn ueberschreibt, nicht. Das Nebenfenster ist genau der Fall, fuer den es
    die Ausnahme gibt: EINE Ansicht, die immer sichtbar sein muss. */
 :root[data-nebenfenster] .kopf,
-:root[data-nebenfenster] .spalte.dokument,
+:root[data-nebenfenster]:not([data-nebenfenster="dokument"]) .spalte.dokument,
 :root[data-nebenfenster] .spalte.cowork,
 :root[data-nebenfenster] #anmelden,
 :root[data-nebenfenster] #einstieg,
@@ -955,6 +982,14 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 :root[data-nebenfenster] #flaeche,
 :root[data-nebenfenster] #spalte-rechts { display: block !important;
   height: 100vh; width: 100%; max-width: none; grid-template-columns: none; }
+
+/* Die Dokumente als eigenes Fenster. Sie sind keine ".fenster"-Kachel wie die
+   drei rechten, sondern eine Spalte - deshalb eine eigene Zeile statt eines
+   Eintrags in der Liste darunter. */
+:root[data-nebenfenster="dokument"] .spalte.dokument {
+  display: flex !important; width: 100%; max-width: none; height: 100vh;
+  border: 0; border-radius: 0; }
+:root[data-nebenfenster="dokument"] #spalte-rechts { display: none !important; }
 
 /* Je Nebenfenster genau EIN Abschnitt - und die anderen bleiben weg, auch
    wenn das Hauptfenster sie im gespeicherten Fensterstand offen hat. */

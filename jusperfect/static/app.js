@@ -1363,14 +1363,35 @@ async function passagenLaden() {
   const daten = await api("GET", `/api/sitzungen/${sitzung.sitzung.id}/passagen`);
   passagenIndex = {};
   for (const p of daten.passagen) passagenIndex[p.kennung] = p;
-  // Dokumentfilter
-  const filter = $("dok-filter"); filter.replaceChildren();
+  dokumentspalteZeichnen();
+}
+
+/** Die Dokumentspalte aus dem, was schon da ist - ohne einen einzigen Aufruf.
+ *
+ * Herausgeloest am 13.10.2026. Aus der Kanzlei: "auch die Dokumente sollen auf
+ * einen Extrabildschirm zu oeffnen sein, so dass der Chat viel Platz hat."
+ *
+ * Bis dahin stand im Bestand, die Dokumentspalte bekomme KEIN Nebenfenster:
+ * "Sie holt ihren Text selbst nach - ein Spiegel, der nachholen muss, ist kein
+ * Spiegel mehr." Das stimmte, solange das Fuellen am Aufruf `passagenLaden`
+ * hing. Nachgesehen: Der Spiegel bekommt `passagenIndex` ueber den Kanal
+ * laengst mitgeschickt, und `zeigeDokument` liest nur daraus. Es fehlte nicht
+ * die Angabe, sondern die Trennung zwischen Holen und Zeichnen.
+ */
+function dokumentspalteZeichnen() {
+  const filter = $("dok-filter");
+  if (!filter) return;
+  const gewaehlt = filter.value || "";
+  filter.replaceChildren();
   const alle = document.createElement("option"); alle.value = ""; alle.textContent = "Alle Dokumente"; filter.appendChild(alle);
-  for (const g of sitzung.sitzung.geladen) {
+  for (const g of ((sitzung && sitzung.sitzung && sitzung.sitzung.geladen) || [])) {
     const o = document.createElement("option"); o.value = g.dokument_id; o.textContent = g.titel; filter.appendChild(o);
   }
+  // Die Wahl ueberlebt das Neuzeichnen - sonst spraenge der Spiegel bei jeder
+  // Nachricht aus dem Hauptfenster auf "Alle Dokumente" zurueck.
+  filter.value = [...filter.options].some((o) => o.value === gewaehlt) ? gewaehlt : "";
   filter.onchange = () => zeigeDokument(filter.value);
-  zeigeDokument("");
+  zeigeDokument(filter.value);
 }
 
 function zeigeDokument(nurDokument) {
@@ -1656,6 +1677,7 @@ function nebenfensterZeichnen() {
     if (nebenfenster === "chronologie") chronologieZeigen();
     else if (nebenfenster === "belege") zeigeBelege();
     else if (nebenfenster === "gedaechtnis") gedaechtnisFensterZeigen();
+    else if (nebenfenster === "dokument") dokumentspalteZeichnen();
   } catch (e) {
     // Ein Spiegel, der sich am Zeichnen verschluckt, darf nicht das ganze
     // Fenster mitnehmen - nebenan wird weitergearbeitet.
@@ -1697,7 +1719,16 @@ function fensterAnwenden() {
   if (rechts) {
     const offen = ["chronologie", "gedaechtnis", "belege"].some(
       (n) => fensterStand[n] && (n !== "gedaechtnis" || K.gedaechtnisAktiv));
-    rechts.hidden = !offen;
+    // Die Spalte bleibt stehen, auch wenn alle drei Fenster zu sind: Seit dem
+    // 13.10.2026 traegt sie oben die Funktionen (Analyse, Entwurf,
+    // Gedaechtnis, Mehr). Waere sie dann weg, waere Analyse nicht mehr
+    // erreichbar, sobald jemand die Belege zuklappt - ein Knopf, der mit dem
+    // Fenster verschwindet, in dem er steht, ist eine Falle.
+    //
+    // Zu heisst jetzt: schmal. "ohne-rechts" gibt der Spalte nur noch die
+    // Breite ihrer Leiste; der frei werdende Platz geht an den Chat.
+    rechts.hidden = false;
+    rechts.classList.toggle("nur-leiste", !offen);
     $("flaeche").classList.toggle("ohne-rechts", !offen);
   }
   $("flaeche").classList.toggle("ohne-links", !fensterStand.dokument);
@@ -4237,7 +4268,11 @@ document.addEventListener("DOMContentLoaded", () => {
   $("ged-dialog").addEventListener("close", (ev) => {
     if (ev.target.returnValue === "uebernehmen") gedaechtnisAufnehmen();
   });
-  document.querySelector(".aktionen").addEventListener("click", (ev) => {
+  // Die Funktionsknoepfe sind am 13.10.2026 in die rechte Spalte gewandert
+  // (siehe index.html). Gelauscht wird deshalb am Dokument und nicht mehr an
+  // einer Leiste: Wer Knoepfe verschiebt, soll nicht zugleich daran denken
+  // muessen, den Lauscher mitzunehmen.
+  document.addEventListener("click", (ev) => {
     const b = ev.target.closest("[data-aktion]"); if (!b) return;
     if (b.dataset.aktion === "pack") mitKnopf(b, packStarten);
     else if (b.dataset.aktion === "analyse") mitKnopf(b, analyseStarten);

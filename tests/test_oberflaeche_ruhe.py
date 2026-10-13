@@ -86,39 +86,46 @@ def test_die_meldung_liegt_weder_ueber_der_eingabe_noch_ueber_den_knoepfen(css: 
 
 
 def test_die_leiste_trennt_arbeiten_von_ansehen(html: str) -> None:
-    """Zwei Arten von Knopf, getrennt – und seit dem 22.09.2026 sogar räumlich.
+    """Zwei Arten von Knopf, getrennt – und seit dem 13.10.2026 in zwei Spalten.
 
-    Analyse, Entwurf und Arbeitsakte tun etwas. Die vier daneben tun nichts an
-    der Akte; sie entscheiden nur, was zu sehen ist. Stünden sie in einer Reihe,
+    Analyse, Entwurf und Gedächtnis tun etwas an der Akte. Die vier daneben tun
+    nichts; sie entscheiden nur, was zu sehen ist. Stünden sie in einer Reihe,
     müsste man bei jedem Klick überlegen, welcher von beiden Sorten er ist.
 
-    Die Trennung war zunächst ein Strich zwischen zwei Gruppen in der Mitte.
-    Aus der Kanzlei kam dann: „die Auswahlbuttons waren in der Mitte und es
-    öffneten sich rechts oder links Fenster." Die Fensterknöpfe stehen jetzt an
-    den Rändern, auf der Seite ihres Fensters; die Arbeit bleibt in der Mitte.
-    Welcher Knopf zu welcher Seite gehört, hält `test_fensterknoepfe.py` fest.
+    Die Trennung war zuerst ein Strich, dann die Stelle in der Leiste (die
+    Fensterknöpfe an den Rändern, die Arbeit in der Mitte). Jetzt ist es die
+    Spalte. Aus der Kanzlei am 13.10.2026:
+
+        Chat teilte sich das Fenster mit Analyse und Eingangsprüfung, Entwurf
+        usw. Das ist meines Erachtens nicht gut. Der Chat steht im
+        Vordergrund. Die Funktionen sollen wählbar sein, aber zum rechten
+        Fenster gehören und anklickbar sein.
+
+    Die Arbeitsknöpfe stehen deshalb oben in der rechten Spalte – und zwar in
+    einer Leiste, die stehen bleibt, wenn die drei Fenster darunter zu sind.
+    Ein Knopf, der mit dem Fenster verschwindet, in dem er steht, wäre eine
+    Falle.
     """
+    # In der Kopfzeile des Chats steht keine Arbeit mehr.
     aktionen = re.search(r'<div class="aktionen">(.*?)</div>\s*</div>\s*<div id="thread"',
                          html, re.S).group(1)
-    arbeit = aktionen[aktionen.index('class="arbeitsknoepfe"'):aktionen.index('class="mehr"')]
-    # Analyse, Entwurf, Aktengedächtnis. Das dritte kam am 25.09.2026 dazu:
-    # "Aktengedächtnis soll eigener Button sein." Es gehört hierher, denn es
-    # tut etwas an der Akte - anders als die Fensterknöpfe daneben, die nur
-    # entscheiden, was zu sehen ist.
-    assert arbeit.count("<button") == 3, "Analyse, Entwurf und Aktengedächtnis."
+    assert "arbeitsknoepfe" not in aktionen
+    for aktion in ("analyse", "entwurf", "gedaechtnis", "triage"):
+        assert f'data-aktion="{aktion}"' not in aktionen, aktion
+
+    # Sie steht in der rechten Spalte, VOR dem ersten Fenster.
+    rechts = html[html.index('<aside class="spalte rechts"'):html.index("</aside>")]
+    assert rechts.index('class="rechts-aktionen"') < rechts.index('class="fenster ')
+    arbeit = rechts[rechts.index('class="arbeitsknoepfe"'):rechts.index('class="mehr"')]
+    assert arbeit.count("<button") == 3, "Analyse, Entwurf und Gedächtnis."
     for aktion in ("analyse", "entwurf", "gedaechtnis"):
         assert f'data-aktion="{aktion}"' in arbeit, aktion
-    # „Arbeitsakte" stand daneben, direkt neben dem Knopf, der die
-    # Dokumentspalte schaltet: zwei Knöpfe mit dem Wort „Dokument", die
-    # Verschiedenes tun. Er gehört zu den Dokumenten, also nach links.
-    assert 'data-aktion="dokumente"' not in aktionen
-    assert aktionen.count("data-fenster=") == 4
-    # Kein Fensterknopf zwischen den Arbeitsknöpfen und umgekehrt.
-    assert "data-fenster=" not in arbeit
-    for seite in ("links", "rechts"):
-        gruppe = aktionen[aktionen.index(f'fenster-knoepfe {seite}'):]
-        gruppe = gruppe[:gruppe.index("</span>")]
-        assert "data-aktion=" not in gruppe, seite
+
+
+def test_die_leiste_der_funktionen_bleibt_wenn_die_fenster_zugehen(app_js: str) -> None:
+    """Sonst wäre Analyse weg, sobald jemand die Belege zuklappt."""
+    assert "rechts.hidden = false" in app_js
+    assert 'rechts.classList.toggle("nur-leiste"' in app_js
 
 
 def test_jedes_fenster_laesst_sich_zuklappen(html: str, app_js: str) -> None:

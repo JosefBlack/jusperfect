@@ -163,6 +163,14 @@
               title="Welche Dokumente liegen in der Arbeitsakte?">Arbeitsakte</button>
       <!-- Der Pfeil zeigt dorthin, wohin die Spalte verschwindet. Rechts am Rand
            der Leiste steht er dort, wo das Auge ihn sucht. -->
+      <!-- Aus der Kanzlei am 13.10.2026: "auch die Dokumente sollen auf einen
+           Extrabildschirm zu oeffnen sein, so dass der Chat viel Platz hat."
+           Chronologie, Gedächtnis und Belege hatten das Zeichen seit dem
+           30.09.2026; die Dokumentspalte als einzige nicht. Der Weg war
+           gebaut und wurde dreimal benutzt - hier fehlte nur der Knopf. -->
+      <button type="button" class="fenster-los" data-fenster-los="dokument"
+              title="Dokumente in einem eigenen Fenster öffnen – für den zweiten Bildschirm"
+              aria-label="Dokumente in einem eigenen Fenster öffnen">⧉</button>
       <button type="button" class="fenster-zu" data-fenster-zu="dokument"
               title="Dokumente ausblenden" aria-label="Dokumente ausblenden">‹</button>
     </div>
@@ -183,40 +191,6 @@
         <span class="fenster-knoepfe links">
           <button type="button" data-fenster="dokument" class="mini leise fensterknopf">‹ Dokumente</button>
         </span>
-        <span class="arbeitsknoepfe">
-          <button data-aktion="analyse" class="mini">Analyse</button>
-          <button data-aktion="entwurf" class="mini">Entwurf</button>
-          <!-- Ein eigener Knopf, nicht im Mehr-Menue. Aus der Kanzlei am
-               25.09.2026: "Aktengedaechtnis soll eigener Button sein."
-               Davor war er ganz verschwunden, weil das Gedaechtnis
-               ausgeschaltet ist - und etwas, das spurlos verschwindet, sieht
-               aus wie ein Fehler. Er steht jetzt fest neben den beiden
-               Arbeitsknoepfen; ist das Gedaechtnis aus, sagt der Klick, wie
-               es wieder angeht. -->
-          <button data-aktion="gedaechtnis" class="mini">Gedächtnis</button>
-          <div class="mehr">
-            <button id="mehr-knopf" type="button" class="mini leise" aria-expanded="false">Mehr ▾</button>
-            <div id="mehr-menue" class="mehr-menue" hidden>
-              <button data-aktion="triage" class="mehr-eintrag">Eingangsprüfung</button>
-              <button data-aktion="pack" class="mehr-eintrag">Prüfliste</button>
-              <button data-aktion="referenzen" class="mehr-eintrag" hidden>Referenzen</button>
-              <button data-aktion="haufe" class="mehr-eintrag" hidden>Recherche bei Haufe</button>
-              <!-- Derselbe Weg wie Haufe: ein Sprung in den Browser, nichts im
-                   Programmordner. Aus der Kanzlei am 25.09.2026: "ich finde
-                   unter mehr gar nicht die Gesetzestexte" - der Sprung stand
-                   bis dahin nur IN einer Antwort, neben einem Paragrafen.
-                   Nachschlagen will man aber auch ohne Antwort. -->
-              <!-- IMMER SICHTBAR, wie Eingangspruefung und Pruefliste. Er stand
-                   zuerst auf "hidden" und wurde aus dem Status eingeblendet,
-                   wie der Haufe-Knopf, der eine hinterlegte Adresse braucht.
-                   Zweimal aus der Kanzlei am 25.09.2026: "ich sehe ihn immer
-                   noch nicht." Die Adresse der amtlichen Seite steht fest im
-                   Programm; es gibt nichts einzublenden. -->
-              <button data-aktion="gesetze" class="mehr-eintrag">Gesetz nachschlagen</button>
-              <button data-aktion="abschluss" class="mehr-eintrag" hidden>Akte abschließen</button>
-            </div>
-          </div>
-        </span>
         <span class="fenster-knoepfe rechts">
           <button type="button" data-fenster="chronologie" class="mini leise fensterknopf">Chronologie ›</button>
           <button type="button" data-fenster="gedaechtnis" class="mini leise fensterknopf" hidden>Gedächtnis ›</button>
@@ -235,6 +209,54 @@
   </section>
 
   <aside class="spalte rechts" id="spalte-rechts">
+  <!-- Die Funktionen gehoeren hierher, nicht in die Kopfzeile des Chats.
+
+       Aus der Kanzlei am 13.10.2026: "Chat teilte sich das Fenster mit
+       Analyse und Eingangspruefung, Entwurf usw. Das ist meines
+       Erachtens nicht gut. Der Chat steht im Vordergrund. Die
+       Funktionen sollen waehlbar sein, aber zum rechten Fenster
+       gehoeren und anklickbar sein."
+
+       Diese Leiste bleibt stehen, auch wenn alle drei Fenster darunter
+       zu sind - sonst waere Analyse nicht mehr erreichbar, sobald man
+       die Belege zuklappt. Ein Knopf, der mit dem Fenster verschwindet,
+       in dem er steht, ist eine Falle. -->
+  <div class="rechts-aktionen">
+      <span class="arbeitsknoepfe">
+        <button data-aktion="analyse" class="mini">Analyse</button>
+        <button data-aktion="entwurf" class="mini">Entwurf</button>
+        <!-- Ein eigener Knopf, nicht im Mehr-Menue. Aus der Kanzlei am
+             25.09.2026: "Aktengedaechtnis soll eigener Button sein."
+             Davor war er ganz verschwunden, weil das Gedaechtnis
+             ausgeschaltet ist - und etwas, das spurlos verschwindet, sieht
+             aus wie ein Fehler. Er steht jetzt fest neben den beiden
+             Arbeitsknoepfen; ist das Gedaechtnis aus, sagt der Klick, wie
+             es wieder angeht. -->
+        <button data-aktion="gedaechtnis" class="mini">Gedächtnis</button>
+        <div class="mehr">
+          <button id="mehr-knopf" type="button" class="mini leise" aria-expanded="false">Mehr ▾</button>
+          <div id="mehr-menue" class="mehr-menue" hidden>
+            <button data-aktion="triage" class="mehr-eintrag">Eingangsprüfung</button>
+            <button data-aktion="pack" class="mehr-eintrag">Prüfliste</button>
+            <button data-aktion="referenzen" class="mehr-eintrag" hidden>Referenzen</button>
+            <button data-aktion="haufe" class="mehr-eintrag" hidden>Recherche bei Haufe</button>
+            <!-- Derselbe Weg wie Haufe: ein Sprung in den Browser, nichts im
+                 Programmordner. Aus der Kanzlei am 25.09.2026: "ich finde
+                 unter mehr gar nicht die Gesetzestexte" - der Sprung stand
+                 bis dahin nur IN einer Antwort, neben einem Paragrafen.
+                 Nachschlagen will man aber auch ohne Antwort. -->
+            <!-- IMMER SICHTBAR, wie Eingangspruefung und Pruefliste. Er stand
+                 zuerst auf "hidden" und wurde aus dem Status eingeblendet,
+                 wie der Haufe-Knopf, der eine hinterlegte Adresse braucht.
+                 Zweimal aus der Kanzlei am 25.09.2026: "ich sehe ihn immer
+                 noch nicht." Die Adresse der amtlichen Seite steht fest im
+                 Programm; es gibt nichts einzublenden. -->
+            <button data-aktion="gesetze" class="mehr-eintrag">Gesetz nachschlagen</button>
+            <button data-aktion="abschluss" class="mehr-eintrag" hidden>Akte abschließen</button>
+          </div>
+        </div>
+      </span>
+  </div>
     <section class="fenster chronologie" id="fenster-chronologie">
       <div class="spalte-kopf">
         <span class="kopf-links">

@@ -45,10 +45,31 @@ class TestDerKnopf:
         for name in ("chronologie", "gedaechtnis", "belege"):
             assert f'data-fenster-los="{name}"' in html, name
 
-    def test_die_dokumentspalte_nicht(self, html: str) -> None:
-        """Sie holt ihren Text selbst nach – ein Spiegel, der nachholen muss,
-        ist kein Spiegel mehr. Später, wenn die Kanzlei es braucht."""
-        assert 'data-fenster-los="dokument"' not in html
+    def test_die_dokumentspalte_auch(self, html: str) -> None:
+        """Seit dem 13.10.2026 – "später, wenn die Kanzlei es braucht" war jetzt.
+
+        Hier stand das Gegenteil, mit diesem Grund: "Sie holt ihren Text selbst
+        nach – ein Spiegel, der nachholen muss, ist kein Spiegel mehr." Der
+        Grund stimmte, solange das Füllen der Spalte am Aufruf `passagenLaden`
+        hing.
+
+        Nachgesehen, bevor der Knopf kam: Der Spiegel bekommt `passagenIndex`
+        über den Kanal längst mitgeschickt, und `zeigeDokument` liest nur
+        daraus. Es fehlte nicht die Angabe, sondern die Trennung zwischen
+        Holen und Zeichnen – `dokumentspalteZeichnen` ist sie.
+
+        Aus der Kanzlei: "auch die Dokumente sollen auf einen Extrabildschirm
+        zu öffnen sein, so dass der Chat viel Platz hat."
+        """
+        assert 'data-fenster-los="dokument"' in html
+
+    def test_der_spiegel_zeichnet_die_dokumente_ohne_aufruf(self, app: str) -> None:
+        """Ein Spiegel, der etwas nachholen muss, wäre kein Spiegel."""
+        assert 'nebenfenster === "dokument"' in app
+        zeichnen = app[app.index("function dokumentspalteZeichnen"):]
+        zeichnen = zeichnen[:zeichnen.index("\n}\n")]
+        assert "api(" not in zeichnen, "Der Spiegel darf nichts holen."
+        assert "passagenIndex" not in zeichnen or "zeigeDokument" in zeichnen
 
     def test_er_sagt_wofuer_er_da_ist(self, html: str) -> None:
         assert "zweiten Bildschirm" in html
