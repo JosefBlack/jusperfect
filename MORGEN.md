@@ -4108,3 +4108,51 @@ herunterlädt, bekommt den Namen nicht. **Was nicht erreicht ist:** Wer die
 vierzigstellige Kennung des alten Commits kennt, kann ihn abrufen. Das
 Repository ist privat; die Kennungen stehen in diesem Gespräch und sonst
 nirgends.
+
+---
+
+## 13.10.2026 — Variante C, und diesmal ohne Preis
+
+Entscheidung der Kanzlei: Repository löschen und neu anlegen. Beim Vorbereiten
+fiel auf, dass das billiger ist, als ich es angeboten hatte.
+
+**Ich hatte gesagt: „Preis: die ganze Vorgeschichte ist weg."** Das stimmte
+nicht. Die Garantie kommt vom **neuen Repository** — die alten, belasteten
+Objekte sterben mit dem alten. Was hochgeschoben wird, ist die **bereits
+umgeschriebene** Vorgeschichte, und die ist sauber. Gemessen vor dem Löschen:
+
+```
+Commits: 91, davon betroffen: 0
+Unerreichbare Objekte: 0
+Die beiden belasteten Commits: nicht vorhanden
+```
+
+> Ein Preis, den man nennt, ohne ihn nachgerechnet zu haben, ist dieselbe Art
+> Fehler wie eine Länge, die man schätzt.
+
+### Die Abnahme, am Server gemessen
+
+| Gemessen | Ergebnis |
+|---|---|
+| Alte Commits `054c85d` und `720b2f3` abrufbar? | **nicht abrufbar** — beide |
+| Zweige auf dem Server | nur `refs/heads/2.0` |
+| Vorgabezweig | **`2.0`** |
+| Frischer Klon: HEAD | `4825bd3…` — wie hier |
+| Frischer Klon: Baum von HEAD | `1cf34b4…` — identisch |
+| Frischer Klon: Commits / Dateien | 91 / 304 |
+| Die ganze Vorgeschichte des Servers, 91 Commits | **0** mit gesperrtem Namen, **0** mit echtem Aktenzeichen |
+| Prüflauf im Klon vom Server | **2045 grün**, eine übersprungen |
+
+Am 12.10. waren die alten Commits nach dem erzwungenen Hochschieben weiter
+abrufbar, und erst das Löschen des Repositorys ergab „repository not found".
+Heute dasselbe, in dieselbe Richtung: **Was mit dem Repository gelöscht wird,
+ist weg.**
+
+### Und ein Problem, das sich beiläufig gelöst hat
+
+Der **Vorgabezweig** steht seit dem 12.10. offen — der Versuch, ihn umzustellen,
+scheiterte mit einer Fehlermeldung, die nie zu uns kam. Bei einem **leeren**
+Repository wird der erste hochgeschobene Zweig automatisch die Vorgabe. Es
+wurde nur `2.0` hochgeschoben, und die API sagt jetzt `"default_branch": "2.0"`.
+
+Kein `main` mehr, nichts umzustellen, keine Fehlermeldung.
