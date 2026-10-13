@@ -1,0 +1,97 @@
+{
+  "_hinweis": [
+    "Der mitgelieferte Vorrat der Promptbibliothek: Ueberschrift und Prompt,",
+    "geordnet nach Rechtsgebiet. Gelesen von services/promptbibliothek.py.",
+    "",
+    "Diese Datei liegt IM Programmordner und wird vom Programm nie",
+    "beschrieben - sie gehoert zum Programm wie die Packs unter packs/.",
+    "Was die Kanzlei selbst ablegt, kommt in die eigene Datei ausserhalb des",
+    "Programmordners (jusperfect-promptbibliothek.json) und ueberlebt damit",
+    "jedes neue ZIP. Wer einen Eintrag von hier wegnimmt, blendet ihn nur",
+    "aus; geloescht wuerde er mit dem naechsten ZIP ohnehin wiederkommen.",
+    "",
+    "Hier gehoert deshalb NIE ein Name, ein Aktenzeichen oder sonst etwas aus",
+    "einer echten Akte hinein: Diese Datei geht in jedem ZIP mit.",
+    "",
+    "Das Rechtsgebiet muss nicht wortgleich mit jur|nodes sein - ein Gebiet",
+    "zaehlt auch bei gemeinsamem Wortanfang (\"Verkehr\" und",
+    "\"Verkehrsunfallrecht\" finden \"Verkehrsrecht\"), siehe _passt in",
+    "services/promptbibliothek.py.",
+    "",
+    "Die Verkehrsrecht-Eintraege stammen wortgleich aus der Kanzlei",
+    "(13.10.2026, \"B. Bearbeitungsmodule\"). Sie sind nicht von mir",
+    "formuliert und nicht von mir gekuerzt."
+  ],
+  "rechtsgebiete": {
+    "Verkehrsrecht": [
+      {
+        "titel": "Aktenübersicht und Bearbeitungsstand",
+        "text": "Werte die freigegebene Verkehrsunfallakte vollständig im Hinblick auf ihren aktuellen Bearbeitungsstand aus.\n\nErstelle eine strukturierte Übersicht über Mandatsumfang, Beteiligte und deren Rollen, Unfallereignis, Haftungspositionen, Schäden, Beweismittel und bisherige Korrespondenz. Erfasse den Stand der zivilrechtlichen Regulierung und eines etwaigen Straf- oder Bußgeldverfahrens getrennt.\n\nErstelle eine Chronologie der wesentlichen Ereignisse. Führe Forderungen, Zahlungen und offene Beträge tabellarisch auf. Identifiziere offene Aufgaben, erkennbare Fristen und den jeweils nächsten sinnvollen Bearbeitungsschritt. Unterscheide dokumentierte Fristen von lediglich vorgeschlagenen Wiedervorlagen."
+      },
+      {
+        "titel": "Unfallhergang und Beweislage",
+        "text": "Rekonstruiere den Unfallhergang aus den verfügbaren Aktenunterlagen.\n\nStelle die Darstellung des Mandanten, die gegnerische Darstellung, Zeugenaussagen und polizeiliche Feststellungen getrennt dar. Berücksichtige Fotos, Skizzen und technische Feststellungen, ohne aus Bildern unbelegte technische Schlussfolgerungen zu ziehen.\n\nErstelle eine neutrale chronologische Unfallschilderung sowie eine Übersicht der übereinstimmenden und streitigen Tatsachen. Ordne jeder wesentlichen Aussage ihre Aktenquelle zu. Formuliere gezielte Fragen zur Klärung entscheidungserheblicher Widersprüche."
+      },
+      {
+        "titel": "Vollständigkeitsprüfung und Unterlagenbedarf",
+        "text": "Prüfe die Akte auf Vollständigkeit für die weitere Haftungs- und Schadenprüfung.\n\nBerücksichtige insbesondere Anspruchsberechtigung, Vollmacht, Unfallnachweise, Gutachten, Rechnungen, Reparatur- oder Ersatzbeschaffungsnachweise, Ausfallzeiten, Zahlungen und gegebenenfalls medizinische Unterlagen.\n\nErstelle eine Tabelle mit benötigter Information beziehungsweise Unterlage, vorhandenem Aktennachweis, fehlendem Bestandteil, Bedeutung für die Bearbeitung und möglicher Bezugsquelle. Bewerte die Relevanz fallbezogen und fordere keine Unterlagen an, die bereits vollständig in der Akte vorliegen."
+      },
+      {
+        "titel": "Haftungsprüfung",
+        "text": "Erstelle anhand der Akte einen internen anwaltlichen Vermerk zur Haftung für den Verkehrsunfall.\n\nPrüfe mögliche Anspruchsgegner und Anspruchsgrundlagen, die Bedeutung der Beteiligtenrollen sowie unfallbezogene Verkehrsverstöße und deren Beweisbarkeit. Berücksichtige Betriebsgefahr, mögliche Mitverursachung und die Voraussetzungen einer Haftungsverteilung.\n\nStelle günstige und ungünstige Umstände für den Mandanten dar. Leite eine mögliche Haftungsquote nur aus ausreichend belegten Umständen ab; stelle andernfalls begründete Varianten dar. Benenne entscheidungserhebliche Beweislücken und erläutere die damit verbundenen Prozessrisiken."
+      },
+      {
+        "titel": "Schadenaufstellung und Forderungsberechnung",
+        "text": "Erstelle eine vollständige Schadenaufstellung aus der Akte.\n\nErfasse sämtliche dokumentierten Sach- und gegebenenfalls Personenschäden einschließlich belegter Nebenpositionen. Prüfe für jede Position Anspruchsteller, Nachweis, Betrag, steuerliche Behandlung, geltend gemachte Haftungsquote und bisherigen Regulierungsstand.\n\nStelle je Position Bruttobetrag, gegebenenfalls maßgeblichen Nettobetrag, geltend gemachten Betrag, Zahlung und Restforderung dar. Kennzeichne mögliche Doppelungen, alternative Abrechnungswege und Positionen mit weiterem Prüfbedarf. Berechne eine nachvollziehbare Gesamtforderung."
+      },
+      {
+        "titel": "Gutachten und Kostenvoranschläge auswerten",
+        "text": "Werte die vorhandenen Gutachten, Prüfberichte und Kostenvoranschläge vergleichend aus.\n\nErfasse insbesondere Reparaturkosten, Wiederbeschaffungswert, Restwert, Wertminderung, Reparaturdauer, Wiederbeschaffungsdauer und Feststellungen zur Fahrbereitschaft beziehungsweise Verkehrssicherheit, soweit enthalten.\n\nStelle Abweichungen zwischen ursprünglichem Gutachten und Versichererprüfung positionsbezogen dar. Prüfe rechnerische Auffälligkeiten und benenne technische Fragen für den Sachverständigen. Unterscheide ausdrücklich sachverständige Feststellungen von rechtlichen Bewertungen."
+      },
+      {
+        "titel": "Fehlende Angaben oder Unterlagen anfordern",
+        "text": "Erstelle aus dem festgestellten Unterlagenbedarf ein adressatengerechtes Anforderungsschreiben.\n\nErmittle aus der Akte, ob die Anfrage an den Mandanten, die Werkstatt, den Sachverständigen, die Versicherung oder eine andere Stelle zu richten ist. Fordere ausschließlich fehlende oder klärungsbedürftige Informationen an.\n\nErläutere kurz den jeweiligen Zweck. Formuliere konkrete, verständliche Fragen und eine geeignete Rückmeldefrist als Vorschlag, soweit keine Kanzleivorgabe vorliegt. Bei unterschiedlichen Empfängern erstelle getrennte Schreiben mit jeweils erforderlichem Informationsumfang."
+      },
+      {
+        "titel": "Sachstandsmitteilung an den Mandanten",
+        "text": "Erstelle eine verständliche Sachstandsmitteilung auf Grundlage des aktuellen Aktenstands.\n\nErläutere bisherige Maßnahmen, Reaktion der Versicherung, Zahlungen, offene Forderungen und ausstehende Unterlagen oder Entscheidungen. Stelle den nächsten vorgesehenen Schritt und gegebenenfalls notwendigen Mitwirkungsbedarf des Mandanten dar.\n\nErkläre rechtliche oder tatsächliche Hindernisse in einfacher Sprache. Verspreche keine ungesicherten Ergebnisse oder Bearbeitungszeiten. Berücksichtige, ob parallel ein Straf- oder Bußgeldverfahren besteht und ob hierzu eine gesonderte Mitteilung erforderlich ist."
+      },
+      {
+        "titel": "Forderungs- und Regulierungsschreiben an die Versicherung",
+        "text": "Erstelle ein anwaltliches Schreiben zur erstmaligen oder ergänzenden Geltendmachung der Schadenersatzansprüche gegenüber der gegnerischen Haftpflichtversicherung.\n\nErmittle aus der Akte Anspruchsteller, Versicherung, Schadennummer, Unfallangaben und bisherigen Schriftwechsel. Stelle Unfallhergang und Haftungsbegründung im für die Forderung erforderlichen Umfang dar.\n\nFühre die belegten Schadenpositionen mit Einzelbeträgen und Gesamtsumme auf. Berücksichtige geleistete Zahlungen und fordere die verbleibende Forderung auf das aus der Akte verlässlich feststellbare Empfangskonto an. Prüfe Empfangsberechtigung und Zahlungsempfänger.\n\nVerwende eine vorgegebene Zahlungsfrist; andernfalls schlage intern eine fallbezogene Frist vor. Erstelle ein Anlagenverzeichnis und kennzeichne Positionen, deren Bezifferung ausdrücklich vorbehalten werden soll."
+      },
+      {
+        "titel": "Abschlussprüfung der Schadenakte",
+        "text": "Prüfe, ob die zivilrechtliche Schadenbearbeitung abgeschlossen werden kann.\n\nGleiche geltend gemachte Forderungen, Entscheidungen der Versicherung, Zahlungseingänge, Gebühren und verbleibende Ansprüche ab. Prüfe offene Nebenforderungen, mögliche Zukunftsschäden, Abfindungs- oder Erledigungserklärungen und noch laufende Verfahren.\n\nErstelle eine Abschlussübersicht mit erledigten Punkten, offenen Aufgaben und bestehenden Vorbehalten. Entwirf eine abschließende Mandantenmitteilung nur, soweit der Aktenstand dies trägt. Gib keine Erledigungs- oder Verzichtserklärung ohne entsprechende dokumentierte Kanzleientscheidung ab."
+      },
+      {
+        "titel": "Mahnung an die Versicherung",
+        "text": "Erstelle anhand der Akte eine begründete Mahnung wegen ausstehender oder unvollständiger Regulierung.\n\nErmittle die bisherigen Anspruchsschreiben, deren nachgewiesenen Zugang, die Vollständigkeit der übermittelten Unterlagen, Reaktionen der Versicherung und Teilzahlungen. Prüfe fallbezogen Fälligkeit, angemessene Prüfungszeit und einen bereits eingetretenen Verzug.\n\nStelle offene Positionen und Restforderung nachvollziehbar dar. Setze eine konkrete Zahlungsfrist nach Kanzleivorgabe; fehlt diese, kennzeichne den vorgeschlagenen Termin im internen Prüfvermerk.\n\nBerechne Verzugszinsen nur bei belegbaren Voraussetzungen und begründetem Beginn. Unterscheide bereits geschuldete Zinsen von einer Ankündigung zukünftiger Verzugsfolgen. Kündige gerichtliche Schritte entsprechend dem dokumentierten Mandatsauftrag an, ohne eine bereits beschlossene Klageerhebung zu behaupten, wenn diese nicht aktenkundig ist."
+      },
+      {
+        "titel": "Verkehrsunfallklage",
+        "text": "Erstelle aus der Akte den vollständigen Entwurf einer zivilrechtlichen Verkehrsunfallklage.\n\nPrüfe Anspruchsberechtigung, richtige Beklagte, zuständiges Gericht, vorgerichtlichen Regulierungsstand und verbleibende Forderung. Berücksichtige gegebenenfalls Abtretungen, Leasing oder Finanzierung.\n\nGliedere den Entwurf in Rubrum, Klageanträge, Sachverhalt, Haftungsbegründung, Schadenbegründung und rechtliche Ausführungen. Formuliere Haupt- und Nebenforderungen hinreichend bestimmt. Prüfe einen Feststellungsantrag nur bei konkret erkennbaren Voraussetzungen.\n\nOrdne jedem entscheidungserheblichen streitigen Tatsachenvortrag ein tatsächlich verfügbares Beweisangebot zu. Unterscheide Urkunden, Zeugen, Sachverständigenbeweis und andere zulässige Beweismittel. Erfinde keine Zeugendaten oder Anlagen.\n\nErstelle eine Forderungsberechnung, einen Anlagenindex und einen internen Vermerk zu Zuständigkeit, Streitwert, Verjährung, Beweisrisiken und fehlenden Voraussetzungen für die Einreichung. Vermeide ungeprüfte Übernahme außergerichtlicher Behauptungen als feststehende Tatsachen."
+      },
+      {
+        "titel": "Rechnung einreichen / Kostenerstattung verlangen",
+        "text": "Ermittle anhand des Bearbeitungsauftrags und der Akte, welche Rechnung gegenüber der Versicherung geltend gemacht werden soll.\n\nPrüfe Rechnungsaussteller, Rechnungsempfänger, Leistungsgegenstand, Unfallbezug, Rechnungsbetrag, Zahlungsstatus, Anspruchsinhaber und etwaige Abtretung. Stelle fest, ob Erstattung an den Mandanten, Zahlung an einen Dritten oder Freistellung verlangt werden soll.\n\nErstelle ein passendes Begleitschreiben mit nachvollziehbarer Forderung, Zahlungsziel, Empfangskonto und Anlagenverzeichnis. Berücksichtige Teilzahlungen, Haftungsquote und Vorsteuerabzugsberechtigung.\n\nHandelt es sich um Rechtsanwaltskosten, erstelle zusätzlich eine überprüfbare Gebührenberechnung nach der maßgeblichen RVG-Fassung und prüfe deren Erstattungsfähigkeit. Unterscheide die Gebührenrechnung an den Auftraggeber von der Erstattungsforderung gegenüber der Versicherung. Bestehende Rechnungen dürfen nicht stillschweigend verändert oder neu ausgestellt werden."
+      },
+      {
+        "titel": "Nutzungsausfall geltend machen",
+        "text": "Prüfe anhand der Akte einen Anspruch auf Nutzungsausfallentschädigung und erstelle das entsprechende Forderungsschreiben.\n\nErmittle Fahrzeugdaten, tatsächliche Gebrauchsentziehung, Nutzungswillen, Nutzungsmöglichkeit, verfügbare Ersatzfahrzeuge und eine etwaige Mietwagennutzung. Werte Gutachten, Werkstattunterlagen, Reparaturbestätigungen, Ersatzbeschaffungsnachweise und Mandantenangaben aus.\n\nRekonstruiere den Ausfallzeitraum taggenau. Unterscheide sachverständig geschätzte Dauer und tatsächlich belegte Dauer. Prüfe zusätzliche Zeiträume, etwa für Begutachtung, Entscheidung, Teilebeschaffung oder verzögerte Regulierung, jeweils anhand der konkreten Umstände.\n\nErmittle einen Tagessatz nur aus einer zulässigen, überprüfbaren Quelle. Ist diese nicht verfügbar oder die Einordnung unsicher, kennzeichne den Prüfbedarf. Prüfe Überschneidungen mit Mietwagenkosten.\n\nErstelle eine Berechnung mit Zeitraum, Tageszahl, Tagessatz, Haftungsquote, Zahlungen und Restforderung. Begründe den Anspruch anhand der belegten Umstände und benenne die erforderlichen Anlagen."
+      },
+      {
+        "titel": "Mandantenaufklärung zu Verweisungswerkstätten",
+        "text": "Erstelle ein individuelles Beratungsschreiben zur Verweisung durch die Versicherung auf eine günstigere Reparaturwerkstatt.\n\nWerte Gutachten, Kürzungsschreiben, Prüfbericht und Angaben zur benannten Werkstatt aus. Ermittle insbesondere Abrechnungsart, Fahrzeugalter, bisherige Wartungs- und Reparaturhistorie, etwaige Garantieumstände, Erreichbarkeit der Werkstatt, behauptete technische Gleichwertigkeit und Grundlage der angebotenen Preise.\n\nPrüfe fallbezogen die rechtlichen Voraussetzungen und Zumutbarkeit der Verweisung. Unterscheide konkrete und fiktive Abrechnung. Prüfe, ob die Angaben zur Werkstatt und zu allgemein zugänglichen Preisen ausreichend belegt sind.\n\nErkläre dem Mandanten verständlich, weshalb die Versicherung kürzt, welche Einwendungen im konkreten Fall möglich sind und welche Nachweise dafür benötigt werden. Stelle den finanziellen Unterschied und die Handlungsoptionen dar.\n\nGib eine begründete Empfehlung mit Einschätzung bestehender Unsicherheiten. Vermeide pauschale Aussagen, dass jede freie Werkstatt akzeptiert werden müsse oder jede Verweisung zurückgewiesen werden könne. Erstelle bei ausreichender Grundlage zusätzlich einen gesonderten Entwurf zur Zurückweisung der Kürzung."
+      },
+      {
+        "titel": "Akteneinsicht zur zivilrechtlichen Geltendmachung",
+        "text": "Erstelle einen anwaltlichen Antrag auf Einsicht in die behördliche Unfall- beziehungsweise Ermittlungsakte zur Prüfung und Durchsetzung zivilrechtlicher Schadensersatzansprüche.\n\nErmittle aus der Mandatsakte Unfalltag, Unfallort, Beteiligte, behördliches Aktenzeichen, bearbeitende Polizeidienststelle und gegebenenfalls Staatsanwaltschaft oder Bußgeldbehörde. Prüfe die Stellung des Mandanten und die Art des behördlichen Verfahrens.\n\nBestimme die zuständige Stelle und passende Rechtsgrundlage. Verwende die zivilrechtliche Zielsetzung nicht automatisch als Bezeichnung der verfahrensrechtlichen Grundlage. Begründe das erforderliche Interesse beziehungsweise die einschlägigen Voraussetzungen konkret mit der Aufklärung von Unfallhergang, Haftung und Schadensersatzansprüchen.\n\nBeantrage Einsicht in die zugänglichen relevanten Aktenbestandteile, insbesondere Unfallberichte, Skizzen, Fotos, Zeugenaussagen und technische Untersuchungen. Bitte um elektronische Bereitstellung über den geeigneten sicheren Übermittlungsweg.\n\nFalls das Aktenzeichen oder die zuständige Stelle nicht feststeht, erstelle ein passendes Ermittlungsschreiben an die aus der Akte bekannte Dienststelle. Bitte erforderlichenfalls um Weiterleitung oder Mitteilung der zuständigen Stelle.\n\nDas Schreiben dient der Informationsbeschaffung. Es darf keine unbeabsichtigte Sachverhaltseinlassung oder Anerkennung eines Verschuldens enthalten.\n\nZur Einordnung: Auch bei zivilrechtlichem Zweck kann sich die Einsicht in eine Ermittlungsakte je nach Mandantenstellung nach § 406e StPO oder § 475 StPO richten."
+      },
+      {
+        "titel": "Strafrechtliche Akteneinsicht – Mandant macht keine Aussage",
+        "text": "Erstelle eine anwaltliche Verteidigungsanzeige mit Antrag auf Akteneinsicht für den als Beschuldigten geführten Mandanten.\n\nErmittle aus der freigegebenen Akte zuständige Behörde, Aktenzeichen, Tatvorwurf, Verfahrensstand, vorhandene Vorladungen und dokumentierte Vollmacht beziehungsweise Beauftragung. Prüfe, ob tatsächlich ein Strafverfahren oder ein Bußgeldverfahren vorliegt, und passe Bezeichnung und Rechtsgrundlage entsprechend an.\n\nZeige die Verteidigung an und beantrage vollständige Akteneinsicht im rechtlich zugänglichen Umfang einschließlich relevanter Beiakten und Beweismittel. Bitte um elektronische Bereitstellung über den geeigneten sicheren Übermittlungsweg.\n\nVerbindliche Mandatsvorgabe: Der Mandant macht keine Aussage zur Sache. Teile dies im Schreiben eindeutig mit. Kündige keine spätere Einlassung an. Gib weder eine Unfallschilderung noch eine rechtliche oder tatsächliche Verteidigungserklärung zur Sache ab. Übernimm insbesondere keine Angaben aus dem zivilrechtlichen Schadenmandat in dieses Schreiben.\n\nPrüfe eine vorhandene Vorladung intern nach ausstellender Stelle, Termin und möglichen Handlungspflichten. Unterstelle nicht pauschal, dass jeder Termin wegen der Aussageverweigerung entfällt. Erstelle gegebenenfalls eine gesonderte kurze Mandanteninformation zu den konkret erforderlichen nächsten Schritten.\n\nIst der Mandant laut Akte Zeuge oder seine Verfahrensstellung unklar, kennzeichne dies als wesentlichen Prüfbedarf und erstelle keine unzutreffende Verteidigungsanzeige."
+      }
+    ]
+  }
+}

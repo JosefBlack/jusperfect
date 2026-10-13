@@ -39,6 +39,8 @@ from jusperfect.services.auftraege import AuftragFehler, Auftragsdienst
 from jusperfect.services.auftragsvorschlag import Vorschlagsdienst, VorschlagFehler
 from jusperfect.services.ausgang import Ausgang
 from jusperfect.services.posteingang import PosteingangFehler, Posteingangsdienst
+from jusperfect.services import promptbibliothek
+from jusperfect.services.promptbibliothek import BibliothekFehler
 from jusperfect.services.referenzen import ReferenzFehler, Referenzendienst
 from jusperfect.services.entwuerfe import (
     EntwurfFehler, EntwurfNichtGefunden, Entwurfsdienst, freigabevorlage,
@@ -254,6 +256,15 @@ class AbschlussAusfuehren(BaseModel):
     text_pruefsumme: str = Field(min_length=64, max_length=64)
 
 
+class PromptAblegen(BaseModel):
+    titel: str = Field(default="", max_length=promptbibliothek.MAX_TITEL)
+    text: str = Field(max_length=promptbibliothek.MAX_ZEICHEN)
+
+
+class PromptVergessen(BaseModel):
+    titel: str = Field(max_length=promptbibliothek.MAX_TITEL)
+
+
 class PackAnfrage(BaseModel):
     pack_id: str = Field(default="", max_length=64)
 
@@ -296,6 +307,7 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         # einen Aufruf. Die Oberflaeche zeigt den Text unveraendert an.
         (AktenZuGross, 422),
         (ReferenzFehler, 422), (GedaechtnisFehler, 422), (AbschlussFehler, 409),
+        (BibliothekFehler, 422),
         (BudgetErschoepft, 429), (GuardrailEingriff, 422), (AnalyseFehler, 422), (EntwurfFehler, 422),
         (KonfigurationsFehler, 500), (JurNodesFehler, 502), (ProviderFehler, 502), (SpeicherFehler, 503),
     ]
@@ -500,6 +512,57 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
                  nutzer=ident.nutzer_id, zeichen=len(daten.text))
         return {"name": a.name, "label": a.label, "kategorie": a.kategorie,
                 "anweisung": a.anweisung, "hat_material": bool(a.material)}
+
+    # ── Promptbibliothek (waechst waehrend der Arbeit) ────────────────────
+    #
+    # Das Rechtsgebiet kommt aus der Akte (jur|nodes: lawCategory), nicht aus
+    # einer Abfrage. Die Oberflaeche muss es deshalb nirgends mitschicken und
+    # kann es auch nicht aus Versehen falsch setzen.
+
+    def _gebiet(sitzung: Any) -> str:
+        return (sitzung.akte.rechtsgebiet if sitzung.akte else "") or ""
+
+    def _bibliothek_antwort(sitzung: Any) -> dict[str, Any]:
+        gebiet = _gebiet(sitzung)
+        liste = promptbibliothek.eintraege(gebiet)
+        return {"rechtsgebiet": gebiet or promptbibliothek.OHNE_GEBIET,
+                "aus_akte": bool(gebiet),
+                "eintraege": [dict(e) for e in liste],
+                "max_titel": promptbibliothek.MAX_TITEL,
+                "max_zeichen": promptbibliothek.MAX_ZEICHEN}
+
+    @app.get("/api/sitzungen/{sitzung_id}/prompts")
+    def prompts_lesen(sitzung_id: str, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Die Prompts zum Rechtsgebiet dieser Akte - eigene und mitgelieferte."""
+        return _bibliothek_antwort(d.sitzungen.laden(ident, sitzung_id))
+
+    @app.post("/api/sitzungen/{sitzung_id}/prompts", status_code=201)
+    def prompt_ablegen(sitzung_id: str, daten: PromptAblegen,
+                       ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Einen Prompt hinterlegen, der sich bewaehrt hat.
+
+        Protokolliert werden Rechtsgebiet und Laenge, nie der Wortlaut: Ein
+        Prompt aus der Arbeit kann einen Namen enthalten.
+        """
+        sitzung = d.sitzungen.laden(ident, sitzung_id)
+        promptbibliothek.merken(_gebiet(sitzung), daten.titel, daten.text)
+        ereignis(_log, "prompt_abgelegt", rechtsgebiet=_gebiet(sitzung) or "-",
+                 nutzer=ident.nutzer_id, zeichen=len(daten.text))
+        return _bibliothek_antwort(sitzung)
+
+    @app.post("/api/sitzungen/{sitzung_id}/prompts/vergessen")
+    def prompt_vergessen(sitzung_id: str, daten: PromptVergessen,
+                         ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Einen Prompt herausnehmen; mitgelieferte werden ausgeblendet.
+
+        Ein eigener Aufruf statt DELETE: Die Ueberschrift steht im Rumpf, und
+        ein DELETE mit Rumpf wird unterwegs nicht ueberall mitgenommen.
+        """
+        sitzung = d.sitzungen.laden(ident, sitzung_id)
+        promptbibliothek.vergessen(_gebiet(sitzung), daten.titel)
+        ereignis(_log, "prompt_vergessen", rechtsgebiet=_gebiet(sitzung) or "-",
+                 nutzer=ident.nutzer_id)
+        return _bibliothek_antwort(sitzung)
 
     # ── Selbsttest: Stehen die Absicherungen? ─────────────────────────────
 

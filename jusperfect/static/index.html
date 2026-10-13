@@ -200,19 +200,42 @@
            einer Reihe in der Mitte - einer schaltete links, drei schalteten
            rechts, und nichts sagte welcher. Jetzt zeigt die Stelle des Knopfes
            dorthin, wo etwas geschieht, und der Pfeil sagt es noch einmal. -->
+      <!-- Hier steht nur noch der Knopf fuer das LINKE Fenster.
+
+           Aus der Kanzlei am 13.10.2026: "Knoepfe Chronologie, Gedaechtnis
+           und Belege nach rechts verschieben, sonst verwirrend." Zu Recht:
+           Sie standen in der Kopfzeile des Chats und schalteten Fenster, die
+           ganz woanders aufgehen. Jetzt stehen sie in der Leiste der rechten
+           Spalte, neben Analyse und Entwurf - also dort, wo sie wirken.
+
+           Der Dokumenten-Knopf bleibt: Die linke Spalte hat keine Leiste,
+           die stehen bliebe, wenn sie zugeht. Ohne ihn kaeme man an ein
+           zugeklapptes Dokumentenfenster nicht mehr heran. -->
       <div class="aktionen">
         <span class="fenster-knoepfe links">
           <button type="button" data-fenster="dokument" class="mini leise fensterknopf">‹ Dokumente</button>
-        </span>
-        <span class="fenster-knoepfe rechts">
-          <button type="button" data-fenster="chronologie" class="mini leise fensterknopf">Chronologie ›</button>
-          <button type="button" data-fenster="gedaechtnis" class="mini leise fensterknopf" hidden>Gedächtnis ›</button>
-          <button type="button" data-fenster="belege" class="mini leise fensterknopf">Belege ›</button>
         </span>
       </div>
     </div>
     <div id="thread" class="thread"></div>
     <div class="eingabe">
+      <!-- Die Fragenbibliothek - ueber dem Chatfenster, wie aus der Kanzlei
+           gewuenscht, aber dicht am Eingabefeld und nicht ueber dem Verlauf:
+           Der Chat steht im Vordergrund, und eine Leiste ueber dem Verlauf
+           haette ihn jedes Mal ein Stueck nach unten geschoben.
+
+           Sie faengt leer an. Aus der Kanzlei: "Kann ich die
+           Promptbibliothek nicht waehrend der Arbeit fuellen?" - Ja, und das
+           ist der bessere Weg: Gemerkt wird eine Frage in dem Augenblick, in
+           dem ihre Antwort getaugt hat. -->
+      <div id="bibliothek" class="bibliothek" hidden>
+        <div class="bib-kopf">
+          <span id="bib-gebiet" class="bib-gebiet"></span>
+          <button type="button" id="bib-neu" class="mini leise">+ Neu</button>
+        </div>
+        <div id="bib-liste" class="bib-liste"></div>
+        <p id="bib-hinweis" class="bib-hinweis" hidden></p>
+      </div>
       <form id="frage-form" class="frage-form">
         <textarea id="frage" rows="2" placeholder="Frage an die Akte … (Eingabetaste fragt, Umschalt+Eingabe macht eine neue Zeile)"></textarea>
         <button id="senden" class="knopf" type="submit">Fragen</button>
@@ -268,6 +291,13 @@
             <button data-aktion="abschluss" class="mehr-eintrag" hidden>Akte abschließen</button>
           </div>
         </div>
+      </span>
+      <!-- Die Fensterknoepfe dieser Spalte - hierher geholt am 13.10.2026.
+           Sie schalten die drei Fenster unter dieser Leiste auf und zu. -->
+      <span class="fenster-knoepfe rechts">
+        <button type="button" data-fenster="chronologie" class="mini leise fensterknopf">Chronologie</button>
+        <button type="button" data-fenster="gedaechtnis" class="mini leise fensterknopf" hidden>Gedächtnis</button>
+        <button type="button" data-fenster="belege" class="mini leise fensterknopf">Belege</button>
       </span>
   </div>
     <section class="fenster chronologie" id="fenster-chronologie">
@@ -340,6 +370,34 @@
     </section>
   </aside>
 </main>
+
+<!-- Einen Prompt in die Bibliothek aufnehmen.
+
+     Aus der Kanzlei am 13.10.2026: "Promptbibliothek neu und dann
+     Ueberschrift und Prompt eintragen." Zwei Felder und nicht eines: Ein
+     brauchbarer Prompt ist mehrere Zeilen lang und taugt nicht als
+     Knopfbeschriftung. In der Leiste steht die Ueberschrift, ins
+     Eingabefeld kommt der Text.
+
+     Der Text steht hier zum Lesen und Aendern, bevor er abgelegt wird. Das
+     ist Absicht: Ein Prompt aus der Arbeit kann einen Namen enthalten, und
+     die Bibliothek ueberdauert die Akte. -->
+<dialog id="prompt-dialog" class="entwurf-dialog">
+  <form method="dialog" class="entwurf-form">
+    <h2>Prompt in die Bibliothek</h2>
+    <p id="prompt-gebiet" class="dialog-hinweis"></p>
+    <label>Überschrift <input id="prompt-titel" autocomplete="off" maxlength="80"
+                              placeholder="Wie soll er in der Leiste heißen?"></label>
+    <label>Prompt <textarea id="prompt-text" rows="6"
+                            placeholder="Der Text, der ins Eingabefeld kommt."></textarea></label>
+    <p class="dialog-hinweis">Bitte keine Namen und keinen Aktenbezug: Die Bibliothek
+      bleibt über diese Akte hinaus und gilt für jede Akte dieses Rechtsgebiets.</p>
+    <div class="dialog-knoepfe">
+      <button value="abbrechen" class="knopf leise">Abbrechen</button>
+      <button id="prompt-ablegen" value="ablegen" class="knopf">Ablegen</button>
+    </div>
+  </form>
+</dialog>
 
 <dialog id="entwurf-dialog" class="entwurf-dialog">
   <form method="dialog" class="entwurf-form">

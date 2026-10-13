@@ -199,8 +199,15 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .spalte.rechts.nur-leiste { background: var(--grund); }
 .spalte.rechts.nur-leiste > .fenster { display: none !important; }
 .rechts-aktionen { flex: none; display: flex; justify-content: flex-end;
-  gap: 6px; padding: 8px 10px; background: var(--flaeche);
+  flex-wrap: wrap; gap: 6px; padding: 8px 10px; background: var(--flaeche);
   border-bottom: 1px solid var(--linie); }
+/* Die Fensterknoepfe dieser Spalte stehen seit dem 13.10.2026 hier, nicht
+   mehr in der Kopfzeile des Chats. Aus der Kanzlei: "Knoepfe Chronologie,
+   Gedaechtnis und Belege nach rechts verschieben, sonst verwirrend."
+   In dieser Leiste trennt nichts mehr nach Seiten - es ist alles eine Seite.
+   Die Trennlinie bleibt als Fuge zwischen Arbeits- und Fensterknoepfen. */
+.rechts-aktionen .fenster-knoepfe.rechts { padding-left: 10px; margin-left: 2px;
+  border-left: 1px solid var(--linie); }
 .spalte.rechts.nur-leiste .rechts-aktionen {
   border-bottom: 0; align-items: flex-start; }
 
@@ -211,6 +218,7 @@ button, input, textarea, select { font: inherit; color: inherit; }
    Zeilen, die niemand mehr liest. Eine feste Lesebreite loest beides. */
 .spalte.cowork .thread,
 .spalte.cowork .frage-form,
+.spalte.cowork .bibliothek,
 .spalte.cowork .schaetzung { max-width: 920px; margin-inline: auto; width: 100%; }
 
 /* Der Benutzername ist selbst der Weg zurueck zur Auswahl. */
@@ -405,6 +413,38 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
      anklickbar bleiben, auch wenn sie unter dem Ausblenden liegen. */
   pointer-events: none; }
 .eingabe > * { pointer-events: auto; }
+/* Die Fragenbibliothek - eine schmale Leiste ueber dem Eingabefeld.
+
+   Aus der Kanzlei: "Diese kann dann ueber dem Chatfenster sein." Sie sitzt
+   ueber der EINGABE und nicht ueber dem Verlauf: Der Chat steht im
+   Vordergrund, und eine Leiste ueber dem Verlauf haette ihn bei jeder
+   Nachricht ein Stueck nach unten geschoben.
+
+   Sie waechst nach oben, nicht in die Breite: Ein Umbruch macht die Leiste
+   hoeher, und die Eingabe bleibt, wo sie ist. */
+.bibliothek { margin-bottom: 8px; }
+.bib-kopf { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.bib-gebiet { font-size: 12px; color: var(--gedaempft); }
+.bib-kopf .mini { margin-left: auto; }
+.bib-liste { display: flex; flex-wrap: wrap; gap: 6px; max-height: 92px; overflow-y: auto; }
+.bib-leer { font-size: 12px; color: var(--gedaempft); }
+.bib-chip { display: inline-flex; align-items: stretch; border: 1px solid var(--linie);
+  border-radius: 999px; background: var(--flaeche); overflow: hidden; max-width: 100%; }
+.bib-chip:hover { border-color: var(--akzent); }
+/* Die Frage selbst wird gekuerzt, nicht umgebrochen: Eine Leiste aus
+   mehrzeiligen Blasen waere keine Leiste mehr. Der ganze Wortlaut steht im
+   Eingabefeld, sobald sie angeklickt ist. */
+.bib-nehmen { border: 0; background: transparent; font: inherit; font-size: 12px; color: inherit;
+  padding: 4px 4px 4px 11px; cursor: pointer; max-width: 320px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bib-weg { border: 0; background: transparent; color: var(--gedaempft); font-size: 11px;
+  padding: 4px 9px 4px 5px; cursor: pointer; }
+.bib-weg:hover { color: var(--rot); }
+/* Mitgeliefertes sieht anders aus als Eigenes - sonst raetselt man, warum
+   etwas dasteht, das man nie eingetippt hat. */
+.bib-chip.mitgeliefert { background: var(--flaeche-2); border-style: dashed; }
+.bib-hinweis { margin: 6px 0 0; font-size: 12px; color: var(--amber); }
+
 .frage-form { display: flex; gap: 8px; padding: 8px; border: 1px solid var(--linie);
   border-radius: 14px; background: var(--flaeche); box-shadow: 0 4px 20px rgba(0,0,0,.09); }
 .frage-form textarea { flex: 1; resize: none; padding: 9px 11px; border: 0; border-radius: 8px;
@@ -442,6 +482,7 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .entwurf-form select, .entwurf-form input, .entwurf-form textarea { display: block; width: 100%; margin-top: 4px; padding: 8px 10px;
   border: 1px solid var(--linie); border-radius: 8px; background: var(--flaeche-2); color: var(--tinte); }
 .dialog-knoepfe { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.dialog-hinweis { margin: 8px 0 0; font-size: 12px; color: var(--gedaempft); }
 
 .nachweis-dialog { border: 1px solid var(--linie-stark); border-radius: 12px; padding: 0; max-width: 640px; width: 94%;
   background: var(--flaeche); color: var(--tinte); }

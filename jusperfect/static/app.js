@@ -1355,6 +1355,7 @@ async function arbeitsflaecheOeffnen() {
   gedaechtnisFensterZeigen();
   threadWillkommen();
   gedaechtnisImThreadZeigen();
+  await bibliothekLaden();
   await gespeicherteAnalyseZeigen();
   zeigeBelege();
 }
@@ -3017,10 +3018,142 @@ function hinweiseBlock(hinweise) {
   return box;
 }
 
+// ── Promptbibliothek ───────────────────────────────────────────────────────
+//
+// Aus der Kanzlei am 13.10.2026, in drei Schritten:
+//
+//   "Koennen wir noch eine Promptbibliothek anlegen. Diese fragt aber erst
+//    nach dem Rechtsgebiet."
+//   "Kann ich die Promptbibliothek nicht waehrend der Arbeit fuellen?"
+//   "Promptbibliothek neu und dann Ueberschrift und Prompt eintragen -
+//    einige sind schon vorher eingetragen."
+//
+// Nach dem Rechtsgebiet fragt deshalb niemand: Es steht in der Akte
+// (jur|nodes: lawCategory) und kommt mit der Sitzung mit. In der Leiste steht
+// die Ueberschrift, ins Eingabefeld kommt der Text - ein brauchbarer Prompt
+// ist mehrere Zeilen lang und taugt nicht als Knopfbeschriftung.
+
+/** Die zuletzt abgeschickte Frage - sie fuellt den Dialog vor. */
+let letzteGestellteFrage = "";
+
+/** Was zuletzt vom Server kam; der Dialog braucht das Rechtsgebiet. */
+let bibliothekStand = null;
+
+function bibHinweis(text) {
+  const p = $("bib-hinweis");
+  if (!p) return;
+  p.textContent = text || "";
+  p.hidden = !text;
+}
+
+/** Die Leiste aus einer Antwort des Servers zeichnen. */
+function bibliothekZeichnen(daten) {
+  bibliothekStand = daten;
+  const kasten = $("bibliothek");
+  if (!kasten) return;
+  kasten.hidden = false;
+  const gebiet = $("bib-gebiet");
+  gebiet.textContent = daten.aus_akte
+    ? `Prompts · ${daten.rechtsgebiet}`
+    : "Prompts · ohne Rechtsgebiet in der Akte";
+  gebiet.title = daten.aus_akte
+    ? "Das Rechtsgebiet kommt aus jur|nodes. Abgelegte Prompts erscheinen bei jeder Akte dieses Gebiets wieder."
+    : "jur|nodes nennt zu dieser Akte kein Rechtsgebiet. Abgelegtes landet in einer gemeinsamen Liste.";
+  const liste = $("bib-liste");
+  liste.replaceChildren();
+  const eintraege = daten.eintraege || [];
+  if (!eintraege.length) {
+    const leer = document.createElement("span");
+    leer.className = "bib-leer";
+    leer.textContent = "Noch nichts abgelegt. Ein Prompt, der sich bewährt hat, kommt über „+ Neu\u201c hierher.";
+    liste.appendChild(leer);
+    return;
+  }
+  for (const eintrag of eintraege) {
+    const chip = document.createElement("span");
+    chip.className = "bib-chip" + (eintrag.mitgeliefert ? " mitgeliefert" : "");
+    const nehmen = document.createElement("button");
+    nehmen.type = "button"; nehmen.className = "bib-nehmen";
+    // textContent, nie als HTML: In einem abgelegten Prompt kann alles stehen.
+    nehmen.textContent = eintrag.titel;
+    nehmen.title = (eintrag.mitgeliefert ? "Mitgeliefert. " : "")
+                 + "In das Eingabefeld übernehmen:\n\n" + eintrag.text;
+    nehmen.addEventListener("click", () => {
+      const feld = $("frage");
+      feld.value = eintrag.text;
+      feld.focus();
+      feld.setSelectionRange(eintrag.text.length, eintrag.text.length);
+      bibHinweis("");
+    });
+    const weg = document.createElement("button");
+    weg.type = "button"; weg.className = "bib-weg";
+    weg.textContent = "✕";
+    weg.title = eintrag.mitgeliefert
+      ? "Diesen mitgelieferten Prompt ausblenden"
+      : "Diesen Prompt entfernen";
+    weg.setAttribute("aria-label", "Prompt aus der Leiste nehmen");
+    weg.addEventListener("click", () => mitKnopf(weg, () => bibVergessen(eintrag.titel)));
+    chip.append(nehmen, weg);
+    liste.appendChild(chip);
+  }
+}
+
+async function bibliothekLaden() {
+  if (!sitzung || !sitzung.sitzung) return;
+  try {
+    bibliothekZeichnen(await api("GET", `/api/sitzungen/${sitzung.sitzung.id}/prompts`));
+  } catch (e) {
+    // Eine Bibliothek, die sich nicht lesen laesst, darf die Akte nicht
+    // aufhalten: Sie ist Zugabe, der Chat ist die Arbeit.
+    const kasten = $("bibliothek");
+    if (kasten) kasten.hidden = false;
+    $("bib-liste").replaceChildren();
+    bibHinweis(e.message);
+  }
+}
+
+/** Der Dialog "+ Neu" - vorgefuellt mit dem, woran gerade gearbeitet wird.
+ *
+ * Vorgefuellt, weil die Bibliothek waehrend der Arbeit waechst: Man legt
+ * einen Prompt in dem Augenblick ab, in dem seine Antwort getaugt hat. Der
+ * Text steht trotzdem zum Lesen und Aendern da - er ueberdauert die Akte,
+ * und eine Frage aus der Arbeit kann einen Namen enthalten.
+ */
+function bibNeu() {
+  const dialog = $("prompt-dialog");
+  if (!dialog) return;
+  const vorlage = ($("frage").value || "").trim() || letzteGestellteFrage || "";
+  $("prompt-text").value = vorlage;
+  $("prompt-titel").value = "";
+  $("prompt-gebiet").textContent = bibliothekStand && bibliothekStand.aus_akte
+    ? `Rechtsgebiet dieser Akte: ${bibliothekStand.rechtsgebiet}`
+    : "Diese Akte nennt kein Rechtsgebiet – der Prompt landet in der gemeinsamen Liste.";
+  bibHinweis("");
+  dialog.showModal();
+  ($("prompt-titel")).focus();
+}
+
+async function bibAblegen() {
+  const titel = ($("prompt-titel").value || "").trim();
+  const text = ($("prompt-text").value || "").trim();
+  if (!text) { bibHinweis("Ohne Prompt gibt es nichts abzulegen."); return; }
+  bibliothekZeichnen(await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/prompts`,
+                               { titel, text }));
+  melden("In der Bibliothek abgelegt.");
+}
+
+async function bibVergessen(titel) {
+  bibliothekZeichnen(await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/prompts/vergessen`,
+                               { titel }));
+  bibHinweis("");
+}
+
 async function frageStellen() {
   const frage = $("frage").value.trim();
   if (!frage) return;
   $("frage").value = "";
+  letzteGestellteFrage = frage;
+  bibHinweis("");
   nutzerkarte(frage);
   const karte = threadKarte("ai");
   const who = document.createElement("div"); who.className = "who"; who.textContent = "jusperfect";
@@ -4313,6 +4446,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("explorer-dialog").returnValue === "uebernehmen") mitKnopf(null, explorerUebernehmen);
   });
   $("frage-form").addEventListener("submit", (ev) => { ev.preventDefault(); mitKnopf($("senden"), frageStellen); });
+  $("bib-neu").addEventListener("click", bibNeu);
+  $("prompt-dialog").addEventListener("close", () => {
+    if ($("prompt-dialog").returnValue === "ablegen") mitKnopf(null, bibAblegen);
+  });
   // Die Eingabetaste fragt.
   //
   // Aus der Kanzlei am 13.10.2026: "Fragen mit Returntaste ausloesen." Bisher

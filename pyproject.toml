@@ -54,7 +54,7 @@ dev = [
 include = ["jusperfect*"]
 
 [tool.setuptools.package-data]
-jusperfect = ["static/*", "packs/*.json"]
+jusperfect = ["static/*", "packs/*.json", "promptvorrat.json"]
 
 [tool.pytest.ini_options]
 # Die Gegenproben der Zweitpruefung liegen bewusst ausserhalb von tests/.

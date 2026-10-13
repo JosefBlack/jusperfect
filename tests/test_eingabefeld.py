@@ -20,6 +20,22 @@ CSS = (WURZEL / "jusperfect" / "static" / "styles.css").read_text(encoding="utf-
 HTML = (WURZEL / "jusperfect" / "static" / "index.html").read_text(encoding="utf-8")
 
 
+def _block(html: str, anfang: str) -> str:
+    """Der Inhalt eines ``div`` samt seiner verschachtelten ``div``."""
+    stelle = html.index(anfang) + len(anfang)
+    tiefe, lauf = 1, stelle
+    while tiefe:
+        auf = html.find("<div", lauf)
+        zu = html.find("</div>", lauf)
+        if zu < 0:
+            raise AssertionError(f"{anfang} wird nirgends geschlossen.")
+        if 0 <= auf < zu:
+            tiefe, lauf = tiefe + 1, auf + 4
+        else:
+            tiefe, lauf = tiefe - 1, zu + 6
+    return html[stelle:lauf]
+
+
 class Eingabefeld(unittest.TestCase):
     def test_eingabe_schwebt_ueber_dem_verlauf(self):
         block = re.search(r"\.eingabe \{([^}]*)\}", CSS)
@@ -70,10 +86,14 @@ class Eingabefeld(unittest.TestCase):
         self.assertIn('<div class="eingabe">', HTML)
         # Frageform und Kostenschätzung gehören mit hinein, sonst schwebt nur
         # die Hälfte.
-        block = HTML[HTML.index('<div class="eingabe">'):]
-        block = block[:block.index("</div>")]
+        #
+        # Bis zum ersten `</div>` zu schneiden genügt seit dem 13.10.2026
+        # nicht mehr: In der Eingabe steht die Promptbibliothek, und die ist
+        # selbst ein `div`. Der Schnitt zählt deshalb mit.
+        block = _block(HTML, '<div class="eingabe">')
         self.assertIn('id="frage-form"', block)
         self.assertIn('id="schaetzung"', block)
+        self.assertIn('id="bibliothek"', block)
 
 
 if __name__ == "__main__":
