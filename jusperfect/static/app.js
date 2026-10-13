@@ -1394,20 +1394,85 @@ function dokumentspalteZeichnen() {
   zeigeDokument(filter.value);
 }
 
+/** Die Suchwoerter aus dem Feld - klein geschrieben, ohne Leeres. */
+function dokSuchwoerter() {
+  const feld = $("dok-suche");
+  return feld ? feld.value.toLowerCase().split(/\s+/).filter(Boolean) : [];
+}
+
+/** Den Text einer Passage mit hervorgehobenen Treffern einsetzen.
+ *
+ * Mit `textContent` je Stueck, nie mit `innerHTML`: Der Text kommt aus der
+ * Akte, und ein Dokument, das wie HTML aussieht, darf nicht als HTML enden.
+ */
+function mitHervorhebung(ziel, text, begriffe) {
+  if (!begriffe.length) { ziel.textContent = text; return; }
+  const klein = text.toLowerCase();
+  const stellen = [];
+  for (const b of begriffe) {
+    let ab = 0;
+    for (;;) {
+      const i = klein.indexOf(b, ab);
+      if (i < 0) break;
+      stellen.push([i, i + b.length]);
+      ab = i + b.length;
+    }
+  }
+  if (!stellen.length) { ziel.textContent = text; return; }
+  stellen.sort((a, b) => a[0] - b[0]);
+  let bis = 0;
+  for (const [von, ende] of stellen) {
+    if (von < bis) continue;                      // ueberlappende Treffer
+    if (von > bis) ziel.appendChild(document.createTextNode(text.slice(bis, von)));
+    const m = document.createElement("mark");
+    m.textContent = text.slice(von, ende);
+    ziel.appendChild(m);
+    bis = ende;
+  }
+  if (bis < text.length) ziel.appendChild(document.createTextNode(text.slice(bis)));
+}
+
+/** Die Dokumentspalte zeichnen - gefiltert nach Dokument UND nach Text.
+ *
+ * Aus der Kanzlei am 13.10.2026: "Eine Suchfunktion in den Dokumenten waere
+ * sehr gut, da ich z. B. schnell Antraege finden muss."
+ *
+ * Gesucht wird in dem, was ohnehin schon da ist: `passagenIndex` traegt den
+ * Text aller geladenen Dokumente. Es geht keine Anfrage hinaus, kein Modell
+ * wird gefragt, und es kostet nichts. Jedes Suchwort muss vorkommen - "antrag
+ * frist" findet die Passage, in der beides steht.
+ */
 function zeigeDokument(nurDokument) {
   const ziel = $("dok-text"); ziel.replaceChildren();
+  const begriffe = dokSuchwoerter();
   let letzterTitel = null;
+  let gefunden = 0, durchsucht = 0;
   for (const kennung of Object.keys(passagenIndex)) {
     const p = passagenIndex[kennung];
     if (nurDokument && p.dokument_id !== nurDokument) continue;
+    durchsucht++;
+    const text = p.text || "";
+    const klein = text.toLowerCase();
+    if (begriffe.length && !begriffe.every((b) => klein.includes(b))) continue;
+    gefunden++;
     if (p.dokument_titel !== letzterTitel) {
       const t = document.createElement("div"); t.className = "dok-doktitel"; t.textContent = p.dokument_titel;
       ziel.appendChild(t); letzterTitel = p.dokument_titel;
     }
     const abs = document.createElement("div"); abs.className = "passage"; abs.id = `p-${p.kennung}`;
     const kz = document.createElement("span"); kz.className = "kennung"; kz.textContent = `${p.kennung} · Seite ${p.seite}`;
-    const satz = document.createElement("div"); satz.className = "satz"; satz.textContent = p.text;
+    const satz = document.createElement("div"); satz.className = "satz";
+    mitHervorhebung(satz, text, begriffe);
     abs.append(kz, satz); ziel.appendChild(abs);
+  }
+  const marke = $("dok-treffer");
+  if (marke) {
+    // Null Treffer ist eine Auskunft, kein leeres Fenster. Ohne diese Zeile
+    // saehe "nichts gefunden" aus wie "nichts geladen".
+    marke.textContent = !begriffe.length ? ""
+      : gefunden === 0 ? `kein Treffer in ${durchsucht} Absatz/Absaetzen`
+      : `${gefunden} von ${durchsucht} Absaetzen`;
+    marke.classList.toggle("ohne-treffer", !!begriffe.length && gefunden === 0);
   }
 }
 
@@ -4267,6 +4332,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ev.preventDefault();
     if ($("senden").disabled) return;
     mitKnopf($("senden"), frageStellen);
+  });
+  const dokSuche = $("dok-suche");
+  if (dokSuche) dokSuche.addEventListener("input", () => {
+    const filter = $("dok-filter");
+    zeigeDokument(filter ? filter.value : "");
   });
   $("chrono-aktualisieren").addEventListener("click", (ev) =>
     mitKnopf(ev.currentTarget, chronologieAktualisieren));

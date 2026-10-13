@@ -1097,3 +1097,20 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .thread-trennung::after {
   content: ""; flex: 1; height: 1px; background: var(--linie);
 }
+
+
+/* Die Suche im Dokumenttext.
+   Aus der Kanzlei am 13.10.2026: „Eine Suchfunktion in den Dokumenten wäre
+   sehr gut, da ich z. B. schnell Anträge finden muss." Sie sitzt über dem
+   Text, nicht in der Kopfzeile: Dort stehen schon vier Dinge. */
+.dok-suche-zeile { flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-bottom: 1px solid var(--linie);
+  background: var(--flaeche); }
+.dok-suche { flex: 1 1 auto; min-width: 0; font: inherit; font-size: 13px;
+  padding: 5px 8px; border: 1px solid var(--linie); border-radius: 7px;
+  background: var(--flaeche-2); color: var(--tinte); }
+.dok-treffer { flex: none; font-size: 12px; color: var(--gedaempft); }
+/* Kein Treffer ist eine Auskunft, kein leeres Fenster. */
+.dok-treffer.ohne-treffer { color: var(--rot); }
+.passage .satz mark { background: var(--amber-hell); color: var(--tinte);
+  border-radius: 3px; padding: 0 1px; }
