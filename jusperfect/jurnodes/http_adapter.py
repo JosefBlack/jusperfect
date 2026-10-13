@@ -544,6 +544,38 @@ def _groesse(wert: Any) -> int | None:
         return None
 
 
+def _erlaubte_verfahren(antwort: Any) -> str:
+    """Was der Server bei 405 selbst als erlaubt nennt - der ``Allow``-Kopf.
+
+    Aus der Kanzlei am 13.10.2026, gemessen mit der Aktenprobe::
+
+        jur|nodes antwortete auf GET /record mit Status 405.
+        jur|nodes antwortete auf POST /correspondence/search mit Status 405.
+
+    405 heisst "Verfahren nicht erlaubt" - der Pfad ist da, das Verfahren
+    passt nicht. Beide stehen so in der Beschreibung des Herstellers (API
+    1.0.2: ``/record`` GET und POST, ``/correspondence/search`` nur POST), und
+    beide Rechte gaeben bei Fehlen 401 oder 403, nicht 405.
+
+    Welches Verfahren der Server stattdessen will, sagt er bei 405 nach RFC
+    9110 selbst - im ``Allow``-Kopf. Der kostet nichts: Er liegt in der
+    Antwort, die wir ohnehin schon haben. Ohne ihn bleibt nur Raten, und
+    geraten wird bei Dritten nicht.
+
+    **Ausprobiert wird nichts.** ``POST /record`` waere das naheliegende
+    zweite Verfahren und ist in der Beschreibung "Erzeugen & Update" - ein
+    Programm, das nicht schreibt, probiert so etwas nicht aus, auch nicht zur
+    Fehlersuche.
+
+    Durchgereicht wird nur, was wie eine Verfahrensliste aussieht: Grossbuchstaben
+    und Kommas. Ein fremder Server darf keinen beliebigen Text in unsere
+    Meldungen schreiben.
+    """
+    roh = (antwort.headers.get("allow") or antwort.headers.get("Allow") or "")[:60]
+    geputzt = "".join(z for z in roh.upper() if z.isalpha() or z in ", ").strip()
+    return f" Der Server nennt als erlaubt: {geputzt}." if geputzt else ""
+
+
 def dokument_aus_json(akte_id: str, d: Mapping[str, Any],
                       ordner: str = "") -> Dokument:
     """Ein Dokument aus einem ``file``-Eintrag von ``/file-system/folder/content``.
@@ -839,7 +871,8 @@ class HttpJurNodesAdapter:
             # Dutzend. Am 24.09.2026 hat genau das eine Stunde gekostet.
             # Ein Pfad ist fest verdrahtet und enthaelt keinen Akteninhalt.
             raise JurNodesFehler(
-                f"jur|nodes antwortete auf GET {pfad} mit Status {antwort.status_code}.")
+                f"jur|nodes antwortete auf GET {pfad} mit Status "
+                f"{antwort.status_code}." + _erlaubte_verfahren(antwort))
         return antwort
 
     def _alle_seiten(self, pfad: str, nicht_gefunden: type[JurNodesFehler],
@@ -917,7 +950,8 @@ class HttpJurNodesAdapter:
                 f"{bereich_von(pfad) or pfad} oder ein Recht darin.")
         if antwort.status_code >= 400:
             raise JurNodesFehler(
-                f"jur|nodes antwortete auf POST {pfad} mit Status {antwort.status_code}.")
+                f"jur|nodes antwortete auf POST {pfad} mit Status "
+                f"{antwort.status_code}." + _erlaubte_verfahren(antwort))
         return antwort
 
     def _alle_seiten_post(self, pfad: str, nicht_gefunden: type[JurNodesFehler],

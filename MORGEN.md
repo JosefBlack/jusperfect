@@ -4580,3 +4580,70 @@ nicht 403, nicht 404 — also kein Rechteproblem). Das sagt der nächste Lauf de
 Aktenprobe, der jetzt Pfad und Status nennt.
 
 2126 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026 — Status 405: der Server weist zwei Aufrufe ab, die der Hersteller beschreibt
+
+Der zweite Lauf der Aktenprobe, jetzt mit dem Satz des Fehlers:
+
+```
+3× JurNodesFehler (http_adapter.py:841) - jur|nodes antwortete auf
+   GET /record mit Status 405.
+1× JurNodesFehler (http_adapter.py:919) - jur|nodes antwortete auf
+   POST /correspondence/search mit Status 405.
+```
+
+**405 heißt „Verfahren nicht erlaubt"** — der Pfad ist da, das Verfahren passt
+nicht. Nachgesehen in `schnittstelle/jurnodes-api-1.0.2.json`, der
+Beschreibung, die die Kanzlei am 05.10.2026 selbst geliefert hat:
+
+| Pfad | Verfahren laut Hersteller | Was jusperfect sendet |
+|---|---|---|
+| `/record` | GET, POST | **GET** |
+| `/correspondence/search` | POST | **POST** |
+
+**Beides stimmt.** Und es ist kein Rechteproblem: `read:records` und
+`search:correspondence` gäben bei Fehlen 401 oder 403, und die haben hier ihren
+eigenen Satz. Zwei weitere Aufrufe an denselben Server — `GET /relation/search`
+und `GET /todo/search` — gingen im selben Lauf durch.
+
+> Zwei beschriebene Aufrufe werden abgewiesen, zwei andere nicht. Das ist keine
+> Frage mehr an unseren Quelltext.
+
+### Was eingebaut wurde: die Antwort des Servers lesen, nicht raten
+
+Nach RFC 9110 nennt ein Server bei 405 im **`Allow`-Kopf** selbst, welche
+Verfahren er für diesen Pfad kennt. Der kostet nichts — er liegt in der
+Antwort, die wir ohnehin schon haben. Er steht jetzt in der Meldung.
+
+Durchgereicht wird nur, was wie eine Verfahrensliste aussieht (Großbuchstaben
+und Kommas, höchstens 60 Zeichen). Ein fremder Server schreibt keinen
+beliebigen Text in unsere Meldungen — dieselbe Erwägung wie beim Wortlaut von
+AWS.
+
+### Und was ausdrücklich NICHT gebaut wurde
+
+`POST /record` wäre das naheliegende zweite Verfahren und steht sogar in der
+Beschreibung. Es heißt dort **„Erzeugen & Update"**. Ein Programm, das nicht
+schreibt, probiert so etwas nicht aus — auch nicht zur Fehlersuche, auch nicht
+„nur einmal". Eine Prüfung hält fest, dass dieser Aufruf im Quelltext nicht
+vorkommt.
+
+Bei Dritten wird gewartet und gemessen, nicht geraten.
+
+`tests/test_verfahren_nicht_erlaubt.py`, acht Prüfungen. Darunter die
+Gegenprobe gegen die Beschreibung selbst: Sollte der Hersteller eines Tages das
+Verfahren ändern, fällt sie.
+
+### Die offene Frage, und sie ist keine des Programms
+
+Warum weist **dieser** Server diese beiden ab, während es am anderen Rechner
+der Kanzlei geht? Die naheliegendste Erklärung ist die hinterlegte **Adresse**:
+Zeigt sie auf einen anderen Einstiegspunkt, kann ein Vorschaltserver genau so
+antworten — manche Pfade durchlassen, andere nicht.
+
+Zu vergleichen ist die Zeile „Schnittstelle:", die `START-JURNODES.bat` beim
+Start auf **beiden** Rechnern ausgibt.
+
+2134 Prüfungen grün, eine übersprungen.
