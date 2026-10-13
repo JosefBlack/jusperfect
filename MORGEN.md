@@ -4374,3 +4374,72 @@ sondern geschlossen. Liegt er woanders, kommt dieselbe Meldung wieder — dann
 aber mit der Zeile im schwarzen Fenster, die es seit heute gibt.
 
 2084 Prüfungen grün, eine übersprungen.
+
+---
+
+## 13.10.2026 — die drei Vorschläge: die Aktenprobe, und zwei echte Funde
+
+### 1. `AKTE-PRUEFEN.bat` — welcher Eintrag lässt sich nicht lesen?
+
+`jusperfect/aktenprobe.py`. Sie geht **denselben Weg wie das Öffnen** — über
+`web.py::_adapter_bauen`, damit es nicht zwei Wahrheiten gibt —, aber Eintrag
+für Eintrag und mit einer Zeile je Eintrag:
+
+```
+  ✓  [1] mail, Eingang, 2026-05-04 - 1 Dokument(e) daraus
+  ✗  [2] mail, Ausgang, 2026-05-04: builtins.RuntimeError (mail.py:212)
+  ✓  [3] note, Eingang, 2026-05-04
+```
+
+| Zusage | Wie sie gehalten wird |
+|---|---|
+| Kostet nichts | Kein Modellaufruf, keine Texterkennung. Der Dokumentinhalt wird nicht geholt — `GET /record/note` kommt nicht vor, und eine Prüfung hält das fest. |
+| Schreibt nichts | Nur GET und die lesenden POSTs (`search`, `download`). Eine Prüfung geht die Aufrufe des Servers durch. |
+| Läuft ohne Gedächtnis | Sie liest es nicht einmal — eine Prüfung sucht `gedaechtnis.lesen` im Quelltext und besteht nur, wenn es nicht vorkommt. Die Probe muss arbeiten, wenn gerade das Gedächtnis das Problem ist. |
+| Lässt sich weitergeben | Kein Betreff, kein Dateiname, kein Beteiligter, kein Text. Kennungen verdeckt (`m-4…(6)`). Vier Prüfungen suchen einen erfundenen Betreff in der Ausgabe. |
+
+Im .bat steht `JUSPERFECT_GEDAECHTNIS=aus` — damit braucht sie auch keinen
+AWS-Zugang und läuft selbst dann, wenn dort etwas fehlt.
+
+`tests/test_aktenprobe.py`, dreizehn Prüfungen.
+
+### 2. Weitergesucht — und die Frage umgedreht
+
+Der Fehler trat am echten Server auf und bei den erfundenen Akten nicht; er
+hängt an echten Daten. Welche, war nicht zu messen. Also die Umkehrung:
+**was müsste eine Antwort enthalten, damit es passiert?**
+`tests/test_seltsame_antworten.py` wirft dem Aufbauen der Liste vor, was ein
+Server schicken kann — und hat zwei Stellen gefunden.
+
+**Fund 1: `null` in der Korrespondenzliste riss die ganze Akte mit.**
+
+```python
+for eintrag in eintraege:
+    if str(eintrag.get("type", "")).lower() != "mail":   # vor jeder Absicherung
+```
+
+`_vermerke` prüft gleich darüber seit dem 06.10.2026 `isinstance(eintrag,
+Mapping)`. In `_mail_dokumente` fehlte es, und `eintrag.get` lief **vor** dem
+`try`. Ein `null` in der Liste — oder eine Liste von Zeichenketten — und das
+Öffnen brach ab. **Das ist ein Kandidat für den Fall aus der Kanzlei**, und
+mehr ist es nicht: gemessen ist es nicht.
+
+**Fund 2: ein Dokument, das keines ist.** Ein Eintrag des Dateiordners ohne
+`identifier` wurde zu einem Dokument mit **leerer Kennung**. Es stand in der
+Liste, ließ sich anhaken — und beim Laden war es nicht zu finden. Das ist
+teurer als ein fehlendes: Was nicht da ist, fällt auf; ein Gespenst nicht.
+Jetzt fällt so ein Eintrag allein aus und wird gezählt.
+
+**Dazu eine Verzierung, die ein Dokument kostete:** `size` ging unverwandelt
+in ein `int | None`. „1,5 MB" ließ das ganze Dokument aus der Liste fallen.
+Die Größe steht in der Zeile und entscheidet nichts; sie darf kein Dokument
+kosten. `_groesse()` liest, was zu lesen ist, und sonst „keine Angabe".
+
+### Und noch einmal die Sperrliste
+
+Der Betreff in der neuen Prüfung trug den Namen eines echten Versicherers —
+die **zwölfte** Wiederholung, und die zweite an diesem Tag, die
+`SPERRLISTE-PRUEFEN.bat` gefunden hat und nicht ich. Vor jedem Commit laufen
+lassen ist nicht Vorsicht, sondern das Einzige, was hier funktioniert.
+
+2105 Prüfungen grün, eine übersprungen.

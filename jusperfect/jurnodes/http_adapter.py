@@ -524,6 +524,26 @@ def _ordnerpfad(bisher: str, ordner: Mapping[str, Any], nummer: Any) -> str:
     return f"{bisher}/{name}" if bisher else name
 
 
+def _groesse(wert: Any) -> int | None:
+    """Die Dateigroesse - und nie ein Grund, ein Dokument zu verlieren.
+
+    Nachgesehen am 13.10.2026, bei der Suche nach dem Abbruch: ``size`` ging
+    unverwandelt in ein ``int | None``. Eine Zahl als Zeichenkette ("12345")
+    nimmt Pydantic noch; "1,5 MB", "12345.5" oder eine Liste nicht - und dann
+    fiel das ganze Dokument aus der Liste.
+
+    Die Groesse ist eine Verzierung. Sie steht in der Zeile des Dokuments und
+    entscheidet nichts; sie darf ein Dokument nicht kosten. Was sich nicht als
+    Zahl lesen laesst, steht deshalb als "keine Angabe" da.
+    """
+    if wert is None or isinstance(wert, bool):
+        return None
+    try:
+        return int(float(str(wert).strip().replace(",", ".")))
+    except (TypeError, ValueError):
+        return None
+
+
 def dokument_aus_json(akte_id: str, d: Mapping[str, Any],
                       ordner: str = "") -> Dokument:
     """Ein Dokument aus einem ``file``-Eintrag von ``/file-system/folder/content``.
@@ -532,11 +552,25 @@ def dokument_aus_json(akte_id: str, d: Mapping[str, Any],
     daneben). Fuer jusperfect ist der Dateiname der zusammengesetzte - daran
     haengt die Erkennung, was sich auslesen laesst und was nicht.
     """
+    # Ohne Kennung ist es kein Dokument.
+    #
+    # Hier stand nur ``str(...)``, und das machte aus einem Eintrag ohne
+    # ``identifier`` ein Dokument mit leerer Kennung: Es stand in der Liste,
+    # liess sich anhaken - und beim Laden war es nicht zu finden. Ein
+    # Dokument, das aussieht wie eines und keines ist, ist teurer als ein
+    # fehlendes: Was nicht da ist, faellt auf.
+    #
+    # Gefunden am 13.10.2026 bei der Suche nach dem Abbruch. Seit demselben
+    # Tag faellt ein solcher Eintrag allein aus und wird gezaehlt.
+    kennung = str(_erstes(d, "identifier", "id", "dokumentId", "dokument_id")).strip()
+    if not kennung:
+        raise JurNodesFehler(
+            "Ein Eintrag des Dateiordners nennt keine Kennung (identifier).")
     name = str(_erstes(d, "fileName", "dateiname", "filename", "datei"))
     endung = str(_erstes(d, "fileExtension", standard="")).lstrip(".")
     dateiname = f"{name}.{endung}" if endung and not name.lower().endswith("." + endung.lower()) else name
     return Dokument(
-        id=str(_erstes(d, "identifier", "id", "dokumentId", "dokument_id")),
+        id=kennung,
         akte_id=akte_id,
         titel=str(_erstes(d, "titel", "bezeichnung", "name", standard=name)) or name,
         dateiname=dateiname,
@@ -544,7 +578,7 @@ def dokument_aus_json(akte_id: str, d: Mapping[str, Any],
         datum=_datum(_erstes(d, "addedDate", "datum", "erstelltAm", "date", standard=None)),
         kategorie=str(_erstes(d, "kategorie", "typ", "art")),
         ordner=ordner,
-        groesse_bytes=_erstes(d, "size", "groesse_bytes", "groesse", standard=None),
+        groesse_bytes=_groesse(_erstes(d, "size", "groesse_bytes", "groesse", standard=None)),
     )
 
 
@@ -1472,6 +1506,21 @@ class HttpJurNodesAdapter:
 
         dokumente: list[Dokument] = []
         for eintrag in eintraege:
+            # Erst die Gestalt, dann die Art. Hier stand die Art zuerst, und
+            # `eintrag.get` lief damit VOR jeder Absicherung: Ein `null` in
+            # der Liste - oder eine Liste von Zeichenketten - riss das Oeffnen
+            # der ganzen Akte mit. `_vermerke` prueft das gleich darueber
+            # seit dem 06.10.2026; hier fehlte es.
+            #
+            # Gefunden am 13.10.2026 bei der Suche nach dem Abbruch, mit einem
+            # Vorrat an Antworten, die ein Server schicken kann (siehe
+            # tests/test_seltsame_antworten.py). Nicht gemessen ist, ob es DER
+            # Fall aus der Kanzlei war - moeglich ist er.
+            if not isinstance(eintrag, Mapping):
+                self._eintrag_gescheitert(TypeError(
+                    f"Korrespondenzeintrag ist {type(eintrag).__name__} "
+                    f"und kein Verzeichnis"))
+                continue
             if str(eintrag.get("type", "")).lower() != "mail":
                 continue
             # Eine Mail, die sich nicht zerlegen laesst, kostet nicht die

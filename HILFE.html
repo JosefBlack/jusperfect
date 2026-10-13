@@ -1057,9 +1057,29 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
     <tr><td><code>JURNODES-ZUGANG.bat</code></td><td>Adresse, Benutzer und Schlüssel von jur|nodes hinterlegen</td></tr>
     <tr><td><code>JURNODES-PRUEFEN.bat</code></td><td>Antwortet die Schnittstelle? Befund in <code>jurnodestest.txt</code></td></tr>
     <tr><td><code>ORDNER-PRUEFEN.bat</code></td><td>Taugt der Aktenordner? Befund in <code>ordnerpruefung.txt</code></td></tr>
+    <tr><td><code>AKTE-PRUEFEN.bat</code><span class="marke fertig">seit 13.10.2026</span></td><td>Welcher <em>Eintrag</em> einer bestimmten Akte lässt sich nicht lesen? Kostet nichts</td></tr>
     <tr><td><code>SPERRLISTE-ANLEGEN.bat</code><span class="marke fertig">seit 13.10.2026</span></td><td>Namen hinterlegen, die nie im Programmordner stehen dürfen – <strong>einmal je Rechner</strong></td></tr>
     <tr><td><code>SPERRLISTE-PRUEFEN.bat</code><span class="marke fertig">seit 13.10.2026</span></td><td>Steht ein echter Name oder ein echtes Aktenzeichen im Ordner? Kostet nichts</td></tr>
   </table>
+
+  <h3>Wenn eine Akte sich nicht öffnen lässt<span class="marke fertig">seit 13.10.2026</span></h3>
+  <p>Steht beim Öffnen <em>„Interner Fehler. Der Vorgang wurde abgebrochen. Vorgangsnummer
+  …"</em>, heißt das: ein Fehler, mit dem niemand gerechnet hat. Zwei Wege führen weiter:</p>
+  <table>
+    <tr><th>Weg</th><th>Was er sagt</th></tr>
+    <tr><td><code>AKTE-PRUEFEN.bat</code></td><td>Geht dieselbe Akte Eintrag für Eintrag durch und sagt, <strong>welcher</strong> nicht lesbar ist – mit Art, Richtung und Datum. Liest nur, kostet nichts, schreibt nichts, holt keinen Dokumentinhalt und liest das Aktengedächtnis nicht einmal.</td></tr>
+    <tr><td>das schwarze Fenster</td><td>Dort steht eine Zeile mit derselben Vorgangsnummer und dem Wort <code>fehler_abgefangen</code>. Sie nennt die Codestelle.</td></tr>
+  </table>
+  <div class="merksatz">
+    <p><strong>Beide Ausgaben enthalten keinen Akteninhalt</strong> – kein Betreff, kein
+    Dateiname, kein Beteiligter, keinen Text. Kennungen stehen verdeckt. Sie lassen sich
+    weitergeben.</p>
+  </div>
+  <p>Ein einzelner Eintrag, der nicht lesbar ist, hält die Akte seit dem 13.10.2026
+  <strong>nicht mehr zu</strong>: Er fällt allein aus, und oben in der Dokumentliste steht,
+  wie viele es sind und woran es lag. Dasselbe gilt für ein Aktengedächtnis, das sich nicht
+  mehr einlesen lässt – dann geht die Akte ohne Erinnerung auf, und der Hinweis nennt den
+  Weg („Gedächtnis verwerfen", dann „Akte einlesen").</p>
 
   <h3>Die Sperrliste<span class="marke fertig">seit 13.10.2026</span></h3>
   <p>Am 11.10.2026 standen echte Namen aus echten Akten im Programmordner. Dagegen
