@@ -3189,3 +3189,441 @@ Infrastruktur nennen wie möglich.**
 Die Ersetzung ist durchgängig: Quelltext, Unterlagen **und** Prüfungen tragen
 denselben Platzhalter. Deshalb laufen die Prüfungen auch im Paket — und das ist
 jetzt gemessen, nicht behauptet.
+
+---
+
+## 12.10.2026 — der Prüfbogen lief am echten Server, und sein Text war zwei Tage alt
+
+Die Kanzlei hat `JURNODES-PRUEFEN.bat` aus dem entpackten Ordner 2.0 laufen
+lassen und die Ausgabe geschickt. Der Lauf selbst ist der sauberste bisher:
+
+| Gemessen | Ergebnis |
+|---|---|
+| Pfade in der Beschreibung | 85, alle gelesen |
+| Status über alle Aufrufe | durchweg 200 |
+| Korrespondenzeinträge | 26 — 22 Mails, 4 Vermerke |
+| Vermerke mit Inhalt abgerufen | 3, über beide Pflichtparameter |
+| `POST /mail/download` | 8 753 880 Bytes, `.eml`, Name vom Server |
+| Ordnerbaum | 8 Ordner, 55 Dateien |
+| Aktenstatus | `active` |
+
+Dazu die Antwort auf die Frage der Kanzlei, wo der Ordner liegt: Zeile 18 der
+Ausgabe nennt ihn selbst, und damit stand fest, dass wirklich 2.0 entpackt
+ist — der Text zu `isInbox` vom 11.10. steht nur dort.
+
+### Vier Stellen im Prüfbogen widersprachen dem, was das Programm tut
+
+Der Bogen *beschreibt* noch den Stand vor dem 08.10., das Programm *tut* längst
+etwas anderes. Wer nur den Bogen liest — auch eine prüfende KI — bekommt ein
+falsches Bild:
+
+| Was dort stand | Was gilt |
+|---|---|
+| „Noch ohne Inhalt im Programm: 22 (mail). Sie stehen nicht in der Dokumentliste." | Seit 08.10. steht jeder Mailtext als eigenes Dokument in der Liste, jeder Anhang zusätzlich |
+| „Mail, beA und Post bleiben vorerst draussen … zwei Dinge zu entscheiden" | Beides am 08.10. entschieden und gebaut; draußen sind nur noch beA und Post |
+| „ob es eine neuere Fassung als 1.0.2 gibt" als offene Frage | Von der Kanzlei am 12.10. beantwortet: nein |
+| „5 Ordner wurden befuellt, BEVOR es diese Akte gab … zu klaeren in jur\|nodes" | Dasselbe Muster war am 08.10. als **unser** Fehler aufgeklärt worden — zwei getrennte Ordnerbäume |
+
+> Ein Prüfbogen, der den Stand von vorgestern beschreibt, ist schlimmer als
+> keiner: Er wird für eine Messung gehalten.
+
+**Nicht geändert.** Der Bogen gehört zu `jusperfect/jurnodestest.py`; die vierte
+Zeile oben muss ich am Quelltext nachsehen, ehe ich sie anfasse — sie läuft
+dort über den **Datei**baum, nicht über den Korrespondenzbaum, und das ist
+möglicherweise ein anderer Fall als der vom 08.10.
+
+### Und die Ausgabe trägt echte Aktendaten
+
+Serveradresse mit Schnittstellenkennung, das Aktenzeichen, die Aktenkennung —
+viermal in der Ausgabe. **Kein Akteninhalt**, aber genug, um die Akte zu
+benennen. Also: nicht an den Hersteller und nicht an eine prüfende KI in
+dieser Form. Das ist dieselbe Erwägung wie bei den fünf maskierten
+Infrastrukturangaben des Pakets, nur eine Ebene tiefer.
+
+---
+
+## 13.10.2026 — „Erst kommt das Aktengedächtnis mit anhaken"
+
+Ein Satz aus der Kanzlei, und er berichtigt eine Annahme von mir. Die
+Gliederung nach Ordnern hatte ich am 12.10. in das **Dokumentfenster** gebaut.
+Angehakt wird im Arbeitsablauf aber **zuerst** im **Aktengedächtnis-Fenster**:
+Ohne Gedächtnis hat die Arbeitsakte nichts, woraus sie schöpfen könnte. Dort
+standen die 55 Einträge aus acht Ordnern weiter in einer Reihe — an der Stelle
+also, an der die Gliederung am meisten trägt.
+
+> Ich hatte die Gliederung dort gebaut, wo ich sie gesucht hätte. Gefragt
+> hatte ich nicht.
+
+Gebaut, und mit einem Unterschied zum Dokumentfenster, der aus der Sache
+kommt: **Die Zahl neben der Überschrift sagt nicht, wie groß der Ordner ist,
+sondern wie viele darin noch fehlen** — das ist die Frage, die man in diesem
+Fenster hat. Der Stapelknopf nimmt nur die fehlenden; was schon im Gedächtnis
+liegt, darf nicht ein zweites Mal aufgenommen werden, sonst zahlt die Kanzlei
+das Einlesen doppelt. Fehlt in einem Ordner nichts, steht dort **kein** Knopf:
+Ein Knopf ohne Wirkung ist ein Versprechen, das nicht gehalten wird.
+
+### Dabei ein Fehler, der nie geprüft war
+
+**„alle fehlenden" nahm die ganze Akte** — auch wenn der Filter nur den Gegner
+stehen ließ. Im Dokumentfenster ist genau das seit dem 29.09.2026 ausdrücklich
+geprüft (`test_alle_anhaken_trifft_nur_die_sichtbaren`); hier war es nie
+geprüft und war falsch.
+
+Der Satz „x von y im Gedächtnis" zählt dagegen weiter die **ganze** Akte: Eine
+vom Filter abhängige Zahl wäre dort gelogen.
+
+**17 neue Prüfungen, davon 11 nicht am Quelltext**, sondern an den
+ausgeführten Funktionen — mit einem winzigen Ersatz-DOM in node.
+**Gegenprobe: 16 der 17 fallen gegen den vorigen Stand durch.** Ein
+Quelltext, der die richtigen Wörter enthält und das Falsche tut, käme sonst
+durch. **1879 Prüfungen grün.**
+
+### Eine Berichtigung in `PRUEFAUFTRAG.md`, und sie ist mein Rechenfehler
+
+Dort stand: „In zwei geprüften Akten lag genau **eine** Mail darüber (8,7 MB)."
+8,7 MB liegen **unter** 20 MB. Richtig ist: **keine** gemessene Mail hat die
+Grenze überschritten; die größte wog 8 753 880 Bytes, die zweite 5 kB. Die 20
+MB sind damit eine Vorsorge und keine aus dem Bestand abgeleitete Zahl.
+
+Gefunden hat es die Gegenlesung. Die Berichtigung bleibt als Berichtigung
+kenntlich, damit niemand den alten Satz wiederfindet und ihn für eine Messung
+hält.
+
+### Warum die Pushes seit zwei Tagen fehlschlugen
+
+```
+fatal: repository 'https://github.com/JosefBlack/jusperfect-/' not found
+```
+
+Das Repository heißt **`jusperfect`** — ohne Bindestrich. Im Programmordner
+stand als Ziel `jusperfect-` **mit**. Kein Rechteproblem, kein gelöschtes
+Repository: ein Bindestrich zu viel, aus dem Namen des alten Repositorys
+stehengeblieben.
+
+Dass ich zwei Tage lang die falsche Erklärung hatte („origin setzt sich
+zurück"), ist dieselbe Form wie am 12.10. bei dem Vorgabezweig: **Ich habe
+geglaubt, statt zu messen.** Ein Blick mit `git ls-remote` auf die
+tatsächliche Adresse hätte es sofort gezeigt.
+
+---
+
+## 13.10.2026 — die dritte Zweitprüfung: zwölf Befunde, sieben dringend
+
+Die prüfende KI hat geliefert: Bericht, 18 eigene Gegenproben, eine externe
+Netzsperre, das Protokoll des Gesamtlaufs, die Paketversionen, eine
+Integritätsprüfung über alle 294 Dateien.
+
+**Was zuerst festzuhalten ist, weil es gut ist:** Die **1862 Prüfungen sind
+von außen bestätigt** — erstmals gemessen und nicht von mir behauptet. 294
+Dateien nach dem Lauf unverändert, kein Code angefasst. Die Septemberkopie und
+der alte Ordner mit dem Prüfbestand sind gelöscht. Der Bericht selbst enthält
+nach eigener Kontrolle **keine** echten Namen.
+
+**Zwölf neue Befunde, sieben P1.** Keine Wiederholung der alten dreizehn —
+andere Wege an denselben Stellen vorbei. Drei habe ich selbst nachgesehen,
+bevor ich etwas geändert habe; alle drei stimmten.
+
+| ID | Was | Wo es wehtut |
+|---|---|---|
+| N01 | die „entfernten" Namen stehen zerlegt in der Prüfdatei | im übergebenen Prüfpaket |
+| N02 | `pypdf` schreibt Dokumentinhalt als Warnung ins Protokoll | anderer Weg als der behobene F01 |
+| N03 | eine weitergeleitete Mail verliert ihren Text | ersatzlos, ohne Warnung |
+| N04 | Anlagen verschwinden, der Zähler erreicht die Anzeige nicht | die Liste sieht vollständig aus |
+| N08 | ein normaler Test spricht mit geerbtem Zugang die echte Schnittstelle an | beim ersten Lauf des Prüfers geschehen |
+| N11 | eine Frankfurt-ARN mit globalem Profil darin passiert die Regionsprüfung | die verschobene Hälfte von F13 |
+| N12 | der Entwurfs**betreff** umgeht die Belegprüfung | wird Titel des Vermerks in der Akte |
+
+Dazu fünf nachrangige: HTML-Mailkopf (N05), Aktenbudget nicht kumulativ (N06),
+fehlende `fileFolderId` unterdrückt auch die E-Akte (N07), der Postfachtest
+prüft Wörter statt Aufrufe (N09), der Mailpuffer überlebt den Sitzungsschluss
+(N10).
+
+### Die Antwort auf die Frage nach den Regionen
+
+Gegengelesen an der AWS-Primärdokumentation, am Prüftag: Für die konkret
+eingetragenen Profile — Opus 4.6, Haiku 4.5, das Schutzgeländer — nennt die
+Tabelle bei Quelle Frankfurt **sechs** EU-Regionen: Frankfurt, Stockholm,
+Mailand, Spanien, Irland, Paris. **London und Zürich sind nicht darunter.**
+Daraus folgt keine Aussage über jedes `eu.`-Profil und keine über die
+tatsächliche Kontokonfiguration.
+
+### N02, N11, N12 — behoben
+
+**N02.** Die Protokollfabrik nahm den **Traceback** ab und ließ **Meldungstext
+und Argumente** stehen. Nachgestellt:
+
+```
+pypdf._reader|WARNING|invalid pdf header: b'GEHEI'
+```
+
+Die ersten fünf Bytes des Dokuments, als gewöhnliche Warnung. Kein Traceback,
+also griff der Riegel vom 05.10. nicht.
+
+> Nicht der Traceback ist das Gefährliche, sondern **jeder Wortlaut, den eine
+> Bibliothek schreibt, die Akteninhalt in der Hand hält.**
+
+Eine Liste der gefährlichen Kanäle wäre am Tag ihrer Aufstellung veraltet —
+der nächste Parser kommt morgen. Also eine **Positivliste**: `uvicorn` darf
+schreiben (es meldet Start und Ende und liest nie ein Dokument), alles andere
+ist stumm; Kanal, Stufe, Datei und Zeile bleiben, denn verschwiegen wird
+nichts. Dazu zwei Dinge, die beim Bauen auffielen:
+
+* Manche Bibliothek protokolliert nicht, sondern **warnt** — und das schreibt
+  unmittelbar nach stderr, vorbei an jeder Fabrik. Jetzt umgeleitet.
+* Der **Kanalname** wird selbst protokolliert, und `getLogger` nimmt jede
+  Zeichenkette. Eine Bibliothek, die ihren Kanal nach der gelesenen Datei
+  benennt, trüge den Dateinamen ins Protokoll. Mein erster Versuch prüfte nur
+  die **Form** des Namens — **meine eigene Prüfung hat gefangen, dass
+  `Klage.pdf` so durchkommt**, nicht mein Nachdenken. Jetzt muss zusätzlich
+  das erste Stück ein wirklich geladenes Modul sein.
+
+**N11.** F13 war nur halb behoben. Bei einer ARN wurde allein das Regionsfeld
+geprüft, und dann kehrte die Funktion zurück — bevor sie ansah, **worauf** die
+ARN zeigt.
+
+| Eingetragen | vorher | jetzt |
+|---|---|---|
+| `global.anthropic.…` als Kurzname | abgewiesen | abgewiesen |
+| dieselbe Verteilregel in einer Frankfurt-ARN | **durchgelassen** | abgewiesen |
+| `application-inference-profile/…` | durchgelassen | abgewiesen, mit Weg zum Nachweis |
+| `arn:aws:bedrock` ohne Regionsfeld | **durchgelassen** | abgewiesen |
+| `foundation-model/…` in Frankfurt | durchgelassen | weiter erlaubt |
+
+Die Region **im** Profil-ARN sagt, wo das Profil eingetragen ist — nicht, wo
+gerechnet wird. Die letzte Zeile ist mir wichtig: Ein Modell ist ortsfest und
+bleibt erlaubt. **Eine zu strenge Prüfung, die die richtige Einstellung
+abweist, ist auch ein Schaden.** Die ARN ohne Region hatte der Prüfer nicht
+gemeldet; sie fiel beim Bauen auf. **10 der neuen Prüfungen fallen gegen den
+vorigen Stand durch.**
+
+**N12.** Am alten Stand gemessen, am Ausgang, der zählt:
+
+```
+HTTP 201 | Betreff: 'Anerkenntnis der Haftung vom 14.03.2026'
+Vermerktitel in jur|nodes: 'Schreiben an die Rechtsschutzversicherung:
+                            Anerkenntnis der Haftung vom 14.03.2026'
+```
+
+Ein frei erfundenes Anerkenntnis **als Titel des Vermerks in der Akte** —
+dort, wo später jemand die Akte überfliegt. Der Brieftext war ordentlich
+belegt; die Belegpflicht deckte nur nicht alle Felder der Antwort.
+
+**Die Abhilfe ist keine weitere Prüfung, sondern eine andere Quelle.** Ein
+Betreff ist kein Satz; ein `[Q: …]` darin wäre unbrauchbar. Art des
+Schreibens, Aktenzeichen und Bezeichnung stehen alle in jur|nodes — keine
+dieser drei Angaben kann ein Modell erfinden. Der Vorschlag des Modells wird
+nicht weggeworfen: Er steht als ungeprüft gekennzeichneter **Hinweis** da,
+und Hinweise gehen nicht nach jur|nodes.
+
+Eine vorhandene Prüfung verlangte das Falsche: `test_entwurf_angelegt` bestand
+darauf, dass ungeprüfter Modelltext zum Betreff wird. Nachgezogen, mit dem
+Grund dabei.
+
+**1922 Prüfungen grün.**
+
+### N03, N04, N08 — behoben
+
+**N03/N04**, am alten Stand mit erfundenen Mails gemessen:
+
+```
+N03  Aussage der angehaengten Nachricht im Dokument: False
+N04a inline-PDF als Anlage uebernommen: []
+N04b PDF ohne Dateinamen: VERLOREN
+N04c leere Anlage: nicht uebernommen, nicht gemeldet
+```
+
+Bei **N03** stand die Annahme, der Text einer weitergeleiteten Mail stehe
+schon im Brieftext der äußeren zitiert. **Geprüft wurde sie nie.** Und
+schlimmer: Die Prüfung `test_eine_mail_in_der_mail` **verlangte** den Verlust
+— und ihre eigene äußere Mail sagt nur „Zur Kenntnis.", zitiert den inneren
+Text also gerade nicht.
+
+> Eine Prüfung, die ihre eigene Begründung am eigenen Beispiel widerlegt, war
+> grün. Das ist nicht ein unsauberer Test, das ist ein festgeschriebener
+> Irrtum.
+
+Jetzt kommt jede angehängte Nachricht mit **eigenen Kopfzeilen** und eigenem
+Text in das Dokument, als „Angehängte Nachricht n" erkennbar. Weggelassen wird
+nur, was **nachweislich** schon oben steht: verglichen wird der
+Buchstabenbestand ohne Leerraum und ohne „> ". Bei kurzem Text gar nicht — ein
+„ok" steht in jedem zweiten Brieftext; es doppelt mitzunehmen kostet nichts,
+es falsch wegzuwerfen eine Aussage.
+
+Bei **N04** entscheidet jetzt die **Medienart** mit: Ein PDF, das der Absender
+„inline" nennt, ist kein Signaturbild — manche Programme bezeichnen jede
+Anlage so. Ein PDF **ohne** Dateinamen ist eine Anlage und bekommt einen
+Ersatznamen mit Endung. Und daraus die Regel für diese Datei: **Jeder Teil,
+der nicht übernommen wird, wird mit Grund gezählt** — aus einer Quelle, damit
+nicht zwei Zählungen auseinanderlaufen. Ein Signaturbild zählt nicht als
+Verlust; es wäre nur Rauschen in der Warnung.
+
+Der dritte Fall von N04 war der eigentliche Befund: **Der Parser kannte diese
+Zahlen, der Adapter nahm sie nicht.**
+
+> Ein Zähler, den nur der Parser kennt, ist kein Zähler.
+
+Der Weg steht jetzt durch — die Zeile der Mail trägt
+`[⚠ nicht alles übernommen: 1× Anlage leer oder nicht lesbar]`, und die Summe
+über die Akte steht über der Dokumentliste, mit Grund.
+
+**Nebenbei erledigt, ohne eine Zeile dafür:** Das Dokument entsteht jetzt aus
+Blöcken, und wird einer davon als HTML gebraucht, läuft `html.escape` über die
+übrigen. Damit verliert `Name <adresse@…>` seine Adresse nicht mehr, und ein
+Betreff `<style>` kann den folgenden Text nicht mehr verschlucken — **das war
+N05.** Er fällt weg, weil der Umbau ihn nicht wieder einbaut.
+
+**N08** ist der, der die Kanzlei unmittelbar betraf.
+`test_ohne_angabe_wird_sie_genommen` hieß „ohne Angabe" und meinte: ohne das
+Argument `--beschreibung`. Die **Adresse** nahm der Test aus der Umgebung des
+Rechners. Also lief er an der harmlosen Prüfung vorbei weiter in die **echte
+Aktensuche**, mit dem echten Zugang. Beim ersten Lauf des Prüfers ist genau
+das passiert; ob einzelne Anfragen den Server erreichten, lässt sich nicht
+mehr feststellen.
+
+> Eine Prüfung, die den echten Server erreicht, misst auf jedem Rechner etwas
+> anderes — und sie kann fremde Mandate anfassen. Die Hausregel ist alt:
+> *Niemals jur|nodes-Nummern durchprobieren.* Ein Test, der mit dem
+> Kanzleischlüssel sucht, tut genau das, nur ungewollt.
+
+Die Abhilfe liegt deshalb **nicht im einzelnen Test**, sondern in
+`tests/conftest.py` — eine Zusage, die an der Sorgfalt des einzelnen Tests
+hängt, hält nicht:
+
+1. **Die Umgebung ist leer.** Alles mit `JUSPERFECT_`, `JURNODES_` oder `AWS_`
+   ist weg; an die Stelle der AWS-Werte treten feste Prüfwerte. Nicht „dieser
+   Test räumt auf", sondern: Es gibt nichts aufzuräumen.
+2. **Nach draußen ist zu.** Gemessen am **Socket**, nicht an der Bibliothek —
+   `httpx`, `botocore` und `urllib` gehen alle dort durch, und was morgen
+   dazukommt auch. Loopback bleibt offen. Wer hinaus muss, setzt die Marke
+   `echtes_netz`.
+
+**Beim Bauen aufgefallen, und kein Nebensatz:** Steht ein **Vermittler** in
+der Umgebung (`HTTP_PROXY` und die übrigen), baut `httpx` die Verbindung **zu
+ihm** auf, oft auf demselben Rechner. Die Sperre sah dann eine
+Loopback-Verbindung und ließ sie durch, während die Anfrage hinausging. In
+dieser Umgebung ist das aufgetreten — mein erster Entwurf bekam ein „403
+Forbidden" von einem Vermittler zurück, statt an der Sperre zu scheitern.
+
+> **Eine Sperre, die so ausfällt, ist schlimmer als keine, weil sie grün
+> aussieht.**
+
+**1961 Prüfungen grün.**
+
+---
+
+## 13.10.2026 — der Datenschutz, ausformuliert, und ein falscher Satz berichtigt
+
+Frage der Kanzlei: *„Wird gegenüber AWS verschlüsselt oder sichere
+Umgebung?"* Die Antwort ist **eine sichere Umgebung mit verschlüsselter
+Ablage — nicht eine Verschlüsselung, die AWS aussperrt.** Beides trifft zu,
+aber auf verschiedene Stellen, und genau diese Unterscheidung war in beiden
+Unterlagen nicht gezogen.
+
+| | Zustand bei AWS |
+|---|---|
+| Übertragung | verschlüsselt (TLS) |
+| Dauerhafte Ablage (S3) | verschlüsselt mit dem KMS-Schlüssel der Kanzlei |
+| **Verarbeitung im Modell** | **Klartext** |
+| **Verarbeitung in der Texterkennung** | **Klartext** |
+
+Der KMS-Schlüssel schützt die Ablage wirksam — und er liegt **in AWS**. Es ist
+der Schlüssel der Kanzlei, nicht einer, den AWS nie gesehen hat. Zur
+Verarbeitung muss ein Modell den Text lesen und eine Texterkennung das Bild
+sehen; verschlüsselter Inhalt ist für beide ohne Nutzen. **Daraus folgt:
+Auftragsverarbeitung, nicht ein Vorgang ohne Personenbezug.**
+
+> Die Maßnahme an dieser Stelle ist **Mengenbegrenzung, nicht
+> Verschlüsselung.** Das Anhaken im Dokumentfenster ist deshalb keine
+> Bequemlichkeit, sondern die wirksamste Maßnahme in der Hand des Bearbeiters:
+> Was nicht angehakt ist, sieht das Modell nie.
+
+Ausformuliert in `SICHERHEIT.md` (neuer Abschnitt, mit Belegstellen und einem
+Satz für die Unterrichtung) und in `DSFA-ENTWURF.md` als Abschnitt 2.4 — beide
+**auf ausdrückliche Anweisung der Kanzlei**.
+
+**Dabei eine falsche Angabe gefunden:** In Tabelle 2.1 der DSFA stand Textract
+weiter als *„verarbeitet, nicht gespeichert"* — genau das, was nach Befund F12
+keine Unterlage behaupten darf, solange die Opt-out-Richtlinie nicht
+nachgewiesen ist. `SICHERHEIT.md` war am 06.10. berichtigt worden, **diese
+Tabellenzeile nicht.** Eine Berichtigung, die nur eine von zwei Stellen
+erreicht, ist keine.
+
+Neue offene Stelle **`[KANZLEI 20]`**: ob es bei dieser Bauweise bleibt. Die
+Zählung ist in allen Unterlagen nachgezogen — 20 Stellen in der DSFA, 42 in
+den drei Unterlagen zusammen.
+
+---
+
+## 13.10.2026 — N01, Variante A: die Namen liegen nicht mehr im Repository
+
+Der unangenehmste Befund, weil er meine eigene Vorrichtung ist.
+
+Die Namen **mussten** irgendwo stehen — die Prüfung muss wissen, wonach sie
+sucht. Ausgeschrieben hätten sie die Prüfung durch sich selbst durchfallen
+lassen, weil sie jede Datei des Bestands liest, auch diese. Mein Ausweg war,
+sie **zerlegt** hinzuschreiben und in der Zeile darunter zusammenzusetzen.
+
+Das war kein Ausweg. Die Namen standen weiter im Bestand, nur in zwei Stücken
+— und die Kommentare sagten dazu, wer Mandant und wer Gegner ist, also das
+**Rubrum**. Jeder Mensch liest das in zwei Sekunden; der externe Prüfer hat es
+getan.
+
+> **Der Riegel gegen das Verbreiten von Namen war selbst das Leck**, und er
+> ist so in einem Prüfpaket aus dem Haus gegangen.
+
+**Entscheidung der Kanzlei: Variante A.** Die Liste liegt außerhalb des
+Programmordners, an zwei festen Orten neben und über ihm, ein Wort je Zeile.
+Keine Einstellung, keine Umgebungsvariable — zu konfigurieren gibt es nichts,
+und die Prüfungen erben seit N08 ohnehin keine Umgebung. Eine Datei **im**
+Programmordner wäre in jedem ZIP; eine eigene Prüfung sieht nach, dass die
+Suchorte draußen liegen und keine Sperrliste in den Bestand geraten ist.
+
+| Wo gelaufen | Aktenzeichen | Namen |
+|---|---|---|
+| Rechner der Kanzlei, Liste vorhanden | geprüft | **geprüft** |
+| Prüfpaket für einen Dritten, keine Liste | geprüft | **übersprungen, mit Warnung im Lauf** |
+
+**Die Warnung ist der Kern dieser Lösung.** Ein Lauf ohne Liste sieht sonst
+genauso grün aus wie einer mit — und bedeutet etwas anderes. Dasselbe Muster
+wie bei der leeren Dateiliste vom 12.10.: *Was nicht sucht, ist still grün.*
+Ist die Liste da und leer, fällt die Prüfung rot aus; lässt sie sich nicht
+lesen, wirft sie.
+
+Die Gegenprobe kann die echten Namen nicht mehr benutzen. Sie sucht
+stattdessen einen **erfundenen** Namen aus den Testakten, von dem bekannt ist,
+dass er im Bestand vorkommt: Findet die Suche ihn nicht, ist die Suche kaputt
+und nicht der Bestand sauber. Beide Richtungen sind gemessen.
+
+### Und zum fünften Mal dasselbe Muster, in genau dieser Änderung
+
+Das Beispiel in `test_ein_gewoehnliches_wort_wird_nicht_gefangen` trug zuerst
+**einen der echten Namen** — in der Änderung, die sie entfernen sollte.
+
+Gefunden hat es **nicht meine Aufmerksamkeit**, sondern ein Nachlauf mit der
+Liste über alle 299 Dateien, den ich nach der Änderung gemacht habe. Jetzt
+steht dort ein Name ohne jeden Aktenbezug, und der Grund steht dabei.
+
+> Fünf Mal an drei Tagen, jedes Mal in der Beschreibung oder der Entfernung
+> des Fundes selbst. **Die Regel wirkt nur, wenn sie gemessen wird** — und sie
+> hat heute gemessen, wo ich versagt habe. Das ist kein Trost, aber es ist der
+> Beleg, dass die Vorrichtung richtig ist.
+
+Nachgemessen nach der Änderung: **kein gesperrter Name in einer der 299
+Dateien**, die git kennt.
+
+**1962 Prüfungen grün, eine übersprungen** — und die übersprungene ist genau
+die, um die es geht.
+
+### Was offen bleibt
+
+Die rechtliche Seite des Befundes hat die Kanzlei am 13.10.2026 abschließend
+behandelt. Sie ist keine Aufgabe der Entwicklung mehr und wird hier nicht
+weiter geführt.
+
+| Wo | Was |
+|---|---|
+| Kanzlei | `[KANZLEI 19]`, die Opt-out-Richtlinie; Anleitung liegt fertig |
+| Kanzlei | `[KANZLEI 20]`, neu seit heute |
+| Kanzlei | die Sperrliste auf beiden Rechnern anlegen |
+| Programm | N06, N07, N09, N10 — die vier nachrangigen Befunde |
+| Programm | die vier veralteten Stellen im Prüfbogen |
