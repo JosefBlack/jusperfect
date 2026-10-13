@@ -3995,3 +3995,62 @@ heute früh: **geschätzt, wo zu zählen war.**
 
 **2043 Prüfungen grün.** Gegenprobe: 6 der neuen fallen gegen den vorigen
 Stand durch.
+
+---
+
+## 13.10.2026 — zwei Funde aus der Kanzlei, einer davon auf GitHub
+
+### „Er fragt nach Name 5, wie kann ich den Vorgang beenden?"
+
+Die Anleitung stand oben: *„Ein Name je Zeile, dann Eingabetaste. Fertig: leere
+Zeile."* Nach vier Eingaben stand sie vier Zeilen weiter oben — und damit
+außerhalb des Blicks.
+
+> Eine Frage muss sagen, wie man sie beendet, und zwar an der Stelle, an der
+> sie gestellt wird.
+
+Jetzt heißt sie `Name 5 (oder Eingabetaste = fertig):`, und der Hinweis oben
+sagt es ausgeschrieben. Zwei Prüfungen halten fest, dass **jede**
+Eingabeaufforderung den Ausweg nennt.
+
+### Und das neunte Mal — diesmal bis auf GitHub
+
+In der Hilfeseite, die ich eine Minute vorher geschrieben hatte, stand der
+Mandantenname als Beispiel — und zwar in dem Satz, der erklärt, warum man die
+Datei nicht im Notepad bearbeiten soll, weil sonst „Buchstabensalat statt des
+Namens" dort steht. Ich habe den Namen hingeschrieben, um zu zeigen, was er
+nicht werden soll.
+
+**Und diesmal kam der Nachlauf eine Sekunde zu spät: Der Commit war
+geschrieben und hochgeschoben, als die Meldung kam.**
+
+| Was | Wann |
+|---|---|
+| Commit `720b2f3` mit dem Namen | hochgeschoben |
+| Nachlauf meldet den Treffer | danach |
+| Berichtigt und erneut hochgeschoben | sofort |
+
+Der Name steht damit in der Vorgeschichte des Repositorys. Das ist derselbe
+Zustand wie am 12.10.2026 vor der Bereinigung — nur dass das Repository
+seitdem privat ist und niemand sonst es gelesen hat.
+
+**Die Lehre ist keine über Aufmerksamkeit mehr, sondern über die
+Reihenfolge:** Ich habe den Nachlauf *neben* dem Einchecken laufen lassen und
+nicht *davor*. Ein Riegel, der nach dem Schuss zuschnappt, ist Buchhaltung und
+kein Riegel. Künftig: Nachlauf, dann lesen, dann einchecken — und bei einem
+Treffer wird nicht eingecheckt.
+
+### Und unmittelbar darauf das zehnte Mal
+
+In dem Absatz direkt darüber. Ich hatte den Satz aus der Hilfeseite **zitiert**
+— mit dem Namen darin. Dasselbe Muster wie am 12.10.2026, fünf Mal an einem
+Tag: *Wer einen Fund beschreibt, schreibt ihn hin.*
+
+**Diesmal lief der Nachlauf davor, und er hat zugeschnappt.** Nichts ist
+eingecheckt worden. Der Absatz nennt den Namen jetzt nicht mehr, sondern sagt,
+was er war.
+
+Das ist der erste der zehn Fälle, in dem die Reihenfolge gehalten hat. Mehr
+beweist es nicht — aber es beweist, dass sie hält.
+
+**2045 Prüfungen grün.**

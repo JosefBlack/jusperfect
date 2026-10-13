@@ -317,6 +317,43 @@ class TestEinFalschEingetipptesWort:
         assert woerter(datei) == ("Krämer",)
 
 
+class TestDieFrageSagtWieManSieBeendet:
+    """Aus der Kanzlei am 13.10.2026: „Er fragt nach Name 5, wie kann ich den
+    Vorgang beenden?"
+
+    Die Anleitung stand oben — vier Zeilen und vier Eingaben weiter oben, und
+    damit außerhalb des Blicks. **Eine Frage muss sagen, wie man sie beendet,
+    und zwar an der Stelle, an der sie gestellt wird.**
+    """
+
+    def test_die_eingabeaufforderung_nennt_den_ausweg(self, monkeypatch,
+                                                      tmp_path) -> None:
+        monkeypatch.setattr("jusperfect.sperrliste.orte",
+                            lambda: (tmp_path / SPERRLISTE_NAME,))
+        gefragt: list[str] = []
+
+        def merken(text: str = "") -> str:
+            gefragt.append(text)
+            return "Vellinghausen" if len(gefragt) == 1 else ""
+
+        monkeypatch.setattr("builtins.input", merken)
+        main()
+        assert gefragt, "Es wurde nichts gefragt."
+        for frage in gefragt:
+            assert "fertig" in frage.lower(), frage
+
+    def test_auch_der_hinweis_oben_sagt_es(self, monkeypatch, tmp_path,
+                                           capsys) -> None:
+        monkeypatch.setattr("jusperfect.sperrliste.orte",
+                            lambda: (tmp_path / SPERRLISTE_NAME,))
+        folge = iter(["Vellinghausen"])
+        monkeypatch.setattr("builtins.input", lambda *a: next(folge, ""))
+        main()
+        ausgabe = capsys.readouterr().out
+        assert "FERTIG" in ausgabe
+        assert "ohne etwas zu schreiben" in ausgabe
+
+
 class TestNachsehenOhneKosten:
     """`SPERRLISTE-PRUEFEN.bat` — und warum es sie gibt.
 

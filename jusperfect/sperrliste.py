@@ -223,7 +223,8 @@ def main() -> int:
         _sagen(" ", "Es gibt noch keine Liste. Sie wird angelegt unter:")
         _sagen(" ", f"     {ziel}")
     print()
-    print("  Ein Name je Zeile, dann Eingabetaste. Fertig: leere Zeile.")
+    print("  Ein Name je Zeile, dann Eingabetaste.")
+    print("  FERTIG: Eingabetaste druecken, ohne etwas zu schreiben.")
     print()
     # Das Beispiel ist einer der ERFUNDENEN Namen aus den Testakten.
     #
@@ -238,7 +239,13 @@ def main() -> int:
     neue: list[str] = []
     while True:
         try:
-            eingabe = input(f"  Name {len(neue) + 1}: ").strip()
+            # Aus der Kanzlei am 13.10.2026: "Er fragt nach Name 5, wie kann
+            # ich den Vorgang beenden?" Die Anleitung stand oben, vier Zeilen
+            # und vier Eingaben weiter oben - und damit ausserhalb des Blicks.
+            # Eine Frage muss sagen, wie man sie beendet, und zwar an der
+            # Stelle, an der sie gestellt wird.
+            eingabe = input(f"  Name {len(neue) + 1} "
+                            f"(oder Eingabetaste = fertig): ").strip()
         except (EOFError, KeyboardInterrupt):
             print()
             _sagen("!", "Abgebrochen. Es wurde nichts geschrieben.")
