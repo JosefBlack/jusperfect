@@ -58,8 +58,30 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    zeigen.
 4. **Beim nächsten abgewiesenen Entwurf den Wortlaut der Abweisung
    festhalten** — ein Bildschirmfoto der Zeile genügt.
-5. Unerledigt bei der Kanzlei: `[KANZLEI 19]` AWS-Widerspruch gegen die
-   Nutzung für KI-Dienste, `[KANZLEI 20]` Auftragsverarbeitungsvertrag.
+5. Unerledigt bei der Kanzlei, beides aus der Datenschutz-Folgenabschätzung:
+
+   * **`[KANZLEI 19]` — die AI-services-Opt-out-Richtlinie bei AWS.** Ohne sie
+     behält AWS sich vor, Inhalte seiner KI-Dienste zu speichern und zur
+     Verbesserung der Dienste zu verwenden; bis zum Nachweis darf keine
+     unserer Unterlagen eine Nicht-Speicherung behaupten. Die Anleitung steht
+     fertig in `AWS-ZWEI-HANDGRIFFE.md`, Handgriff 2 — fünf Schritte in der
+     AWS-Konsole, dazu ein fertiger Text für den AWS-Support, falls die
+     Konsole etwas anderes zeigt. Der fünfte Schritt ist der eigentliche: die
+     **wirksame** Richtlinie am Konto ablesen und datiert ablegen. Eine
+     erstellte, aber nicht angehängte Richtlinie sieht fast genauso aus und
+     bewirkt nichts.
+   * **`[KANZLEI 20]` — die festzuhaltende Entscheidung**, ob es bei dieser
+     Bauweise bleibt: Verarbeitung bei einem Auftragsverarbeiter (AWS
+     Frankfurt). Die Alternative wäre eigene Hardware ohne
+     Auftragsverarbeiter; ihr Preis an Qualität, Kosten und Betriebsaufwand
+     ist **nicht gemessen** und darf in der Folgenabschätzung nicht behauptet
+     werden. Zu tun ist keine Konsolenarbeit, sondern ein paar Sätze mit
+     Begründung und Datum in `DSFA-ENTWURF.md`, Abschnitt 2.
+
+   > **Berichtigt am 14.10.2026:** Hier stand, `[KANZLEI 20]` sei der
+   > Auftragsverarbeitungsvertrag. Das ist falsch — der AVV mit AWS ist
+   > geprüft (`SICHERHEIT.md`, Abschnitt zu den Unterlagen). `[KANZLEI 20]`
+   > ist die Entscheidung über die Bauweise.
 
 ### Woran der nächste Schritt hängt
 
