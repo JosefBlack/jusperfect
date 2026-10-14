@@ -442,6 +442,20 @@ Unter **Berichte** stehen die Nachweise der Prüfer. Diese fünf genügen:
 | **ISO 27701** | Datenschutz-Managementsystem |
 | **SOC 2 Typ II** | der Prüfbericht über die Wirksamkeit der Maßnahmen, nicht nur über ihr Vorhandensein |
 
+Suchen Sie jeden Titel im Filterfeld und nehmen Sie aus der Vorschlagsliste
+den Eintrag, der mit **„Titel = …"** beginnt — nicht „Verwenden: …", sonst
+sucht die Konsole auch in den Beschreibungen, und bei 397 Berichten stehen
+dann fremde Prüfberichte dazwischen, in deren Text die Norm vorkommt. Die
+Fassungen mit *(Spanish)* oder *(French)* sind dieselbe Urkunde in einer
+anderen Sprache; *Statement of Applicability* ist Beiwerk für Prüfer.
+
+> **Eine Falle beim zweiten Filter.** Setzt man zwei Titel nebeneinander,
+> verknüpft die Konsole sie mit **„und"** — und kein Bericht heißt
+> gleichzeitig 27001 und 27017. Es erscheint „0 Treffer". Abhilfe: auf das
+> blaue **„und"** klicken und auf **„oder"** umstellen. Dann kann man alle
+> sechs Titel nebeneinanderlegen und die Liste Zeile für Zeile abarbeiten.
+> Sonst nach jedem Bericht auf **Filter löschen**.
+
 Nehmen Sie jeweils die **neueste** Fassung. Beim Herunterladen eines
 SOC-Berichts erscheint eine **Vertraulichkeitsvereinbarung** zum Bestätigen —
 das ist die aus Abschnitt 10.1 des Vertrages; ohne sie gibt AWS die Berichte
