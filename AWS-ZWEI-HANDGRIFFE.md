@@ -440,7 +440,22 @@ Unter **Berichte** stehen die Nachweise der Prüfer. Diese fünf genügen:
 | **ISO 27017** | Sicherheit in der Cloud |
 | **ISO 27018** | Schutz personenbezogener Daten in der Cloud |
 | **ISO 27701** | Datenschutz-Managementsystem |
-| **SOC 2 Typ II** | der Prüfbericht über die Wirksamkeit der Maßnahmen, nicht nur über ihr Vorhandensein |
+| **System and Organization Controls (SOC) 2 Report** | der Prüfbericht über die Wirksamkeit der Maßnahmen, nicht nur über ihr Vorhandensein |
+| **System and Organization Controls (SOC) 3 Report** | dasselbe Prüfungsurteil in einer Fassung, die weitergegeben werden darf |
+
+> **Die SOC-Berichte findet man nicht unter „SOC 2".** Sie heißen „System and
+> Organization Controls **(SOC)** 2 Report", mit *SOC* in Klammern — wer
+> `SOC 2` tippt, trifft keinen Titel, sondern nur Beschreibungen. **Tippen Sie
+> bloß `soc`** und nehmen Sie aus der Vorschlagsliste die beiden schlichten
+> englischen Einträge. Stehen lassen:
+>
+> * *… in OSCAL* — maschinenlesbares Format für Prüfsoftware, kein Dokument
+>   zum Lesen;
+> * *(Spanish)*, *(Japanese)* — dieselbe Urkunde in anderer Sprache;
+> * **SOC 1 Report** — betrifft Kontrollen für die **Rechnungslegung**, also
+>   Wirtschaftsprüfung und nicht Datenschutz;
+> * *SOC Continued Operations Letter* — Überbrückungsschreiben zwischen zwei
+>   Berichtszeiträumen; hier nicht nötig.
 
 Suchen Sie jeden Titel im Filterfeld und nehmen Sie aus der Vorschlagsliste
 den Eintrag, der mit **„Titel = …"** beginnt — nicht „Verwenden: …", sonst
@@ -499,7 +514,7 @@ nicht heraus.
 
 1. Alle Stücke in die **Datenschutzakte**, mit dem Vermerk:
    *„AWS-Nachweise für Konto 579138738703, abgerufen aus AWS Artifact am
-   TT.MM.JJJJ: ISO 27001, 27017, 27018, 27701, SOC 2 Typ II, SOC 3; dazu die
+   TT.MM.JJJJ: ISO 27001, 27017, 27018, 27701, SOC 2, SOC 3; dazu die
    Liste der Kontovereinbarungen — keine davon einschlägig, keine
    angenommen."*
 2. **Nicht** in den jusperfect-Ordner und nicht ins Programm — die Berichte

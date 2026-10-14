@@ -165,7 +165,7 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    Auftragsverarbeitungsvertrag in seinem Abschnitt 10 verspricht. Vier
    Schritte, eine Viertelstunde:
 
-   * **ISO 27001, 27017, 27018, 27701** und **SOC 2 Typ II** herunterladen —
+   * **ISO 27001, 27017, 27018, 27701** und **SOC 2** herunterladen —
      das Material für `[KANZLEI 10]`, die Dokumentation der
      Dienstleisterauswahl nach § 43e Abs. 2 BRAO. **SOC 3** gleich mit: er
      ist derselbe Gegenstand in einer Fassung, die weitergegeben werden darf,
