@@ -447,13 +447,34 @@ SOC-Berichts erscheint eine **Vertraulichkeitsvereinbarung** zum Bestätigen —
 das ist die aus Abschnitt 10.1 des Vertrages; ohne sie gibt AWS die Berichte
 nicht heraus.
 
-> **Was die Vertraulichkeitsvereinbarung für Sie bedeutet.** Der SOC-Bericht
-> ist vertrauliche Information von AWS. Er gehört in die Datenschutzakte und
-> **nicht** weiter: nicht an Mandanten, nicht als Anlage in einen Schriftsatz,
-> nicht in den jusperfect-Ordner. Muss ein Dritter einmal etwas sehen, ist
-> **SOC 3** das richtige Stück — derselbe Prüfungsgegenstand in einer Fassung,
-> die zur Weitergabe bestimmt ist. Laden Sie den gleich mit herunter; er
-> kostet einen Klick und erspart später eine unangenehme Abwägung.
+> **Die Vereinbarung, Punkt für Punkt** (am 14.10.2026 am Bildschirm gelesen;
+> der Text ist englisch und so auch maßgeblich). Zuerst links auf
+> **Bedingungen ausdrucken** und den Ausdruck in die Datenschutzakte — was man
+> annimmt, legt man ab. Dann gilt:
+>
+> 1. **Keine Auszüge.** „nor take excerpts of this document, without Amazon's
+>    express written consent." Aus dem SOC-Bericht wird nichts zitiert — nicht
+>    in der Folgenabschätzung, nicht in einem Schriftsatz. Er belegt durch
+>    seinen Inhalt, nicht durch Zitate; deshalb steht aus ihm auch in keiner
+>    Unterlage dieses Ordners etwas.
+> 2. **An die Aufsichtsbehörde darf er.** Erlaubt ist die Weitergabe an „a
+>    regulator, so long as you request confidential treatment of this
+>    document" — **vollständig** und **mit dem Antrag auf vertrauliche
+>    Behandlung**. Für eine Nachfrage nach Art. 35 oder 36 DSGVO ist der Weg
+>    damit frei.
+> 3. **An Mandanten praktisch nicht.** Der andere erlaubte Empfänger ist ein
+>    Endnutzer des eigenen Dienstes, und auch nur mit einer
+>    Vertraulichkeitsvereinbarung, die Amazon als begünstigten Dritten
+>    benennt. Dafür ist **SOC 3** da — derselbe Prüfungsgegenstand in einer
+>    Fassung, die zur Weitergabe bestimmt ist. Gleich mitnehmen; ein Klick
+>    jetzt erspart später eine unangenehme Abwägung.
+> 4. **Buchführungspflicht.** „You must keep comprehensive records of all
+>    Permitted Recipient requests." Jede Weitergabe wird notiert, mit Datum
+>    und Empfänger — auch die an die Aufsichtsbehörde. Ein Vermerk in der
+>    Datenschutzakte genügt.
+>
+> Und in jedem Fall: **nicht in den jusperfect-Ordner.** Der wird
+> weitergegeben.
 
 ### Schritt 4 — Ablegen
 
