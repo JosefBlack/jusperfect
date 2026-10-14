@@ -100,16 +100,28 @@ Hinweise auf Änderungen an Diensten, Fristen.
    > Anmeldung über die Kontoadresse **nichts**.
 
 4. In der AWS-Konsole nachsehen, dass **diese** Adresse hinterlegt ist, und
-   nicht eine aus der Einrichtungszeit. Der Weg: oben rechts auf den
-   **Kontonamen**, dann **Konto** (*Account*). Oben steht die **E-Mail-Adresse
-   des Root-Benutzers**, weiter unten stehen die **alternativen Kontakte** für
-   **Abrechnung**, **Betrieb** und **Sicherheit**.
+   nicht eine aus der Einrichtungszeit. Zwei Wege führen hin:
 
-   > **Verlassen Sie sich nicht auf die Root-Adresse.** Sie ist zugleich die
-   > Adresse für das Zurücksetzen des Passworts, wird deshalb gern
-   > abgeschottet und selten geöffnet — und dort läge dann die Rückfrage.
-   > **Unter „Betrieb" und „Sicherheit" gehört eine Adresse, die wirklich
-   > gelesen wird.** Die trägt man oben ein.
+   * oben rechts auf den **Kontonamen**, dann **Konto** (*Account*) — dort
+     stehen die Adresse des Root-Benutzers und weiter unten die
+     **alternativen Kontakte** für **Abrechnung**, **Betrieb** und
+     **Sicherheit**;
+   * oder in **AWS Organizations** unter **AWS-Konten** das Konto anklicken —
+     die **Kontodetails** nennen die Adresse ebenfalls. Das ist dieselbe
+     Seite, auf der am 14.10.2026 die wirksame Opt-out-Richtlinie abgelesen
+     wurde.
+
+   > **Dieselbe Adresse setzt auch das Passwort zurück.** Wer Zugriff auf
+   > dieses Postfach hat, kann sich damit das Kennwort des **Root-Benutzers**
+   > von AWS neu setzen lassen — und der Root-Benutzer darf im Konto alles.
+   > Je mehr Menschen das Postfach lesen, desto wichtiger werden deshalb zwei
+   > Dinge: Für den Root-Benutzer muss die **Zwei-Faktor-Anmeldung
+   > eingeschaltet** sein, und **gearbeitet wird nie als Root-Benutzer**
+   > (`AWS-EINRICHTEN.md`, Schritt 1).
+   >
+   > Wird das Postfach umgekehrt kaum geöffnet, läge dort die Rückfrage von
+   > AWS und niemand sähe sie. Dann gehört unter **„Betrieb"** und
+   > **„Sicherheit"** eine Adresse, die wirklich gelesen wird.
 5. Bei einer Nachfrage von AWS **nicht abwarten**. Wer nicht weiß, was zu
    antworten ist, fragt zurück — aber antwortet.
 
