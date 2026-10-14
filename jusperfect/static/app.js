@@ -3064,50 +3064,98 @@ function bibHinweis(text) {
   p.hidden = !text;
 }
 
-/** Die Leiste aus einer Antwort des Servers zeichnen - eine Zeile je Gruppe.
+/** Welches Rechtsgebiet gerade in der Leiste steht. "" = das der Akte. */
+let bibGebietswahl = "";
+
+/** Welche Reiter zugeklappt sind - je Gruppe, ueber die Sitzung hinaus. */
+function bibZu() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem("jusperfect.bib.zu") || "[]"));
+  } catch (e) { return new Set(); }
+}
+
+function bibZuMerken(menge) {
+  // Der Stand der Reiter ist Bequemlichkeit und nicht Arbeit: Faellt der
+  // Speicher aus (privates Fenster, gesperrte Seitendaten), stehen sie beim
+  // naechsten Mal eben alle offen. Kein Grund fuer eine Meldung.
+  try { localStorage.setItem("jusperfect.bib.zu", JSON.stringify([...menge])); }
+  catch (e) { /* dann eben nicht */ }
+}
+
+/** Die Leiste aus einer Antwort des Servers zeichnen - ein Reiter je Gruppe.
  *
- * Erst das Rechtsgebiet der Akte, dann was in jedem Verfahren gilt (die
- * Gerichtsmuster). Aus der Kanzlei: "Eigenstaendiger Bereich
- * ‚Gerichtsmuster'" - eine Klageerwiderung schreibt man im Bau- wie im
- * Arbeitsrecht. Zusammengeworfen waeren es dreissig Knoepfe, in denen man
- * suchen muesste.
+ * Aus der Kanzlei am 14.10.2026: "Mit ausklappbaren Reitern und Rechtsgebiet
+ * wechseln."
+ *
+ * Ausklappbar, weil neununddreissig Prompts in vier Gruppen auf einmal keine
+ * Auswahl mehr sind, sondern eine Liste, die man durchsuchen muesste. Wer
+ * eine Gruppe zuklappt, hat sie beim naechsten Mal wieder zu.
  */
 function bibliothekZeichnen(daten) {
   bibliothekStand = daten;
   const kasten = $("bibliothek");
   if (!kasten) return;
   kasten.hidden = false;
-  const gebiet = $("bib-gebiet");
-  gebiet.textContent = daten.aus_akte ? daten.rechtsgebiet : "ohne Rechtsgebiet in der Akte";
-  gebiet.title = daten.aus_akte
-    ? "Das Rechtsgebiet kommt aus jur|nodes. Abgelegte Prompts erscheinen bei jeder Akte dieses Gebiets wieder."
-    : "jur|nodes nennt zu dieser Akte kein Rechtsgebiet. Abgelegtes landet in einer gemeinsamen Liste.";
+
+  // Die Wahl des Rechtsgebiets. Das der Akte steht als solches benannt da -
+  // sonst weiss nach dem Wechseln niemand mehr, wozu die Akte gehoert.
+  const wahl = $("bib-gebietswahl");
+  wahl.replaceChildren();
+  for (const gebiet of (daten.gebiete || [])) {
+    const o = document.createElement("option");
+    o.value = gebiet;
+    o.textContent = gebiet + (gebiet === daten.gebiet_der_akte ? " (aus der Akte)" : "");
+    wahl.appendChild(o);
+  }
+  wahl.value = daten.rechtsgebiet;
+
+  const marke = $("bib-gebiet");
+  if (daten.gewaehlt) {
+    marke.textContent = "nicht das Gebiet dieser Akte";
+    marke.title = "Die Akte gehört zu „" + daten.gebiet_der_akte
+                + "“. Was Sie hier ablegen, landet unter „" + daten.rechtsgebiet + "“.";
+    marke.hidden = false;
+  } else {
+    marke.textContent = daten.aus_akte ? "" : "jur|nodes nennt zu dieser Akte keines";
+    marke.hidden = !marke.textContent;
+  }
+
   const liste = $("bib-liste");
   liste.replaceChildren();
   const gruppen = (daten.gruppen || []).filter((g) => (g.eintraege || []).length);
   if (!gruppen.length) {
     const leer = document.createElement("span");
     leer.className = "bib-leer";
-    leer.textContent = "Noch nichts abgelegt. Ein Prompt, der sich bewährt hat, kommt über „+ Neu\u201c hierher.";
+    leer.textContent = "Zu „" + daten.rechtsgebiet + "“ ist noch nichts abgelegt. "
+      + "Ein Prompt, der sich bewährt hat, kommt über „+ Neu\u201c hierher.";
     liste.appendChild(leer);
     return;
   }
-  for (const gruppe of gruppen) liste.appendChild(bibGruppe(gruppe, gruppen.length > 1));
+  const zu = bibZu();
+  for (const gruppe of gruppen) liste.appendChild(bibReiter(gruppe, zu));
 }
 
-/** Eine Gruppe: Beschriftung und ihre Knöpfe. */
-function bibGruppe(gruppe, beschriften) {
-  const zeile = document.createElement("div"); zeile.className = "bib-gruppe";
-  if (beschriften) {
-    const name = document.createElement("span"); name.className = "bib-gruppenname";
-    name.textContent = gruppe.name;
-    if (gruppe.basis) {
-      name.textContent += " · mit Vorspann";
-      name.title = "Zu dieser Gruppe gehört ein gemeinsamer Vorspann. "
-                 + "Er kommt sichtbar mit ins Eingabefeld.";
-    }
-    zeile.appendChild(name);
+/** Ein Reiter: Beschriftung mit Anzahl, darunter die Knöpfe. */
+function bibReiter(gruppe, zu) {
+  const reiter = document.createElement("details");
+  reiter.className = "bib-gruppe";
+  reiter.open = !zu.has(gruppe.name);
+  reiter.addEventListener("toggle", () => {
+    const stand = bibZu();
+    if (reiter.open) stand.delete(gruppe.name); else stand.add(gruppe.name);
+    bibZuMerken(stand);
+  });
+
+  const kopf = document.createElement("summary"); kopf.className = "bib-gruppenname";
+  kopf.textContent = `${gruppe.name} (${gruppe.eintraege.length})`;
+  if (gruppe.basis) {
+    kopf.textContent += " · mit Vorspann";
+    kopf.title = "Zu dieser Gruppe gehört ein gemeinsamer Vorspann. "
+               + "Er kommt sichtbar mit ins Eingabefeld.";
   }
+  reiter.appendChild(kopf);
+
+  const zeile = document.createElement("div"); zeile.className = "bib-chips";
   for (const eintrag of gruppe.eintraege) {
     const chip = document.createElement("span");
     chip.className = "bib-chip" + (eintrag.mitgeliefert ? " mitgeliefert" : "");
@@ -3141,13 +3189,15 @@ function bibGruppe(gruppe, beschriften) {
     chip.append(nehmen, weg);
     zeile.appendChild(chip);
   }
-  return zeile;
+  reiter.appendChild(zeile);
+  return reiter;
 }
 
 async function bibliothekLaden() {
   if (!sitzung || !sitzung.sitzung) return;
   try {
-    bibliothekZeichnen(await api("GET", `/api/sitzungen/${sitzung.sitzung.id}/prompts`));
+    bibliothekZeichnen(await api("GET", `/api/sitzungen/${sitzung.sitzung.id}/prompts`
+      + (bibGebietswahl ? "?rechtsgebiet=" + encodeURIComponent(bibGebietswahl) : "")));
   } catch (e) {
     // Eine Bibliothek, die sich nicht lesen laesst, darf die Akte nicht
     // aufhalten: Sie ist Zugabe, der Chat ist die Arbeit.
@@ -3171,9 +3221,12 @@ function bibNeu() {
   const vorlage = ($("frage").value || "").trim() || letzteGestellteFrage || "";
   $("prompt-text").value = vorlage;
   $("prompt-titel").value = "";
-  $("prompt-gebiet").textContent = bibliothekStand && bibliothekStand.aus_akte
-    ? `Rechtsgebiet dieser Akte: ${bibliothekStand.rechtsgebiet}`
-    : "Diese Akte nennt kein Rechtsgebiet – der Prompt landet in der gemeinsamen Liste.";
+  const stand = bibliothekStand || {};
+  $("prompt-gebiet").textContent = stand.gewaehlt
+    ? `Wird abgelegt unter „${stand.rechtsgebiet}“ – die Akte gehört zu „${stand.gebiet_der_akte}“.`
+    : (stand.aus_akte
+       ? `Rechtsgebiet dieser Akte: ${stand.rechtsgebiet}`
+       : "Diese Akte nennt kein Rechtsgebiet – der Prompt landet in der gemeinsamen Liste.");
   bibHinweis("");
   dialog.showModal();
   ($("prompt-titel")).focus();
@@ -3184,13 +3237,13 @@ async function bibAblegen() {
   const text = ($("prompt-text").value || "").trim();
   if (!text) { bibHinweis("Ohne Prompt gibt es nichts abzulegen."); return; }
   bibliothekZeichnen(await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/prompts`,
-                               { titel, text }));
+                               { titel, text, rechtsgebiet: bibGebietswahl }));
   melden("In der Bibliothek abgelegt.");
 }
 
 async function bibVergessen(titel) {
   bibliothekZeichnen(await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/prompts/vergessen`,
-                               { titel }));
+                               { titel, rechtsgebiet: bibGebietswahl }));
   bibHinweis("");
 }
 
@@ -4658,10 +4711,7 @@ function entwurfKnoepfe(e) {
     leiste.appendChild(frei);
   }
 
-  const brief = document.createElement("button"); brief.className = "mini";
-  brief.textContent = "Auf Briefbogen (Word)";
-  brief.addEventListener("click", () => mitKnopf(brief, () => briefbogenHolen(e.id)));
-  leiste.appendChild(brief);
+  leiste.appendChild(briefbogenKnopf(e.id));
   return leiste;
 }
 
@@ -4788,6 +4838,42 @@ async function entwurfAendern(anweisung) {
     + `„Zurück zu Fassung ${e.fassung - 1}“ nimmt die Änderung zurück.`;
   inhalt.appendChild(p);
   karte.appendChild(inhalt);
+}
+
+// ── Was noch nicht fertig ist, sagt es selbst ──────────────────────────────
+//
+// Aus der Kanzlei am 14.10.2026: "Briefbogen funktioniert noch nicht. Bitte
+// noch als Button kennzeichnen - rot und ‚noch nicht fertig' beim Anklicken."
+//
+// Zu Recht, und es ist mehr als eine Farbe: In einer Kanzlei arbeiten zwei
+// Anwaelte mit demselben Programm. Was der eine als unfertig kennt, sieht
+// der andere als fertigen Knopf - und verlaesst sich darauf. Deshalb steht
+// es am Knopf und nicht in einem Merkzettel.
+//
+// Der Weg bleibt offen: Der Hinweis fragt, ob es trotzdem versucht werden
+// soll. Ein gesperrter Knopf sagt nicht, WAS fehlt - und solange niemand
+// ihn drueckt, erfaehrt es auch niemand.
+
+const BRIEFBOGEN_UNFERTIG =
+  "Der Weg auf den Briefbogen ist noch nicht fertig.\n\n"
+  + "Was schon steht: Ihre Word-Vorlage wird geöffnet, der Entwurf kommt in "
+  + "ihren leeren Rumpf, Kopf- und Fußzeile bleiben unverändert.\n\n"
+  + "Was noch fehlt: die Anschrift des Empfängers und die Betreffzeile an "
+  + "ihrem Platz. Und die Vorlage muss einmal hinterlegt sein — mit "
+  + "BRIEFBOGEN-HINTERLEGEN.bat.\n\n"
+  + "Trotzdem versuchen?";
+
+/** Der Knopf mit der roten Kennzeichnung. */
+function briefbogenKnopf(entwurfId) {
+  const knopf = document.createElement("button");
+  knopf.className = "mini unfertig";
+  knopf.textContent = "Auf Briefbogen (Word) – noch nicht fertig";
+  knopf.title = "Diese Funktion ist noch in Arbeit.";
+  knopf.addEventListener("click", () => {
+    if (!confirm(BRIEFBOGEN_UNFERTIG)) return;
+    mitKnopf(knopf, () => briefbogenHolen(entwurfId));
+  });
+  return knopf;
 }
 
 /** Den Entwurf als Word-Datei auf dem Briefbogen holen.
@@ -4926,6 +5012,8 @@ async function sitzungSchliessen() {
   // gehoert - bei Mandatsakten die gefaehrlichste Art von Anzeige.
   entwurfStand = null; entwurfLaeuft = ""; entwurfVorschautext = "";
   entwurfModusAus();
+  // Die Wahl gehoert zur Akte, die gerade offen war.
+  bibGebietswahl = "";
   // Den Nebenfenstern sagen, dass hier nichts mehr offen ist. Sonst
   // zeigten sie weiter eine Akte, die geschlossen wurde - und das waere
   // bei Mandatsakten die gefaehrlichste Art von Anzeige.
@@ -5079,6 +5167,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   $("frage-form").addEventListener("submit", (ev) => { ev.preventDefault(); mitKnopf($("senden"), frageStellen); });
   $("bib-neu").addEventListener("click", bibNeu);
+  $("bib-gebietswahl").addEventListener("change", (ev) => mitKnopf(null, async () => {
+    bibGebietswahl = ev.target.value || "";
+    await bibliothekLaden();
+  }));
   $("entwurf-modus-aus").addEventListener("click", entwurfModusAus);
   $("blatt-dialog").addEventListener("close", () => {
     const wahl = $("blatt-dialog").returnValue;

@@ -191,8 +191,17 @@
   </section>
 
   <section class="spalte cowork">
-    <!-- Ohne Ueberschrift: "Cowork" sagte niemandem etwas, und das Eingabefeld
-         unten erklaert die Spalte besser als jedes Wort darueber. -->
+    <!-- Die Ueberschrift der mittleren Spalte.
+
+         Hier stand lange gar keine - "Cowork" sagte niemandem etwas, und
+         der Satz dazu lautete, das Eingabefeld unten erklaere die Spalte
+         besser als jedes Wort darueber. Aus der Kanzlei am 14.10.2026:
+         "Bitte in der Mitte haette ich gerne eine grosse Ueberschrift Chat
+         ohne Auswahlfunktion."
+
+         "Ohne Auswahlfunktion" ist der Kern: Sie ist eine Ueberschrift und
+         kein Knopf. Hier wird nichts umgeschaltet - die Spalte heisst
+         Chat, und damit ist gesagt, wo man ist. -->
     <div class="spalte-kopf">
       <!-- Die Fensterknoepfe stehen auf der Seite, auf der ihr Fenster aufgeht.
            Aus der Kanzlei: "die Auswahlbuttons waren in der Mitte und es
@@ -215,6 +224,7 @@
         <span class="fenster-knoepfe links">
           <button type="button" data-fenster="dokument" class="mini leise fensterknopf">‹ Dokumente</button>
         </span>
+        <h1 class="chat-titel">Chat</h1>
       </div>
     </div>
     <div id="thread" class="thread"></div>
@@ -230,6 +240,15 @@
            dem ihre Antwort getaugt hat. -->
       <div id="bibliothek" class="bibliothek" hidden>
         <div class="bib-kopf">
+          <!-- Eine normale Ueberschrift, wie aus der Kanzlei am 14.10.2026
+               gewuenscht - die grosse gehoert dem Chat. Daneben die Wahl des
+               Rechtsgebiets: Voreingestellt ist das der Akte, aber eine
+               Verkehrssache kann eine arbeitsrechtliche Frage aufwerfen, und
+               dann will man dorthin, ohne die Akte zu wechseln. -->
+          <h2 class="bib-titel">Promptbibliothek</h2>
+          <label class="bib-wahl">Rechtsgebiet
+            <select id="bib-gebietswahl"></select>
+          </label>
           <span id="bib-gebiet" class="bib-gebiet"></span>
           <button type="button" id="bib-neu" class="mini leise">+ Neu</button>
         </div>

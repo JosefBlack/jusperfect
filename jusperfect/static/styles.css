@@ -216,6 +216,14 @@ button, input, textarea, select { font: inherit; color: inherit; }
    links springen." Ohne diese Zeilen rutscht er an den linken Rand, sobald
    die Dokumentspalte zugeht - und bei zwei Bildschirmen Breite entstuenden
    Zeilen, die niemand mehr liest. Eine feste Lesebreite loest beides. */
+/* Die Ueberschrift der mittleren Spalte. Aus der Kanzlei am 14.10.2026:
+   "eine grosse Ueberschrift Chat ohne Auswahlfunktion." Sie steht mittig
+   ueber dem Verlauf und ist kein Knopf - hier wird nichts umgeschaltet. */
+.chat-titel { position: absolute; left: 0; right: 0; margin: 0; text-align: center;
+  font-size: 19px; font-weight: 600; letter-spacing: .01em; color: var(--tinte);
+  pointer-events: none; }
+.spalte.cowork .spalte-kopf { position: relative; }
+
 .spalte.cowork .thread,
 .spalte.cowork .frage-form,
 .spalte.cowork .bibliothek,
@@ -312,6 +320,13 @@ button, input, textarea, select { font: inherit; color: inherit; }
   cursor: pointer; font-size: 12px; text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--akzent); }
 .mini:hover { border-color: var(--akzent); }
 .mini.leise { color: var(--gedaempft); }
+/* Was noch nicht fertig ist, sagt es selbst. Aus der Kanzlei am 14.10.2026:
+   "Bitte noch als Button kennzeichnen - rot und ‚noch nicht fertig' beim
+   Anklicken." In einer Kanzlei arbeiten zwei Anwaelte mit demselben
+   Programm; was der eine als unfertig kennt, sieht der andere als fertigen
+   Knopf. */
+.mini.unfertig { color: var(--rot); border-color: var(--rot); background: var(--rot-hell); }
+.mini.unfertig:hover { border-color: var(--rot); }
 .dok-filter { border: 1px solid var(--linie); background: var(--flaeche-2); border-radius: 6px; padding: 3px 6px; font-size: 12px; max-width: 55%; }
 
 /* Dokumentspalte */
@@ -427,20 +442,40 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
    Sie waechst nach oben, nicht in die Breite: Ein Umbruch macht die Leiste
    hoeher, und die Eingabe bleibt, wo sie ist. */
 .bibliothek { margin-bottom: 8px; }
-.bib-kopf { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-.bib-gebiet { font-size: 12px; color: var(--gedaempft); }
+.bib-kopf { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+/* Eine normale Ueberschrift - die grosse gehoert dem Chat. */
+.bib-titel { margin: 0; font-size: 13px; font-weight: 600; color: var(--tinte); }
+.bib-wahl { display: inline-flex; align-items: baseline; gap: 5px;
+  font-size: 12px; color: var(--gedaempft); }
+.bib-wahl select { font: inherit; font-size: 12px; color: var(--tinte);
+  border: 1px solid var(--linie); border-radius: 6px; background: var(--flaeche-2);
+  padding: 2px 5px; max-width: 220px; }
+.bib-gebiet { font-size: 12px; color: var(--amber); }
 .bib-kopf .mini { margin-left: auto; }
 /* Zwei Zeilen hoch, der Rest wird gerollt: Die Leiste ist ein Griffbrett,
    keine Liste. Bei vier Gruppen und neununddreissig Prompts waere sie sonst
    hoeher als der Chat darueber. */
-.bib-liste { display: flex; flex-direction: column; gap: 5px; max-height: 96px; overflow-y: auto; }
-/* Eine Zeile je Gruppe: das Rechtsgebiet der Akte, danach die
-   Gerichtsmuster. Innerhalb einer Gruppe darf umbrochen werden, zwischen
-   zwei Gruppen nie - sonst stuende ein Gerichtsmuster mitten zwischen den
-   Modulen des Rechtsgebiets. */
-.bib-gruppe { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* Hoeher als vorher, weil die Reiter zugeklappt wenig Platz brauchen - und
+   wer einen aufmacht, will auch etwas davon sehen. */
+.bib-liste { display: flex; flex-direction: column; max-height: 168px; overflow-y: auto; }
+/* Ein Reiter je Gruppe. Aus der Kanzlei am 14.10.2026: "Mit ausklappbaren
+   Reitern." Neununddreissig Prompts auf einmal sind keine Auswahl mehr,
+   sondern eine Liste, die man durchsuchen muesste.
+
+   Gebaut mit <details>: Das kann der Browser selbst - mit Tastatur, mit
+   Vorlesesoftware und ohne eine Zeile Javascript fuer das Auf und Zu. */
+.bib-gruppe { border-top: 1px solid var(--linie); }
+.bib-gruppe:first-child { border-top: 0; }
 .bib-gruppenname { font-size: 11px; color: var(--gedaempft); text-transform: uppercase;
-  letter-spacing: .04em; padding-right: 2px; }
+  letter-spacing: .04em; padding: 5px 2px; cursor: pointer; list-style: none;
+  display: flex; align-items: center; gap: 5px; }
+.bib-gruppenname::-webkit-details-marker { display: none; }
+/* Das Dreieck zeigt den Zustand - und dreht sich, wenn der Reiter aufgeht. */
+.bib-gruppenname::before { content: "▸"; display: inline-block; font-size: 10px;
+  transition: transform .12s ease; }
+.bib-gruppe[open] > .bib-gruppenname::before { transform: rotate(90deg); }
+.bib-gruppenname:hover { color: var(--tinte); }
+.bib-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 0 7px 14px; }
 .bib-leer { font-size: 12px; color: var(--gedaempft); }
 .bib-chip { display: inline-flex; align-items: stretch; border: 1px solid var(--linie);
   border-radius: 999px; background: var(--flaeche); overflow: hidden; max-width: 100%; }
@@ -479,6 +514,11 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 /* Der Aendern-Knopf, solange der Modus laeuft: Er sagt denselben Zustand
    noch einmal, dort wo man ihn eingeschaltet hat. */
 .entwurf-knoepfe .mini.an { border-color: var(--akzent); background: var(--akzent-hell); color: var(--tinte); }
+/* Modell und Kosten unter dem Entwurf. Die Regel dafuer stand nur unter
+   `.karte-c` - im Vorschaufenster klebten die drei Angaben aneinander
+   ("skript2 Token0,0100 €"). */
+.entwurf-vorschau .fuss { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 8px;
+  font-size: 11.5px; color: var(--gedaempft); }
 
 /* Text oder Blatt. Aus der Kanzlei: "Kann der Entwurf nicht gleich das
    fertige Schreiben mit Briefkopf angeben? Schliesslich muss auch optisch

@@ -354,7 +354,7 @@ class DerVorspannKommtSichtbarInsFeld(unittest.TestCase):
     JS = (WURZEL / "jusperfect" / "static" / "app.js").read_text(encoding="utf-8")
 
     def _block(self):
-        return self.JS[self.JS.index("function bibGruppe"):
+        return self.JS[self.JS.index("function bibReiter"):
                        self.JS.index("async function bibliothekLaden")]
 
     def test_er_wird_dem_prompt_vorangestellt(self):
@@ -511,18 +511,158 @@ class DieOberflaecheZeigtSie(unittest.TestCase):
         self.assertNotIn("insertAdjacentHTML", block)
         self.assertIn("nehmen.textContent = eintrag.titel", block)
 
-    def test_jede_gruppe_bekommt_ihre_eigene_zeile(self):
-        """Dreissig Knoepfe in einer Reihe waeren eine Liste zum Durchsuchen."""
+    def test_jede_gruppe_bekommt_ihren_eigenen_reiter(self):
+        """Neununddreissig Knoepfe auf einmal waeren eine Liste zum
+        Durchsuchen. Aus der Kanzlei am 14.10.2026: „Mit ausklappbaren
+        Reitern."""
         block = self.JS[self.JS.index("function bibliothekZeichnen"):
                         self.JS.index("async function bibliothekLaden")]
         self.assertIn("bib-gruppe", block)
         self.assertIn("bib-gruppenname", block)
+        self.assertIn('createElement("details")', block)
+        self.assertIn('createElement("summary")', block)
 
     def test_der_dialog_ist_vorgefuellt_aber_zu_lesen(self):
         """Waehrend der Arbeit fuellen - aber mit einem Blick darauf."""
         block = self.JS[self.JS.index("function bibNeu"):self.JS.index("async function bibAblegen")]
         self.assertIn("letzteGestellteFrage", block)
         self.assertIn("showModal", block)
+
+
+class DieMitteHatEineUeberschrift(unittest.TestCase):
+    """Aus der Kanzlei am 14.10.2026: „Bitte in der Mitte hätte ich gerne
+    eine große Überschrift Chat ohne Auswahlfunktion - eine normale
+    Überschrift für die Promptbibliothek."
+
+    „Ohne Auswahlfunktion" ist der Kern: Sie ist eine Überschrift und kein
+    Knopf. Hier wird nichts umgeschaltet.
+    """
+
+    HTML = (WURZEL / "jusperfect" / "static" / "index.html").read_text(encoding="utf-8")
+    CSS = (WURZEL / "jusperfect" / "static" / "styles.css").read_text(encoding="utf-8")
+
+    def test_die_mitte_heisst_chat(self):
+        kopf = self.HTML[self.HTML.index('<section class="spalte cowork'):
+                         self.HTML.index('<div id="thread"')]
+        self.assertIn('<h1 class="chat-titel">Chat</h1>', kopf)
+
+    def test_die_ueberschrift_ist_kein_knopf(self):
+        kopf = self.HTML[self.HTML.index('<section class="spalte cowork'):
+                         self.HTML.index('<div id="thread"')]
+        block = kopf[kopf.index('class="chat-titel"'):]
+        self.assertNotIn("<button", block[:block.index("</h1>")])
+        regel = self.CSS[self.CSS.index(".chat-titel {"):]
+        self.assertIn("pointer-events: none", regel[:regel.index("}")])
+
+    def test_die_bibliothek_bekommt_die_kleinere_ueberschrift(self):
+        """Die große gehört dem Chat."""
+        self.assertIn('<h2 class="bib-titel">Promptbibliothek</h2>', self.HTML)
+        gross = self.CSS[self.CSS.index(".chat-titel {"):]
+        klein = self.CSS[self.CSS.index(".bib-titel {"):]
+        self.assertIn("font-size: 19px", gross[:gross.index("}")])
+        self.assertIn("font-size: 13px", klein[:klein.index("}")])
+
+
+class DasRechtsgebietLaesstSichWechseln(unittest.TestCase):
+    """Aus der Kanzlei am 14.10.2026: „und Rechtsgebiet wechseln."
+
+    Voreingestellt bleibt das Gebiet der Akte. Aber eine Verkehrssache kann
+    eine arbeitsrechtliche Frage aufwerfen, und dann will man dorthin, ohne
+    die Akte zu wechseln.
+    """
+
+    def setUp(self):
+        self._ordner = TemporaryDirectory()
+        self.addCleanup(self._ordner.cleanup)
+        ort = Path(self._ordner.name) / pb.DATEINAME
+        self._alt_orte = pb.orte
+        pb.orte = lambda: (ort,)                      # type: ignore[assignment]
+        self.addCleanup(lambda: setattr(pb, "orte", self._alt_orte))
+        self.d = dienste()
+        self.c = client(self.d)
+        self.sid = self.c.post("/api/sitzungen",
+                               json={"akte_id": "AR-2026-0115"}).json()["sitzung"]["id"]
+
+    def test_die_gebiete_stehen_zur_wahl(self):
+        daten = self.c.get(f"/api/sitzungen/{self.sid}/prompts").json()
+        self.assertIn("Arbeitsrecht", daten["gebiete"])
+        self.assertIn("Verkehrsrecht", daten["gebiete"])
+        self.assertEqual(daten["gebiet_der_akte"], "Arbeitsrecht")
+        self.assertFalse(daten["gewaehlt"])
+
+    def test_die_gerichtsmuster_stehen_nicht_zur_wahl(self):
+        """Sie sind keine Wahl, sie sind da."""
+        daten = self.c.get(f"/api/sitzungen/{self.sid}/prompts").json()
+        self.assertNotIn("Gerichtsmuster", daten["gebiete"])
+        self.assertIn("Gerichtsmuster", [g["name"] for g in daten["gruppen"]])
+
+    def test_ein_gewaehltes_gebiet_zeigt_dessen_prompts(self):
+        daten = self.c.get(f"/api/sitzungen/{self.sid}/prompts",
+                           params={"rechtsgebiet": "Verkehrsrecht"}).json()
+        self.assertEqual(daten["rechtsgebiet"], "Verkehrsrecht")
+        self.assertTrue(daten["gewaehlt"])
+        self.assertEqual(len(daten["gruppen"][0]["eintraege"]), 17)
+
+    def test_die_akte_bleibt_benannt(self):
+        """Sonst weiß nach dem Wechseln niemand mehr, wozu die Akte gehört."""
+        daten = self.c.get(f"/api/sitzungen/{self.sid}/prompts",
+                           params={"rechtsgebiet": "Verkehrsrecht"}).json()
+        self.assertEqual(daten["gebiet_der_akte"], "Arbeitsrecht")
+
+    def test_abgelegt_wird_unter_dem_gewaehlten_gebiet(self):
+        """Wer zum Verkehrsrecht gewechselt hat und dort etwas merkt, meint
+        das Verkehrsrecht."""
+        self.c.post(f"/api/sitzungen/{self.sid}/prompts",
+                    json={"titel": "Eigenes", "text": "Ein eigener Prompt",
+                          "rechtsgebiet": "Verkehrsrecht"})
+        self.assertIn("Eigenes", [e["titel"] for e in pb.eintraege("Verkehrsrecht")])
+        self.assertNotIn("Eigenes", [e["titel"] for e in pb.eintraege("Arbeitsrecht")])
+
+    def test_ohne_wahl_bleibt_es_bei_der_akte(self):
+        self.c.post(f"/api/sitzungen/{self.sid}/prompts",
+                    json={"titel": "Eigenes", "text": "Ein eigener Prompt"})
+        self.assertIn("Eigenes", [e["titel"] for e in pb.eintraege("Arbeitsrecht")])
+
+    def test_die_oberflaeche_hat_die_wahl(self):
+        html = (WURZEL / "jusperfect" / "static" / "index.html").read_text(encoding="utf-8")
+        js = (WURZEL / "jusperfect" / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="bib-gebietswahl"', html)
+        self.assertIn("bibGebietswahl", js)
+        self.assertIn("rechtsgebiet=", js)
+
+    def test_die_wahl_gehoert_zur_akte_und_endet_mit_ihr(self):
+        js = (WURZEL / "jusperfect" / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('bibGebietswahl = "";', js)
+
+
+class DieReiterKlappenAus(unittest.TestCase):
+    """Aus der Kanzlei am 14.10.2026: „Mit ausklappbaren Reitern."
+
+    Gebaut mit <details>: Das kann der Browser selbst - mit Tastatur, mit
+    Vorlesesoftware und ohne eine Zeile Javascript für das Auf und Zu.
+    """
+
+    JS = (WURZEL / "jusperfect" / "static" / "app.js").read_text(encoding="utf-8")
+    CSS = (WURZEL / "jusperfect" / "static" / "styles.css").read_text(encoding="utf-8")
+
+    def test_die_anzahl_steht_am_reiter(self):
+        """Wer sucht, soll sehen, wo etwas zu holen ist, ohne aufzuklappen."""
+        block = self.JS[self.JS.index("function bibReiter"):]
+        self.assertIn("gruppe.eintraege.length", block[:2000])
+
+    def test_der_stand_der_reiter_ueberlebt_die_sitzung(self):
+        """Wer eine Gruppe zuklappt, hat sie beim nächsten Mal wieder zu."""
+        self.assertIn("jusperfect.bib.zu", self.JS)
+        block = self.JS[self.JS.index("function bibZuMerken"):]
+        self.assertIn("try", block[:600])
+
+    def test_ein_ausgefallener_speicher_haelt_nichts_auf(self):
+        """Der Stand der Reiter ist Bequemlichkeit und nicht Arbeit."""
+        block = self.JS[self.JS.index("function bibZu()"):self.JS.index("function bibliothekZeichnen")]
+        self.assertIn("catch", block)
+
+    def test_das_dreieck_zeigt_den_zustand(self):
+        self.assertIn(".bib-gruppe[open] > .bib-gruppenname::before", self.CSS)
 
 
 class DieFensterknoepfeStehenRechts(unittest.TestCase):

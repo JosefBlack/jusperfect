@@ -274,10 +274,13 @@ class AbschlussAusfuehren(BaseModel):
 class PromptAblegen(BaseModel):
     titel: str = Field(default="", max_length=promptbibliothek.MAX_TITEL)
     text: str = Field(max_length=promptbibliothek.MAX_ZEICHEN)
+    #: Leer heisst: das Rechtsgebiet der Akte.
+    rechtsgebiet: str = Field(default="", max_length=120)
 
 
 class PromptVergessen(BaseModel):
     titel: str = Field(max_length=promptbibliothek.MAX_TITEL)
+    rechtsgebiet: str = Field(default="", max_length=120)
 
 
 class PackAnfrage(BaseModel):
@@ -537,14 +540,31 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
     def _gebiet(sitzung: Any) -> str:
         return (sitzung.akte.rechtsgebiet if sitzung.akte else "") or ""
 
-    def _bibliothek_antwort(sitzung: Any) -> dict[str, Any]:
-        gebiet = _gebiet(sitzung)
+    def _bibliothek_antwort(sitzung: Any, wahl: str = "") -> dict[str, Any]:
+        """Die Leiste - zum Rechtsgebiet der Akte oder zu einem gewaehlten.
+
+        Aus der Kanzlei am 14.10.2026: „Rechtsgebiet wechseln." Die Akte
+        gibt vor, die Wahl geht vor: Eine Verkehrssache kann eine
+        arbeitsrechtliche Frage aufwerfen.
+        """
+        aus_akte = _gebiet(sitzung)
+        gebiet = wahl.strip() or aus_akte
         # In Gruppen: erst das Rechtsgebiet der Akte, dann was in jedem
         # Verfahren gilt (die Gerichtsmuster). Jede Gruppe traegt ihren
         # eigenen Vorspann; die Oberflaeche setzt ihn SICHTBAR ins
         # Eingabefeld, nie heimlich davor.
+        # Zur Wahl stehen alle hinterlegten Gebiete und das der Akte - auch
+        # wenn zu ihm noch nichts dasteht: Sonst koennte man zu der Akte,
+        # die gerade offen ist, nichts ablegen.
+        waehlbar = set(promptbibliothek.alle_gebiete())
+        if aus_akte:
+            waehlbar.add(promptbibliothek._schluessel(aus_akte))
+        waehlbar.add(promptbibliothek._schluessel(gebiet))
         return {"rechtsgebiet": gebiet or promptbibliothek.OHNE_GEBIET,
-                "aus_akte": bool(gebiet),
+                "aus_akte": bool(aus_akte),
+                "gebiet_der_akte": aus_akte or promptbibliothek.OHNE_GEBIET,
+                "gewaehlt": bool(wahl.strip()) and wahl.strip() != aus_akte,
+                "gebiete": sorted(waehlbar),
                 "gruppen": [{"name": g["name"], "basis": g["basis"],
                              "immer": g["immer"],
                              "eintraege": [dict(e) for e in g["eintraege"]]}
@@ -553,23 +573,29 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
                 "max_zeichen": promptbibliothek.MAX_ZEICHEN}
 
     @app.get("/api/sitzungen/{sitzung_id}/prompts")
-    def prompts_lesen(sitzung_id: str, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
-        """Die Prompts zum Rechtsgebiet dieser Akte - eigene und mitgelieferte."""
-        return _bibliothek_antwort(d.sitzungen.laden(ident, sitzung_id))
+    def prompts_lesen(sitzung_id: str, rechtsgebiet: str = "",
+                      ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Die Prompts zum Rechtsgebiet dieser Akte - oder zu einem gewaehlten."""
+        return _bibliothek_antwort(d.sitzungen.laden(ident, sitzung_id), rechtsgebiet)
 
     @app.post("/api/sitzungen/{sitzung_id}/prompts", status_code=201)
     def prompt_ablegen(sitzung_id: str, daten: PromptAblegen,
                        ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
         """Einen Prompt hinterlegen, der sich bewaehrt hat.
 
+        Abgelegt wird unter dem Gebiet, das gerade in der Leiste steht - nicht
+        unter dem der Akte. Wer zum Arbeitsrecht gewechselt hat und dort etwas
+        merkt, meint das Arbeitsrecht.
+
         Protokolliert werden Rechtsgebiet und Laenge, nie der Wortlaut: Ein
         Prompt aus der Arbeit kann einen Namen enthalten.
         """
         sitzung = d.sitzungen.laden(ident, sitzung_id)
-        promptbibliothek.merken(_gebiet(sitzung), daten.titel, daten.text)
-        ereignis(_log, "prompt_abgelegt", rechtsgebiet=_gebiet(sitzung) or "-",
+        gebiet = daten.rechtsgebiet.strip() or _gebiet(sitzung)
+        promptbibliothek.merken(gebiet, daten.titel, daten.text)
+        ereignis(_log, "prompt_abgelegt", rechtsgebiet=gebiet or "-",
                  nutzer=ident.nutzer_id, zeichen=len(daten.text))
-        return _bibliothek_antwort(sitzung)
+        return _bibliothek_antwort(sitzung, daten.rechtsgebiet)
 
     @app.post("/api/sitzungen/{sitzung_id}/prompts/vergessen")
     def prompt_vergessen(sitzung_id: str, daten: PromptVergessen,
@@ -580,10 +606,11 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         ein DELETE mit Rumpf wird unterwegs nicht ueberall mitgenommen.
         """
         sitzung = d.sitzungen.laden(ident, sitzung_id)
-        promptbibliothek.vergessen(_gebiet(sitzung), daten.titel)
-        ereignis(_log, "prompt_vergessen", rechtsgebiet=_gebiet(sitzung) or "-",
+        gebiet = daten.rechtsgebiet.strip() or _gebiet(sitzung)
+        promptbibliothek.vergessen(gebiet, daten.titel)
+        ereignis(_log, "prompt_vergessen", rechtsgebiet=gebiet or "-",
                  nutzer=ident.nutzer_id)
-        return _bibliothek_antwort(sitzung)
+        return _bibliothek_antwort(sitzung, daten.rechtsgebiet)
 
     # ── Selbsttest: Stehen die Absicherungen? ─────────────────────────────
 

@@ -339,6 +339,31 @@ def eintraege(rechtsgebiet: str, ort: Path | None = None,
     return tuple(fertig)
 
 
+def alle_gebiete(ort: Path | None = None,
+                 vorrat_ort: Path | None = None) -> tuple[str, ...]:
+    """Jedes Rechtsgebiet, zu dem etwas bereitsteht - alphabetisch.
+
+    Aus der Kanzlei am 14.10.2026: „Mit ausklappbaren Reitern und
+    Rechtsgebiet wechseln."
+
+    Voreingestellt bleibt das Gebiet der Akte. Aber eine Verkehrssache kann
+    eine arbeitsrechtliche Frage aufwerfen, und dann will man dorthin, ohne
+    die Akte zu wechseln.
+
+    Die Gruppen, die ohnehin immer stehen (die Gerichtsmuster), kommen hier
+    nicht vor: Sie sind keine Wahl, sie sind da.
+    """
+    gefunden: set[str] = set()
+    bestand: dict[str, list[dict[str, str]]] = laden(ort)["rechtsgebiete"]   # type: ignore[assignment]
+    for gebiet, liste in bestand.items():
+        if liste:
+            gefunden.add(gebiet)
+    for gebiet, block in vorrat(vorrat_ort).items():
+        if not block.get("immer"):
+            gefunden.add(gebiet)
+    return tuple(sorted(gefunden))
+
+
 def gruppen(rechtsgebiet: str, ort: Path | None = None,
             vorrat_ort: Path | None = None) -> tuple[dict[str, object], ...]:
     """Die Leiste, in Gruppen: erst das Rechtsgebiet, dann was immer gilt.
