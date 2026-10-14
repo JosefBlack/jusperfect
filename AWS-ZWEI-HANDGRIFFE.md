@@ -454,7 +454,12 @@ anderen Sprache; *Statement of Applicability* ist Beiwerk für Prüfer.
 > gleichzeitig 27001 und 27017. Es erscheint „0 Treffer". Abhilfe: auf das
 > blaue **„und"** klicken und auf **„oder"** umstellen. Dann kann man alle
 > sechs Titel nebeneinanderlegen und die Liste Zeile für Zeile abarbeiten.
-> Sonst nach jedem Bericht auf **Filter löschen**.
+>
+> **Und nicht erschrecken: „Filter löschen" räumt ALLE Filter weg**, nicht
+> nur den letzten — danach steht wieder die volle Liste mit allen Berichten
+> da. Einen einzelnen Filter entfernt das kleine **`✕`** an diesem Filter.
+> Verloren geht dabei nichts; schon heruntergeladene Berichte liegen auf dem
+> Rechner und haben mit der Ansicht nichts mehr zu tun.
 
 Nehmen Sie jeweils die **neueste** Fassung. Beim Herunterladen eines
 SOC-Berichts erscheint eine **Vertraulichkeitsvereinbarung** zum Bestätigen —
