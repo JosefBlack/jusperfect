@@ -524,7 +524,9 @@ Kanzlei und keine des Programms.
 
 ## Rechtliches Paket vor der ersten echten Akte (Phase 0)
 
-- AWS-Auftragsverarbeitungsvertrag (DPA; bereits geprüft) und Dokumentation der Dienstleisterauswahl nach § 43e BRAO
+- AWS-Auftragsverarbeitungsvertrag (DPA; am 14.10.2026 Abschnitt für Abschnitt gegen Art. 28 Abs. 3 DSGVO gelesen,
+  `DSFA-ENTWURF.md` R4 — er enthält **keine** Zusage zum Modelltraining, siehe dort `[KANZLEI 21]`)
+  und Dokumentation der Dienstleisterauswahl nach § 43e BRAO
   mit Verschwiegenheitsverpflichtung in Textform.
 - Datenschutz-Folgenabschätzung nach Art. 35 DSGVO (Gesundheitsdaten in Unfall- und RSV-Akten,
   neue Technologie).

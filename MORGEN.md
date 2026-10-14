@@ -102,6 +102,24 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    > geprüft (`SICHERHEIT.md`, Abschnitt zu den Unterlagen). `[KANZLEI 20]`
    > ist die Entscheidung über die Bauweise.
 
+6. **Neu am 14.10.2026: der AV-Vertrag ist gelesen — und `[KANZLEI 21]` ist
+   dabei herausgekommen.** Die Kanzlei hat das „AWS Data Processing Addendum"
+   vorgelegt. Es ist jetzt Abschnitt für Abschnitt gegen Art. 28 Abs. 3 DSGVO
+   geprüft; das Ergebnis steht in `DSFA-ENTWURF.md`, Abschnitt 4, R4. Alle
+   acht Punkte des Art. 28 sind belegt.
+
+   **Der Fund:** In unseren Unterlagen stand zweimal, AWS sichere zu, Eingaben
+   nicht zum Training zu verwenden — „im AWS-Vertragswerk zugesichert". **Im
+   AV-Vertrag steht dazu kein Wort.** Sein Abschnitt 16 lässt die *AWS Service
+   Terms* ausdrücklich vorgehen; dort steht die Zusage zu Bedrock, und die
+   Service Terms liegen uns nicht vor. Beide Stellen sind jetzt als offen
+   geführt (`[KANZLEI 21]`).
+
+   **Zu tun ist damit:** den einschlägigen Abschnitt der AWS Service Terms zu
+   Amazon Bedrock beschaffen, mit Datum — oder ihn über den Support-Text
+   erfragen, Punkt 3. Dazu für die Ablage: Standardvertragsklauseln,
+   Unterauftragsverarbeiterliste, Tag des Abrufs (`[KANZLEI 8]`).
+
 ### Woran der nächste Schritt hängt
 
 Nicht am Programm, sondern an zwei Auskünften: dem Wortlaut der jur\|nodes-

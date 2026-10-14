@@ -16,10 +16,11 @@ Maßnahmen* dagegen im Programm stehen — jede mit Fundstelle.
 verbleibende Risiko tragbar ist und ob die Aufsichtsbehörde nach Art. 36
 einzuschalten ist, kann nur ein Jurist entscheiden, der das Mandatsgeschäft
 kennt. Diese Stellen sind mit **[KANZLEI n]** gekennzeichnet; es sind
-**zwanzig** — Nr. 20 ist am 13.10.2026 dazugekommen —, und sie stehen am Ende
-noch einmal in einer Liste. Eine davon ist entschieden: **Nr. 18** am
-05.10.2026. Sie bleibt stehen und durchgestrichen — eine Stelle, die
-verschwindet, sieht aus, als hätte es sie nie gegeben.
+**einundzwanzig** — Nr. 21 ist am 14.10.2026 dazugekommen, beim Lesen des
+Auftragsverarbeitungsvertrages —, und sie stehen am Ende noch einmal in einer
+Liste. Drei davon sind erledigt: **Nr. 18** am 05.10.2026, **Nr. 19** und
+**Nr. 20** am 14.10.2026. Sie bleiben stehen und durchgestrichen — eine
+Stelle, die verschwindet, sieht aus, als hätte es sie nie gegeben.
 
 **Die Zahlen und Befunde stehen woanders.** Jede technische Angabe hier ist aus
 `DSFA-ANGABEN.md` übernommen, wo sie mit Datum und Fundstelle steht. Bei
@@ -202,7 +203,7 @@ tut; was AWS vertraglich zusagt, steht nicht im Programm (siehe oben).
 | Zum Modell gehen die Systemanweisung, die vom Bearbeiter ausgewählten Passagen und die Aufgabe — **nicht die Akte** | Abschnitt 2.1, `jusperfect/providers/bedrock.py` |
 | Die dauerhafte Ablage ist mit dem KMS-Schlüssel der Kanzlei verschlüsselt; über die Schlüsselrichtlinie verfügt die Kanzlei allein, jede Entschlüsselung steht in CloudTrail | Abschnitt 2.4, `SICHERHEIT.md` |
 | In den Protokollen steht kein Akteninhalt; das ist nicht Vorsatz des Bearbeiters, sondern im Programm erzwungen | `jusperfect/security/protokoll.py` |
-| Der Auftragsverarbeitungsvertrag mit AWS liegt vor und ist geprüft | `SICHERHEIT.md`, Zeile 524 |
+| Der Auftragsverarbeitungsvertrag mit AWS liegt vor und ist Abschnitt für Abschnitt gegen Art. 28 Abs. 3 DSGVO gelesen | Abschnitt 4, R4, „Der Auftragsverarbeitungsvertrag, Abschnitt für Abschnitt" |
 
 **Was daran Bewertung der Kanzlei ist und kein Beleg:** dass diese
 Mengenbegrenzung, diese Verschlüsselung der Ablage und diese
@@ -397,12 +398,85 @@ des § 203 Abs. 3 StGB und des § 43e BRAO.
 
 | Maßnahme | Stand |
 |---|---|
-| AV-Vertrag | **[KANZLEI 8]** — Datum, Fassung, Ablage eintragen |
+| AV-Vertrag | liegt vor: **AWS Data Processing Addendum** — siehe unten; `[KANZLEI 8]` nur noch für Fassung und Ablage |
 | Verpflichtung zur Verschwiegenheit in Textform (§ 43e Abs. 3 BRAO) | **[KANZLEI 9]** — prüfen und dokumentieren |
 | Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **[KANZLEI 10]** |
-| Kein Modelltraining | im AWS-Vertragswerk zugesichert |
+| Kein Modelltraining | **nicht im AV-Vertrag** — siehe unten, `[KANZLEI 21]` |
 | Ein einziger Ausgang im Programm | `services/ausgang.py` — genau eine Stelle führt zum Modell |
 | Kein zweiter Anbieter | andere sind vorbereitet, keiner angebunden |
+
+#### Der Auftragsverarbeitungsvertrag, Abschnitt für Abschnitt
+
+*Gelesen am 14.10.2026 am vorgelegten Stück „AWS Data Processing Addendum"
+(englisch, zehn Seiten, Anlage 1 „Security Standards"). Die Abschnittsnummern
+unten sind die des Vertrages.*
+
+**Was Art. 28 Abs. 3 DSGVO verlangt, und wo es steht:**
+
+| Verlangt | Im Vertrag |
+|---|---|
+| Verarbeitung nur auf dokumentierte Weisung (lit. a) | Abschn. 2; Weisung sind der Vertrag und die Einstellungen in Konsole und Schnittstelle |
+| Vertraulichkeit des eingesetzten Personals (lit. b) | Abschn. 4 |
+| Technische und organisatorische Maßnahmen (lit. c) | Abschn. 5 und Anlage 1 |
+| Unterauftragsverarbeiter (lit. d) | Abschn. 6 — **allgemeine** Genehmigung, 30 Tage Vorankündigung |
+| Unterstützung bei Betroffenenrechten (lit. e) | Abschn. 7 |
+| Unterstützung bei Meldungen und Folgenabschätzung (lit. f) | Abschn. 9 und 10.4 |
+| Löschung oder Rückgabe am Ende (lit. g) | Abschn. 14 — bis 90 Tage nach Vertragsende |
+| Nachweise und Überprüfungen (lit. h) | Abschn. 10 und 11 |
+| Drittlandübermittlung | Abschn. 12 — Standardvertragsklauseln, einbezogen durch Verweis |
+
+**Vier Stellen, die in die Bewertung gehören und keine Formalien sind:**
+
+1. **Abschnitt 3 ist die Stelle, auf die es bei § 203 StGB ankommt.** AWS darf
+   auf Kundendaten nicht zugreifen, sie nicht verwenden und sie nicht an
+   Dritte geben — außer soweit zur Erbringung des Dienstes nötig oder aufgrund
+   eines rechtswirksamen behördlichen Verlangens. Beim behördlichen Verlangen
+   sagt AWS zu, die Behörde an die Kanzlei zu verweisen und die Kanzlei zu
+   unterrichten, **soweit nicht rechtlich untersagt**. Dieser letzte Halbsatz
+   ist das verbleibende Risiko und lässt sich vertraglich nicht wegnehmen.
+2. **Beim Unterauftragsverarbeiter gibt es kein Vetorecht**, nur einen
+   Ausgang: kündigen, den Dienst nicht mehr nutzen, oder in eine Region
+   ausweichen, in der dieser Unterauftragsverarbeiter nicht eingesetzt ist
+   (Abschn. 6.1). Wer widersprechen will, muss also gehen. Das ist bei
+   Hyperscalern üblich und gehört trotzdem in die Abwägung.
+3. **Die Prüfung erfolgt über Berichte, nicht vor Ort.** Die Kanzlei übt ihr
+   Prüfrecht aus, indem sie AWS anweist, die Prüfung nach Abschn. 10
+   durchzuführen — ISO-Zertifikate und SOC-Berichte gegen eine
+   Vertraulichkeitsvereinbarung (Abschn. 11). Eine eigene Besichtigung des
+   Rechenzentrums gibt es nicht.
+4. **Abschnitt 12.1 trägt unsere Regionswahl.** AWS verbringt Kundendaten
+   nicht aus der gewählten Region — *außer soweit zur Erbringung des Dienstes
+   nötig*. Genau unter diesen Vorbehalt fallen das EU-Inferenzprofil und das
+   Geländerprofil, die auf mehrere europäische Regionen verteilen (R5). Die
+   Regionswahl `eu-central-1` des Programms ist damit vertraglich gedeckt,
+   die Verteilung innerhalb Europas ebenfalls — eine Festlegung auf **ein**
+   Rechenzentrum ist der Vertrag nicht.
+
+**[KANZLEI 21] — was in diesem Vertrag NICHT steht, und wo es stehen müsste.**
+Das vorgelegte Stück enthält **kein Wort** zu Modelltraining oder zur
+Verwendung von Inhalten zur Verbesserung der Dienste. Der einzige Satz in
+diese Richtung ist Abschnitt 3 („nur soweit zur Erbringung des Dienstes
+nötig") — allgemein gehalten, und ausdrücklich nachrangig: **Abschnitt 16
+bestimmt, dass die AWS Service Terms diesem Vertrag vorgehen.** Die Zusage zu
+Bedrock steht dort und nicht hier.
+
+> **Daraus folgt für diese Unterlage:** Die Zeile „Kein Modelltraining — im
+> AWS-Vertragswerk zugesichert" stand bis zum 14.10.2026 ohne Fundstelle da.
+> Sie ist jetzt als offen geführt. Zu beschaffen ist der einschlägige
+> Abschnitt der **AWS Service Terms** zu Amazon Bedrock, in der am Tag der
+> Ablage geltenden Fassung, mit Datum. Dieselbe Frage steht als Punkt 3 im
+> Support-Text in `AWS-ZWEI-HANDGRIFFE.md`. Die Abmelderichtlinie vom
+> 14.10.2026 (`[KANZLEI 19]`) beantwortet sie **nicht** — sie erfasst Bedrock
+> nicht.
+
+**[KANZLEI 8] — was zur Ablage noch fehlt.** Das Stück trägt keine
+Fassungsnummer, und der Vertrag gilt „in der jeweils geänderten Fassung"
+(Einleitungssatz). Für die Akte sind deshalb **drei** Dinge festzuhalten: der
+Tag des Abrufs, von welcher AWS-Seite abgerufen wurde, und ein Ausdruck des
+Stücks. Dazu gehören drei Unterlagen, auf die der Vertrag nur verweist und die
+er nicht enthält: die **Standardvertragsklauseln** (Abschn. 17, zwei
+verlinkte Stücke), die **Liste der Unterauftragsverarbeiter** (Abschn. 6.1)
+und die **AWS Service Terms** (Abschn. 16).
 
 ---
 
@@ -532,9 +606,12 @@ Die Entwicklung kann dazu nur sagen, was ist, nicht was reicht.
 | Nachweis der Verarbeitung | der Nachweis nennt Zeitpunkt, Nutzer, Funktion, Modell, Umfang — **ohne Inhalt** |
 
 **Eine Grenze, die genannt gehört:** Was einmal an das Modell übermittelt
-wurde, lässt sich nicht zurückholen. AWS sichert zu, Eingaben nicht zu
-speichern und nicht zum Training zu verwenden; mehr als diese Zusage gibt es
-nicht. **[KANZLEI 14]** — in den Hinweisen an die Betroffenen zu beschreiben.
+wurde, lässt sich nicht zurückholen. Mehr als eine Zusage des
+Auftragsverarbeiters gibt es dagegen nicht — und für Bedrock steht diese
+Zusage **nicht im Auftragsverarbeitungsvertrag**, sondern in den AWS Service
+Terms, die ihm vorgehen (R4, `[KANZLEI 21]`). Die Abmelderichtlinie vom
+14.10.2026 erfasst Bedrock nicht. **[KANZLEI 14]** — in den Hinweisen an die
+Betroffenen zu beschreiben, und zwar nach dem, was `[KANZLEI 21]` ergibt.
 
 ---
 
@@ -584,7 +661,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 
 ---
 
-## 8. Die zwanzig Stellen für die Kanzlei auf einen Blick
+## 8. Die einundzwanzig Stellen für die Kanzlei auf einen Blick
 
 | Nr. | Was zu entscheiden ist | Abschnitt |
 |---|---|---|
@@ -596,7 +673,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 5 | Einstufung der acht Risiken | 4 |
 | 6 | R1: Verletzung nach Art. 4 Nr. 12? Meldung nach Art. 33? | R1 |
 | 7 | Wann wird die Fallkopie gelöscht? | R3 |
-| 8 | AV-Vertrag: Datum, Fassung, Ablage | R4 |
+| 8 | AV-Vertrag: Tag des Abrufs, Quelle, Ausdruck — dazu SCC, Unterauftragsverarbeiterliste, Service Terms | R4 |
 | 9 | Verschwiegenheitsverpflichtung § 43e Abs. 3 BRAO | R4 |
 | 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 | R4 |
 | 11 | Regionen des Geländerprofils — bei AWS erfragen | R5 |
@@ -606,8 +683,9 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 15 | Schulung und KI-Kompetenz nach Art. 4 KI-VO | 6 |
 | 17 | Verbleibendes Risiko, Art. 36, Beteiligung des DSB, Überprüfungsfrist | 7 |
 | ~~18~~ | ~~Sollen Aktenzeichen und Dokumenttitel an das Modell gehen?~~ **Entschieden am 05.10.2026: Dateiname nein, Art des Schriftstücks ja, Aktenzeichen nur beim Entwurf** | 2.1 |
-| 19 | Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen | R6 |
-| 20 | Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt? | 2.4 |
+| ~~19~~ | ~~Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen~~ **Eingelöst am 14.10.2026, 17:11 MESZ — Nachweis in der Datenschutzakte** | R6 |
+| ~~20~~ | ~~Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt?~~ **Entschieden am 14.10.2026: ja, es bleibt dabei** | 2.4 |
+| 21 | Zusage zum Modelltraining für Bedrock: einschlägigen Abschnitt der AWS Service Terms beschaffen, mit Datum — im AV-Vertrag steht dazu nichts | R4 |
 
 ---
 

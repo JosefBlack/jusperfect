@@ -299,10 +299,14 @@ er betrifft Bedrock und wird von der Abmelderichtlinie nicht beantwortet:
 >    ausschließt? Falls ja: seit wann, und für welche Dienste?
 > 2. Falls nein: Wie richten wir sie für ein Konto ein, das keiner
 >    Organisation angehört?
-> 3. Ist Amazon Bedrock von dieser Richtlinienart erfasst? Falls nein — auf
->    welcher vertraglichen Grundlage ist ausgeschlossen, dass Inhalte, die wir
->    an Bedrock senden, zur Verbesserung der Dienste verwendet werden, und wie
->    lange werden sie zu anderen Zwecken aufbewahrt?
+>
+> 3. Ist Amazon Bedrock von dieser Richtlinienart erfasst? Falls nein: Bitte
+>    nennen Sie uns den einschlägigen Abschnitt der **AWS Service Terms** zu
+>    Amazon Bedrock in der heute geltenden Fassung. Das Data Processing
+>    Addendum enthält dazu nichts und lässt die Service Terms in seinem
+>    Abschnitt 16 ausdrücklich vorgehen. Wir benötigen die Aussage, ob Inhalte,
+>    die wir an Bedrock senden, zur Entwicklung oder Verbesserung der Dienste
+>    verwendet werden, und wie lange sie zu anderen Zwecken aufbewahrt werden.
 >
 > Hintergrund ist eine Datenschutz-Folgenabschätzung nach Art. 35 DSGVO. Wir
 > verarbeiten mit Amazon Textract und Amazon Bedrock Unterlagen, die dem
