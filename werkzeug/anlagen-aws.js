@@ -122,6 +122,56 @@ const seiten = [
       "Wortlaut ist \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C zu beziehen und " +
       "dieser Anlage nachzureichen.",
   },
+  {
+    datei: "19.png",
+    masse: [373, 81],
+    anlage: "Anlage 15",
+    titel: "AWS Service Terms \u2014 Stand der Fassung",
+    fuss:
+      "Kopf der Seite mit dem Stand der Fassung: 15. September 2026. Die Service Terms gehen nach " +
+      "Abschnitt 16 des Data Processing Addendum und Ziffer 11.2 der Kundenvereinbarung beiden vor.",
+  },
+  {
+    datei: "20.png",
+    masse: [799, 671],
+    anlage: "Anlage 15",
+    titel: "Abschnitt 50.12 Amazon Bedrock (Blatt 1 von 4)",
+    fuss:
+      "50.12.1 Modelle von Drittanbietern; 50.12.2 Erkennung von Missbrauch \u2014 Speicherung von Ein- und " +
+      "Ausgaben bis zu 30 Tage f\u00FCr bestimmte Modelle, mit \u00DCberpr\u00FCfung im Verdachtsfall; " +
+      "50.12.3 Durchsatzverpflichtungen.",
+  },
+  {
+    datei: "21.png",
+    masse: [678, 832],
+    anlage: "Anlage 15",
+    titel: "Abschnitt 50.12 Amazon Bedrock (Blatt 2 von 4)",
+    fuss:
+      "50.12.4 bis 50.12.6; anschlie\u00DFend 50.13 Amazon Q. Der Vergleich ist der Grund, warum dieses " +
+      "Blatt dabei ist: F\u00FCr Amazon Q nimmt AWS sich die Nutzung zur Verbesserung ausdr\u00FCcklich " +
+      "heraus \u2014 f\u00FCr Bedrock an keiner Stelle.",
+  },
+  {
+    datei: "22.png",
+    masse: [700, 370],
+    anlage: "Anlage 15",
+    titel: "Abschnitt 50.13 Amazon Q zum Vergleich (Blatt 3 von 4)",
+    fuss:
+      "50.13.1 bis 50.13.3: Nutzung zur Entwicklung und Verbesserung, ausdr\u00FCcklich einschlie\u00DFlich " +
+      "des \u201ETrainieren[s] von Machine-Learning-Modellen\u201C, und Verweis auf die " +
+      "Opt-out-Richtlinie f\u00FCr den Widerspruch. Das rechts eingeblendete Men\u00FC des " +
+      "Anzeigeprogramms geh\u00F6rt nicht zum Vertragstext.",
+  },
+  {
+    datei: "23.png",
+    masse: [483, 356],
+    anlage: "Anlage 15",
+    titel: "Abschnitt 50.14.2 Kiro (Blatt 4 von 4)",
+    fuss:
+      "Die Bestimmung verweist auf Abschnitt 1.24 der Service Terms und spricht von der Speicherung und " +
+      "\u201Em\u00F6glichen menschlichen \u00DCberpr\u00FCfung von Eingaben und Ausgaben\u201C durch die " +
+      "Missbrauchserkennungsmechanismen von Amazon Bedrock. Abschnitt 1.24 liegt noch nicht vor.",
+  },
 ];
 
 const t = (text, opt = {}) => new TextRun({ text, ...opt });

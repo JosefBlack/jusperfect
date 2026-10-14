@@ -528,8 +528,12 @@ Kanzlei und keine des Programms.
   Addendum** (gegen Art. 28 Abs. 3 DSGVO geprüft, alle acht Punkte belegt), die **Kundenvereinbarung**
   (Fassung 01.06.2026 — ihre Ziffer 1.4 und 6.1 tragen die Aussage „kein Modelltraining", nicht der AV-Vertrag)
   und der **Datenschutzhinweis** (18.05.2026 — gilt ausdrücklich **nicht** für Akteninhalt, nur für
-  Account-Informationen). Offen bleibt allein `[KANZLEI 21]`: die AWS Service Terms zu Bedrock, die beiden
-  Verträgen vorgehen. Dazu Dokumentation der Dienstleisterauswahl nach § 43e BRAO
+  Account-Informationen). Dazu am selben Tag die **AWS Service Terms** (Stand 15.09.2026), Abschnitt 50.12
+  zu Amazon Bedrock: **keine Erlaubnis zu Training oder Serviceverbesserung** — die Schranke aus Ziffer 1.4
+  der Kundenvereinbarung bleibt unangetastet. **Neu und zu bewerten** ist dagegen 50.12.2: Je nach Modell
+  speichert Bedrock Ein- und Ausgaben **bis zu 30 Tage** zur Missbrauchserkennung und überprüft sie im
+  Verdachtsfall (`DSFA-ENTWURF.md` `[KANZLEI 22]`). Dazu Dokumentation der Dienstleisterauswahl nach
+  § 43e BRAO
   mit Verschwiegenheitsverpflichtung in Textform.
 - Datenschutz-Folgenabschätzung nach Art. 35 DSGVO (Gesundheitsdaten in Unfall- und RSV-Akten,
   neue Technologie).

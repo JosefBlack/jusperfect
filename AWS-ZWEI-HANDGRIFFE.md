@@ -302,7 +302,8 @@ Erstellt ist nicht wirksam. Sie muss an das Konto gehängt werden.
 Wenn Schritt 1a nicht in Frage kommt oder die Konsole etwas anderes zeigt als
 hier beschrieben, geht es auch über ein Support-Ticket. Dieser Text ist dafür
 fertig. **Punkt 3 steht auch dann an, wenn die Handgriffe geglückt sind** —
-er betrifft Bedrock und wird von der Abmelderichtlinie nicht beantwortet.
+er betrifft die Missbrauchserkennung bei Bedrock, die von der
+Abmelderichtlinie nicht erfasst wird (`DSFA-ENTWURF.md` `[KANZLEI 22]`).
 
 > **Eine Hausregel, bevor Sie etwas an AWS schicken.** Nach Ziffer 6.5 der
 > AWS-Kundenvereinbarung überträgt ein **Vorschlag** an AWS — eine Anregung,
@@ -324,14 +325,12 @@ er betrifft Bedrock und wird von der Abmelderichtlinie nicht beantwortet.
 > 2. Falls nein: Wie richten wir sie für ein Konto ein, das keiner
 >    Organisation angehört?
 >
-> 3. Ist Amazon Bedrock von dieser Richtlinienart erfasst? Falls nein: Bitte
->    nennen Sie uns den einschlägigen Abschnitt der **AWS Service Terms** zu
->    Amazon Bedrock in der heute geltenden Fassung. Ziffer 1.4 der
->    Kundenvereinbarung schließt eine Nutzung über die Erbringung der Services
->    hinaus aus; da die Service Terms der Kundenvereinbarung (Ziffer 11.2) und
->    dem Data Processing Addendum (Abschnitt 16) vorgehen, benötigen wir die
->    Bestätigung, dass sie davon für Bedrock nicht abweichen — und wie lange
->    Eingaben und Ausgaben zu anderen Zwecken aufbewahrt werden.
+> 3. Zu Abschnitt 50.12.2 der Service Terms (Erkennung von Missbrauch):
+>    Gehört das Modell, das wir über Amazon Bedrock in der Region Frankfurt
+>    nutzen, zu den dort genannten Modellen, für die Ein- und Ausgaben bis zu
+>    30 Tage gespeichert werden? Falls ja: Wo werden sie gespeichert, wer
+>    kann sie im Verdachtsfall einsehen, und lässt sich die Speicherung für
+>    unser Konto abstellen?
 >
 > Hintergrund ist eine Datenschutz-Folgenabschätzung nach Art. 35 DSGVO. Wir
 > verarbeiten mit Amazon Textract und Amazon Bedrock Unterlagen, die dem

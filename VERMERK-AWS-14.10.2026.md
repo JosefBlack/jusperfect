@@ -85,6 +85,7 @@ Es liegen vor und sind geprüft:
 | AWS Data Processing Addendum (Auftragsverarbeitungsvertrag) | am 14.10.2026 abgerufen |
 | AWS-Kundenvereinbarung, deutsche Fassung | Stand 01.06.2026 |
 | AWS-Datenschutzhinweis | Stand 18.05.2026 |
+| AWS Service Terms, Abschnitt 50.12 (Amazon Bedrock) | Stand 15.09.2026 |
 
 Das Data Processing Addendum ist Abschnitt für Abschnitt gegen Art. 28 Abs. 3
 DSGVO gelesen worden; **alle acht Punkte sind belegt.**
@@ -105,8 +106,30 @@ Drei Feststellungen daraus:
    EMEA SARL, Luxemburg.** Ihr gegenüber ist die Haftung für grobe
    Fahrlässigkeit und Vorsatz nicht beschränkt.
 
-Beide letztgenannten Stücke liegen in deutscher Übersetzung vor und tragen
-den Hinweis, dass bei Abweichungen die **englische Fassung maßgeblich** ist.
+4. **Die Service Terms, Abschnitt 50.12, enthalten für Amazon Bedrock keine
+   Erlaubnis, Inhalte zum Training oder zur Verbesserung der Dienste zu
+   verwenden.** Das ist von Bedeutung, weil die Service Terms sowohl dem
+   Auftragsverarbeitungsvertrag (Abschnitt 16) als auch der
+   Kundenvereinbarung (Ziffer 11.2) vorgehen. Die Schranke aus Ziffer 1.4
+   bleibt damit unangetastet. Dass dieses Schweigen Absicht ist, zeigt der
+   unmittelbar folgende Abschnitt 50.13 zu Amazon Q: Dort nimmt AWS sich das
+   Gegenteil ausdrücklich heraus, einschließlich des Trainierens von
+   Machine-Learning-Modellen, und verweist für den Widerspruch auf die
+   Opt-out-Richtlinie.
+5. **Abschnitt 50.12.2 regelt jedoch eine Speicherung.** Für bestimmte, auf
+   einer eigenen Seite von AWS genannte Modelle speichert Amazon Bedrock
+   **Ein- und Ausgaben bis zu 30 Tage** zum alleinigen Zweck der Erkennung
+   von Verstößen gegen die Nutzungsbedingungen und **überprüft sie im
+   Verdachtsfall**. Der Nachbarabschnitt zu Kiro (50.14.2) spricht dabei von
+   „möglicher menschlicher Überprüfung". Siehe Abschnitt 4 dieses Vermerks.
+6. **Nach Abschnitt 50.12.1 hängt die Rechtslage am gewählten Modell.** Ein
+   Modell eines Drittanbieters aus dem AWS Marketplace brächte dessen eigene
+   Bedingungen mit. Die Modellwahl in jusperfect ist deshalb keine rein
+   technische Einstellung.
+
+Die Kundenvereinbarung, der Datenschutzhinweis und die Service Terms liegen in
+deutscher Übersetzung vor und tragen den Hinweis, dass bei Abweichungen die
+**englische Fassung maßgeblich** ist.
 
 ### 2.4 Die Nachweise der Prüfer
 
@@ -134,7 +157,10 @@ Aus **AWS Artifact** wurden am 14.10.2026 abgerufen:
 2. **Für Amazon Bedrock** — die Verarbeitung im Sprachmodell — gilt das
    **nicht aus dieser Richtlinie.** Die Abmelderichtlinie erfasst Bedrock
    nicht. Dort trägt die vertragliche Schranke aus Ziffer 1.4 der
-   Kundenvereinbarung.
+   Kundenvereinbarung, die durch die Service Terms bestätigt und nicht
+   eingeschränkt wird. **Eine Aufbewahrung findet dort gleichwohl statt**,
+   nach Abschnitt 50.12.2 und je nach Modell bis zu 30 Tage; das ist in
+   Abschnitt 4 gesondert ausgewiesen.
 3. **Die Auswahl des Auftragsverarbeiters** ist mit den unter 2.4 genannten
    Nachweisen belegbar. Die Bewertung, ob sie die Anforderungen des
    § 43e Abs. 2 BRAO tragen, bleibt der Kanzlei vorbehalten.
@@ -148,13 +174,21 @@ Aus **AWS Artifact** wurden am 14.10.2026 abgerufen:
 
 ## 4. Was offen bleibt
 
-**Die AWS Service Terms zu Amazon Bedrock.** Sowohl das Data Processing
-Addendum (Abschnitt 16) als auch die Kundenvereinbarung (Ziffer 11.2) lassen
-die Service Terms **beiden vorgehen**. Solange der einschlägige Abschnitt
-nicht vorliegt, steht die Schranke aus Ziffer 1.4 unter diesem Vorbehalt. Der
-Abschnitt ist zu beschaffen, mit Datum.
+**Die Missbrauchserkennung nach Abschnitt 50.12.2 der Service Terms.** Die
+dort beschriebene Aufbewahrung von Ein- und Ausgaben über bis zu 30 Tage und
+die Möglichkeit ihrer Überprüfung betreffen Unterlagen, die dem anwaltlichen
+Berufsgeheimnis unterliegen. Zu klären und zu entscheiden sind drei Punkte:
 
-Ferner zur Vervollständigung der Ablage: die englischen Fassungen der beiden
+1. **Steht das genutzte Modell auf der von AWS geführten Seite zur
+   Missbrauchserkennung?** Der Abschnitt gilt nur für die dort genannten
+   Modelle. Die Seite ist abzurufen und mit Datum abzulegen.
+2. **Abschnitt 1.24 der Service Terms** — die allgemeine Bestimmung zur
+   Missbrauchserkennung, auf die Abschnitt 50.14.2 verweist — ist zu lesen.
+3. **Die Bewertung selbst**, ob eine solche Aufbewahrung für die hier
+   verarbeiteten Unterlagen tragbar ist und ob sie in die Hinweise nach
+   Art. 13 DSGVO und in die Einweisung gehört.
+
+Ferner zur Vervollständigung der Ablage: die englischen Fassungen der
 übersetzten Stücke, die Standardvertragsklauseln und die Liste der
 Unterauftragsverarbeiter.
 
@@ -208,6 +242,8 @@ Eine gesonderte Frist wird nicht notiert.
 14. Bildschirmausdruck der Vertraulichkeitsbedingungen für den Abruf der
     SOC-Berichte — vollständiger Ausdruck über die Schaltfläche
     „Bedingungen ausdrucken“ nachzureichen
+15. Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12
+    (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich
 
 ---
 

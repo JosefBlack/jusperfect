@@ -16,11 +16,11 @@ Maßnahmen* dagegen im Programm stehen — jede mit Fundstelle.
 verbleibende Risiko tragbar ist und ob die Aufsichtsbehörde nach Art. 36
 einzuschalten ist, kann nur ein Jurist entscheiden, der das Mandatsgeschäft
 kennt. Diese Stellen sind mit **[KANZLEI n]** gekennzeichnet; es sind
-**einundzwanzig** — Nr. 21 ist am 14.10.2026 dazugekommen, beim Lesen des
-Auftragsverarbeitungsvertrages —, und sie stehen am Ende noch einmal in einer
-Liste. Drei davon sind erledigt: **Nr. 18** am 05.10.2026, **Nr. 19** und
-**Nr. 20** am 14.10.2026; bei **Nr. 10** liegt seit dem 14.10.2026 das
-Material vor und fehlt nur noch die Bewertung. Sie bleiben stehen und durchgestrichen — eine
+**zweiundzwanzig** — Nr. 21 und Nr. 22 sind am 14.10.2026 dazugekommen, beim
+Lesen des AWS-Vertragswerks —, und sie stehen am Ende noch einmal in einer
+Liste. Vier davon sind erledigt: **Nr. 18** am 05.10.2026, **Nr. 19**,
+**Nr. 20** und **Nr. 21** am 14.10.2026; bei **Nr. 10** liegt seit dem
+14.10.2026 das Material vor und fehlt nur noch die Bewertung. Sie bleiben stehen und durchgestrichen — eine
 Stelle, die verschwindet, sieht aus, als hätte es sie nie gegeben.
 
 **Die Zahlen und Befunde stehen woanders.** Jede technische Angabe hier ist aus
@@ -72,7 +72,7 @@ Risikobewertung gebraucht wird.
 |---|---|---|
 | Dokumente lesen | nichts | — |
 | Gescannte Seite erkennen | **ein Bild je Seite** | AWS Textract, Frankfurt. Verarbeitet; **weder gespeichert noch zur Verbesserung der AWS-KI-Dienste verwendet** — wirksame Abmelderichtlinie seit 14.10.2026, siehe `[KANZLEI 19]` |
-| Frage, Analyse, Entwurf | **die ausgewählten Passagen** als Text | AWS Bedrock, Frankfurt, über das EU-Inferenzprofil |
+| Frage, Analyse, Entwurf | **die ausgewählten Passagen** als Text | AWS Bedrock, Frankfurt, über das EU-Inferenzprofil. **Nicht zum Training verwendet** (Service Terms 50.12, Stand 15.09.2026); **aber je nach Modell bis zu 30 Tage zur Missbrauchserkennung gespeichert** — siehe `[KANZLEI 22]` |
 | Schutzgeländer | **Frage und Antwort**, nicht der Akteninhalt | `eu.guardrail.v1:0`, verteilt auf europäische Regionen |
 | Aktengedächtnis sichern | **Dokumenttexte und Abgeleitetes** | S3-Bucket der Kanzlei, Frankfurt, SSE-KMS |
 | Vermerk zurückschreiben | **nur der freigegebene Text** | jur\|nodes |
@@ -564,15 +564,83 @@ allgemeine Nutzungsschranke und keine Zusage zu einem bestimmten Dienst.
 > maßgeblich** ist. Für die Datenschutzakte gehört deshalb zu jedem deutschen
 > Ausdruck der englische dazu.
 
-**[KANZLEI 21] — was damit noch offen ist, und es ist weniger als gestern.**
-Die Nutzungsschranke steht (Ziffer 1.4, 6.1). Offen bleibt allein, ob die
-**AWS Service Terms** für Amazon Bedrock etwas anderes bestimmen: Sowohl der
-AV-Vertrag (Abschnitt 16) als auch die Kundenvereinbarung (Ziffer 11.2) lassen
-die Service Terms **beiden vorgehen**. Das Stück liegt nicht vor. Zu
-beschaffen ist der einschlägige Abschnitt zu Amazon Bedrock, mit Datum —
-abrufbar unter der in Ziffer 12 genannten Adresse. Die Abmelderichtlinie vom
-14.10.2026 (`[KANZLEI 19]`) beantwortet diese Frage **nicht**; sie erfasst
-Bedrock nicht.
+**[KANZLEI 21] — am 14.10.2026 beantwortet.** Die Service Terms lagen nicht
+vor; sie gehen dem AV-Vertrag (Abschnitt 16) und der Kundenvereinbarung
+(Ziffer 11.2) **beiden vor**, und solange niemand sie gelesen hatte, stand die
+Schranke aus Ziffer 1.4 unter Vorbehalt. Der Abschnitt liegt jetzt vor — siehe
+den nächsten Abschnitt. Der Vorbehalt ist ausgeräumt; **dafür ist eine neue
+Stelle entstanden** (`[KANZLEI 22]`).
+
+#### Die Service Terms, Abschnitt 50.12 — Amazon Bedrock
+
+*AWS Service Terms, Stand 15.09.2026, deutsche Fassung. Am 14.10.2026 gelesen.
+Auch hier gilt: Bei Abweichungen ist die englische Fassung maßgeblich.*
+
+**Das Wichtigste zuerst: Eine Erlaubnis, Inhalte zum Training oder zur
+Verbesserung der Dienste zu verwenden, enthält der Abschnitt nicht.** Die
+Schranke aus Ziffer 1.4 der Kundenvereinbarung bleibt damit unangetastet; die
+Aussage „kein Modelltraining" trägt.
+
+**Dass dieses Schweigen Absicht ist und keine Lücke, zeigt der unmittelbar
+folgende Abschnitt.** In 50.13 (*Amazon Q*) schreibt AWS das Gegenteil
+ausdrücklich hin: Inhalte dürfen genutzt werden, „um Amazon Q und die zugrunde
+liegenden Technologien zu entwickeln und zu verbessern", einschließlich des
+„Trainieren[s] von Machine-Learning-Modellen", und dürfen dafür in einer
+anderen AWS-Region gespeichert werden; 50.13.3 verweist für den Widerspruch
+auf die **Opt-out-Richtlinie für KI-Services**. Wo AWS solche Rechte will,
+nennt es sie — und für Bedrock nennt es sie nicht. Das bestätigt zugleich den
+Befund vom Vormittag, dass die Abmelderichtlinie (`[KANZLEI 19]`) für Bedrock
+kein Werkzeug ist: Sie hat dort nichts, woran sie greifen könnte.
+
+**Was der Abschnitt sonst regelt, geordnet nach Bedeutung für diese Akte:**
+
+| Stelle | Inhalt |
+|---|---|
+| **50.12.2 Erkennung von Missbrauch** | **Für bestimmte Modelle** — genannt auf der Bedrock-Missbrauchserkennungsseite — speichert Bedrock **Ein- und Ausgaben bis zu 30 Tage**, zum alleinigen Zweck, Verstöße gegen die Nutzungsbedingungen zu erkennen. Bei erkanntem Verdacht **überprüft AWS** die Ein- und Ausgaben; der Kunde „stimmt zu und weist an". Siehe `[KANZLEI 22]` |
+| 50.12.2.1 | Bei Verdacht auf Darstellungen von Kindesmissbrauch Prüfung und Meldung an das NCMEC oder eine andere Stelle |
+| 50.12.4 | Ein durch Feinabstimmung angepasstes Modell steht allein der Kanzlei zu; Drittanbieter haben keinen Zugriff. AWS greift darauf nur zu, soweit zur Wartung oder Bereitstellung nötig oder gesetzlich gefordert. **Betrifft uns heute nicht** — jusperfect stimmt kein Modell ab |
+| 50.12.5 | AWS darf dem Anbieter eines Drittanbieter-Modells Angaben zur Nutzung weitergeben, **die die Inhalte nicht umfassen** |
+| 50.12.5.1 | Bestimmte Anthropic-Produkte (genannt werden Claude Code und die Computernutzung) betten **Metadaten** in Anfragen ein. **Betrifft uns nicht** — jusperfect ruft die Schnittstelle unmittelbar auf |
+| 50.12.1 | Modelle von Drittanbietern sind „Inhalte von Drittanbietern"; ihre Nutzung heißt Zustimmung zu deren eigenen Bedingungen, über AWS Marketplace (Abschnitt 20) |
+| 50.12.6 | Ausgaben können Herkunftsdaten tragen (Metadaten, Signaturen, Wasserzeichen); sie dürfen nicht entfernt werden |
+
+> **Eine Folgerung für den Betrieb, die nicht datenschutzrechtlich aussieht und
+> es doch ist:** Nach 50.12.1 hängt die Rechtslage **am gewählten Modell**. Ein
+> Wechsel auf ein Modell eines Drittanbieters aus dem Marktplatz unterstellt
+> die Verarbeitung dessen Bedingungen — nicht mehr allein denen, die hier
+> geprüft sind. Die Modellwahl ist deshalb keine rein technische Einstellung.
+> `JUSPERFECT_MODELL` zu ändern ist eine Entscheidung mit Rechtsfolgen.
+
+**[KANZLEI 22] — die Missbrauchserkennung nach 50.12.2.** Sie ist neu, sie ist
+belegt, und sie betrifft den Kern: eine **Speicherung von Akteninhalt bis zu 30
+Tagen** und eine **Überprüfung durch AWS** im Verdachtsfall. Dass der Abschnitt
+zur Nachbarbestimmung über Kiro (50.14.2) ausdrücklich von „möglicher
+**menschlicher** Überprüfung von Eingaben und Ausgaben" spricht, lässt die
+Möglichkeit offen, dass auch hier Menschen lesen. Für Unterlagen unter § 203
+StGB ist das zu bewerten und nicht zu übergehen.
+
+Drei Dinge sind dafür zu beschaffen oder zu entscheiden:
+
+1. **Steht das von der Kanzlei genutzte Modell auf der
+   Bedrock-Missbrauchserkennungsseite?** Der Abschnitt gilt nur „für
+   bestimmte, auf der Missbrauchserkennungsseite genannte Modelle". Steht das
+   Modell nicht darauf, entfällt die Speicherung. Die Seite ist abzurufen und
+   mit Datum abzulegen — sie ist von hier aus nicht erreichbar.
+2. **Abschnitt 1.24 der Service Terms** ist zu lesen. Die Bestimmung zu Kiro
+   verweist auf ihn als allgemeine Regel zur Missbrauchserkennung; er liegt
+   nicht vor.
+3. **Die Bewertung selbst:** ob eine Aufbewahrung von bis zu 30 Tagen zu
+   diesem Zweck, mit der Möglichkeit der Überprüfung, für die hier
+   verarbeiteten Unterlagen tragbar ist — und ob sie in die Hinweise nach
+   Art. 13 DSGVO und in die Einweisung gehört.
+
+> **Was das für Abschnitt 2.1 und für `[KANZLEI 20]` heißt.** Die
+> Mengenbegrenzung bleibt die wirksamste Maßnahme in der Hand des Bearbeiters
+> und wird durch diesen Befund **wichtiger**, nicht unwichtiger: Was nicht
+> angehakt ist, kann auch nicht dreißig Tage liegen. Die Entscheidung vom
+> 14.10.2026 steht; sie behauptet an keiner Stelle, es werde nichts
+> aufbewahrt. Ihr dritter „nicht behauptet"-Satz — die Speicherfrage sei
+> geklärt — ist durch diesen Befund bestätigt und nicht widerlegt.
 
 **[KANZLEI 8] — was zur Ablage noch fehlt.** Der Weg dorthin steht in
 `AWS-ZWEI-HANDGRIFFE.md`, Handgriff 3: In **AWS Artifact** liegen die
@@ -719,9 +787,12 @@ Die Entwicklung kann dazu nur sagen, was ist, nicht was reicht.
 wurde, lässt sich nicht zurückholen. Mehr als eine vertragliche Schranke gibt
 es dagegen nicht: AWS darf die Inhalte nur nutzen, soweit zur Erbringung der
 Services nötig (Kundenvereinbarung Ziffer 1.4 und 6.1). Diese Schranke steht
-**nicht** im Auftragsverarbeitungsvertrag, und die Service Terms gehen ihr
-nach beiden Verträgen vor (R4, `[KANZLEI 21]`). **[KANZLEI 14]** — in den
-Hinweisen an die Betroffenen zu beschreiben.
+**nicht** im Auftragsverarbeitungsvertrag; die Service Terms gehen ihr vor,
+weichen für Bedrock aber nicht von ihr ab (R4, Abschnitt 50.12). **Zum Löschen
+kommt hinzu, was 50.12.2 zulässt:** Je nach Modell liegen Ein- und Ausgaben
+bis zu dreißig Tage bei AWS, und eine Löschung durch die Kanzlei erreicht sie
+nicht (`[KANZLEI 22]`). **[KANZLEI 14]** — in den Hinweisen an die Betroffenen
+zu beschreiben.
 
 ---
 
@@ -771,7 +842,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 
 ---
 
-## 8. Die einundzwanzig Stellen für die Kanzlei auf einen Blick
+## 8. Die zweiundzwanzig Stellen für die Kanzlei auf einen Blick
 
 | Nr. | Was zu entscheiden ist | Abschnitt |
 |---|---|---|
@@ -795,7 +866,8 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | ~~18~~ | ~~Sollen Aktenzeichen und Dokumenttitel an das Modell gehen?~~ **Entschieden am 05.10.2026: Dateiname nein, Art des Schriftstücks ja, Aktenzeichen nur beim Entwurf** | 2.1 |
 | ~~19~~ | ~~Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen~~ **Eingelöst am 14.10.2026, 17:11 MESZ — Nachweis in der Datenschutzakte** | R6 |
 | ~~20~~ | ~~Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt?~~ **Entschieden am 14.10.2026: ja, es bleibt dabei** | 2.4 |
-| 21 | Einschlägigen Abschnitt der **AWS Service Terms** zu Amazon Bedrock beschaffen, mit Datum — sie gehen AV-Vertrag und Kundenvereinbarung vor | R4 |
+| ~~21~~ | ~~Einschlägigen Abschnitt der AWS Service Terms zu Amazon Bedrock beschaffen~~ **Beschafft und gelesen am 14.10.2026: keine Abweichung von Ziffer 1.4, kein Training** | R4 |
+| 22 | Missbrauchserkennung nach 50.12.2: Modellliste abrufen, Abschnitt 1.24 lesen, Aufbewahrung von bis zu 30 Tagen bewerten | R4 |
 
 ---
 

@@ -179,6 +179,7 @@ inhalt.push(
       ["AWS Data Processing Addendum (Auftragsverarbeitungsvertrag)", "am 14.10.2026 abgerufen"],
       ["AWS-Kundenvereinbarung, deutsche Fassung", "Stand 01.06.2026"],
       ["AWS-Datenschutzhinweis", "Stand 18.05.2026"],
+      ["AWS Service Terms, Abschnitt 50.12 (Amazon Bedrock)", "Stand 15.09.2026"],
     ],
     [6000, 3354]
   ),
@@ -187,7 +188,7 @@ inhalt.push(
     t("Das Data Processing Addendum ist Abschnitt für Abschnitt gegen Art. 28 Abs. 3 DSGVO gelesen worden; "),
     t("alle acht Punkte sind belegt.", { bold: true }),
   ], { spacing: { before: 120, after: 120 } }),
-  p("Drei Feststellungen daraus:", { spacing: { after: 100 } }),
+  p("Sechs Feststellungen daraus:", { spacing: { after: 100 } }),
   ((aktuelleListe = neueListe()), leer()),
   nr([
     t("Die Nutzungsschranke steht in der Kundenvereinbarung, nicht im Auftragsverarbeitungsvertrag. ", { bold: true }),
@@ -201,8 +202,24 @@ inhalt.push(
     t("Vertragspartei ist für Kunden mit Sitz in der EU die Amazon Web Services EMEA SARL, Luxemburg. ", { bold: true }),
     t("Ihr gegenüber ist die Haftung für grobe Fahrlässigkeit und Vorsatz nicht beschränkt."),
   ]),
+  nr([
+    t("Die Service Terms, Abschnitt 50.12, enthalten für Amazon Bedrock keine Erlaubnis, Inhalte zum Training oder zur Verbesserung der Dienste zu verwenden. ", { bold: true }),
+    t("Das ist von Bedeutung, weil die Service Terms sowohl dem Auftragsverarbeitungsvertrag (Abschnitt 16) als auch der Kundenvereinbarung (Ziffer 11.2) vorgehen. Die Schranke aus Ziffer 1.4 bleibt damit unangetastet. Dass dieses Schweigen Absicht ist, zeigt der unmittelbar folgende Abschnitt 50.13 zu Amazon Q: Dort nimmt AWS sich das Gegenteil ausdrücklich heraus, einschließlich des Trainierens von Machine-Learning-Modellen, und verweist für den Widerspruch auf die Opt-out-Richtlinie."),
+  ]),
+  nr([
+    t("Abschnitt 50.12.2 regelt jedoch eine Speicherung. ", { bold: true }),
+    t("Für bestimmte, auf einer eigenen Seite von AWS genannte Modelle speichert Amazon Bedrock "),
+    t("Ein- und Ausgaben bis zu 30 Tage", { bold: true }),
+    t(" zum alleinigen Zweck der Erkennung von Verstößen gegen die Nutzungsbedingungen und "),
+    t("überprüft sie im Verdachtsfall", { bold: true }),
+    t(". Der Nachbarabschnitt zu Kiro (50.14.2) spricht dabei von \u201Em\u00F6glicher menschlicher \u00DCberpr\u00FCfung\u201C. Siehe Abschnitt 4 dieses Vermerks."),
+  ]),
+  nr([
+    t("Nach Abschnitt 50.12.1 hängt die Rechtslage am gewählten Modell. ", { bold: true }),
+    t("Ein Modell eines Drittanbieters aus dem AWS Marketplace brächte dessen eigene Bedingungen mit. Die Modellwahl in jusperfect ist deshalb keine rein technische Einstellung."),
+  ]),
   p([
-    t("Beide letztgenannten Stücke liegen in deutscher Übersetzung vor und tragen den Hinweis, dass bei Abweichungen die "),
+    t("Die Kundenvereinbarung, der Datenschutzhinweis und die Service Terms liegen in deutscher Übersetzung vor und tragen den Hinweis, dass bei Abweichungen die "),
     t("englische Fassung maßgeblich", { bold: true }),
     t(" ist."),
   ], { spacing: { before: 100, after: 120 } })
@@ -242,7 +259,9 @@ inhalt.push(
     t("Für Amazon Bedrock", { bold: true }),
     t(" — die Verarbeitung im Sprachmodell — gilt das "),
     t("nicht aus dieser Richtlinie.", { bold: true }),
-    t(" Die Abmelderichtlinie erfasst Bedrock nicht. Dort trägt die vertragliche Schranke aus Ziffer 1.4 der Kundenvereinbarung."),
+    t(" Die Abmelderichtlinie erfasst Bedrock nicht. Dort trägt die vertragliche Schranke aus Ziffer 1.4 der Kundenvereinbarung, die durch die Service Terms bestätigt und nicht eingeschränkt wird. "),
+    t("Eine Aufbewahrung findet dort gleichwohl statt", { bold: true }),
+    t(", nach Abschnitt 50.12.2 und je nach Modell bis zu 30 Tage; das ist in Abschnitt 4 gesondert ausgewiesen."),
   ]),
   nr([
     t("Die Auswahl des Auftragsverarbeiters", { bold: true }),
@@ -258,10 +277,23 @@ inhalt.push(
 inhalt.push(
   h1("4. Was offen bleibt"),
   p([
-    t("Die AWS Service Terms zu Amazon Bedrock. ", { bold: true }),
-    t("Sowohl das Data Processing Addendum (Abschnitt 16) als auch die Kundenvereinbarung (Ziffer 11.2) lassen die Service Terms beiden vorgehen. Solange der einschlägige Abschnitt nicht vorliegt, steht die Schranke aus Ziffer 1.4 unter diesem Vorbehalt. Der Abschnitt ist zu beschaffen, mit Datum."),
-  ], { spacing: { after: 120 } }),
-  p("Ferner zur Vervollständigung der Ablage: die englischen Fassungen der beiden übersetzten Stücke, die Standardvertragsklauseln und die Liste der Unterauftragsverarbeiter.", { spacing: { after: 120 } })
+    t("Die Missbrauchserkennung nach Abschnitt 50.12.2 der Service Terms. ", { bold: true }),
+    t("Die dort beschriebene Aufbewahrung von Ein- und Ausgaben über bis zu 30 Tage und die Möglichkeit ihrer Überprüfung betreffen Unterlagen, die dem anwaltlichen Berufsgeheimnis unterliegen. Zu klären und zu entscheiden sind drei Punkte:"),
+  ], { spacing: { after: 100 } }),
+  ((aktuelleListe = neueListe()), leer()),
+  nr([
+    t("Steht das genutzte Modell auf der von AWS geführten Seite zur Missbrauchserkennung? ", { bold: true }),
+    t("Der Abschnitt gilt nur für die dort genannten Modelle. Die Seite ist abzurufen und mit Datum abzulegen."),
+  ]),
+  nr([
+    t("Abschnitt 1.24 der Service Terms", { bold: true }),
+    t(" — die allgemeine Bestimmung zur Missbrauchserkennung, auf die Abschnitt 50.14.2 verweist — ist zu lesen."),
+  ]),
+  nr([
+    t("Die Bewertung selbst", { bold: true }),
+    t(", ob eine solche Aufbewahrung für die hier verarbeiteten Unterlagen tragbar ist und ob sie in die Hinweise nach Art. 13 DSGVO und in die Einweisung gehört."),
+  ]),
+  p("Ferner zur Vervollständigung der Ablage: die englischen Fassungen der übersetzten Stücke, die Standardvertragsklauseln und die Liste der Unterauftragsverarbeiter.", { spacing: { before: 100, after: 120 } })
 );
 
 // ---------------------------------------------------------------- 5
@@ -319,6 +351,7 @@ inhalt.push(h1("7. Anlagen"));
   "SOC 3 Report",
   "SOC Continued Operations Letter",
   "Bildschirmausdruck der Vertraulichkeitsbedingungen f\u00FCr den Abruf der SOC-Berichte \u2014 vollst\u00E4ndiger Ausdruck \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C nachzureichen",
+  "Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12 (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich",
 ].forEach((z) =>
   inhalt.push(
     new Paragraph({
@@ -346,7 +379,7 @@ const doc = new Document({
   description: "Nachweise zum Auftragsverarbeiter Amazon Web Services",
   numbering: {
     config: [
-      ...[1, 2, 3, 4, 5, 6].map((i) => ({
+      ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
         reference: "liste" + i,
         levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1.", alignment: AlignmentType.START,
           style: { paragraph: { indent: { left: 700, hanging: 340 } } } }],

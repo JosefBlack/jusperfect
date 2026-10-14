@@ -143,13 +143,6 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    > Bildschirmfoto mit Text. Die Regel steht jetzt in
    > `AWS-ZWEI-HANDGRIFFE.md` über dem Support-Text.
 
-   **`[KANZLEI 21]` ist damit kleiner, aber nicht weg.** Offen bleibt allein:
-   die **AWS Service Terms** zu Amazon Bedrock. Sie gehen dem AV-Vertrag
-   (Abschnitt 16) **und** der Kundenvereinbarung (Ziffer 11.2) vor — solange
-   sie niemand gelesen hat, steht die Schranke aus Ziffer 1.4 unter Vorbehalt.
-   Abrufbar unter der in Ziffer 12 genannten Adresse; sonst über den
-   Support-Text, Punkt 3.
-
    **Für die Ablage (`[KANZLEI 8]`):** Beide Stücke tragen oben den Satz, dass
    die deutsche Übersetzung nur der Information dient und **die englische
    Fassung maßgeblich** ist. Zu jedem deutschen Ausdruck gehört also der
@@ -198,6 +191,43 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    > Handgriff 2 haben die Bildschirmfotos aus der Kanzlei zwei falsche
    > Bezeichnungen aufgedeckt. Heißt in Artifact etwas anders: ein Bild
    > genügt, ich ziehe nach.
+
+8. **Noch am selben Abend: die Service Terms sind gelesen. `[KANZLEI 21]` ist
+   geschlossen — und `[KANZLEI 22]` ist dabei aufgegangen.**
+
+   Die Kanzlei hat Abschnitt 50.12 (Amazon Bedrock) aus den **AWS Service
+   Terms, Stand 15.09.2026** geschickt. Das Ergebnis steht in
+   `DSFA-ENTWURF.md`, R4.
+
+   **Die gute Nachricht, und sie ist belastbar:** Eine Erlaubnis, Inhalte zum
+   Training oder zur Verbesserung der Dienste zu verwenden, enthält der
+   Abschnitt **nicht**. Damit bleibt Ziffer 1.4 der Kundenvereinbarung
+   unangetastet, und die Aussage „kein Modelltraining" trägt.
+
+   **Dass dieses Schweigen Absicht ist, zeigt der nächste Abschnitt.** In
+   50.13 (Amazon Q) schreibt AWS das Gegenteil ausdrücklich hin — Nutzung zur
+   Entwicklung und Verbesserung, ausdrücklich einschließlich des „Trainierens
+   von Machine-Learning-Modellen", Speicherung auch in anderen Regionen, und
+   ein Verweis auf die Opt-out-Richtlinie für den Widerspruch. Wo AWS solche
+   Rechte will, nennt es sie. Für Bedrock nennt es sie nicht.
+
+   **Die ernste Nachricht steht in 50.12.2.** Für **bestimmte Modelle** —
+   welche, sagt eine eigene Seite von AWS — speichert Bedrock **Ein- und
+   Ausgaben bis zu 30 Tage** zur Missbrauchserkennung und **überprüft sie im
+   Verdachtsfall**. Der Nachbarabschnitt zu Kiro spricht dabei ausdrücklich
+   von „möglicher **menschlicher** Überprüfung". Für Unterlagen unter § 203
+   StGB ist das zu bewerten.
+
+   **Daraus `[KANZLEI 22]`**, mit drei Teilen: die Modellliste abrufen und
+   ablegen (steht das genutzte Modell darauf?), Abschnitt 1.24 der Service
+   Terms lesen (die allgemeine Regel zur Missbrauchserkennung), und die
+   Bewertung selbst. Der Support-Text fragt jetzt genau danach.
+
+   > **Eine Folgerung für den Betrieb**, die nicht datenschutzrechtlich
+   > aussieht: Nach 50.12.1 hängt die Rechtslage **am gewählten Modell**. Ein
+   > Modell eines Drittanbieters aus dem Marktplatz brächte dessen eigene
+   > Bedingungen mit. `JUSPERFECT_MODELL` zu ändern ist damit keine rein
+   > technische Einstellung.
 
 ### Woran der nächste Schritt hängt
 
