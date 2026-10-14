@@ -64,6 +64,8 @@ Ankündigung ändern und ein Modell aufnehmen, auch unseres.
 
 **Dafür verantwortlich ist:** ........................................
 
+**Vertretung:** ........................................
+
 ### Warum
 
 Erkennt AWS einen möglichen Verstoß gegen seine Nutzungsbedingungen, fragt es
@@ -84,7 +86,16 @@ Hinweise auf Änderungen an Diensten, Fristen.
 2. Eine Person benennen, die dafür zuständig ist, und eine Vertretung für
    Urlaub und Krankheit.
 3. In der AWS-Konsole nachsehen, dass **diese** Adresse hinterlegt ist, und
-   nicht eine aus der Einrichtungszeit.
+   nicht eine aus der Einrichtungszeit. Der Weg: oben rechts auf den
+   **Kontonamen**, dann **Konto** (*Account*). Oben steht die **E-Mail-Adresse
+   des Root-Benutzers**, weiter unten stehen die **alternativen Kontakte** für
+   **Abrechnung**, **Betrieb** und **Sicherheit**.
+
+   > **Verlassen Sie sich nicht auf die Root-Adresse.** Sie ist zugleich die
+   > Adresse für das Zurücksetzen des Passworts, wird deshalb gern
+   > abgeschottet und selten geöffnet — und dort läge dann die Rückfrage.
+   > **Unter „Betrieb" und „Sicherheit" gehört eine Adresse, die wirklich
+   > gelesen wird.** Die trägt man oben ein.
 4. Bei einer Nachfrage von AWS **nicht abwarten**. Wer nicht weiß, was zu
    antworten ist, fragt zurück — aber antwortet.
 

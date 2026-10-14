@@ -106,7 +106,8 @@ inhalt.push(
 inhalt.push(
   h1("Regel 2 — Die E-Mail-Adresse des AWS-Kontos wird gelesen"),
   p([t("Benannt ist: ", { bold: true }), t("........................................  "), t("(Adresse eintragen)", { italics: true })], { spacing: { after: 160 } }),
-  p([t("Dafür verantwortlich ist: ", { bold: true }), t("........................................")], { spacing: { after: 200 } }),
+  p([t("Dafür verantwortlich ist: ", { bold: true }), t("........................................")], { spacing: { after: 160 } }),
+  p([t("Vertretung: ", { bold: true }), t("........................................")], { spacing: { after: 200 } }),
 
   h2("Warum"),
   p([
@@ -126,7 +127,25 @@ inhalt.push(
   ((aktuelleListe = neueListe()), leer()),
   nr([t("Eine Adresse benennen, die "), t("tatsächlich gelesen wird", { bold: true }), t(" — kein Sammelkorb, der einmal im Quartal geöffnet wird.")]),
   nr("Eine Person benennen, die dafür zuständig ist, und eine Vertretung für Urlaub und Krankheit."),
-  nr([t("In der AWS-Konsole nachsehen, dass "), t("diese", { bold: true }), t(" Adresse hinterlegt ist, und nicht eine aus der Einrichtungszeit.")]),
+  nr([
+    t("In der AWS-Konsole nachsehen, dass "),
+    t("diese", { bold: true }),
+    t(" Adresse hinterlegt ist, und nicht eine aus der Einrichtungszeit. Der Weg: oben rechts auf den "),
+    t("Kontonamen", { bold: true }),
+    t(", dann "),
+    t("Konto", { bold: true }),
+    t(" (Account). Oben steht die "),
+    t("E-Mail-Adresse des Root-Benutzers", { bold: true }),
+    t(", weiter unten stehen die "),
+    t("alternativen Kontakte", { bold: true }),
+    t(" für Abrechnung, Betrieb und Sicherheit."),
+  ]),
+  kasten([
+    t("Verlassen Sie sich nicht auf die Root-Adresse. ", { bold: true }),
+    t("Sie ist zugleich die Adresse für das Zurücksetzen des Passworts, wird deshalb gern abgeschottet und selten geöffnet — und dort läge dann die Rückfrage. "),
+    t("Unter \u201EBetrieb\u201C und \u201ESicherheit\u201C geh\u00F6rt eine Adresse, die wirklich gelesen wird.", { bold: true }),
+    t(" Die trägt man oben ein."),
+  ]),
   nr([t("Bei einer Nachfrage von AWS "), t("nicht abwarten.", { bold: true }), t(" Wer nicht weiß, was zu antworten ist, fragt zurück — aber antwortet.")]),
   kasten([
     t("Was in eine solche Antwort nicht gehört: ", { bold: true }),
