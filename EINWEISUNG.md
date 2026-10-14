@@ -85,7 +85,20 @@ Hinweise auf Änderungen an Diensten, Fristen.
    der einmal im Quartal geöffnet wird.
 2. Eine Person benennen, die dafür zuständig ist, und eine Vertretung für
    Urlaub und Krankheit.
-3. In der AWS-Konsole nachsehen, dass **diese** Adresse hinterlegt ist, und
+3. **Feststellen, welche Adresse AWS heute wirklich verwendet — nicht
+   annehmen.** Dafür genügt ein Blick in die Postfächer: Nachrichten mit dem
+   Absender **Amazon Web Services** liegen in genau dieser Adresse. Es gibt
+   sie regelmäßig — die monatliche Rechnung, Hinweise auf Änderungen, und die
+   Bestätigung, die AWS beim Anlegen der Organisation am 14.10.2026 geschickt
+   hat.
+
+   > **Die Anmeldung beweist es nur in einem Fall.** Wer sich mit einer
+   > **E-Mail-Adresse** anmeldet, ist als Root-Benutzer unterwegs — dann ist
+   > das die Kontoadresse. Wer sich mit **Kontonummer oder Kontoalias und
+   > einem Benutzernamen** anmeldet, benutzt einen IAM-Benutzer; dann sagt die
+   > Anmeldung über die Kontoadresse **nichts**.
+
+4. In der AWS-Konsole nachsehen, dass **diese** Adresse hinterlegt ist, und
    nicht eine aus der Einrichtungszeit. Der Weg: oben rechts auf den
    **Kontonamen**, dann **Konto** (*Account*). Oben steht die **E-Mail-Adresse
    des Root-Benutzers**, weiter unten stehen die **alternativen Kontakte** für
@@ -96,7 +109,7 @@ Hinweise auf Änderungen an Diensten, Fristen.
    > abgeschottet und selten geöffnet — und dort läge dann die Rückfrage.
    > **Unter „Betrieb" und „Sicherheit" gehört eine Adresse, die wirklich
    > gelesen wird.** Die trägt man oben ein.
-4. Bei einer Nachfrage von AWS **nicht abwarten**. Wer nicht weiß, was zu
+5. Bei einer Nachfrage von AWS **nicht abwarten**. Wer nicht weiß, was zu
    antworten ist, fragt zurück — aber antwortet.
 
 > **Was in eine solche Antwort nicht gehört:** Akteninhalt. Kein Ausschnitt,

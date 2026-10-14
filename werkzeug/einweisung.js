@@ -128,6 +128,22 @@ inhalt.push(
   nr([t("Eine Adresse benennen, die "), t("tatsächlich gelesen wird", { bold: true }), t(" — kein Sammelkorb, der einmal im Quartal geöffnet wird.")]),
   nr("Eine Person benennen, die dafür zuständig ist, und eine Vertretung für Urlaub und Krankheit."),
   nr([
+    t("Feststellen, welche Adresse AWS heute wirklich verwendet — nicht annehmen. ", { bold: true }),
+    t("Daf\u00FCr gen\u00FCgt ein Blick in die Postf\u00E4cher: Nachrichten mit dem Absender "),
+    t("Amazon Web Services", { bold: true }),
+    t(" liegen in genau dieser Adresse. Es gibt sie regelm\u00E4\u00DFig — die monatliche Rechnung, Hinweise auf \u00C4nderungen, und die Best\u00E4tigung, die AWS beim Anlegen der Organisation am 14.10.2026 geschickt hat."),
+  ]),
+  kasten([
+    t("Die Anmeldung beweist es nur in einem Fall. ", { bold: true }),
+    t("Wer sich mit einer "),
+    t("E-Mail-Adresse", { bold: true }),
+    t(" anmeldet, ist als Root-Benutzer unterwegs — dann ist das die Kontoadresse. Wer sich mit "),
+    t("Kontonummer oder Kontoalias und einem Benutzernamen", { bold: true }),
+    t(" anmeldet, benutzt einen IAM-Benutzer; dann sagt die Anmeldung \u00FCber die Kontoadresse "),
+    t("nichts", { bold: true }),
+    t("."),
+  ]),
+  nr([
     t("In der AWS-Konsole nachsehen, dass "),
     t("diese", { bold: true }),
     t(" Adresse hinterlegt ist, und nicht eine aus der Einrichtungszeit. Der Weg: oben rechts auf den "),
