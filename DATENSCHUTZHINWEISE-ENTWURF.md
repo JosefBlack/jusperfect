@@ -184,10 +184,49 @@ Aufbewahrungspflichten.
 
 # Teil B · Ein Absatz für die Mandatsbedingungen
 
-> **Zwei Fassungen.** Welche genommen wird, hängt von der Entscheidung unter
+> **Drei Fassungen.** Welche genommen wird, hängt von der Entscheidung unter
 > „Einwilligung oder nicht" am Ende ab. [KANZLEI 5]
+>
+> **Empfohlen wird Fassung 1.** Die Begründung steht am Ende; sie ist am
+> 14.10.2026 auf den Wunsch der Kanzlei hin ausgearbeitet worden, es
+> „sicherheitshalber" mit einer Einwilligung zu versehen.
 
-### Fassung 1 — Hinweis (ohne Einwilligung)
+### Fassung 1 — Vereinbarung im Mandatsvertrag *(empfohlen)*
+
+> **Einsatz KI-gestützter Hilfsmittel.** Die Kanzlei setzt bei der Bearbeitung
+> des Mandats ein KI-gestütztes Programm zur Auswertung der Akte ein. Dazu
+> werden einzelne, von der Bearbeiterin oder dem Bearbeiter ausgewählte
+> Abschnitte der Akte an einen Auftragsverarbeiter in Rechenzentren innerhalb
+> der Europäischen Union übermittelt. Der Auftragsverarbeiter ist zur
+> Verschwiegenheit verpflichtet; eine Nutzung der Inhalte über die Erbringung
+> des Dienstes hinaus, insbesondere zum Training von KI-Modellen, ist
+> vertraglich ausgeschlossen. Die anwaltliche Prüfung und jede Entscheidung
+> bleiben bei der Kanzlei.
+>
+> **Die Mandantschaft kann jederzeit verlangen, dass die Kanzlei das Programm
+> in ihrem Mandat nicht einsetzt.** Die Bearbeitung erfolgt dann ohne dieses
+> Hilfsmittel; Nachteile entstehen daraus nicht. Einzelheiten zur Verarbeitung
+> stehen in unseren Datenschutzhinweisen.
+
+> **Für die Kanzlei, nicht für den Mandanten: warum das keine Einwilligung
+> ist, und warum das der Punkt ist.**
+>
+> Dieser Absatz **beschreibt, wie das Mandat bearbeitet wird**. Er ist
+> Bestandteil des Mandatsvertrags und damit Teil dessen, was nach **Art. 6
+> Abs. 1 lit. b** zu erfüllen ist — er trägt die Rechtsgrundlage, statt sie
+> durch eine zweite zu ersetzen.
+>
+> Das **Verlangen, das Programm nicht einzusetzen**, ist bewusst **kein
+> Widerruf nach Art. 7 Abs. 3**, sondern eine vertraglich zugesagte
+> Rücksichtnahme. Der Unterschied ist nicht sprachlich: Ein Widerruf ließe die
+> Rechtsgrundlage entfallen — hier bleibt sie bestehen, und die Kanzlei schuldet
+> nur, auf das Hilfsmittel zu verzichten.
+>
+> **Was dieser Absatz nicht leistet und auch nicht leisten kann:** Für Daten
+> von Gegnern, Zeugen und Dritten gilt ohnehin Art. 6 Abs. 1 lit. f; deren
+> Einverständnis ist weder zu erlangen noch nötig.
+
+### Fassung 2 — bloßer Hinweis (ohne Vereinbarung)
 
 > **Einsatz KI-gestützter Hilfsmittel.** Die Kanzlei setzt bei der Bearbeitung
 > des Mandats ein KI-gestütztes Programm zur Auswertung der Akte ein. Die
@@ -197,7 +236,7 @@ Aufbewahrungspflichten.
 > Entscheidung bleiben bei der Kanzlei. Einzelheiten stehen in unseren
 > Datenschutzhinweisen.
 
-### Fassung 2 — Einwilligung
+### Fassung 3 — Einwilligung *(von dieser Fassung wird abgeraten)*
 
 > **Einsatz KI-gestützter Hilfsmittel.** Die Kanzlei setzt bei der Bearbeitung
 > des Mandats ein KI-gestütztes Programm zur Auswertung der Akte ein. Dazu
@@ -212,11 +251,15 @@ Aufbewahrungspflichten.
 > anwaltliche Prüfung und jede Entscheidung bleiben in jedem Fall bei der
 > Kanzlei.
 
-> **Ein technischer Hinweis zur Fassung 2.** Ein Widerruf muss im Programm
+> **Ein technischer Hinweis zur Fassung 3.** Ein Widerruf muss im Programm
 > umsetzbar sein. Umsetzbar ist er: Die Arbeitskopie einer Akte lässt sich
 > vollständig löschen, und für die Akte selbst kann die Benutzung unterbleiben.
 > **Nicht umsetzbar ist, Übermitteltes zurückzuholen** — darauf weist Teil A
 > hin. [KANZLEI 6] — ob das für eine wirksame Widerrufsmöglichkeit genügt.
+>
+> *Dieselbe Frage stellt sich bei Fassung 1 nicht in dieser Schärfe: Dort ist
+> das Verlangen auf die Zukunft gerichtet, und die Rechtsgrundlage für das
+> bereits Übermittelte bleibt bestehen.*
 
 ---
 
@@ -269,8 +312,32 @@ Was die Entwicklung dazu beitragen kann, ist nur die Tatsachenlage:
 Die Frage, ob § 203 StGB und § 43e BRAO eine Einwilligung des Mandanten
 **verlangen** oder ob die Auftragsverarbeitung mit verpflichtetem Dienstleister
 genügt, ist in der Literatur nicht einheitlich beantwortet. **Das ist eine
-Rechtsfrage und keine technische** — sie gehört zu den fünfzehn offenen Stellen
-in `DSFA-ENTWURF.md`.
+Rechtsfrage und keine technische** — sie gehört zu den offenen Stellen in
+`DSFA-ENTWURF.md`.
+
+### Warum hier von einer zusätzlichen Einwilligung abgeraten wird
+
+*Ausgearbeitet am 14.10.2026 auf den Wunsch der Kanzlei, es
+„sicherheitshalber" mit einer Einwilligung zu versehen. Der Wunsch ist
+verständlich und führt hier zum Gegenteil.*
+
+| | |
+|---|---|
+| **1. Widerruf** | Eine Einwilligung ist jederzeit widerruflich (Art. 7 Abs. 3). Der Widerruf kommt mitten im Mandat, und die Grundlage entfällt für die Zukunft. |
+| **2. Freiwilligkeit** | Wer das Mandat faktisch nur mit Einwilligung bekommt, willigt nicht freiwillig ein (Art. 7 Abs. 4, ErwG 43). Eine unfreiwillige Einwilligung ist unwirksam. |
+| **3. Kein Nachrücken** | Fällt die Einwilligung weg, darf nach verbreiteter Auffassung nicht nachträglich auf lit. b oder lit. f umgestellt werden. Wer sich nur auf sie stützt, steht dann ohne Grundlage da. |
+| **4. Dritte** | Gegner, Zeugen und Dritte können nicht einwilligen. Für sie trägt ohnehin Art. 6 Abs. 1 lit. f — die Einwilligung des Mandanten deckt sie nicht. |
+| **5. Art. 9** | Für besondere Kategorien ist **lit. f** (Rechtsansprüche) belastbarer als **lit. a** (ausdrückliche Einwilligung), weil er nicht widerruflich ist. |
+
+**Daraus Fassung 1.** Sie gibt der Mandantschaft, was die Einwilligung geben
+soll — Offenheit über den Einsatz und die Möglichkeit, ihn abzulehnen —, ohne
+die Rechtsgrundlage daran zu hängen. Der Unterschied zeigt sich erst im
+Streitfall, und dann ist er der ganze Unterschied.
+
+> **Das ist Vorarbeit und keine Rechtsberatung.** Die Einschätzung steht so
+> auch im Prüfpaket für die zweite Meinung (`PRUEFPAKET-14.10.2026.md`,
+> Abschnitt 2.4); fällt sie dort anders aus, ist dieser Abschnitt zu ändern.
+> **[KANZLEI 8]** bleibt die Entscheidung der Kanzlei.
 
 ---
 
