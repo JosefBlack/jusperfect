@@ -269,6 +269,7 @@ inhalt.push(
     t("Das von jusperfect genutzte Modell anthropic.claude-opus-4-6-v1 steht nicht auf dieser Liste. ", { bold: true }),
     t("F\u00FCr die Verarbeitung der Kanzlei gilt damit nach dem Stand vom 14.10.2026: "),
     t("keine Aufbewahrung und keine \u00DCberpr\u00FCfung.", { bold: true }),
+    t(" Die Kanzlei hat am 14.10.2026 best\u00E4tigt, dass dieses Modell im Betrieb eingestellt ist."),
   ], { spacing: { before: 120, after: 120 } }),
   p("Drei Angaben derselben Seite geh\u00F6ren dazu:", { spacing: { after: 100 } }),
   ((aktuelleListe = neueListe()), leer()),
@@ -316,8 +317,8 @@ inhalt.push(
   ], { spacing: { after: 100 } }),
   ((aktuelleListe = neueListe()), leer()),
   nr([
-    t("Welches Modell ist in START-JURNODES.bat wirklich eingetragen? ", { bold: true }),
-    t("Maßgeblich ist der Wert von JUSPERFECT_MODELL_ID, nicht die Voreinstellung des Programms. Die Oberfläche nennt das Modell unter jeder Antwort. Einmal bestätigen, dann ist der Punkt geschlossen."),
+    t("Die Liste gehört in die jährliche Durchsicht. ", { bold: true }),
+    t("Sie ist Dokumentation und kein Vertrag; AWS kann ein Modell aufnehmen, auch das genutzte. Dann änderte sich die Bewertung."),
   ]),
   nr([
     t("Zwei Hausregeln in die Einweisung: ", { bold: true }),
@@ -387,7 +388,7 @@ inhalt.push(h1("7. Anlagen"));
   "Bildschirmausdruck der Vertraulichkeitsbedingungen f\u00FCr den Abruf der SOC-Berichte \u2014 vollst\u00E4ndiger Ausdruck \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C nachzureichen",
   "Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12 (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich",
   "Bildschirmausdruck: AWS Service Terms, Abschnitt 1.24",
-  "Ausdruck der Seite \u201EAmazon Bedrock abuse detection\u201C aus dem Amazon Bedrock User Guide, mit Abrufdatum \u2014 nachzureichen",
+  "Abschrift der Seite \u201EAmazon Bedrock abuse detection\u201C aus dem Amazon Bedrock User Guide, abgerufen am 14.10.2026 \u2014 ein Ausdruck der Seite selbst ist nachzureichen",
 ].forEach((z) =>
   inhalt.push(
     new Paragraph({

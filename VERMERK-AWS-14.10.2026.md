@@ -168,7 +168,9 @@ dieser Dienste.
 
 **Das von jusperfect genutzte Modell `anthropic.claude-opus-4-6-v1` steht
 nicht auf dieser Liste.** Für die Verarbeitung der Kanzlei gilt damit nach dem
-Stand vom 14.10.2026: **keine Aufbewahrung und keine Überprüfung.**
+Stand vom 14.10.2026: **keine Aufbewahrung und keine Überprüfung.** Die
+Kanzlei hat am 14.10.2026 bestätigt, dass dieses Modell im Betrieb eingestellt
+ist.
 
 Drei Angaben derselben Seite gehören dazu:
 
@@ -216,10 +218,9 @@ Drei Angaben derselben Seite gehören dazu:
 **Drei Punkte zur Missbrauchserkennung**, nachdem die beiden Sachfragen
 geklärt sind (Abschnitt 2.5):
 
-1. **Welches Modell ist in `START-JURNODES.bat` wirklich eingetragen?**
-   Maßgeblich ist der Wert von `JUSPERFECT_MODELL_ID`, nicht die
-   Voreinstellung des Programms. Die Oberfläche nennt das Modell unter jeder
-   Antwort. Einmal bestätigen, dann ist der Punkt geschlossen.
+1. **Die Liste gehört in die jährliche Durchsicht.** Sie ist Dokumentation
+   und kein Vertrag; AWS kann ein Modell aufnehmen, auch das genutzte. Dann
+   änderte sich die Bewertung.
 2. **Zwei Hausregeln in die Einweisung:** Für Mandatsakten wird kein Modell
    verwendet, das auf der Missbrauchserkennungsseite steht, und vor jedem
    Modellwechsel wird sie angesehen. Die E-Mail-Adresse des AWS-Kontos wird
@@ -285,8 +286,9 @@ Eine gesonderte Frist wird nicht notiert.
 15. Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12
     (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich
 16. Bildschirmausdruck: AWS Service Terms, Abschnitt 1.24
-17. Ausdruck der Seite „Amazon Bedrock abuse detection" aus dem Amazon
-    Bedrock User Guide, mit Abrufdatum — nachzureichen
+17. Abschrift der Seite „Amazon Bedrock abuse detection" aus dem Amazon
+    Bedrock User Guide, abgerufen am 14.10.2026 — ein Ausdruck der Seite
+    selbst ist nachzureichen
 
 ---
 

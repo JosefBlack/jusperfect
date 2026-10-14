@@ -184,11 +184,89 @@ const seiten = [
       + "nennt die regions\u00FCbergreifende Inferenz. jusperfect nutzt keinen dieser Dienste, sondern ruft "
       + "die Bedrock-Schnittstelle unmittelbar auf.",
   },
+  {
+    wortlaut: [
+      { h: "Amazon Bedrock abuse detection" },
+      "You are responsible for your (and your end users') data input into, and content generated using, Amazon Bedrock. As part of providing the Service, Amazon Bedrock may use automated abuse detection mechanisms to detect activity that violates our, or third-party model providers', terms of service or use policies. In certain limited circumstances described below, we may also store or review model inputs or outputs. Amazon Bedrock uses a zero operator access (ZOA) data security model, subject to the model-specific abuse and CSAM detection detailed below.",
+      { h: "Model-specific abuse detection" },
+      "For abuse detection purposes related to the following models, we will store inputs and outputs as follows:",
+      { b: "For all OpenAI models other than GPT OSS Safeguard 120B, GPT OSS Safeguard 20B, gpt-oss-120b, and gpt-oss-20b, classifier-flagged traffic will be retained for up to 30 days for automated offline abuse detection. Eligible customers may request full ZDR through their AWS account team." },
+      { b: "For Anthropic Claude Fable 5 and Claude Fable 5.1, all traffic will be retained for up to 30 days for automated offline abuse detection. Classifier-flagged traffic will be subject to potential human review performed by AWS." },
+      { b: "Customers that are eligible for the Enterprise Frontier Safeguards program will receive ZDR through December 31, 2026. After ZDR ends, all traffic will be retained for up to 30 days for automated offline abuse detection. The Enterprise Frontier Safeguards program plans to enable customer-managed encryption keys and bring your own bucket for storage for automated offline abuse detection." },
+      "Retained inputs and outputs are stored and processed by AWS and are not shared with third-party model providers. For more information on data retention and related controls, see Data retention.",
+      "If cross-region inference is enabled for these models, retained inputs and outputs are stored in destination regions (i.e., the region where your inference request is processed).",
+      { h: "Child sexual abuse material (\u201CCSAM\u201D)" },
+      "To help stop the dissemination of child sexual abuse material (\u201CCSAM\u201D), Amazon Bedrock uses automated abuse detection mechanisms to detect apparent CSAM. If Amazon Bedrock detects apparent CSAM in your image inputs or outputs, Amazon Bedrock may block the request and return a ValidationException (HTTP 400) error in the API response. Amazon Bedrock may store and review the flagged input or output exclusively to determine if it is CSAM and may also file a report with the National Center for Missing and Exploited Children (NCMEC) or a relevant authority. You might be required by applicable laws to take additional actions, and you are responsible for those actions.",
+      { h: "General information" },
+      "If an abuse detection mechanism identifies potential violations, we may request information about your use of Amazon Bedrock and compliance with relevant terms and policies. These requests are sent to the email address associated with your AWS account, so ensure that your account contact information is current and monitored. AWS may suspend your access to any model or Amazon Bedrock if you fail to comply with applicable terms or policies or are non-responsive.",
+      "Contact your AWS account team or AWS Support if you have additional questions.",
+    ],
+    anlage: "Anlage 17",
+    titel: "Amazon Bedrock abuse detection \u2014 Wortlaut der Seite",
+    fuss:
+      "DIES IST EINE ABSCHRIFT UND KEIN BILDSCHIRMAUSDRUCK. Der Wortlaut ist unver\u00E4ndert \u00FCbernommen; "
+      + "Hervorhebungen, Verweise und die Gliederung der Urfassung sind nicht wiedergegeben. Ein Ausdruck der "
+      + "Seite selbst ist nachzureichen. \u2014 Das von der Kanzlei genutzte Modell "
+      + "anthropic.claude-opus-4-6-v1 ist in keiner der drei Aufz\u00E4hlungen genannt; f\u00FCr es gilt damit "
+      + "das Zero-Operator-Access-Modell.",
+    quelle:
+      "Amazon Bedrock User Guide, Abschnitt \u201EAbuse detection\u201C (Seiten 2152 f.), abgerufen am "
+      + "14.10.2026, Kanzlei Dortschy & Thunert \u2014 Anlage zum Aktenvermerk gleichen Datums. Der User Guide "
+      + "ist Dokumentation und kein Vertrag; AWS kann ihn ohne Ank\u00FCndigung \u00E4ndern.",
+  },
 ];
 
 const t = (text, opt = {}) => new TextRun({ text, ...opt });
 
 function blatt(s, erstes) {
+  const kopf = (fussText) => [
+    ...(erstes ? [] : [new Paragraph({ children: [new PageBreak()] })]),
+    new Paragraph({
+      children: [t(s.anlage, { bold: true, size: 28 })],
+      spacing: { after: 80 },
+    }),
+    new Paragraph({
+      children: [t(s.titel, { size: 24 })],
+      spacing: { after: 240 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 8, color: "999999" } },
+    }),
+  ];
+
+  // Ein Blatt kann statt einer Aufnahme auch WORTLAUT tragen. Dann ist es
+  // eine Abschrift und kein Bildschirmausdruck - und sagt das auch.
+  if (s.wortlaut) {
+    const kinder = kopf();
+    // Der Vorbehalt steht VOR dem Wortlaut: Wer liest, soll vorher wissen,
+    // was er vor sich hat.
+    kinder.push(new Paragraph({
+      children: [t(s.fuss, { size: 20, italics: true })],
+      spacing: { after: 280 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 10, color: "999999" } },
+    }));
+    s.wortlaut.forEach((z) => {
+      if (typeof z === "string") {
+        kinder.push(new Paragraph({ children: [t(z, { size: 18 })], spacing: { after: 100 } }));
+      } else if (z.h) {
+        kinder.push(new Paragraph({
+          children: [t(z.h, { size: 21, bold: true })],
+          spacing: { before: 200, after: 100 },
+        }));
+      } else if (z.b) {
+        kinder.push(new Paragraph({
+          children: [t("\u2022  " + z.b, { size: 18 })],
+          indent: { left: 340, hanging: 220 },
+          spacing: { after: 100 },
+        }));
+      }
+    });
+    kinder.push(new Paragraph({
+      children: [t(s.quelle, { size: 18, color: "666666" })],
+      spacing: { before: 240 },
+      border: { top: { style: BorderStyle.SINGLE, size: 6, space: 10, color: "999999" } },
+    }));
+    return kinder;
+  }
+
   const [bw, bh] = s.masse;
   const maxB = s.quer ? BREITE_QUER_PX : BREITE_PX;
   const maxH = s.quer ? HOEHE_QUER_PX : HOEHE_PX;
@@ -199,21 +277,9 @@ function blatt(s, erstes) {
     w = (bw / bh) * h;
   }
 
-  const kinder = [];
-  if (!erstes) {
-    kinder.push(new Paragraph({ children: [new PageBreak()] }));
-  }
+  const kinder = kopf();
 
   kinder.push(
-    new Paragraph({
-      children: [t(s.anlage, { bold: true, size: 28 })],
-      spacing: { after: 80 },
-    }),
-    new Paragraph({
-      children: [t(s.titel, { size: 24 })],
-      spacing: { after: 240 },
-      border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 8, color: "999999" } },
-    }),
     new Paragraph({
       children: [
         new ImageRun({

@@ -246,10 +246,8 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
      (`jusperfect/config.py:299`) — steht nicht darauf.** Für die Kanzlei
      wird also nichts aufbewahrt und nichts mitgelesen.
 
-   **Was die Kanzlei noch bestätigen muss, und es dauert zehn Sekunden:**
-   Welches Modell steht wirklich in `START-JURNODES.bat` bei
-   `JUSPERFECT_MODELL_ID`? Die Oberfläche nennt es auch unter jeder Antwort.
-   Stimmt es mit der Voreinstellung überein, ist der Punkt erledigt.
+   **Die Kanzlei hat das eingestellte Modell am selben Abend bestätigt:**
+   `claude-opus-4-6-v1`. Damit ist der Punkt geschlossen.
 
    **Zwei Regeln, die daraus folgen und in die Einweisung gehören:**
 
