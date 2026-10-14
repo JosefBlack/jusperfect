@@ -398,8 +398,11 @@ nachgesehen, und so sieht es wirklich aus:
    (HIPAA), die US-Wertpapieraufsicht (SEC), Japan und kostenlose
    Beratungsleistungen. **Keiner davon geht eine deutsche Kanzlei etwas an,
    und alle bleiben zu Recht inaktiv.**
-3. Der Reiter **Organisationsvereinbarungen** zeigt nahezu dieselben Zusätze
-   (am 14.10.2026 nachgesehen). Auch dort ist nichts anzunehmen.
+3. Der Reiter **Organisationsvereinbarungen** hat **fünf** Einträge, ebenfalls
+   alle auf „Inaktiv": Japan, Australien, der HIPAA-Zusatz (*Business
+   Associate Addendum*) mit seinem Gesundheitswesen-Anhang, und Neuseeland.
+   Dasselbe Bild, dieselbe Antwort: nichts anzunehmen. (Am 14.10.2026
+   nachgesehen.)
 4. **Bildschirmausdruck machen** — gerade weil nichts Passendes darauf steht.
 
 > **Warum der Auftragsverarbeitungsvertrag hier fehlt.** AWS hat den
