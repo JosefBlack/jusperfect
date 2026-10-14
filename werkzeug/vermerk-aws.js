@@ -247,6 +247,40 @@ inhalt.push(
   leer()
 );
 
+inhalt.push(
+  h2("2.5 Die Missbrauchserkennung bei Amazon Bedrock"),
+  p("Gelesen am 14.10.2026: der Abschnitt \u201EAbuse detection\u201C des Amazon Bedrock User Guide \u2014 die Seite, auf die Abschnitt 50.12.2 der Service Terms verweist \u2014 sowie Abschnitt 1.24 der Service Terms. Der User Guide ist Dokumentation und kein Vertrag; AWS kann ihn ohne Ank\u00FCndigung \u00E4ndern.", { spacing: { after: 140 } }),
+  p([
+    t("Abschnitt 1.24 betrifft die Kanzlei nicht. ", { bold: true }),
+    t("Er regelt andere AWS-Dienste mit eingebauter, von Bedrock betriebener KI-Funktion (genannt werden unter anderem CloudWatch, CodeCatalyst, Connect, Q, SageMaker, Kiro und GuardDuty). jusperfect ruft die Bedrock-Schnittstelle unmittelbar auf und nutzt keinen dieser Dienste."),
+  ], { spacing: { after: 140 } }),
+  p([t("Die Seite nennt die betroffenen Modelle namentlich:", { bold: true })], { spacing: { after: 120 } }),
+  tabelle(
+    ["Modell", "Was aufbewahrt wird"],
+    [
+      ["OpenAI-Modelle, bis auf vier genannte", "vom Klassifikator aufgefallener Verkehr, bis zu 30 Tage"],
+      ["Anthropic Claude Fable 5 und Claude Fable 5.1", "der gesamte Verkehr, bis zu 30 Tage; aufgefallener Verkehr zus\u00E4tzlich mit m\u00F6glicher menschlicher \u00DCberpr\u00FCfung durch AWS"],
+      ["alle \u00FCbrigen", "nichts; es gilt das Zero-Operator-Access-Modell"],
+    ],
+    [4000, 5354]
+  ),
+  leer(),
+  p([
+    t("Das von jusperfect genutzte Modell anthropic.claude-opus-4-6-v1 steht nicht auf dieser Liste. ", { bold: true }),
+    t("F\u00FCr die Verarbeitung der Kanzlei gilt damit nach dem Stand vom 14.10.2026: "),
+    t("keine Aufbewahrung und keine \u00DCberpr\u00FCfung.", { bold: true }),
+  ], { spacing: { before: 120, after: 120 } }),
+  p("Drei Angaben derselben Seite geh\u00F6ren dazu:", { spacing: { after: 100 } }),
+  ((aktuelleListe = neueListe()), leer()),
+  nr("W\u00FCrde ein gelistetes Modell genutzt, l\u00E4gen die aufbewahrten Daten bei regions\u00FCbergreifender Inferenz in der jeweiligen Verarbeitungsregion."),
+  nr("Die Erkennung von Darstellungen des Kindesmissbrauchs arbeitet auf Bild-Ein- und -Ausgaben. jusperfect sendet an Bedrock ausschlie\u00DFlich Text."),
+  nr("Aufbewahrtes wird nicht an die Modellanbieter weitergegeben."),
+  kasten([
+    t("Eine Betriebspflicht, die daraus folgt: ", { bold: true }),
+    t("Erkennt AWS einen m\u00F6glichen Versto\u00DF, richtet es R\u00FCckfragen an die E-Mail-Adresse des AWS-Kontos und kann den Zugang sperren, wenn keine Antwort erfolgt. Diese Adresse ist zu pflegen und zu lesen."),
+  ])
+);
+
 // ---------------------------------------------------------------- 3
 inhalt.push(
   h1("3. Was daraus folgt"),
@@ -259,9 +293,9 @@ inhalt.push(
     t("Für Amazon Bedrock", { bold: true }),
     t(" — die Verarbeitung im Sprachmodell — gilt das "),
     t("nicht aus dieser Richtlinie.", { bold: true }),
-    t(" Die Abmelderichtlinie erfasst Bedrock nicht. Dort trägt die vertragliche Schranke aus Ziffer 1.4 der Kundenvereinbarung, die durch die Service Terms bestätigt und nicht eingeschränkt wird. "),
-    t("Eine Aufbewahrung findet dort gleichwohl statt", { bold: true }),
-    t(", nach Abschnitt 50.12.2 und je nach Modell bis zu 30 Tage; das ist in Abschnitt 4 gesondert ausgewiesen."),
+    t(" Die Abmelderichtlinie erfasst Bedrock nicht. Dort trägt die vertragliche Schranke aus Ziffer 1.4 der Kundenvereinbarung, die durch die Service Terms bestätigt und nicht eingeschränkt wird. Die Aufbewahrung nach Abschnitt 50.12.2 greift für das "),
+    t("genutzte Modell nicht", { bold: true }),
+    t(" (Abschnitt 2.5); für die dort gelisteten Modelle gälte sie."),
   ]),
   nr([
     t("Die Auswahl des Auftragsverarbeiters", { bold: true }),
@@ -277,21 +311,21 @@ inhalt.push(
 inhalt.push(
   h1("4. Was offen bleibt"),
   p([
-    t("Die Missbrauchserkennung nach Abschnitt 50.12.2 der Service Terms. ", { bold: true }),
-    t("Die dort beschriebene Aufbewahrung von Ein- und Ausgaben über bis zu 30 Tage und die Möglichkeit ihrer Überprüfung betreffen Unterlagen, die dem anwaltlichen Berufsgeheimnis unterliegen. Zu klären und zu entscheiden sind drei Punkte:"),
+    t("Drei Punkte zur Missbrauchserkennung", { bold: true }),
+    t(", nachdem die beiden Sachfragen geklärt sind (Abschnitt 2.5):"),
   ], { spacing: { after: 100 } }),
   ((aktuelleListe = neueListe()), leer()),
   nr([
-    t("Steht das genutzte Modell auf der von AWS geführten Seite zur Missbrauchserkennung? ", { bold: true }),
-    t("Der Abschnitt gilt nur für die dort genannten Modelle. Die Seite ist abzurufen und mit Datum abzulegen."),
+    t("Welches Modell ist in START-JURNODES.bat wirklich eingetragen? ", { bold: true }),
+    t("Maßgeblich ist der Wert von JUSPERFECT_MODELL_ID, nicht die Voreinstellung des Programms. Die Oberfläche nennt das Modell unter jeder Antwort. Einmal bestätigen, dann ist der Punkt geschlossen."),
   ]),
   nr([
-    t("Abschnitt 1.24 der Service Terms", { bold: true }),
-    t(" — die allgemeine Bestimmung zur Missbrauchserkennung, auf die Abschnitt 50.14.2 verweist — ist zu lesen."),
+    t("Zwei Hausregeln in die Einweisung: ", { bold: true }),
+    t("Für Mandatsakten wird kein Modell verwendet, das auf der Missbrauchserkennungsseite steht, und vor jedem Modellwechsel wird sie angesehen. Die E-Mail-Adresse des AWS-Kontos wird gelesen."),
   ]),
   nr([
-    t("Die Bewertung selbst", { bold: true }),
-    t(", ob eine solche Aufbewahrung für die hier verarbeiteten Unterlagen tragbar ist und ob sie in die Hinweise nach Art. 13 DSGVO und in die Einweisung gehört."),
+    t("Die Hinweise nach Art. 13 DSGVO: ", { bold: true }),
+    t("Nach heutigem Stand ist über eine Aufbewahrung bei Bedrock nichts zu sagen. Ändert sich die Liste, ändert sich das."),
   ]),
   p("Ferner zur Vervollständigung der Ablage: die englischen Fassungen der übersetzten Stücke, die Standardvertragsklauseln und die Liste der Unterauftragsverarbeiter.", { spacing: { before: 100, after: 120 } })
 );
@@ -352,6 +386,8 @@ inhalt.push(h1("7. Anlagen"));
   "SOC Continued Operations Letter",
   "Bildschirmausdruck der Vertraulichkeitsbedingungen f\u00FCr den Abruf der SOC-Berichte \u2014 vollst\u00E4ndiger Ausdruck \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C nachzureichen",
   "Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12 (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich",
+  "Bildschirmausdruck: AWS Service Terms, Abschnitt 1.24",
+  "Ausdruck der Seite \u201EAmazon Bedrock abuse detection\u201C aus dem Amazon Bedrock User Guide, mit Abrufdatum \u2014 nachzureichen",
 ].forEach((z) =>
   inhalt.push(
     new Paragraph({
@@ -379,7 +415,7 @@ const doc = new Document({
   description: "Nachweise zum Auftragsverarbeiter Amazon Web Services",
   numbering: {
     config: [
-      ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
+      ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => ({
         reference: "liste" + i,
         levels: [{ level: 0, format: LevelFormat.DECIMAL, text: "%1.", alignment: AlignmentType.START,
           style: { paragraph: { indent: { left: 700, hanging: 340 } } } }],

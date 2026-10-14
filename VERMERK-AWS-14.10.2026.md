@@ -145,6 +145,45 @@ Aus **AWS Artifact** wurden am 14.10.2026 abgerufen:
 | System and Organization Controls (SOC) 3 Report | dasselbe Prüfurteil in weitergabefähiger Fassung |
 | SOC Continued Operations Letter | Fortgeltung der geprüften Kontrollen über den Berichtszeitraum hinaus |
 
+### 2.5 Die Missbrauchserkennung bei Amazon Bedrock
+
+*Gelesen am 14.10.2026: der Abschnitt „Abuse detection" des Amazon Bedrock
+User Guide — die Seite, auf die Abschnitt 50.12.2 der Service Terms verweist —
+sowie Abschnitt 1.24 der Service Terms. Der User Guide ist **Dokumentation und
+kein Vertrag**; AWS kann ihn ohne Ankündigung ändern.*
+
+**Abschnitt 1.24 betrifft die Kanzlei nicht.** Er regelt andere AWS-Dienste
+mit eingebauter, von Bedrock betriebener KI-Funktion (genannt werden unter
+anderem CloudWatch, CodeCatalyst, Connect, Q, SageMaker, Kiro und GuardDuty).
+jusperfect ruft die Bedrock-Schnittstelle unmittelbar auf und nutzt keinen
+dieser Dienste.
+
+**Die Seite nennt die betroffenen Modelle namentlich:**
+
+| Modell | Was aufbewahrt wird |
+|---|---|
+| OpenAI-Modelle, bis auf vier genannte | vom Klassifikator aufgefallener Verkehr, bis zu 30 Tage |
+| **Anthropic Claude Fable 5 und Claude Fable 5.1** | **der gesamte Verkehr**, bis zu 30 Tage; aufgefallener Verkehr zusätzlich mit möglicher **menschlicher Überprüfung durch AWS** |
+| alle übrigen | nichts; es gilt das **Zero-Operator-Access-Modell** |
+
+**Das von jusperfect genutzte Modell `anthropic.claude-opus-4-6-v1` steht
+nicht auf dieser Liste.** Für die Verarbeitung der Kanzlei gilt damit nach dem
+Stand vom 14.10.2026: **keine Aufbewahrung und keine Überprüfung.**
+
+Drei Angaben derselben Seite gehören dazu:
+
+1. Würde ein gelistetes Modell genutzt, lägen die aufbewahrten Daten bei
+   regionsübergreifender Inferenz in der jeweiligen Verarbeitungsregion.
+2. Die Erkennung von Darstellungen des Kindesmissbrauchs arbeitet auf
+   **Bild**-Ein- und -Ausgaben. jusperfect sendet an Bedrock ausschließlich
+   Text.
+3. Aufbewahrtes wird **nicht an die Modellanbieter weitergegeben**.
+
+> **Eine Betriebspflicht, die daraus folgt:** Erkennt AWS einen möglichen
+> Verstoß, richtet es Rückfragen an die **E-Mail-Adresse des AWS-Kontos** und
+> kann den Zugang sperren, wenn keine Antwort erfolgt. Diese Adresse ist zu
+> pflegen und zu lesen.
+
 ---
 
 ## 3. Was daraus folgt
@@ -158,9 +197,9 @@ Aus **AWS Artifact** wurden am 14.10.2026 abgerufen:
    **nicht aus dieser Richtlinie.** Die Abmelderichtlinie erfasst Bedrock
    nicht. Dort trägt die vertragliche Schranke aus Ziffer 1.4 der
    Kundenvereinbarung, die durch die Service Terms bestätigt und nicht
-   eingeschränkt wird. **Eine Aufbewahrung findet dort gleichwohl statt**,
-   nach Abschnitt 50.12.2 und je nach Modell bis zu 30 Tage; das ist in
-   Abschnitt 4 gesondert ausgewiesen.
+   eingeschränkt wird. Die Aufbewahrung nach Abschnitt 50.12.2 greift für das
+   **genutzte Modell nicht** (Abschnitt 2.5); für die dort gelisteten Modelle
+   gälte sie.
 3. **Die Auswahl des Auftragsverarbeiters** ist mit den unter 2.4 genannten
    Nachweisen belegbar. Die Bewertung, ob sie die Anforderungen des
    § 43e Abs. 2 BRAO tragen, bleibt der Kanzlei vorbehalten.
@@ -174,19 +213,20 @@ Aus **AWS Artifact** wurden am 14.10.2026 abgerufen:
 
 ## 4. Was offen bleibt
 
-**Die Missbrauchserkennung nach Abschnitt 50.12.2 der Service Terms.** Die
-dort beschriebene Aufbewahrung von Ein- und Ausgaben über bis zu 30 Tage und
-die Möglichkeit ihrer Überprüfung betreffen Unterlagen, die dem anwaltlichen
-Berufsgeheimnis unterliegen. Zu klären und zu entscheiden sind drei Punkte:
+**Drei Punkte zur Missbrauchserkennung**, nachdem die beiden Sachfragen
+geklärt sind (Abschnitt 2.5):
 
-1. **Steht das genutzte Modell auf der von AWS geführten Seite zur
-   Missbrauchserkennung?** Der Abschnitt gilt nur für die dort genannten
-   Modelle. Die Seite ist abzurufen und mit Datum abzulegen.
-2. **Abschnitt 1.24 der Service Terms** — die allgemeine Bestimmung zur
-   Missbrauchserkennung, auf die Abschnitt 50.14.2 verweist — ist zu lesen.
-3. **Die Bewertung selbst**, ob eine solche Aufbewahrung für die hier
-   verarbeiteten Unterlagen tragbar ist und ob sie in die Hinweise nach
-   Art. 13 DSGVO und in die Einweisung gehört.
+1. **Welches Modell ist in `START-JURNODES.bat` wirklich eingetragen?**
+   Maßgeblich ist der Wert von `JUSPERFECT_MODELL_ID`, nicht die
+   Voreinstellung des Programms. Die Oberfläche nennt das Modell unter jeder
+   Antwort. Einmal bestätigen, dann ist der Punkt geschlossen.
+2. **Zwei Hausregeln in die Einweisung:** Für Mandatsakten wird kein Modell
+   verwendet, das auf der Missbrauchserkennungsseite steht, und vor jedem
+   Modellwechsel wird sie angesehen. Die E-Mail-Adresse des AWS-Kontos wird
+   gelesen.
+3. **Die Hinweise nach Art. 13 DSGVO:** Nach heutigem Stand ist über eine
+   Aufbewahrung bei Bedrock nichts zu sagen. Ändert sich die Liste, ändert
+   sich das.
 
 Ferner zur Vervollständigung der Ablage: die englischen Fassungen der
 übersetzten Stücke, die Standardvertragsklauseln und die Liste der
@@ -244,6 +284,9 @@ Eine gesonderte Frist wird nicht notiert.
     „Bedingungen ausdrucken“ nachzureichen
 15. Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12
     (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich
+16. Bildschirmausdruck: AWS Service Terms, Abschnitt 1.24
+17. Ausdruck der Seite „Amazon Bedrock abuse detection" aus dem Amazon
+    Bedrock User Guide, mit Abrufdatum — nachzureichen
 
 ---
 

@@ -172,6 +172,18 @@ const seiten = [
       "\u201Em\u00F6glichen menschlichen \u00DCberpr\u00FCfung von Eingaben und Ausgaben\u201C durch die " +
       "Missbrauchserkennungsmechanismen von Amazon Bedrock. Abschnitt 1.24 liegt noch nicht vor.",
   },
+  {
+    datei: "24.png",
+    masse: [590, 550],
+    anlage: "Anlage 16",
+    titel: "AWS Service Terms, Abschnitt 1.24",
+    fuss:
+      "Abschnitt 1.24 regelt AWS-Dienste mit eingebauter, von Amazon Bedrock betriebener KI-Funktion "
+      + "(CloudWatch, CodeCatalyst, Connect, Q, SageMaker, Kiro, GuardDuty und weitere). 1.24.1 erkl\u00E4rt "
+      + "die Missbrauchserkennungsmechanismen von Bedrock f\u00FCr diese Dienste f\u00FCr anwendbar, 1.24.2 "
+      + "nennt die regions\u00FCbergreifende Inferenz. jusperfect nutzt keinen dieser Dienste, sondern ruft "
+      + "die Bedrock-Schnittstelle unmittelbar auf.",
+  },
 ];
 
 const t = (text, opt = {}) => new TextRun({ text, ...opt });

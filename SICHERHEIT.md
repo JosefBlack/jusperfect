@@ -530,9 +530,12 @@ Kanzlei und keine des Programms.
   und der **Datenschutzhinweis** (18.05.2026 — gilt ausdrücklich **nicht** für Akteninhalt, nur für
   Account-Informationen). Dazu am selben Tag die **AWS Service Terms** (Stand 15.09.2026), Abschnitt 50.12
   zu Amazon Bedrock: **keine Erlaubnis zu Training oder Serviceverbesserung** — die Schranke aus Ziffer 1.4
-  der Kundenvereinbarung bleibt unangetastet. **Neu und zu bewerten** ist dagegen 50.12.2: Je nach Modell
-  speichert Bedrock Ein- und Ausgaben **bis zu 30 Tage** zur Missbrauchserkennung und überprüft sie im
-  Verdachtsfall (`DSFA-ENTWURF.md` `[KANZLEI 22]`). Dazu Dokumentation der Dienstleisterauswahl nach
+  der Kundenvereinbarung bleibt unangetastet. Zu 50.12.2 (Missbrauchserkennung) ist am selben Tag die
+  von AWS geführte Modellliste gelesen worden: Aufbewahrt wird nur für namentlich genannte Modelle —
+  **das voreingestellte `anthropic.claude-opus-4-6-v1` steht nicht darauf**, es gilt dort das
+  Zero-Operator-Access-Modell. **Hausregel daraus:** Für Mandatsakten wird kein gelistetes Modell
+  verwendet (heute: Claude Fable 5 und 5.1, die meisten OpenAI-Modelle); vor jedem Modellwechsel wird
+  die Seite angesehen. Sie ist Dokumentation und ändert sich (`DSFA-ENTWURF.md` `[KANZLEI 22]`). Dazu Dokumentation der Dienstleisterauswahl nach
   § 43e BRAO
   mit Verschwiegenheitsverpflichtung in Textform.
 - Datenschutz-Folgenabschätzung nach Art. 35 DSGVO (Gesundheitsdaten in Unfall- und RSV-Akten,

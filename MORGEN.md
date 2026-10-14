@@ -229,6 +229,39 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    > Bedingungen mit. `JUSPERFECT_MODELL` zu ändern ist damit keine rein
    > technische Einstellung.
 
+9. **Eine halbe Stunde später: die Missbrauchserkennungsseite und Abschnitt
+   1.24 sind gelesen. `[KANZLEI 22]` ist fast geschlossen — und die Antwort
+   ist besser als befürchtet.**
+
+   * **Abschnitt 1.24 betrifft uns nicht.** Er regelt *andere* AWS-Dienste
+     mit eingebauter Bedrock-Funktion (CloudWatch, CodeCatalyst, Connect, Q,
+     SageMaker, Kiro, GuardDuty und weitere). jusperfect ruft die
+     Schnittstelle unmittelbar auf.
+   * **Die Seite nennt die betroffenen Modelle namentlich:** die meisten
+     OpenAI-Modelle (nur aufgefallener Verkehr) und **Claude Fable 5 und
+     5.1** (*aller* Verkehr, 30 Tage, aufgefallener mit möglicher
+     **menschlicher** Durchsicht). Für alle übrigen gilt das
+     **Zero-Operator-Access-Modell**: nichts wird aufbewahrt.
+   * **Das Modell von jusperfect — `anthropic.claude-opus-4-6-v1`
+     (`jusperfect/config.py:299`) — steht nicht darauf.** Für die Kanzlei
+     wird also nichts aufbewahrt und nichts mitgelesen.
+
+   **Was die Kanzlei noch bestätigen muss, und es dauert zehn Sekunden:**
+   Welches Modell steht wirklich in `START-JURNODES.bat` bei
+   `JUSPERFECT_MODELL_ID`? Die Oberfläche nennt es auch unter jeder Antwort.
+   Stimmt es mit der Voreinstellung überein, ist der Punkt erledigt.
+
+   **Zwei Regeln, die daraus folgen und in die Einweisung gehören:**
+
+   1. **Für Mandatsakten wird kein Modell verwendet, das auf dieser Seite
+      steht** — und vor jedem Modellwechsel wird sie angesehen. Die Liste
+      ist Dokumentation und ändert sich; sie gehört in die jährliche
+      Durchsicht.
+   2. **Die E-Mail-Adresse des AWS-Kontos muss gelesen werden.** Erkennt AWS
+      einen möglichen Verstoß, fragt es dort nach — und kann den Zugang
+      sperren, wenn niemand antwortet. Eine unbeantwortete Rückfrage brächte
+      jusperfect zum Stillstand.
+
 ### Woran der nächste Schritt hängt
 
 Nicht am Programm, sondern an zwei Auskünften: dem Wortlaut der jur\|nodes-

@@ -72,7 +72,7 @@ Risikobewertung gebraucht wird.
 |---|---|---|
 | Dokumente lesen | nichts | — |
 | Gescannte Seite erkennen | **ein Bild je Seite** | AWS Textract, Frankfurt. Verarbeitet; **weder gespeichert noch zur Verbesserung der AWS-KI-Dienste verwendet** — wirksame Abmelderichtlinie seit 14.10.2026, siehe `[KANZLEI 19]` |
-| Frage, Analyse, Entwurf | **die ausgewählten Passagen** als Text | AWS Bedrock, Frankfurt, über das EU-Inferenzprofil. **Nicht zum Training verwendet** (Service Terms 50.12, Stand 15.09.2026); **aber je nach Modell bis zu 30 Tage zur Missbrauchserkennung gespeichert** — siehe `[KANZLEI 22]` |
+| Frage, Analyse, Entwurf | **die ausgewählten Passagen** als Text | AWS Bedrock, Frankfurt, über das EU-Inferenzprofil. **Nicht zum Training verwendet** (Service Terms 50.12, Stand 15.09.2026) und für das genutzte Modell **auch nicht zur Missbrauchserkennung aufbewahrt** — anders als bei den namentlich gelisteten Modellen, siehe `[KANZLEI 22]` |
 | Schutzgeländer | **Frage und Antwort**, nicht der Akteninhalt | `eu.guardrail.v1:0`, verteilt auf europäische Regionen |
 | Aktengedächtnis sichern | **Dokumenttexte und Abgeleitetes** | S3-Bucket der Kanzlei, Frankfurt, SSE-KMS |
 | Vermerk zurückschreiben | **nur der freigegebene Text** | jur\|nodes |
@@ -611,28 +611,80 @@ kein Werkzeug ist: Sie hat dort nichts, woran sie greifen könnte.
 > geprüft sind. Die Modellwahl ist deshalb keine rein technische Einstellung.
 > `JUSPERFECT_MODELL` zu ändern ist eine Entscheidung mit Rechtsfolgen.
 
-**[KANZLEI 22] — die Missbrauchserkennung nach 50.12.2.** Sie ist neu, sie ist
-belegt, und sie betrifft den Kern: eine **Speicherung von Akteninhalt bis zu 30
-Tagen** und eine **Überprüfung durch AWS** im Verdachtsfall. Dass der Abschnitt
-zur Nachbarbestimmung über Kiro (50.14.2) ausdrücklich von „möglicher
-**menschlicher** Überprüfung von Eingaben und Ausgaben" spricht, lässt die
-Möglichkeit offen, dass auch hier Menschen lesen. Für Unterlagen unter § 203
-StGB ist das zu bewerten und nicht zu übergehen.
+**[KANZLEI 22] — die Missbrauchserkennung nach 50.12.2.** Die beiden offenen
+Fragen dazu sind am 14.10.2026 beantwortet worden; siehe den nächsten
+Abschnitt. Übrig bleibt eine Bestätigung und eine Hausregel.
 
-Drei Dinge sind dafür zu beschaffen oder zu entscheiden:
+#### Die Missbrauchserkennungsseite und Abschnitt 1.24
 
-1. **Steht das von der Kanzlei genutzte Modell auf der
-   Bedrock-Missbrauchserkennungsseite?** Der Abschnitt gilt nur „für
-   bestimmte, auf der Missbrauchserkennungsseite genannte Modelle". Steht das
-   Modell nicht darauf, entfällt die Speicherung. Die Seite ist abzurufen und
-   mit Datum abzulegen — sie ist von hier aus nicht erreichbar.
-2. **Abschnitt 1.24 der Service Terms** ist zu lesen. Die Bestimmung zu Kiro
-   verweist auf ihn als allgemeine Regel zur Missbrauchserkennung; er liegt
-   nicht vor.
-3. **Die Bewertung selbst:** ob eine Aufbewahrung von bis zu 30 Tagen zu
-   diesem Zweck, mit der Möglichkeit der Überprüfung, für die hier
-   verarbeiteten Unterlagen tragbar ist — und ob sie in die Hinweise nach
-   Art. 13 DSGVO und in die Einweisung gehört.
+*Amazon Bedrock User Guide, Abschnitt „Abuse detection", und AWS Service
+Terms Abschnitt 1.24; beide am 14.10.2026 gelesen. Der User Guide ist
+**Dokumentation und kein Vertrag** — AWS kann ihn ohne Ankündigung ändern.
+Gerade deshalb gehört er mit Abrufdatum in die Akte.*
+
+**Erstens: Abschnitt 1.24 betrifft die Kanzlei nicht.** Er regelt *andere*
+AWS-Dienste, die eine von Bedrock betriebene KI-Funktion eingebaut haben —
+genannt werden unter anderem CloudWatch, CodeCatalyst, Connect, Q, SageMaker,
+WorkSpaces, Kiro, GuardDuty. jusperfect ruft die Bedrock-Schnittstelle
+**unmittelbar** auf und nutzt keinen dieser Dienste. Die Frage ist damit
+erledigt.
+
+**Zweitens, und das ist der Befund dieses Tages:** Die Seite nennt die Modelle
+namentlich, für die gespeichert wird.
+
+| Modell | Was gespeichert wird |
+|---|---|
+| OpenAI-Modelle (bis auf vier genannte) | vom Klassifikator aufgefallener Verkehr, bis zu 30 Tage |
+| **Anthropic Claude Fable 5 und Claude Fable 5.1** | **der gesamte Verkehr**, bis zu 30 Tage; aufgefallener Verkehr zusätzlich mit **möglicher menschlicher Überprüfung durch AWS** |
+| alle übrigen | nichts — es gilt das **Zero-Operator-Access-Modell** (ZOA) |
+
+**Das voreingestellte Modell von jusperfect ist
+`anthropic.claude-opus-4-6-v1`** (`jusperfect/config.py:299`), als
+EU-Inferenzprofil `eu.anthropic.claude-opus-4-6-v1`. **Es steht nicht auf der
+Liste.** Für die Kanzlei gilt damit nach heutigem Stand der Seite: **keine
+Aufbewahrung, kein Mitlesen** — es greift das Zero-Operator-Access-Modell.
+
+> **Zwei Vorbehalte, ohne die dieser Satz zu viel sagt.**
+>
+> 1. Maßgeblich ist das Modell, das in `START-JURNODES.bat` wirklich
+>    eingetragen ist (`JUSPERFECT_MODELL_ID`), nicht die Voreinstellung. Die
+>    Oberfläche nennt es unter jeder Antwort. **Die Kanzlei bestätigt es
+>    einmal**; dann ist dieser Punkt geschlossen.
+> 2. **Die Liste ist Dokumentation und ändert sich.** Ein Modell kann
+>    hinzukommen, auch das heute genutzte. Sie gehört deshalb in die
+>    jährliche Durchsicht dieser Unterlage.
+
+**Daraus folgt eine Hausregel, die in die Einweisung gehört:** Für
+Mandatsakten wird **kein Modell verwendet, das auf dieser Seite steht** — und
+vor jedem Modellwechsel wird sie angesehen. Ein Wechsel auf Claude Fable 5
+oder 5.1 hieße nach heutigem Stand: *aller* Verkehr dreißig Tage bei AWS,
+aufgefallener mit menschlicher Durchsicht. Das ist keine Einstellung, die man
+nebenbei ändert (dazu schon oben zu 50.12.1).
+
+**Drei weitere Angaben der Seite, die hierhergehören:**
+
+1. **Regionsübergreifende Inferenz:** Würde ein gelistetes Modell genutzt,
+   lägen die aufbewahrten Ein- und Ausgaben „in den Zielregionen" — also dort,
+   wo die Anfrage verarbeitet wurde. Das `eu.`-Profil verteilt auf mehrere
+   europäische Regionen (R5). Für das heute genutzte Modell ist das
+   gegenstandslos, weil nichts aufbewahrt wird.
+2. **CSAM-Erkennung:** Sie arbeitet auf **Bild**-Ein- und -Ausgaben. jusperfect
+   sendet an Bedrock ausschließlich Text; gescannte Seiten gehen an Textract
+   und nicht an Bedrock. Sie greift hier also nicht.
+3. **Aufbewahrtes wird nicht an die Modellanbieter weitergegeben**, sondern
+   allein von AWS gespeichert und verarbeitet.
+
+> **Eine Pflicht, die nicht nach Datenschutz aussieht und den Betrieb trifft:**
+> Erkennt AWS einen möglichen Verstoß, fragt es per E-Mail an die
+> **Kontoadresse** nach — und kann den Zugang sperren, wenn niemand antwortet.
+> Diese Adresse muss also gepflegt und gelesen werden. Eine unbeantwortete
+> Rückfrage könnte jusperfect zum Stillstand bringen.
+
+**[KANZLEI 22] — was noch bleibt:** die Bestätigung des wirklich eingetragenen
+Modells, die Aufnahme der Hausregel in die Einweisung, und die Entscheidung,
+ob der Umstand in die Hinweise nach Art. 13 DSGVO gehört. Nach heutigem Stand
+ist dort **nichts über eine Aufbewahrung bei Bedrock zu sagen** — das kann
+sich mit der Liste ändern.
 
 > **Was das für Abschnitt 2.1 und für `[KANZLEI 20]` heißt.** Die
 > Mengenbegrenzung bleibt die wirksamste Maßnahme in der Hand des Bearbeiters
@@ -867,7 +919,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | ~~19~~ | ~~Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen~~ **Eingelöst am 14.10.2026, 17:11 MESZ — Nachweis in der Datenschutzakte** | R6 |
 | ~~20~~ | ~~Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt?~~ **Entschieden am 14.10.2026: ja, es bleibt dabei** | 2.4 |
 | ~~21~~ | ~~Einschlägigen Abschnitt der AWS Service Terms zu Amazon Bedrock beschaffen~~ **Beschafft und gelesen am 14.10.2026: keine Abweichung von Ziffer 1.4, kein Training** | R4 |
-| 22 | Missbrauchserkennung nach 50.12.2: Modellliste abrufen, Abschnitt 1.24 lesen, Aufbewahrung von bis zu 30 Tagen bewerten | R4 |
+| 22 | Missbrauchserkennung nach 50.12.2: **Modellliste und Abschnitt 1.24 am 14.10.2026 geklärt — das genutzte Modell ist nicht gelistet.** Bleibt: das eingetragene Modell bestätigen, Hausregel in die Einweisung, Art.-13-Hinweise | R4 |
 
 ---
 

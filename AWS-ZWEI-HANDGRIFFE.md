@@ -301,9 +301,11 @@ Erstellt ist nicht wirksam. Sie muss an das Konto gehängt werden.
 
 Wenn Schritt 1a nicht in Frage kommt oder die Konsole etwas anderes zeigt als
 hier beschrieben, geht es auch über ein Support-Ticket. Dieser Text ist dafür
-fertig. **Punkt 3 steht auch dann an, wenn die Handgriffe geglückt sind** —
-er betrifft die Missbrauchserkennung bei Bedrock, die von der
-Abmelderichtlinie nicht erfasst wird (`DSFA-ENTWURF.md` `[KANZLEI 22]`).
+fertig. **Punkt 3 steht auch dann an, wenn die Handgriffe geglückt sind.** Er
+betrifft die Missbrauchserkennung bei Bedrock, die von der Abmelderichtlinie
+nicht erfasst wird. Die Antwort ist am 14.10.2026 aus der Dokumentation
+gewonnen worden (`DSFA-ENTWURF.md` `[KANZLEI 22]`); eine Bestätigung aus
+dem Support ist mehr wert, weil Dokumentation sich ohne Ankündigung ändert.
 
 > **Eine Hausregel, bevor Sie etwas an AWS schicken.** Nach Ziffer 6.5 der
 > AWS-Kundenvereinbarung überträgt ein **Vorschlag** an AWS — eine Anregung,
@@ -326,11 +328,13 @@ Abmelderichtlinie nicht erfasst wird (`DSFA-ENTWURF.md` `[KANZLEI 22]`).
 >    Organisation angehört?
 >
 > 3. Zu Abschnitt 50.12.2 der Service Terms (Erkennung von Missbrauch):
->    Gehört das Modell, das wir über Amazon Bedrock in der Region Frankfurt
->    nutzen, zu den dort genannten Modellen, für die Ein- und Ausgaben bis zu
->    30 Tage gespeichert werden? Falls ja: Wo werden sie gespeichert, wer
->    kann sie im Verdachtsfall einsehen, und lässt sich die Speicherung für
->    unser Konto abstellen?
+>    Wir nutzen über Amazon Bedrock in der Region Frankfurt das Modell
+>    `anthropic.claude-opus-4-6-v1` über das EU-Inferenzprofil. Nach der von
+>    Ihnen geführten Seite zur Missbrauchserkennung gehört es nicht zu den
+>    Modellen, für die Ein- und Ausgaben aufbewahrt werden; es gilt das
+>    Zero-Operator-Access-Modell. Bitte bestätigen Sie das für unser Konto —
+>    und teilen Sie uns mit, auf welchem Weg wir erfahren, wenn sich diese
+>    Einordnung ändert.
 >
 > Hintergrund ist eine Datenschutz-Folgenabschätzung nach Art. 35 DSGVO. Wir
 > verarbeiten mit Amazon Textract und Amazon Bedrock Unterlagen, die dem
