@@ -249,7 +249,9 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    **Die Kanzlei hat das eingestellte Modell am selben Abend bestätigt:**
    `claude-opus-4-6-v1`. Damit ist der Punkt geschlossen.
 
-   **Zwei Regeln, die daraus folgen und in die Einweisung gehören:**
+   **Zwei Regeln folgen daraus. Sie stehen seit dem 14.10.2026 in
+   `EINWEISUNG.md`**, dem ersten Blatt dieser Art — als Word-Datei und als
+   PDF, mit Zeilen zum Eintragen und zum Unterschreiben:
 
    1. **Für Mandatsakten wird kein Modell verwendet, das auf dieser Seite
       steht** — und vor jedem Modellwechsel wird sie angesehen. Die Liste
@@ -259,6 +261,11 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
       einen möglichen Verstoß, fragt es dort nach — und kann den Zugang
       sperren, wenn niemand antwortet. Eine unbeantwortete Rückfrage brächte
       jusperfect zum Stillstand.
+
+   **Zu tun bleibt der Kanzlei:** die Adresse und die zuständige Person
+   eintragen, in der AWS-Konsole nachsehen, dass genau diese Adresse
+   hinterlegt ist, und beide unterschreiben. Das Blatt nennt selbst, was ihm
+   noch fehlt — die Auswahl im Dokumentfenster als Datenminimierung.
 
 ### Woran der nächste Schritt hängt
 

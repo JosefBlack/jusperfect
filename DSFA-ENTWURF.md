@@ -680,9 +680,10 @@ nebenbei ändert (dazu schon oben zu 50.12.1).
 > Diese Adresse muss also gepflegt und gelesen werden. Eine unbeantwortete
 > Rückfrage könnte jusperfect zum Stillstand bringen.
 
-**[KANZLEI 22] — was noch bleibt:** die Aufnahme der beiden Hausregeln in die
-Einweisung und die Entscheidung, ob der Umstand in die Hinweise nach Art. 13
-DSGVO gehört. Nach heutigem Stand ist dort **nichts über eine Aufbewahrung bei
+**[KANZLEI 22] — was noch bleibt:** die Entscheidung, ob der Umstand in die
+Hinweise nach Art. 13 DSGVO gehört. **Die beiden Hausregeln sind am 14.10.2026
+in `EINWEISUNG.md` aufgenommen worden** und warten dort nur noch auf die
+Kenntnisnahme. Nach heutigem Stand ist dort **nichts über eine Aufbewahrung bei
 Bedrock zu sagen** — das kann sich mit der Liste ändern, und deshalb gehört
 sie in die jährliche Durchsicht.
 
@@ -919,7 +920,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | ~~19~~ | ~~Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen~~ **Eingelöst am 14.10.2026, 17:11 MESZ — Nachweis in der Datenschutzakte** | R6 |
 | ~~20~~ | ~~Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt?~~ **Entschieden am 14.10.2026: ja, es bleibt dabei** | 2.4 |
 | ~~21~~ | ~~Einschlägigen Abschnitt der AWS Service Terms zu Amazon Bedrock beschaffen~~ **Beschafft und gelesen am 14.10.2026: keine Abweichung von Ziffer 1.4, kein Training** | R4 |
-| 22 | Missbrauchserkennung nach 50.12.2: **am 14.10.2026 geklärt — Abschnitt 1.24 betrifft uns nicht, das eingestellte Modell `claude-opus-4-6-v1` ist nicht gelistet.** Bleibt: zwei Hausregeln in die Einweisung, Art.-13-Hinweise, jährliche Durchsicht der Liste | R4 |
+| 22 | Missbrauchserkennung nach 50.12.2: **am 14.10.2026 geklärt — Abschnitt 1.24 betrifft uns nicht, das eingestellte Modell `claude-opus-4-6-v1` ist nicht gelistet; die beiden Hausregeln stehen in `EINWEISUNG.md`.** Bleibt: Art.-13-Hinweise und die jährliche Durchsicht der Liste | R4 |
 
 ---
 
