@@ -205,7 +205,9 @@ Eine gesonderte Frist wird nicht notiert.
 11. SOC 2 Report, Typ 2, Berichtszeitraum 01.04.2025 – 31.03.2026
 12. SOC 3 Report
 13. SOC Continued Operations Letter
-14. Ausdruck der Vertraulichkeitsbedingungen für den Abruf der SOC-Berichte
+14. Bildschirmausdruck der Vertraulichkeitsbedingungen für den Abruf der
+    SOC-Berichte — vollständiger Ausdruck über die Schaltfläche
+    „Bedingungen ausdrucken“ nachzureichen
 
 ---
 

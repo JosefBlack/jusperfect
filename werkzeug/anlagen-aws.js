@@ -110,6 +110,18 @@ const seiten = [
     titel: "Organisationsvereinbarungen in AWS Artifact (Blatt 3 von 3)",
     fuss: "Fortsetzung der Liste.",
   },
+  {
+    datei: "11.png",
+    masse: [817, 828],
+    anlage: "Anlage 14",
+    titel: "Vertraulichkeitsbedingungen f\u00FCr den Abruf der SOC-Berichte",
+    fuss:
+      "Der Dialog \u201EBedingungen zum Herunterladen des Berichts akzeptieren\u201C, wie er beim Abruf des " +
+      "ersten SOC-Berichts angezeigt wurde. Ob der sichtbare Text vollst\u00E4ndig ist, l\u00E4sst sich " +
+      "an der Aufnahme nicht abschlie\u00DFend feststellen (Bildlaufleiste rechts). Der ma\u00DFgebliche " +
+      "Wortlaut ist \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C zu beziehen und " +
+      "dieser Anlage nachzureichen.",
+  },
 ];
 
 const t = (text, opt = {}) => new TextRun({ text, ...opt });
@@ -169,8 +181,15 @@ function blatt(s, erstes) {
   return kinder;
 }
 
-const hoch = seiten.filter((s) => !s.quer);
-const quer = seiten.filter((s) => s.quer);
+// Die Abschnitte folgen der Reihenfolge der Anlagen; ein neuer Abschnitt
+// beginnt, sobald sich die Blattlage aendert. Sortiert man stattdessen nach
+// Lage, stuenden die Anlagen in falscher Folge.
+const gruppen = [];
+seiten.forEach((s) => {
+  const letzte = gruppen[gruppen.length - 1];
+  if (letzte && !!letzte.quer === !!s.quer) letzte.seiten.push(s);
+  else gruppen.push({ quer: !!s.quer, seiten: [s] });
+});
 
 const doc = new Document({
   creator: "Kanzlei Dortschy & Thunert",
@@ -181,30 +200,21 @@ const doc = new Document({
       document: { run: { font: SCHRIFT, size: 22 }, paragraph: { spacing: { line: 276 } } },
     },
   },
-  sections: [
-    {
-      properties: {
-        page: {
-          size: { width: 11906, height: 16838 },
-          margin: { top: 1134, right: 1134, bottom: 1134, left: 1134 },
-        },
+  sections: gruppen.map((g) => ({
+    properties: {
+      page: {
+        // Immer die Hoch-Masse angeben; die Kennzeichnung dreht das Blatt.
+        size: g.quer
+          ? { width: 11906, height: 16838, orientation: PageOrientation.LANDSCAPE }
+          : { width: 11906, height: 16838 },
+        margin: { top: 1134, right: 1134, bottom: 1134, left: 1134 },
       },
-      children: hoch.flatMap((s, i) => blatt(s, i === 0)),
     },
-    {
-      properties: {
-        page: {
-          // Hoch-Masse angeben; die Kennzeichnung dreht das Blatt.
-          size: { width: 11906, height: 16838, orientation: PageOrientation.LANDSCAPE },
-          margin: { top: 1134, right: 1134, bottom: 1134, left: 1134 },
-        },
-      },
-      children: quer.flatMap((s, i) => blatt(s, i === 0)),
-    },
-  ],
+    children: g.seiten.flatMap((s, i) => blatt(s, i === 0)),
+  })),
 });
 
 Packer.toBuffer(doc).then((buf) => {
   fs.writeFileSync(ausgabe, buf);
-  console.log("geschrieben:", ausgabe, "-", hoch.length, "hoch,", quer.length, "quer");
+  console.log("geschrieben:", ausgabe, "-", seiten.length, "Seiten in", gruppen.length, "Abschnitten");
 });

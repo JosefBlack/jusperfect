@@ -318,7 +318,7 @@ inhalt.push(h1("7. Anlagen"));
   "SOC 2 Report, Typ 2, Berichtszeitraum 01.04.2025 – 31.03.2026",
   "SOC 3 Report",
   "SOC Continued Operations Letter",
-  "Ausdruck der Vertraulichkeitsbedingungen für den Abruf der SOC-Berichte",
+  "Bildschirmausdruck der Vertraulichkeitsbedingungen f\u00FCr den Abruf der SOC-Berichte \u2014 vollst\u00E4ndiger Ausdruck \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C nachzureichen",
 ].forEach((z) =>
   inhalt.push(
     new Paragraph({
@@ -334,9 +334,9 @@ inhalt.push(
   new Paragraph({
     children: [],
     border: { bottom: { style: BorderStyle.SINGLE, size: 6, space: 8, color: "999999" } },
-    spacing: { before: 280, after: 280 },
+    spacing: { before: 200, after: 200 },
   }),
-  p("Ort, Datum ........................................", { spacing: { after: 280 }, keepNext: true }),
+  p("Ort, Datum ........................................", { spacing: { after: 240 }, keepNext: true }),
   p("Unterschrift ........................................", { spacing: { after: 120 } })
 );
 
