@@ -287,7 +287,16 @@ Erstellt ist nicht wirksam. Sie muss an das Konto gehängt werden.
 Wenn Schritt 1a nicht in Frage kommt oder die Konsole etwas anderes zeigt als
 hier beschrieben, geht es auch über ein Support-Ticket. Dieser Text ist dafür
 fertig. **Punkt 3 steht auch dann an, wenn die Handgriffe geglückt sind** —
-er betrifft Bedrock und wird von der Abmelderichtlinie nicht beantwortet:
+er betrifft Bedrock und wird von der Abmelderichtlinie nicht beantwortet.
+
+> **Eine Hausregel, bevor Sie etwas an AWS schicken.** Nach Ziffer 6.5 der
+> AWS-Kundenvereinbarung überträgt ein **Vorschlag** an AWS — eine Anregung,
+> ein Verbesserungswunsch, eine Fehlermeldung mit Beispiel — AWS
+> unwiderruflich sämtliche Rechte daran, „ohne jegliche Beschränkung". In eine
+> Support-Anfrage gehört deshalb **nie Akteninhalt**: kein Ausschnitt, kein
+> anonymisiertes Beispiel, kein Bildschirmfoto mit Text. Der Text unten ist
+> danach gebaut — er nennt nur Kontonummer, Dienste und den Rechtsgrund.
+
 
 > Sehr geehrte Damen und Herren,
 >
@@ -302,11 +311,12 @@ er betrifft Bedrock und wird von der Abmelderichtlinie nicht beantwortet:
 >
 > 3. Ist Amazon Bedrock von dieser Richtlinienart erfasst? Falls nein: Bitte
 >    nennen Sie uns den einschlägigen Abschnitt der **AWS Service Terms** zu
->    Amazon Bedrock in der heute geltenden Fassung. Das Data Processing
->    Addendum enthält dazu nichts und lässt die Service Terms in seinem
->    Abschnitt 16 ausdrücklich vorgehen. Wir benötigen die Aussage, ob Inhalte,
->    die wir an Bedrock senden, zur Entwicklung oder Verbesserung der Dienste
->    verwendet werden, und wie lange sie zu anderen Zwecken aufbewahrt werden.
+>    Amazon Bedrock in der heute geltenden Fassung. Ziffer 1.4 der
+>    Kundenvereinbarung schließt eine Nutzung über die Erbringung der Services
+>    hinaus aus; da die Service Terms der Kundenvereinbarung (Ziffer 11.2) und
+>    dem Data Processing Addendum (Abschnitt 16) vorgehen, benötigen wir die
+>    Bestätigung, dass sie davon für Bedrock nicht abweichen — und wie lange
+>    Eingaben und Ausgaben zu anderen Zwecken aufbewahrt werden.
 >
 > Hintergrund ist eine Datenschutz-Folgenabschätzung nach Art. 35 DSGVO. Wir
 > verarbeiten mit Amazon Textract und Amazon Bedrock Unterlagen, die dem

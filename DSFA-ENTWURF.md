@@ -398,10 +398,10 @@ des § 203 Abs. 3 StGB und des § 43e BRAO.
 
 | Maßnahme | Stand |
 |---|---|
-| AV-Vertrag | liegt vor: **AWS Data Processing Addendum** — siehe unten; `[KANZLEI 8]` nur noch für Fassung und Ablage |
+| AV-Vertrag und Hauptvertrag | liegen vor: **AWS Data Processing Addendum**, **AWS-Kundenvereinbarung** (01.06.2026), **AWS-Datenschutzhinweis** (18.05.2026) — alle drei unten gelesen; `[KANZLEI 8]` nur noch für Ablage |
 | Verpflichtung zur Verschwiegenheit in Textform (§ 43e Abs. 3 BRAO) | **[KANZLEI 9]** — prüfen und dokumentieren |
 | Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **[KANZLEI 10]** |
-| Kein Modelltraining | **nicht im AV-Vertrag** — siehe unten, `[KANZLEI 21]` |
+| Kein Modelltraining | **Kundenvereinbarung Ziffer 1.4 und 6.1** (Fassung 01.06.2026) — nicht im AV-Vertrag, siehe unten |
 | Ein einziger Ausgang im Programm | `services/ausgang.py` — genau eine Stelle führt zum Modell |
 | Kein zweiter Anbieter | andere sind vorbereitet, keiner angebunden |
 
@@ -462,12 +462,79 @@ Bedrock steht dort und nicht hier.
 
 > **Daraus folgt für diese Unterlage:** Die Zeile „Kein Modelltraining — im
 > AWS-Vertragswerk zugesichert" stand bis zum 14.10.2026 ohne Fundstelle da.
-> Sie ist jetzt als offen geführt. Zu beschaffen ist der einschlägige
-> Abschnitt der **AWS Service Terms** zu Amazon Bedrock, in der am Tag der
-> Ablage geltenden Fassung, mit Datum. Dieselbe Frage steht als Punkt 3 im
-> Support-Text in `AWS-ZWEI-HANDGRIFFE.md`. Die Abmelderichtlinie vom
-> 14.10.2026 (`[KANZLEI 19]`) beantwortet sie **nicht** — sie erfasst Bedrock
-> nicht.
+> Die Fundstelle ist noch am selben Tag beigebracht worden, aber sie steht
+> **nicht hier**, sondern in der Kundenvereinbarung — siehe den nächsten
+> Abschnitt. Wer nur den AV-Vertrag liest, findet sie nicht; deshalb bleibt
+> dieser Hinweis stehen.
+
+#### Die Kundenvereinbarung und der Datenschutzhinweis
+
+*Am 14.10.2026 nachgereicht und gelesen: die **AWS-Kundenvereinbarung**
+(deutsche Fassung, Stand 01.06.2026) und der **AWS-Datenschutzhinweis**
+(Stand 18.05.2026). Beide frisch von AWS abgerufen.*
+
+**Hier steht, was im AV-Vertrag fehlte.** Ziffer 1.4 der Kundenvereinbarung
+ist die tragende Stelle, und sie ist weiter als Abschnitt 3 des AV-Vertrages:
+Sie gilt für **„Ihre Inhalte"** und nicht nur für personenbezogene Daten.
+
+> „Wir werden nicht auf Ihre Inhalte zugreifen oder diese nutzen, es sei denn,
+> dass dies notwendig ist, um die Services zu warten oder anzubieten oder
+> erforderlich, um die Gesetze einzuhalten oder einer verbindlichen Anordnung
+> einer staatlichen Stelle nachzukommen."
+
+Dazu Ziffer 6.1: AWS erhält keine Rechte an den Inhalten; die Kanzlei stimmt
+ihrer Nutzung nur zu, „um Ihnen und allen Endnutzern die Services zur
+Verfügung zu stellen". Ein Modell mit Akteninhalt zu trainieren ist keines von
+beidem. **Damit hat die Zeile „kein Modelltraining" eine Fundstelle** — sie
+steht in der Kundenvereinbarung und nicht im AV-Vertrag, und sie ist eine
+allgemeine Nutzungsschranke und keine Zusage zu einem bestimmten Dienst.
+
+**Drei weitere Sätze derselben Ziffer, die hierhergehören:**
+
+1. AWS gibt Inhalte **nicht an staatliche Stellen oder Dritte** weiter und
+   verlagert sie nicht aus den gewählten Regionen — außer soweit im Einzelfall
+   gesetzlich oder durch verbindliche Anordnung gefordert. Über eine solche
+   Anordnung wird die Kanzlei unterrichtet, **„es sei denn, dass dies uns
+   gesetzlich oder durch die Anordnung einer staatlichen Stelle untersagt
+   ist"**. Das ist dasselbe verbleibende Risiko wie im AV-Vertrag, nur in
+   anderen Worten; es ist nicht wegzuverhandeln und steht hier als bekannt.
+2. **„Die Datenschutzerklärung ist auf Ihre Inhalte nicht anwendbar."** Das
+   ist ein Satz, der eine Fehllesung verhindert: Wer den Datenschutzhinweis
+   allein liest, findet dort als Zweck „die AWS-Angebote zu verbessern und zu
+   entwickeln" und schließt daraus auf die Akte. Falsch — der
+   Datenschutzhinweis sagt es selbst, gleich auf seiner ersten Seite: Er
+   „gilt nicht für ‚Inhalte', die von unseren Kunden unter Nutzung von
+   AWS-Angeboten in Verbindung mit einem AWS-Account verarbeitet, gespeichert
+   oder gehostet werden." Er betrifft die **Account-Informationen** —
+   Anschrift, Abrechnung, Nutzungsmessung —, nicht den Akteninhalt.
+3. **Vertragspartei ist für Kunden mit Sitz in der EU die Amazon Web Services
+   EMEA SARL in Luxemburg** (Ziffer 12 (e)). Für sie gilt zusätzlich, dass
+   Haftung für grobe Fahrlässigkeit und Vorsatz nicht beschränkt ist.
+
+> **Eine Falle in Ziffer 6.5, die den Umgang mit AWS betrifft und nicht die
+> Technik.** Wer AWS einen **Vorschlag** macht — eine Anregung, eine
+> Fehlermeldung mit Beispiel, einen Verbesserungswunsch —, überträgt AWS
+> daran unwiderruflich sämtliche Rechte, „ohne jegliche Beschränkung".
+> Daraus folgt eine Hausregel: **In eine Support-Anfrage oder einen
+> Verbesserungswunsch an AWS gehört niemals Akteninhalt**, auch kein
+> anonymisierter Ausschnitt und kein Bildschirmfoto mit Text. Der Support-Text
+> in `AWS-ZWEI-HANDGRIFFE.md` ist danach gebaut.
+
+> **Und ein Vorbehalt, der für beide Stücke gilt:** Sie liegen in deutscher
+> Übersetzung vor, und beide tragen oben den Satz, dass die Übersetzung nur
+> der Information dient und bei Abweichungen **die englische Fassung
+> maßgeblich** ist. Für die Datenschutzakte gehört deshalb zu jedem deutschen
+> Ausdruck der englische dazu.
+
+**[KANZLEI 21] — was damit noch offen ist, und es ist weniger als gestern.**
+Die Nutzungsschranke steht (Ziffer 1.4, 6.1). Offen bleibt allein, ob die
+**AWS Service Terms** für Amazon Bedrock etwas anderes bestimmen: Sowohl der
+AV-Vertrag (Abschnitt 16) als auch die Kundenvereinbarung (Ziffer 11.2) lassen
+die Service Terms **beiden vorgehen**. Das Stück liegt nicht vor. Zu
+beschaffen ist der einschlägige Abschnitt zu Amazon Bedrock, mit Datum —
+abrufbar unter der in Ziffer 12 genannten Adresse. Die Abmelderichtlinie vom
+14.10.2026 (`[KANZLEI 19]`) beantwortet diese Frage **nicht**; sie erfasst
+Bedrock nicht.
 
 **[KANZLEI 8] — was zur Ablage noch fehlt.** Das Stück trägt keine
 Fassungsnummer, und der Vertrag gilt „in der jeweils geänderten Fassung"
@@ -606,12 +673,12 @@ Die Entwicklung kann dazu nur sagen, was ist, nicht was reicht.
 | Nachweis der Verarbeitung | der Nachweis nennt Zeitpunkt, Nutzer, Funktion, Modell, Umfang — **ohne Inhalt** |
 
 **Eine Grenze, die genannt gehört:** Was einmal an das Modell übermittelt
-wurde, lässt sich nicht zurückholen. Mehr als eine Zusage des
-Auftragsverarbeiters gibt es dagegen nicht — und für Bedrock steht diese
-Zusage **nicht im Auftragsverarbeitungsvertrag**, sondern in den AWS Service
-Terms, die ihm vorgehen (R4, `[KANZLEI 21]`). Die Abmelderichtlinie vom
-14.10.2026 erfasst Bedrock nicht. **[KANZLEI 14]** — in den Hinweisen an die
-Betroffenen zu beschreiben, und zwar nach dem, was `[KANZLEI 21]` ergibt.
+wurde, lässt sich nicht zurückholen. Mehr als eine vertragliche Schranke gibt
+es dagegen nicht: AWS darf die Inhalte nur nutzen, soweit zur Erbringung der
+Services nötig (Kundenvereinbarung Ziffer 1.4 und 6.1). Diese Schranke steht
+**nicht** im Auftragsverarbeitungsvertrag, und die Service Terms gehen ihr
+nach beiden Verträgen vor (R4, `[KANZLEI 21]`). **[KANZLEI 14]** — in den
+Hinweisen an die Betroffenen zu beschreiben.
 
 ---
 
@@ -673,7 +740,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 5 | Einstufung der acht Risiken | 4 |
 | 6 | R1: Verletzung nach Art. 4 Nr. 12? Meldung nach Art. 33? | R1 |
 | 7 | Wann wird die Fallkopie gelöscht? | R3 |
-| 8 | AV-Vertrag: Tag des Abrufs, Quelle, Ausdruck — dazu SCC, Unterauftragsverarbeiterliste, Service Terms | R4 |
+| 8 | Ablage: Tag des Abrufs, Quelle, Ausdruck — je deutsch **und** englisch; dazu SCC, Unterauftragsverarbeiterliste, Service Terms | R4 |
 | 9 | Verschwiegenheitsverpflichtung § 43e Abs. 3 BRAO | R4 |
 | 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 | R4 |
 | 11 | Regionen des Geländerprofils — bei AWS erfragen | R5 |
@@ -685,7 +752,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | ~~18~~ | ~~Sollen Aktenzeichen und Dokumenttitel an das Modell gehen?~~ **Entschieden am 05.10.2026: Dateiname nein, Art des Schriftstücks ja, Aktenzeichen nur beim Entwurf** | 2.1 |
 | ~~19~~ | ~~Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen~~ **Eingelöst am 14.10.2026, 17:11 MESZ — Nachweis in der Datenschutzakte** | R6 |
 | ~~20~~ | ~~Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt?~~ **Entschieden am 14.10.2026: ja, es bleibt dabei** | 2.4 |
-| 21 | Zusage zum Modelltraining für Bedrock: einschlägigen Abschnitt der AWS Service Terms beschaffen, mit Datum — im AV-Vertrag steht dazu nichts | R4 |
+| 21 | Einschlägigen Abschnitt der **AWS Service Terms** zu Amazon Bedrock beschaffen, mit Datum — sie gehen AV-Vertrag und Kundenvereinbarung vor | R4 |
 
 ---
 

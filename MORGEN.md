@@ -115,10 +115,46 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    Service Terms liegen uns nicht vor. Beide Stellen sind jetzt als offen
    geführt (`[KANZLEI 21]`).
 
-   **Zu tun ist damit:** den einschlägigen Abschnitt der AWS Service Terms zu
-   Amazon Bedrock beschaffen, mit Datum — oder ihn über den Support-Text
-   erfragen, Punkt 3. Dazu für die Ablage: Standardvertragsklauseln,
-   Unterauftragsverarbeiterliste, Tag des Abrufs (`[KANZLEI 8]`).
+   **Noch am selben Tag beigebracht.** Die Kanzlei hat die
+   **AWS-Kundenvereinbarung** (deutsche Fassung, 01.06.2026) und den
+   **AWS-Datenschutzhinweis** (18.05.2026) frisch abgerufen und
+   nachgereicht. Damit hat die Aussage ihre Fundstelle — nur eben an einer
+   anderen Stelle als behauptet:
+
+   * **Ziffer 1.4 der Kundenvereinbarung** ist die tragende Stelle und weiter
+     als der AV-Vertrag: Sie gilt für *Ihre Inhalte* und nicht nur für
+     personenbezogene Daten. AWS greift nicht zu und nutzt nicht, außer soweit
+     zur Erbringung der Services nötig oder gesetzlich gefordert. Dazu
+     Ziffer 6.1. Ein Modell mit Akteninhalt zu trainieren ist keines von
+     beidem.
+   * **Der Datenschutzhinweis gilt ausdrücklich NICHT für Akteninhalt** — er
+     sagt es auf seiner ersten Seite, und Ziffer 1.4 sagt es von der anderen
+     Seite. Wer ihn allein liest, findet dort „die AWS-Angebote verbessern
+     und entwickeln" und schließt falsch. Er betrifft die
+     Account-Informationen.
+   * **Vertragspartei ist für EU-Kunden die Amazon Web Services EMEA SARL in
+     Luxemburg**; ihr gegenüber ist die Haftung für grobe Fahrlässigkeit und
+     Vorsatz nicht beschränkt.
+
+   > **Eine Hausregel, die dabei herauskam:** Nach Ziffer 6.5 überträgt ein
+   > *Vorschlag* an AWS diesem unwiderruflich sämtliche Rechte daran. In eine
+   > Support-Anfrage oder einen Verbesserungswunsch an AWS gehört deshalb
+   > **nie Akteninhalt** — auch kein anonymisierter Ausschnitt und kein
+   > Bildschirmfoto mit Text. Die Regel steht jetzt in
+   > `AWS-ZWEI-HANDGRIFFE.md` über dem Support-Text.
+
+   **`[KANZLEI 21]` ist damit kleiner, aber nicht weg.** Offen bleibt allein:
+   die **AWS Service Terms** zu Amazon Bedrock. Sie gehen dem AV-Vertrag
+   (Abschnitt 16) **und** der Kundenvereinbarung (Ziffer 11.2) vor — solange
+   sie niemand gelesen hat, steht die Schranke aus Ziffer 1.4 unter Vorbehalt.
+   Abrufbar unter der in Ziffer 12 genannten Adresse; sonst über den
+   Support-Text, Punkt 3.
+
+   **Für die Ablage (`[KANZLEI 8]`):** Beide Stücke tragen oben den Satz, dass
+   die deutsche Übersetzung nur der Information dient und **die englische
+   Fassung maßgeblich** ist. Zu jedem deutschen Ausdruck gehört also der
+   englische. Dazu weiter: Standardvertragsklauseln,
+   Unterauftragsverarbeiterliste, Tag des Abrufs.
 
 ### Woran der nächste Schritt hängt
 
