@@ -131,7 +131,7 @@ inhalt.push(
     t("Feststellen, welche Adresse AWS heute wirklich verwendet — nicht annehmen. ", { bold: true }),
     t("Daf\u00FCr gen\u00FCgt ein Blick in die Postf\u00E4cher: Nachrichten mit dem Absender "),
     t("Amazon Web Services", { bold: true }),
-    t(" liegen in genau dieser Adresse. Es gibt sie regelm\u00E4\u00DFig — die monatliche Rechnung, Hinweise auf \u00C4nderungen, und die Best\u00E4tigung, die AWS beim Anlegen der Organisation am 14.10.2026 geschickt hat."),
+    t(" liegen in genau dieser Adresse. Verl\u00E4sslich kommt die monatliche Rechnung; dazu Hinweise auf \u00C4nderungen an Diensten. Beim Anlegen der Organisation am 14.10.2026 kam KEINE Mail — darauf ist also kein Verlass."),
   ]),
   kasten([
     t("Die Anmeldung beweist es nur in einem Fall. ", { bold: true }),

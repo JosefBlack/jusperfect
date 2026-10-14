@@ -87,10 +87,11 @@ Hinweise auf Änderungen an Diensten, Fristen.
    Urlaub und Krankheit.
 3. **Feststellen, welche Adresse AWS heute wirklich verwendet — nicht
    annehmen.** Dafür genügt ein Blick in die Postfächer: Nachrichten mit dem
-   Absender **Amazon Web Services** liegen in genau dieser Adresse. Es gibt
-   sie regelmäßig — die monatliche Rechnung, Hinweise auf Änderungen, und die
-   Bestätigung, die AWS beim Anlegen der Organisation am 14.10.2026 geschickt
-   hat.
+   Absender **Amazon Web Services** liegen in genau dieser Adresse. Verlässlich
+   kommt die **monatliche Rechnung**; dazu Hinweise auf Änderungen an Diensten.
+
+   > Beim Anlegen der Organisation am 14.10.2026 kam **keine** Mail — darauf
+   > ist also kein Verlass.
 
    > **Die Anmeldung beweist es nur in einem Fall.** Wer sich mit einer
    > **E-Mail-Adresse** anmeldet, ist als Root-Benutzer unterwegs — dann ist

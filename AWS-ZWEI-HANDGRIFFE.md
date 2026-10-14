@@ -149,9 +149,19 @@ einzelnes Konto genügt eine Organisation mit genau diesem einen Konto; das
 kostet nichts und ändert an der Abrechnung nichts.
 
 1. Auf **Organisation erstellen** (*Create an organization*).
-2. AWS schickt eine Bestätigungsmail an die Kontoadresse — den Link darin
-   anklicken.
-3. Danach weiter bei Schritt 2.
+2. Danach weiter bei Schritt 2.
+
+> **Berichtigt am 14.10.2026.** Hier stand: „AWS schickt eine
+> Bestätigungsmail an die Kontoadresse — den Link darin anklicken." **Es kam
+> keine.** Die Organisation war unmittelbar angelegt, die Richtlinie ließ sich
+> ohne weiteres erstellen und anhängen, und die wirksame Richtlinie stand
+> zwanzig Minuten später am Konto. Wer auf eine Mail wartet, die nicht kommt,
+> hält den Handgriff für gescheitert.
+>
+> Käme bei Ihnen doch eine, ist das kein Widerspruch: AWS verlangt eine
+> Bestätigung der Kontoadresse für manche Vorgänge, etwa das Einladen
+> *weiterer* Konten. Für eine Organisation mit einem einzigen Konto wird sie
+> offenbar nicht gebraucht.
 
 > **Die drei Warnungen, die AWS dabei anzeigt** — alle drei betreffen
 > Kanzleien mit mehreren AWS-Konten und nicht diesen Fall:
