@@ -432,16 +432,26 @@ nachgesehen, und so sieht es wirklich aus:
 
 ### Schritt 3 — Die Berichte herunterladen
 
-Unter **Berichte** stehen die Nachweise der Prüfer. Diese fünf genügen:
+Unter **Berichte** stehen die Nachweise der Prüfer — am 14.10.2026 waren es
+397. Diese sechs genügen. Die Titel stehen hier **wortgenau so, wie die
+Konsole sie führt**; am 14.10.2026 ergaben genau diese sechs Filter auch
+genau sechs Treffer:
 
-| Unterlage | Wofür sie steht |
+| Titel in der Konsole | Wofür er steht |
 |---|---|
-| **ISO 27001** | Informationssicherheit, das Grundzertifikat |
-| **ISO 27017** | Sicherheit in der Cloud |
-| **ISO 27018** | Schutz personenbezogener Daten in der Cloud |
-| **ISO 27701** | Datenschutz-Managementsystem |
-| **System and Organization Controls (SOC) 2 Report** | der Prüfbericht über die Wirksamkeit der Maßnahmen, nicht nur über ihr Vorhandensein |
+| **ISO 27001:2022 Certification** | Informationssicherheit, das Grundzertifikat |
+| **ISO 27017:2015 Certification** | Sicherheit in der Cloud |
+| **ISO 27018:2019 Certification** | Schutz personenbezogener Daten in der Cloud |
+| **ISO/IEC 27701:2019 Certification** | Datenschutz-Managementsystem |
+| **System and Organization Controls (SOC) 2 Report** | der Prüfbericht über die **Wirksamkeit** der Maßnahmen, nicht nur über ihr Vorhandensein |
 | **System and Organization Controls (SOC) 3 Report** | dasselbe Prüfungsurteil in einer Fassung, die weitergegeben werden darf |
+
+> **Eine Datei, die sich dazwischendrängt und nicht hierhergehört:** ein
+> SOC-Bericht über die **AWS European Sovereign Cloud**. Das ist eine eigene,
+> getrennte Cloud von AWS und nicht die, in der dieses Konto läuft
+> (`eu-central-1`, Frankfurt, reguläre AWS-Cloud). Der Bericht ist nicht
+> falsch, er ist über etwas anderes — und in der Datenschutzakte wäre er ein
+> Beleg, der bei genauem Hinsehen eine fremde Umgebung betrifft.
 
 > **Die SOC-Berichte findet man nicht unter „SOC 2".** Sie heißen „System and
 > Organization Controls **(SOC)** 2 Report", mit *SOC* in Klammern — wer
@@ -476,7 +486,11 @@ anderen Sprache; *Statement of Applicability* ist Beiwerk für Prüfer.
 > Verloren geht dabei nichts; schon heruntergeladene Berichte liegen auf dem
 > Rechner und haben mit der Ansicht nichts mehr zu tun.
 
-Nehmen Sie jeweils die **neueste** Fassung. Beim Herunterladen eines
+Am Ende sollten **sechs Filter mit „oder"** nebeneinanderstehen und die Liste
+**sechs Treffer** zeigen. Stimmt beides, ist nichts übersehen; dann Zeile für
+Zeile: auswählen, **Bericht herunterladen**, nächste.
+
+Beim Herunterladen eines
 SOC-Berichts erscheint eine **Vertraulichkeitsvereinbarung** zum Bestätigen —
 das ist die aus Abschnitt 10.1 des Vertrages; ohne sie gibt AWS die Berichte
 nicht heraus.
