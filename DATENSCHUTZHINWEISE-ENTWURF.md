@@ -54,7 +54,24 @@ Auftragsverarbeiter, ausschließlich in **Rechenzentren in der Europäischen
 Union**; für die Verarbeitung Ihrer Dokumente ist das Frankfurt am Main. Ein
 Auftragsverarbeitungsvertrag besteht; der Auftragsverarbeiter ist zur
 Verschwiegenheit verpflichtet. **Ihre Daten werden nicht zum Training von
-KI-Modellen verwendet**; das ist uns vertraglich zugesichert.
+KI-Modellen verwendet.** Der Auftragsverarbeiter darf die übermittelten
+Inhalte vertraglich nur insoweit nutzen, als es zur Erbringung des Dienstes
+erforderlich ist; eine Nutzung zu eigenen Zwecken — insbesondere zur
+Entwicklung oder Verbesserung eigener Modelle — ist ausgeschlossen.
+
+> **Für die Kanzlei, nicht für den Mandanten: woher diese beiden Sätze
+> stammen und woran sie hängen** *(eingefügt am 14.10.2026)*
+>
+> * **Die Nutzungsschranke ist belegt.** Sie steht in **Ziffer 1.4 und 6.1 der
+>   AWS-Kundenvereinbarung** (Fassung 01.06.2026) — nicht im
+>   Auftragsverarbeitungsvertrag, der dazu schweigt. Bestätigt durch die
+>   **AWS Service Terms, Abschnitt 50.12** (Stand 15.09.2026), die für Amazon
+>   Bedrock keine Nutzung zu Trainings- oder Verbesserungszwecken einräumen.
+>   Die Gegenprobe steht im Nachbarabschnitt 50.13 zu Amazon Q: Dort nimmt
+>   AWS sich das Gegenteil ausdrücklich heraus. Wo AWS solche Rechte will,
+>   schreibt es sie hin.
+> * **Der Satz steht und fällt nicht mit dem Vertrag, sondern mit dem
+>   eingesetzten Modell.** Siehe die Anmerkung zur Speicherdauer.
 
 **Übermittlung in Drittländer.** Findet nicht statt. [KANZLEI 2] — *nur
 aufnehmen, wenn die Auskunft von AWS zu den Regionen des Schutzfilters
@@ -68,6 +85,38 @@ Arbeitskopie liegt verschlüsselt in einem Speicher, der ausschließlich unserer
 Kanzlei zugeordnet ist. Sie wird gelöscht, [KANZLEI 3] — *Frist einsetzen; nach
 dem heutigen Stand: wenn die Akte abgeschlossen und die Übergangsfrist von 30
 Tagen abgelaufen ist. Siehe `DSFA-ENTWURF.md`, Risiko R3.*
+
+**Beim Auftragsverarbeiter** werden die zur Auswertung übermittelten Texte
+darüber hinaus **nicht aufbewahrt**: Sie werden verarbeitet und nicht
+gespeichert.
+
+> **Für die Kanzlei, nicht für den Mandanten: dieser Satz hängt am Modell**
+> *(eingefügt am 14.10.2026)*
+>
+> **Abschnitt 50.12.2 der AWS Service Terms erlaubt eine Aufbewahrung von bis
+> zu 30 Tagen** zur Erkennung von Missbrauch — aber nur für Modelle, die AWS
+> auf einer eigenen Seite namentlich nennt, und bei einigen davon mit der
+> Möglichkeit, dass Mitarbeiter von AWS die Ein- und Ausgaben durchsehen.
+> **Das von uns eingesetzte Modell steht dort nicht**; für es gilt ein
+> Zero-Operator-Access-Modell. Deshalb ist der Satz oben heute richtig.
+>
+> **Er wird falsch, sobald ein gelistetes Modell eingesetzt wird.** Dann ist
+> er zu streichen und die Speicherdauer um die dreißig Tage zu ergänzen. Davor
+> schützt **Regel 1 der Einweisung** (`EINWEISUNG.md`): kein gelistetes Modell
+> für Mandatsakten, und vor jedem Wechsel die Seite ansehen. Die Hinweise nach
+> Art. 13 hängen damit an einer Betriebsregel — wer sie ändert, ändert auch
+> diese Unterlage.
+>
+> **Eine Frist, die nicht läuft, gehört nicht in die Hinweise.** Dreißig Tage
+> zu nennen, die es nicht gibt, wäre unrichtig und würde Mandanten
+> beunruhigen; Art. 13 Abs. 2 lit. a verlangt die Dauer der *tatsächlichen*
+> Verarbeitung. Das ist die Antwort auf die Stelle **Nr. 22** der
+> Folgenabschätzung, soweit sie Art. 13 betrifft.
+>
+> *Ohne die Klammerschreibweise, und das ist kein Zufall: Die Marken sind in
+> dieser Unterlage und in der Folgenabschätzung getrennt durchnummeriert. Eine
+> fremde Nummer in eigener Schreibweise verschöbe die Zählung — der Prüflauf
+> hat genau das abgefangen.*
 
 **Keine automatisierte Entscheidung.** Das Programm trifft keine Entscheidung
 über Sie im Sinne des Art. 22 DSGVO. Es bereitet vor; jede Entscheidung und
@@ -97,8 +146,9 @@ Aufbewahrungspflichten.
   gerechnet wird in der Kanzlei.
 - **Es versendet nichts.** Entwürfe bleiben Entwürfe, bis wir sie freigeben.
 - **Was einmal zur Auswertung übermittelt wurde, lässt sich nicht
-  zurückrufen.** Der Auftragsverarbeiter sichert zu, Eingaben weder zu
-  speichern noch zum Training zu verwenden.
+  zurückrufen.** Der Auftragsverarbeiter darf es nur zur Erbringung des
+  Dienstes verwenden und bewahrt es bei dem von uns eingesetzten Modell nicht
+  auf.
 
 ---
 

@@ -680,10 +680,32 @@ nebenbei ändert (dazu schon oben zu 50.12.1).
 > Diese Adresse muss also gepflegt und gelesen werden. Eine unbeantwortete
 > Rückfrage könnte jusperfect zum Stillstand bringen.
 
-**[KANZLEI 22] — was noch bleibt:** die Entscheidung, ob der Umstand in die
-Hinweise nach Art. 13 DSGVO gehört. **Die beiden Hausregeln sind am 14.10.2026
-in `EINWEISUNG.md` aufgenommen worden** und warten dort nur noch auf die
-Kenntnisnahme. Nach heutigem Stand ist dort **nichts über eine Aufbewahrung bei
+**[KANZLEI 22] — Stand am Abend des 14.10.2026.** Die beiden Hausregeln
+stehen in `EINWEISUNG.md` und warten dort nur noch auf die Kenntnisnahme.
+
+**Die Frage nach Art. 13 ist entschieden: Eine Aufbewahrung bei Bedrock wird
+in den Hinweisen nicht genannt — weil sie nicht stattfindet.** Art. 13 Abs. 2
+lit. a verlangt die Dauer der *tatsächlichen* Verarbeitung; eine Frist zu
+nennen, die nicht läuft, wäre unrichtig und würde Mandanten beunruhigen.
+
+Statt dessen sind in `DATENSCHUTZHINWEISE-ENTWURF.md` drei Dinge geändert
+worden:
+
+1. Die Speicherdauer sagt jetzt ausdrücklich, dass beim Auftragsverarbeiter
+   **nichts darüber hinaus aufbewahrt** wird — eine Angabe, die vorher fehlte
+   und die Art. 13 verlangt.
+2. Die Zusage „kein Training" hat ihre Fundstelle bekommen (Ziffer 1.4 und
+   6.1 der Kundenvereinbarung, bestätigt durch Service Terms 50.12).
+3. Der Satz im Hinweiskasten, der Auftragsverarbeiter sichere zu, Eingaben
+   „weder zu speichern noch zum Training zu verwenden", ist **berichtigt**. Es
+   gibt keine vertragliche Zusage der Nicht-Speicherung; sie folgt aus der
+   Modellwahl.
+
+> **Und daraus eine Abhängigkeit, die festzuhalten ist:** Die Hinweise nach
+> Art. 13 sind nur so lange richtig, wie **Regel 1 der Einweisung** eingehalten
+> wird. Wird ein gelistetes Modell eingesetzt, sind sie zu ändern. Das steht
+> als Anmerkung für die Kanzlei an beiden Stellen der Hinweise — eine
+> Rechtsunterlage, die von einer Betriebsregel abhängt, muss das sagen. Nach heutigem Stand ist dort **nichts über eine Aufbewahrung bei
 Bedrock zu sagen** — das kann sich mit der Liste ändern, und deshalb gehört
 sie in die jährliche Durchsicht.
 
@@ -841,11 +863,14 @@ wurde, lässt sich nicht zurückholen. Mehr als eine vertragliche Schranke gibt
 es dagegen nicht: AWS darf die Inhalte nur nutzen, soweit zur Erbringung der
 Services nötig (Kundenvereinbarung Ziffer 1.4 und 6.1). Diese Schranke steht
 **nicht** im Auftragsverarbeitungsvertrag; die Service Terms gehen ihr vor,
-weichen für Bedrock aber nicht von ihr ab (R4, Abschnitt 50.12). **Zum Löschen
-kommt hinzu, was 50.12.2 zulässt:** Je nach Modell liegen Ein- und Ausgaben
-bis zu dreißig Tage bei AWS, und eine Löschung durch die Kanzlei erreicht sie
-nicht (`[KANZLEI 22]`). **[KANZLEI 14]** — in den Hinweisen an die Betroffenen
-zu beschreiben.
+weichen für Bedrock aber nicht von ihr ab (R4, Abschnitt 50.12). **Beim Auftragsverarbeiter
+wird darüber hinaus nichts aufbewahrt:** Die Missbrauchserkennung nach 50.12.2
+greift für das eingesetzte Modell nicht (`[KANZLEI 22]`). Bei einem gelisteten
+Modell läge es anders — dann lägen Ein- und Ausgaben bis zu dreißig Tage bei
+AWS, und eine Löschung durch die Kanzlei erreichte sie nicht. **[KANZLEI 14]**
+— in den Hinweisen an die Betroffenen zu beschreiben; der Satz dazu steht seit
+dem 14.10.2026 im Hinweiskasten von `DATENSCHUTZHINWEISE-ENTWURF.md` und ist
+nur noch zu behalten oder zu streichen.
 
 ---
 
@@ -920,7 +945,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | ~~19~~ | ~~Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen~~ **Eingelöst am 14.10.2026, 17:11 MESZ — Nachweis in der Datenschutzakte** | R6 |
 | ~~20~~ | ~~Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt?~~ **Entschieden am 14.10.2026: ja, es bleibt dabei** | 2.4 |
 | ~~21~~ | ~~Einschlägigen Abschnitt der AWS Service Terms zu Amazon Bedrock beschaffen~~ **Beschafft und gelesen am 14.10.2026: keine Abweichung von Ziffer 1.4, kein Training** | R4 |
-| 22 | Missbrauchserkennung nach 50.12.2: **am 14.10.2026 geklärt — Abschnitt 1.24 betrifft uns nicht, das eingestellte Modell `claude-opus-4-6-v1` ist nicht gelistet; die beiden Hausregeln stehen in `EINWEISUNG.md`.** Bleibt: Art.-13-Hinweise und die jährliche Durchsicht der Liste | R4 |
+| 22 | Missbrauchserkennung nach 50.12.2: **am 14.10.2026 geklärt** — Abschnitt 1.24 betrifft uns nicht, das eingestellte Modell `claude-opus-4-6-v1` ist nicht gelistet, die Hausregeln stehen in `EINWEISUNG.md`, und die Art.-13-Frage ist entschieden und in `DATENSCHUTZHINWEISE-ENTWURF.md` eingearbeitet. Bleibt: die jährliche Durchsicht der Liste | R4 |
 
 ---
 

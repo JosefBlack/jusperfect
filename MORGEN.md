@@ -267,6 +267,39 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    hinterlegt ist, und beide unterschreiben. Das Blatt nennt selbst, was ihm
    noch fehlt — die Auswahl im Dokumentfenster als Datenminimierung.
 
+10. **Zum Abschluss des Tages: Art. 13 ist entschieden und eingearbeitet.**
+
+    Die Frage aus `[KANZLEI 22]` lautete, ob die Missbrauchserkennung in die
+    Hinweise nach Art. 13 DSGVO gehört. **Antwort: nein — weil sie für das
+    eingesetzte Modell nicht stattfindet.** Art. 13 Abs. 2 lit. a verlangt die
+    Dauer der *tatsächlichen* Verarbeitung; eine Frist zu nennen, die nicht
+    läuft, wäre unrichtig und würde Mandanten beunruhigen.
+
+    **Drei Änderungen in `DATENSCHUTZHINWEISE-ENTWURF.md`:**
+
+    1. Die **Speicherdauer** sagt jetzt ausdrücklich, dass beim
+       Auftragsverarbeiter nichts darüber hinaus aufbewahrt wird. Diese Angabe
+       fehlte — und Art. 13 verlangt sie.
+    2. Die Zusage **„kein Training"** hat ihre Fundstelle bekommen und ist
+       enger gefasst: AWS darf die Inhalte nur zur Erbringung des Dienstes
+       nutzen.
+    3. Der Satz im Hinweiskasten, AWS sichere zu, Eingaben **„weder zu
+       speichern noch zum Training zu verwenden"**, ist berichtigt. Eine
+       vertragliche Zusage der Nicht-Speicherung gibt es nicht; sie folgt aus
+       der Modellwahl.
+
+    > **Daraus eine Abhängigkeit, die vorher niemand gesehen hat:** Die
+    > Hinweise nach Art. 13 sind nur so lange richtig, wie **Regel 1 der
+    > Einweisung** eingehalten wird. Wird ein gelistetes Modell eingesetzt,
+    > sind sie zu ändern. Beide Stellen der Hinweise sagen das jetzt — eine
+    > Rechtsunterlage, die von einer Betriebsregel abhängt, muss das sagen.
+
+    **Und ein Fund des Prüflaufs:** Ich hatte `[KANZLEI 22]` der
+    Folgenabschätzung in die Hinweise geschrieben. Die Marken sind dort
+    getrennt durchnummeriert — die fremde Nummer hätte die Zählung der
+    Hinweise verschoben. Die Prüfung hat es abgefangen, bevor es jemand
+    gelesen hat.
+
 ### Woran der nächste Schritt hängt
 
 Nicht am Programm, sondern an zwei Auskünften: dem Wortlaut der jur\|nodes-
