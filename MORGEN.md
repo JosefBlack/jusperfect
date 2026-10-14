@@ -1,8 +1,71 @@
 # Was als Nächstes zu tun ist
 
-Stand: **05.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-1653 Prüfungen grün (`.venv/bin/python -m pytest -q`).
-Jüngster Programmstand: `fb66f9e`.
+Stand: **14.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
+2447 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
+
+> Diese Datei wächst von unten: Jeder Tag kommt hinten dazu. Ganz oben steht
+> deshalb das, was man im Betrieb wissen muss, und nicht die Vorgeschichte.
+
+---
+
+## Kann die Kanzlei damit arbeiten? — Stand 14.10.2026
+
+**Aus der Kanzlei am 14.10.2026:** „Was ist der nächste Schritt, kann ich das
+Programm nun benutzen."
+
+### Ja — der tägliche Weg trägt
+
+| Was | Stand |
+|---|---|
+| Akte aus jur\|nodes öffnen, Dokumente einlesen | trägt (am 13.10. in der Kanzlei gemessen: kein Schritt gescheitert) |
+| Fragen an die Akte, mit Beleg zu jeder Aussage | trägt |
+| Analyse, Chronologie, Belege, Prüfliste, Eingangsprüfung | trägt |
+| Gedächtnis: einlesen, sichern, verwerfen | trägt |
+| Volltextsuche in den geladenen Dokumenten | trägt, kostet nichts |
+| Promptbibliothek, 39 Prompts der Kanzlei | trägt |
+| Entwurf schreiben, über den Chat ändern, zurücknehmen | trägt |
+| Vorschaufenster: Text und Blatt | trägt |
+
+**Der Grundsatz hält dabei überall:** Was keinen Beleg aus der Akte hat, kommt
+nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
+
+### Noch nicht — zwei Dinge
+
+1. **Der Weg auf den Briefbogen ist nicht fertig.** Was steht: Die Vorlage der
+   Kanzlei wird geöffnet, der Entwurf kommt in ihren leeren Rumpf unter dem
+   Briefkopf, Kopf- und Fußzeile bleiben unberührt, Überschriften und
+   Aufzählungen werden gesetzt. **Was fehlt: das Anschriftenfeld des
+   Empfängers und die Betreffzeile an ihrem Platz.** Der Knopf ist deshalb
+   rot und sagt es beim Anklicken. Zurückgestellt auf Wunsch der Kanzlei
+   (14.10.2026).
+
+2. **Die Ablage eines Entwurfs als Vermerk in jur\|nodes wird abgewiesen.**
+   Aus der Kanzlei am 13.10.2026: „Entwurf-Funktion funktioniert noch nicht,
+   jur\|nodes lehnt ab." **Der Wortlaut der Abweisung liegt nicht vor** — ohne
+   ihn lässt sich nicht sagen, ob es an der Berechtigung des Zugangs, am
+   Vermerktyp oder am Programm liegt. Bis dahin ist der Weg hinaus die
+   Word-Datei.
+
+### Was die Kanzlei jetzt tun muss
+
+1. **Neues ZIP von GitHub holen** und auf beiden Rechnern auspacken. Danach
+   einmal `VERKNUEPFUNG.bat` — die Verknüpfung zeigte bis zum 13.10. auf die
+   erfundenen Testakten.
+2. **`SPERRLISTE-ANLEGEN.bat` auf dem zweiten Rechner.** Die Liste bleibt auf
+   dem Rechner und geht nicht mit (Befund N01).
+3. **`BRIEFBOGEN-HINTERLEGEN.bat` auf beiden Rechnern**, auch wenn der Weg
+   noch nicht fertig ist: Ohne Vorlage lässt sich die Blattansicht nicht
+   zeigen.
+4. **Beim nächsten abgewiesenen Entwurf den Wortlaut der Abweisung
+   festhalten** — ein Bildschirmfoto der Zeile genügt.
+5. Unerledigt bei der Kanzlei: `[KANZLEI 19]` AWS-Widerspruch gegen die
+   Nutzung für KI-Dienste, `[KANZLEI 20]` Auftragsverarbeitungsvertrag.
+
+### Woran der nächste Schritt hängt
+
+Nicht am Programm, sondern an zwei Auskünften: dem Wortlaut der jur\|nodes-
+Abweisung und der Entscheidung, woher die Empfängeranschrift kommen soll
+(aus der Akte nach Art des Schreibens, oder von Hand).
 
 ---
 
