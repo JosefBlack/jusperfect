@@ -42,12 +42,42 @@ des Sachverhalts, einen Zeitstrahl der Ereignisse und Entwürfe, die wir prüfen
 ausschließlich dieses Mandats. Eine Auswertung über mehrere Akten hinweg findet
 nicht statt.
 
-**Rechtsgrundlage.** [KANZLEI 1] — *zu benennen. In Betracht kommen Art. 6
-Abs. 1 lit. b DSGVO (Erfüllung des Mandatsvertrags) und, für Daten von
-Gegnern, Zeugen und Dritten, Art. 6 Abs. 1 lit. f. Für Gesundheitsdaten und
-andere besondere Kategorien ist zusätzlich ein Erlaubnistatbestand nach Art. 9
-Abs. 2 zu benennen — hier kommt insbesondere lit. f in Betracht
-(Geltendmachung, Ausübung oder Verteidigung von Rechtsansprüchen).*
+**Rechtsgrundlage.** Die Verarbeitung beruht auf
+
+* **Art. 6 Abs. 1 lit. b DSGVO** — soweit es um Ihre eigenen Daten geht: Die
+  Auswertung dient der Erfüllung des Mandatsvertrags.
+* **Art. 6 Abs. 1 lit. f DSGVO** — soweit Daten anderer Personen betroffen
+  sind, die in der Akte vorkommen (Gegner, Zeugen, Dritte): Unser berechtigtes
+  Interesse und das Interesse unserer Mandantschaft an einer sorgfältigen und
+  zügigen Bearbeitung.
+* **Art. 9 Abs. 2 lit. f DSGVO** — soweit besondere Kategorien
+  personenbezogener Daten betroffen sind, etwa Gesundheitsdaten: zur
+  Geltendmachung, Ausübung oder Verteidigung von Rechtsansprüchen.
+
+Die Offenbarung gegenüber dem Auftragsverarbeiter ist berufsrechtlich zulässig
+(§ 203 Abs. 3 StGB, § 43e BRAO); er ist zur Verschwiegenheit verpflichtet.
+
+> **Für die Kanzlei, nicht für den Mandanten: [KANZLEI 1]** *(ausformuliert am
+> 14.10.2026 — die Entscheidung bleibt Ihre.)*
+>
+> * **lit. b trägt die Mandantendaten.** Der Einsatz eines Hilfsmittels zur
+>   Bearbeitung der Akte ist Erfüllung des Mandatsvertrags; dafür braucht es
+>   keine gesonderte Erlaubnis.
+> * **lit. f trägt die Daten Dritter**, und die Abwägung fällt hier nicht
+>   knapp aus: Die Daten stehen ohnehin in der Akte. Es kommt kein neuer
+>   Empfängerkreis hinzu außer einem weisungsgebundenen Auftragsverarbeiter,
+>   es gehen nur die vom Bearbeiter ausgewählten Passagen hinaus, und eine
+>   Auswertung über Akten hinweg findet nicht statt. Diese drei Punkte sind
+>   die Abwägung — sie sollten in der Dokumentation stehen und nicht nur in
+>   der Unterlage für die Betroffenen.
+> * **Art. 9 Abs. 2 lit. f trägt die besonderen Kategorien.** Er ist hier der
+>   belastbarere Tatbestand: Anwaltliche Tätigkeit ist der Regelfall seiner
+>   Anwendung, und er ist — anders als lit. a, die ausdrückliche Einwilligung
+>   — **nicht widerruflich**. Siehe dazu „Einwilligung oder nicht" am Ende.
+> * **Berufsrecht ist keine datenschutzrechtliche Rechtsgrundlage.** § 203
+>   Abs. 3 StGB und § 43e BRAO erlauben die Offenbarung; die Rechtsgrundlage
+>   für die Verarbeitung bleibt Art. 6 und 9. Beides gehört genannt, aber
+>   nicht verwechselt.
 
 **Empfänger.** Die Auswertung erfolgt durch Amazon Web Services als
 Auftragsverarbeiter, ausschließlich in **Rechenzentren in der Europäischen
