@@ -156,6 +156,39 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    englische. Dazu weiter: Standardvertragsklauseln,
    Unterauftragsverarbeiterliste, Tag des Abrufs.
 
+7. **Neu am 14.10.2026: Handgriff 3 steht fertig in
+   `AWS-ZWEI-HANDGRIFFE.md`** — auf die Frage aus der Kanzlei, ob in der
+   AWS-Dienstliste etwas zum Datenschutz steht. Es steht: **AWS Artifact**.
+
+   Das ist kein Dienst zum Einschalten und kostet nichts. Es ist die
+   Schublade, in der AWS seine Prüfnachweise bereitlegt — genau die, die der
+   Auftragsverarbeitungsvertrag in seinem Abschnitt 10 verspricht. Vier
+   Schritte, eine Viertelstunde:
+
+   * **ISO 27001, 27017, 27018, 27701** und **SOC 2 Typ II** herunterladen —
+     das Material für `[KANZLEI 10]`, die Dokumentation der
+     Dienstleisterauswahl nach § 43e Abs. 2 BRAO. **SOC 3** gleich mit: er
+     ist derselbe Gegenstand in einer Fassung, die weitergegeben werden darf,
+     und erspart später eine unangenehme Abwägung.
+   * Unter **Vereinbarungen** steht, ob das Data Processing Addendum für
+     *dieses Konto* angenommen ist. Das ist ein Nachweis, den das PDF von der
+     Webseite nicht erbringt — derselbe Unterschied wie bei der Opt-out-
+     Richtlinie zwischen „erstellt" und „wirksam".
+   * Die SOC-Berichte sind **vertrauliche Information von AWS**: Sie gehören
+     in die Datenschutzakte und **nicht** in den jusperfect-Ordner, der
+     weitergegeben wird.
+
+   **Was Artifact NICHT enthält**, damit niemand danach sucht: die **Service
+   Terms** (`[KANZLEI 21]`) und die **Liste der Unterauftragsverarbeiter**.
+   Beide sind Webseiten.
+
+   > **Ein Vorbehalt, der nach heute Vormittag dazugehört:** Die
+   > Schaltflächen in Handgriff 3 habe ich **nicht** am Bildschirm gesehen —
+   > die AWS-Dokumentationsseiten sind von hier nicht erreichbar. Bei
+   > Handgriff 2 haben die Bildschirmfotos aus der Kanzlei zwei falsche
+   > Bezeichnungen aufgedeckt. Heißt in Artifact etwas anders: ein Bild
+   > genügt, ich ziehe nach.
+
 ### Woran der nächste Schritt hängt
 
 Nicht am Programm, sondern an zwei Auskünften: dem Wortlaut der jur\|nodes-

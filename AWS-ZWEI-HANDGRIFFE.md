@@ -1,6 +1,8 @@
-# Die beiden Handgriffe in AWS
+# Die Handgriffe in AWS
 
-**Stand 08.10.2026.**
+**Stand 14.10.2026.** Es waren zwei; am 14.10.2026 ist ein dritter
+dazugekommen. **Die Datei heißt weiter `AWS-ZWEI-HANDGRIFFE.md`**, damit Sie
+sie dort wiederfinden, wo Sie sie gewohnt sind.
 
 > ## Handgriff 1 ist bereits erledigt
 >
@@ -15,20 +17,33 @@
 > richtige Kontonummer. **So soll es sein.**
 >
 > Teil 1 dieser Anleitung bleibt stehen — für einen neuen Rechner, ein
-> zweites Konto oder die nächste Änderung. **Offen ist nur noch Handgriff 2.**
+> zweites Konto oder die nächste Änderung.
 
-Zwei Dinge waren in der AWS-Konsole zu tun. Der erste dauert fünf Minuten und
-ist getan. Der zweite kann fünf Minuten dauern oder eine Vormittagsstunde —
-das hängt davon ab, ob das AWS-Konto zu einer *Organisation* gehört.
-Schritt 1 des zweiten Handgriffs klärt das.
+> ## Handgriff 2 ist seit dem 14.10.2026 ebenfalls erledigt
+>
+> Die Kanzlei hat die Organisation angelegt, die Richtlinienart eingeschaltet,
+> die Richtlinie `jusperfect-keine-ki-nutzung` erstellt und an die
+> Stammorganisation gehängt. Die **effektive** Richtlinie am Konto lautet
+> `{"services":{"default":{"opt_out_policy":"optOut"}}}`, festgestellt am
+> 14.10.2026 um 17:11 MESZ, ohne Validierungsprobleme. `[KANZLEI 19]` ist
+> damit eingelöst.
+>
+> Auch Teil 2 bleibt stehen — für ein zweites Konto, einen neuen Dienst oder
+> den Tag, an dem jemand fragt, wie das zustande kam. **Offen ist nur noch
+> Handgriff 3**, und der ist Holen und nicht Einstellen.
 
-Beides betrifft das Konto **579138738703**, Region **eu-central-1**
+**Handgriff 1 und 2 sind am 14.10.2026 erledigt.** Handgriff 3 ist neu und
+anders als die beiden anderen: Dort wird nichts eingestellt, sondern etwas
+geholt — die Nachweise, die AWS für seine Kunden bereitlegt und die unsere
+Unterlagen brauchen.
+
+Alles betrifft das Konto **579138738703**, Region **eu-central-1**
 (Frankfurt).
 
-> **Vorab, damit es nicht untergeht:** Sie brauchen für beides die
-> AWS-Konsole mit einem Zugang, der Richtlinien ändern darf — also nicht den
-> Benutzer `jusperfect-test`, den das Programm benutzt. Der darf nichts
-> davon, und das ist Absicht.
+> **Vorab, damit es nicht untergeht:** Sie brauchen dafür die AWS-Konsole mit
+> einem Zugang, der Richtlinien ändern und Nachweise abrufen darf — also
+> nicht den Benutzer `jusperfect-test`, den das Programm benutzt. Der darf
+> nichts davon, und das ist Absicht.
 
 ---
 
@@ -327,11 +342,114 @@ er betrifft Bedrock und wird von der Abmelderichtlinie nicht beantwortet.
 
 ---
 
+## Handgriff 3 — Die Nachweise aus AWS Artifact holen
+
+*Neu am 14.10.2026, auf die Frage der Kanzlei, ob in der Dienstliste etwas
+zum Datenschutz steht. Es steht: **AWS Artifact**.*
+
+### Worum es geht, und warum es sich lohnt
+
+Artifact ist kein Dienst, den Sie einschalten, und er kostet nichts. Es ist
+die Schublade, in der AWS seine Prüfnachweise bereitlegt. Unser
+Auftragsverarbeitungsvertrag verspricht sie in seinem Abschnitt 10 — auf
+Anfrage und gegen eine Vertraulichkeitsvereinbarung. Artifact *ist* dieses
+Verfahren: Sie hängen die Vereinbarung mit einem Haken an und laden herunter.
+
+**Was Sie damit schließen:**
+
+* **`[KANZLEI 10]` — die Dokumentation der Dienstleisterauswahl nach
+  § 43e Abs. 2 BRAO.** Dass Sie sich den Auftragsverarbeiter *angesehen*
+  haben, muss aktenkundig sein. Die Zertifikate und Prüfberichte sind genau
+  das Material dafür.
+* **`[KANZLEI 8]` zu einem guten Teil** — die Ablage des Vertragswerks.
+
+**Was Sie damit NICHT schließen, damit Sie nicht danach suchen:** Die **AWS
+Service Terms** (`[KANZLEI 21]`) liegen **nicht** in Artifact — sie stehen
+als Webseite unter der in Ziffer 12 der Kundenvereinbarung genannten Adresse.
+Die **Liste der Unterauftragsverarbeiter** ebenfalls nicht; auch sie ist eine
+Webseite.
+
+> **Ehrlich vorweg, und das ist nach heute Vormittag wichtig:** Die
+> Schaltflächen unten habe ich **nicht** am Bildschirm gesehen — anders als
+> bei Handgriff 2, wo Ihre Bildschirmfotos zwei falsche Bezeichnungen in
+> dieser Anleitung aufgedeckt haben. Die AWS-Dokumentationsseiten sind von
+> meinem Rechner aus nicht erreichbar. Heißt in der Konsole etwas anders,
+> schicken Sie mir ein Bild — ich ziehe die Anleitung nach, wie bei
+> Handgriff 2.
+
+### Schritt 1 — Artifact öffnen
+
+1. In der **AWS-Konsole** anmelden.
+2. Oben ins Suchfeld **`Artifact`** eingeben und **AWS Artifact** öffnen.
+3. In der linken Spalte stehen zwei Bereiche, und Sie brauchen beide:
+   **Berichte** (*Reports*) und **Vereinbarungen** (*Agreements*).
+
+### Schritt 2 — Die Vereinbarungen ansehen
+
+**Das ist der kürzeste Weg zu einem Nachweis, den Sie sonst nicht bekommen.**
+Unter **Vereinbarungen** steht, welche Vereinbarungen für *dieses Konto*
+gelten und angenommen sind — darunter das **AWS GDPR Data Processing
+Addendum**, also der Auftragsverarbeitungsvertrag.
+
+1. **Vereinbarungen** anklicken, dann **Konto-Vereinbarungen** (*Account
+   agreements*).
+2. Das Data Processing Addendum heraussuchen und den **Status** ansehen.
+3. **Bildschirmausdruck mit sichtbarem Datum** machen.
+
+> **Warum das mehr wert ist als das PDF, das Sie mir geschickt haben.** Das
+> PDF zeigt, *was* im Vertrag steht. Dieser Ausdruck zeigt, dass er **für
+> Ihr Konto gilt** — mit Datum. Das ist der Unterschied zwischen „erstellt"
+> und „wirksam", derselbe wie bei Handgriff 2, Schritt 5.
+
+### Schritt 3 — Die Berichte herunterladen
+
+Unter **Berichte** stehen die Nachweise der Prüfer. Diese fünf genügen:
+
+| Unterlage | Wofür sie steht |
+|---|---|
+| **ISO 27001** | Informationssicherheit, das Grundzertifikat |
+| **ISO 27017** | Sicherheit in der Cloud |
+| **ISO 27018** | Schutz personenbezogener Daten in der Cloud |
+| **ISO 27701** | Datenschutz-Managementsystem |
+| **SOC 2 Typ II** | der Prüfbericht über die Wirksamkeit der Maßnahmen, nicht nur über ihr Vorhandensein |
+
+Nehmen Sie jeweils die **neueste** Fassung. Beim Herunterladen eines
+SOC-Berichts erscheint eine **Vertraulichkeitsvereinbarung** zum Bestätigen —
+das ist die aus Abschnitt 10.1 des Vertrages; ohne sie gibt AWS die Berichte
+nicht heraus.
+
+> **Was die Vertraulichkeitsvereinbarung für Sie bedeutet.** Der SOC-Bericht
+> ist vertrauliche Information von AWS. Er gehört in die Datenschutzakte und
+> **nicht** weiter: nicht an Mandanten, nicht als Anlage in einen Schriftsatz,
+> nicht in den jusperfect-Ordner. Muss ein Dritter einmal etwas sehen, ist
+> **SOC 3** das richtige Stück — derselbe Prüfungsgegenstand in einer Fassung,
+> die zur Weitergabe bestimmt ist. Laden Sie den gleich mit herunter; er
+> kostet einen Klick und erspart später eine unangenehme Abwägung.
+
+### Schritt 4 — Ablegen
+
+1. Alle Stücke in die **Datenschutzakte**, mit dem Vermerk:
+   *„AWS-Nachweise für Konto 579138738703, abgerufen aus AWS Artifact am
+   TT.MM.JJJJ: ISO 27001, 27017, 27018, 27701, SOC 2 Typ II, SOC 3; Status
+   des Data Processing Addendum."*
+2. **Nicht** in den jusperfect-Ordner und nicht ins Programm — die Berichte
+   sind vertraulich, und der Ordner wird weitergegeben.
+3. Mir Bescheid geben — dann trage ich `[KANZLEI 10]` in `DSFA-ENTWURF.md`
+   nach und ergänze `[KANZLEI 8]`.
+
+> **Einmal im Jahr wiederholen.** Die Berichte decken einen Zeitraum ab und
+> laufen damit ab. Das gehört zur jährlichen Durchsicht der Folgenabschätzung
+> und nicht in eine eigene Frist.
+
+---
+
 ## Was danach noch offen ist
 
-Nach beiden Handgriffen bleibt in AWS nichts mehr zu tun. Offen bleiben dann
-nur noch die Stellen in den drei Rechtsunterlagen — und die sind Bewertung,
-keine Konsolenarbeit.
+Nach den drei Handgriffen bleibt in der AWS-Konsole nichts mehr zu tun.
+Außerhalb der Konsole bleiben zwei Webseiten abzurufen — die **Service
+Terms** zu Amazon Bedrock (`[KANZLEI 21]`) und die **Liste der
+Unterauftragsverarbeiter** —, und im Übrigen nur noch die Stellen in den drei
+Rechtsunterlagen; die sind Bewertung, keine Konsolenarbeit.
 
 ---
 

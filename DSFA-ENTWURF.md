@@ -400,7 +400,7 @@ des § 203 Abs. 3 StGB und des § 43e BRAO.
 |---|---|
 | AV-Vertrag und Hauptvertrag | liegen vor: **AWS Data Processing Addendum**, **AWS-Kundenvereinbarung** (01.06.2026), **AWS-Datenschutzhinweis** (18.05.2026) — alle drei unten gelesen; `[KANZLEI 8]` nur noch für Ablage |
 | Verpflichtung zur Verschwiegenheit in Textform (§ 43e Abs. 3 BRAO) | **[KANZLEI 9]** — prüfen und dokumentieren |
-| Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **[KANZLEI 10]** |
+| Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **[KANZLEI 10]** — Material dafür liegt bei AWS bereit: `AWS-ZWEI-HANDGRIFFE.md`, Handgriff 3 |
 | Kein Modelltraining | **Kundenvereinbarung Ziffer 1.4 und 6.1** (Fassung 01.06.2026) — nicht im AV-Vertrag, siehe unten |
 | Ein einziger Ausgang im Programm | `services/ausgang.py` — genau eine Stelle führt zum Modell |
 | Kein zweiter Anbieter | andere sind vorbereitet, keiner angebunden |
@@ -536,7 +536,12 @@ abrufbar unter der in Ziffer 12 genannten Adresse. Die Abmelderichtlinie vom
 14.10.2026 (`[KANZLEI 19]`) beantwortet diese Frage **nicht**; sie erfasst
 Bedrock nicht.
 
-**[KANZLEI 8] — was zur Ablage noch fehlt.** Das Stück trägt keine
+**[KANZLEI 8] — was zur Ablage noch fehlt.** Der Weg dorthin steht in
+`AWS-ZWEI-HANDGRIFFE.md`, Handgriff 3: In **AWS Artifact** liegen die
+Zertifikate und Prüfberichte bereit, die der Vertrag in seinem Abschnitt 10
+verspricht, und dort steht auch, ob das Data Processing Addendum für dieses
+Konto **angenommen** ist — ein Nachweis, den das vorgelegte PDF nicht
+erbringt. Das Stück trägt keine
 Fassungsnummer, und der Vertrag gilt „in der jeweils geänderten Fassung"
 (Einleitungssatz). Für die Akte sind deshalb **drei** Dinge festzuhalten: der
 Tag des Abrufs, von welcher AWS-Seite abgerufen wurde, und ein Ausdruck des
@@ -742,7 +747,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 7 | Wann wird die Fallkopie gelöscht? | R3 |
 | 8 | Ablage: Tag des Abrufs, Quelle, Ausdruck — je deutsch **und** englisch; dazu SCC, Unterauftragsverarbeiterliste, Service Terms | R4 |
 | 9 | Verschwiegenheitsverpflichtung § 43e Abs. 3 BRAO | R4 |
-| 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 | R4 |
+| 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 — Nachweise aus AWS Artifact holen | R4 |
 | 11 | Regionen des Geländerprofils — bei AWS erfragen | R5 |
 | 12 | Erlaubnistatbestand Art. 9 Abs. 2; Beschränkung nach Rechtsgebiet? | R6 |
 | 13 | Zugriffsbeschränkung je Bearbeiter? Zugangsschutz? | R7 |
