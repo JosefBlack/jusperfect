@@ -19,7 +19,8 @@ kennt. Diese Stellen sind mit **[KANZLEI n]** gekennzeichnet; es sind
 **einundzwanzig** — Nr. 21 ist am 14.10.2026 dazugekommen, beim Lesen des
 Auftragsverarbeitungsvertrages —, und sie stehen am Ende noch einmal in einer
 Liste. Drei davon sind erledigt: **Nr. 18** am 05.10.2026, **Nr. 19** und
-**Nr. 20** am 14.10.2026. Sie bleiben stehen und durchgestrichen — eine
+**Nr. 20** am 14.10.2026; bei **Nr. 10** liegt seit dem 14.10.2026 das
+Material vor und fehlt nur noch die Bewertung. Sie bleiben stehen und durchgestrichen — eine
 Stelle, die verschwindet, sieht aus, als hätte es sie nie gegeben.
 
 **Die Zahlen und Befunde stehen woanders.** Jede technische Angabe hier ist aus
@@ -400,7 +401,7 @@ des § 203 Abs. 3 StGB und des § 43e BRAO.
 |---|---|
 | AV-Vertrag und Hauptvertrag | liegen vor: **AWS Data Processing Addendum**, **AWS-Kundenvereinbarung** (01.06.2026), **AWS-Datenschutzhinweis** (18.05.2026) — alle drei unten gelesen; `[KANZLEI 8]` nur noch für Ablage |
 | Verpflichtung zur Verschwiegenheit in Textform (§ 43e Abs. 3 BRAO) | **[KANZLEI 9]** — prüfen und dokumentieren |
-| Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **[KANZLEI 10]** — Material dafür liegt bei AWS bereit: `AWS-ZWEI-HANDGRIFFE.md`, Handgriff 3 |
+| Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **Material beschafft am 14.10.2026** — sechs Nachweise aus AWS Artifact, siehe unten; `[KANZLEI 10]` nur noch für die Bewertung |
 | Kein Modelltraining | **Kundenvereinbarung Ziffer 1.4 und 6.1** (Fassung 01.06.2026) — nicht im AV-Vertrag, siehe unten |
 | Ein einziger Ausgang im Programm | `services/ausgang.py` — genau eine Stelle führt zum Modell |
 | Kein zweiter Anbieter | andere sind vorbereitet, keiner angebunden |
@@ -466,6 +467,43 @@ Bedrock steht dort und nicht hier.
 > **nicht hier**, sondern in der Kundenvereinbarung — siehe den nächsten
 > Abschnitt. Wer nur den AV-Vertrag liest, findet sie nicht; deshalb bleibt
 > dieser Hinweis stehen.
+
+#### Die Nachweise der Prüfer
+
+*Am 14.10.2026 aus **AWS Artifact** abgerufen und in der Datenschutzakte
+abgelegt. Sie liegen bewusst **nicht** im Programmordner: Der SOC-2-Bericht
+ist vertrauliche Information von AWS, und der Ordner wird weitergegeben.*
+
+| Nachweis | Was er sagt |
+|---|---|
+| ISO 27001:2022 | Informationssicherheit, das Grundzertifikat |
+| ISO 27017:2015 | Sicherheit in der Cloud |
+| ISO 27018:2019 | Schutz personenbezogener Daten in der Cloud |
+| ISO/IEC 27701:2019 | Datenschutz-Managementsystem |
+| **SOC 2 Typ 2**, Berichtszeitraum **01.04.2025 – 31.03.2026** | Prüfurteil über die **Wirksamkeit** der Kontrollen, nicht nur über ihr Vorhandensein — geprüfte Kriterien: Security, Availability, **Confidentiality**, **Privacy** |
+| SOC 3 | dasselbe Prüfurteil in einer Fassung, die weitergegeben werden darf |
+
+**Wozu das trägt.** § 43e Abs. 2 BRAO verlangt, dass die Auswahl des
+Dienstleisters dokumentiert ist — dass die Kanzlei ihn sich *angesehen* hat
+und nicht nur beauftragt. Das ist hiermit belegbar. Der Vertrag verspricht
+diese Unterlagen in seinem Abschnitt 10; Artifact ist der Weg dorthin.
+
+**Zwei Einschränkungen, die zum Nachweis gehören:**
+
+1. **Der SOC-2-Bericht darf nicht zitiert werden.** Die
+   Vertraulichkeitsvereinbarung beim Abruf untersagt Auszüge. Deshalb steht
+   aus ihm in dieser Unterlage nichts — nur, dass er vorliegt, für welchen
+   Zeitraum und mit welchen Kriterien. An eine **Aufsichtsbehörde** darf er
+   vollständig gehen, mit dem Antrag auf vertrauliche Behandlung; jede
+   Weitergabe ist zu notieren. An Mandanten geht **SOC 3**.
+2. **Der Berichtszeitraum endete am 31.03.2026.** Für die Zeit danach trägt
+   der Bericht nichts. Die Lücke schließt das **SOC Continued Operations
+   Letter** aus derselben Quelle. Zur jährlichen Durchsicht dieser Unterlage
+   gehört, die Nachweise neu abzurufen.
+
+**[KANZLEI 10]** — die Bewertung bleibt bei der Kanzlei: ob diese Nachweise
+die Auswahl nach § 43e Abs. 2 BRAO tragen und was darüber hinaus in die Akte
+soll. Das Material liegt vor; der Satz dazu fehlt.
 
 #### Die Kundenvereinbarung und der Datenschutzhinweis
 
@@ -747,7 +785,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 7 | Wann wird die Fallkopie gelöscht? | R3 |
 | 8 | Ablage: Tag des Abrufs, Quelle, Ausdruck — je deutsch **und** englisch; dazu SCC, Unterauftragsverarbeiterliste, Service Terms | R4 |
 | 9 | Verschwiegenheitsverpflichtung § 43e Abs. 3 BRAO | R4 |
-| 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 — Nachweise aus AWS Artifact holen | R4 |
+| 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 — **Nachweise liegen seit 14.10.2026 vor**, es fehlt die Bewertung | R4 |
 | 11 | Regionen des Geländerprofils — bei AWS erfragen | R5 |
 | 12 | Erlaubnistatbestand Art. 9 Abs. 2; Beschränkung nach Rechtsgebiet? | R6 |
 | 13 | Zugriffsbeschränkung je Bearbeiter? Zugangsschutz? | R7 |

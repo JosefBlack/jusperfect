@@ -464,8 +464,11 @@ genau sechs Treffer:
 > * *(Spanish)*, *(Japanese)* — dieselbe Urkunde in anderer Sprache;
 > * **SOC 1 Report** — betrifft Kontrollen für die **Rechnungslegung**, also
 >   Wirtschaftsprüfung und nicht Datenschutz;
-> * *SOC Continued Operations Letter* — Überbrückungsschreiben zwischen zwei
->   Berichtszeiträumen; hier nicht nötig.
+> * *SOC Continued Operations Letter* — **das nehmen Sie doch mit.** Hier
+>   stand bis zum 14.10.2026 „hier nicht nötig". Das war falsch, sobald der
+>   Berichtszeitraum bekannt war: Der SOC-2-Bericht vom 14.10.2026 deckt
+>   01.04.2025 bis 31.03.2026 ab und sagt über die Zeit danach nichts. Genau
+>   diese Lücke schließt das Überbrückungsschreiben.
 
 Suchen Sie jeden Titel im Filterfeld und nehmen Sie aus der Vorschlagsliste
 den Eintrag, der mit **„Titel = …"** beginnt — nicht „Verwenden: …", sonst

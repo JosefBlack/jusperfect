@@ -165,11 +165,21 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    Auftragsverarbeitungsvertrag in seinem Abschnitt 10 verspricht. Vier
    Schritte, eine Viertelstunde:
 
-   * **ISO 27001, 27017, 27018, 27701** und **SOC 2** herunterladen —
-     das Material für `[KANZLEI 10]`, die Dokumentation der
-     Dienstleisterauswahl nach § 43e Abs. 2 BRAO. **SOC 3** gleich mit: er
-     ist derselbe Gegenstand in einer Fassung, die weitergegeben werden darf,
-     und erspart später eine unangenehme Abwägung.
+   **Am 14.10.2026 abgerufen:** ISO 27001:2022, ISO 27017:2015,
+   ISO 27018:2019, ISO/IEC 27701:2019, **SOC 2 Typ 2** (Berichtszeitraum
+   01.04.2025 – 31.03.2026, geprüfte Kriterien *Security, Availability,
+   Confidentiality, Privacy*) und **SOC 3**. Eingetragen in
+   `DSFA-ENTWURF.md`, R4, Abschnitt „Die Nachweise der Prüfer".
+
+   * Damit liegt das Material für `[KANZLEI 10]` vor — die Dokumentation der
+     Dienstleisterauswahl nach § 43e Abs. 2 BRAO. **Offen bleibt dort nur
+     noch die Bewertung**, also der Satz der Kanzlei, dass diese Nachweise
+     die Auswahl tragen.
+   * **Noch zu holen: das SOC Continued Operations Letter.** Ich hatte davon
+     abgeraten; das war falsch, sobald der Berichtszeitraum bekannt war. Er
+     endete am 31.03.2026, und für die sechseinhalb Monate danach sagt der
+     Bericht nichts. Genau diese Lücke schließt das Schreiben. Ein Filter,
+     ein Download.
    * Unter **Vereinbarungen** steht, ob das Data Processing Addendum für
      *dieses Konto* angenommen ist. Das ist ein Nachweis, den das PDF von der
      Webseite nicht erbringt — derselbe Unterschied wie bei der Opt-out-
