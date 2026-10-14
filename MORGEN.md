@@ -58,27 +58,35 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
    zeigen.
 4. **Beim nächsten abgewiesenen Entwurf den Wortlaut der Abweisung
    festhalten** — ein Bildschirmfoto der Zeile genügt.
-5. Unerledigt bei der Kanzlei, beides aus der Datenschutz-Folgenabschätzung:
+5. Die beiden Stellen aus der Datenschutz-Folgenabschätzung — **beide am
+   14.10.2026 erledigt**; zu tun bleibt Ablage und Unterschrift:
 
-   * **`[KANZLEI 19]` — die AI-services-Opt-out-Richtlinie bei AWS.** Ohne sie
-     behält AWS sich vor, Inhalte seiner KI-Dienste zu speichern und zur
-     Verbesserung der Dienste zu verwenden; bis zum Nachweis darf keine
-     unserer Unterlagen eine Nicht-Speicherung behaupten. Die Anleitung steht
-     fertig in `AWS-ZWEI-HANDGRIFFE.md`, Handgriff 2 — fünf Schritte in der
-     AWS-Konsole, dazu ein fertiger Text für den AWS-Support, falls die
-     Konsole etwas anderes zeigt. Der fünfte Schritt ist der eigentliche: die
-     **wirksame** Richtlinie am Konto ablesen und datiert ablegen. Eine
-     erstellte, aber nicht angehängte Richtlinie sieht fast genauso aus und
-     bewirkt nichts.
+   * **`[KANZLEI 19]` — die AI-services-Opt-out-Richtlinie bei AWS:
+     ERLEDIGT am 14.10.2026.** Die Kanzlei hat die fünf Schritte aus
+     `AWS-ZWEI-HANDGRIFFE.md` in der Konsole durchgeführt und den Nachweis
+     geschickt: Für das Konto ist die effektive Richtlinie
+     `{"services":{"default":{"opt_out_policy":"optOut"}}}`, festgestellt am
+     14.10.2026 um 17:11 MESZ, ohne Validierungsprobleme, verknüpft mit der
+     Stammorganisation. Nachgetragen in `DSFA-ENTWURF.md` (Abschnitt 2.1 und
+     die Stelle `[KANZLEI 19]`) und in `SICHERHEIT.md`; der Vorbehalt ist
+     dort heraus.
 
-     > **Die Anleitung ist am 14.10.2026 an drei Stellen berichtigt worden**,
-     > nachdem die Kanzlei Bildschirmfotos aus der Konsole geschickt hat:
-     > Die deutsche Konsole nennt die Richtlinienart **„Abmelderichtlinien
-     > für KI-Services"** und nicht „Opt-out-Richtlinien"; daneben steht ein
-     > Eintrag „Bedrock-Richtlinien", der etwas anderes ist und nicht
-     > angefasst wird. Und der Satz, `default` decke „auch Bedrock" ab, war
-     > zu weit — er widersprach unserer eigenen Berichtigung vom 05.10.2026.
-     > Die Frage steht jetzt im Support-Text.
+     **Zu tun bleibt der Kanzlei nur eins:** die beiden Bildschirmausdrucke
+     in die Datenschutzakte legen, mit dem Vermerk aus Schritt 5.
+
+     > **Was dabei herauskam und nicht vorher feststand:** Eine
+     > Abmelderichtlinie an der Stammorganisation erfasst **auch das
+     > Verwaltungskonto** — anders als die Service-Kontrollrichtlinien. Eine
+     > Organisation mit einem einzigen Konto reicht also. Abgelesen am Konto
+     > und nicht angenommen.
+     >
+     > **Und was offen bleibt: Bedrock.** Diese Richtlinienart erfasst es
+     > nicht. Der Satz in der Anleitung, `default` decke „auch Bedrock" ab,
+     > war meiner und falsch — er widersprach unserer eigenen Berichtigung
+     > vom 05.10.2026. Die Frage steht jetzt als Punkt 3 im Support-Text und
+     > ist bei Antwort in `DSFA-ENTWURF.md` nachzutragen. Die deutsche
+     > Konsole heißt die Richtlinienart übrigens **„Abmelderichtlinien für
+     > KI-Services"**; auch das ist in der Anleitung berichtigt.
    * **`[KANZLEI 20]` — die festzuhaltende Entscheidung**, ob es bei dieser
      Bauweise bleibt: Verarbeitung bei einem Auftragsverarbeiter (AWS
      Frankfurt). **Am 14.10.2026 entschieden: es bleibt dabei.** Der Abschnitt
@@ -86,8 +94,8 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
      belegt ist, dem, was Bewertung der Kanzlei ist, und den drei Sätzen, die
      daraus ausdrücklich **nicht** folgen (unter anderem, dass AWS den Inhalt
      nicht lesen könne; er wird im Klartext verarbeitet). Zu tun bleibt: lesen
-     und unterschreiben. Die Entscheidung steht unter der Bedingung, dass
-     `[KANZLEI 19]` eingelöst wird.
+     und unterschreiben. Die Entscheidung stand unter der Bedingung, dass
+     `[KANZLEI 19]` eingelöst wird — am selben Tag geschehen, siehe oben.
 
    > **Berichtigt am 14.10.2026:** Hier stand, `[KANZLEI 20]` sei der
    > Auftragsverarbeitungsvertrag. Das ist falsch — der AVV mit AWS ist

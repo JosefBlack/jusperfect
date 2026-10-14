@@ -464,10 +464,11 @@ Abschnitt 3.2.
 hier aus nur, *was das Programm sendet und wie es ablegt*. Ob und wie lange
 AWS Inhalte aufbewahren oder verwenden darf, steht im
 Auftragsverarbeitungsvertrag und in den Dienstbedingungen — und für die
-KI-Dienste in der **AI-services-Opt-out-Richtlinie**, die bis heute aussteht
-(Befund F12, `DSFA-ENTWURF.md` `[KANZLEI 19]`, Anleitung in
-`AWS-ZWEI-HANDGRIFFE.md`, Handgriff 2). Solange sie nicht nachgewiesen und
-datiert abgelegt ist, darf keine Unterlage eine Nicht-Speicherung behaupten.
+KI-Dienste in der **AI-services-Opt-out-Richtlinie**. Sie ist seit dem
+**14.10.2026** für das Konto wirksam und nachgewiesen (Befund F12,
+`DSFA-ENTWURF.md` `[KANZLEI 19]`, Anleitung in `AWS-ZWEI-HANDGRIFFE.md`,
+Handgriff 2). **Bedrock erfasst sie nicht** — dort trägt allein die
+vertragliche Grundlage.
 
 ### Ein Satz für die Unterrichtung
 
@@ -511,13 +512,15 @@ Kanzlei und keine des Programms.
   Bild je gescannter Seite, erzeugt auf dem Rechner der Kanzlei, an denselben
   Auftragsverarbeiter in derselben Region. Abschalten: `JUSPERFECT_OCR=keine`.
 
-  **Offen, und das gehört hierher (Befund F12 der Zweitprüfung).** Die
-  Unterlagen schlossen aus dem Versand der Bildbytes ohne eigenen
-  S3-Zwischenspeicher, AWS speichere die Bilder nicht. **Dieser Schluss trägt
-  nicht.** Für die KI-Dienste von AWS gilt die Nicht-Speicherung nur mit einer
-  wirksamen **AI-services-Opt-out-Richtlinie** des Kontos. Solange sie nicht
-  nachgewiesen und datiert abgelegt ist (`DSFA-ENTWURF.md` `[KANZLEI 19]`),
-  darf keine Unterlage eine Nicht-Speicherung behaupten – diese auch nicht.
+  **Erledigt am 14.10.2026 (Befund F12 der Zweitprüfung).** Die Unterlagen
+  schlossen aus dem Versand der Bildbytes ohne eigenen S3-Zwischenspeicher,
+  AWS speichere die Bilder nicht. **Dieser Schluss trug nicht** — er brauchte
+  eine wirksame **AI-services-Opt-out-Richtlinie** des Kontos. Die liegt seit
+  dem 14.10.2026, 17:11 MESZ vor: effektive Richtlinie am Konto
+  `{"services":{"default":{"opt_out_policy":"optOut"}}}`, Ausdruck in der
+  Datenschutzakte (`DSFA-ENTWURF.md` `[KANZLEI 19]`). Für Textract gilt damit:
+  nicht gespeichert, nicht zur Verbesserung der Dienste verwendet. **Für
+  Bedrock sagt die Richtlinie nichts** — diese Frage steht beim AWS-Support.
 
 ## Rechtliches Paket vor der ersten echten Akte (Phase 0)
 

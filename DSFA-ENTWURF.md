@@ -69,7 +69,7 @@ Risikobewertung gebraucht wird.
 | Schritt | Was verlässt die Kanzlei | Wohin |
 |---|---|---|
 | Dokumente lesen | nichts | — |
-| Gescannte Seite erkennen | **ein Bild je Seite** | AWS Textract, Frankfurt. Verarbeitet; **ob gespeichert wird, ist offen** — siehe `[KANZLEI 19]` |
+| Gescannte Seite erkennen | **ein Bild je Seite** | AWS Textract, Frankfurt. Verarbeitet; **weder gespeichert noch zur Verbesserung der AWS-KI-Dienste verwendet** — wirksame Abmelderichtlinie seit 14.10.2026, siehe `[KANZLEI 19]` |
 | Frage, Analyse, Entwurf | **die ausgewählten Passagen** als Text | AWS Bedrock, Frankfurt, über das EU-Inferenzprofil |
 | Schutzgeländer | **Frage und Antwort**, nicht der Akteninhalt | `eu.guardrail.v1:0`, verteilt auf europäische Regionen |
 | Aktengedächtnis sichern | **Dokumenttexte und Abgeleitetes** | S3-Bucket der Kanzlei, Frankfurt, SSE-KMS |
@@ -179,10 +179,12 @@ gehört in die Einweisung.
 **Was von hier aus nicht belegbar ist.** Was AWS vertraglich zusagt, steht
 nicht im Programm. Belegbar ist nur, *was das Programm sendet und wie es
 ablegt*. Die Aufbewahrung beim Auftragsverarbeiter hängt am
-Auftragsverarbeitungsvertrag und — für die KI-Dienste — an der
-**AI-services-Opt-out-Richtlinie**, die weiter aussteht. Sie ist der Grund,
-warum die Textract-Zeile in Abschnitt 2.1 heute „offen" sagt und nicht mehr
-„nicht gespeichert".
+Auftragsverarbeitungsvertrag und — für die KI-Dienste, die sie erfasst — an
+der **AI-services-Opt-out-Richtlinie**. Sie ist seit dem 14.10.2026 für das
+Konto wirksam und nachgewiesen (`[KANZLEI 19]`); deshalb sagt die
+Textract-Zeile in Abschnitt 2.1 wieder „nicht gespeichert". **Für Bedrock
+gilt das nicht** — die Richtlinienart erfasst es nicht, und dort trägt allein
+der Auftragsverarbeitungsvertrag.
 
 ### [KANZLEI 20] — die Entscheidung über die Bauweise
 
@@ -223,13 +225,14 @@ dürfen:
 3. **Nicht**, dass die Frage der Speicherung beim Auftragsverarbeiter geklärt
    wäre. Sie steht als `[KANZLEI 19]` offen.
 
-**Unter welcher Bedingung sie gilt.** Die Entscheidung setzt voraus, dass
+**Unter welcher Bedingung sie gilt.** Die Entscheidung setzte voraus, dass
 `[KANZLEI 19]` eingelöst wird — die wirksame AI-services-Opt-out-Richtlinie
-für das Konto, nachgewiesen und datiert. Solange sie aussteht, gilt die
-Entscheidung für die Bauweise, **nicht** für den Betrieb mit gescannten
-Unterlagen: Bis zum Nachweis bleibt die Texterkennung abschaltbar zu halten
-(`JUSPERFECT_OCR=keine`), und keine Unterlage der Kanzlei darf eine
-Nicht-Speicherung behaupten.
+für das Konto, nachgewiesen und datiert. **Das ist am selben Tag geschehen**
+(Abschnitt 4, `[KANZLEI 19]`): die Richtlinie ist am 14.10.2026 um 17:11 MESZ
+am Konto als wirksam festgestellt und abgelegt. Die Bedingung ist damit
+erfüllt — für die Dienste, die diese Richtlinienart erfasst. **Für Bedrock
+ist sie es nicht**, und diese Frage trägt die Entscheidung mit: Sie steht
+beim AWS-Support und ist bei Antwort hier nachzutragen.
 
 **Wann sie neu zu treffen ist.** Wenn eines davon eintritt, ist dieser
 Abschnitt neu zu schreiben und nicht fortzuschreiben:
@@ -450,7 +453,7 @@ dass sich an Anbieter, Region oder Vertrag etwas ändert.
 | Maßnahme | Stand |
 |---|---|
 | Derselbe Auftragsverarbeiter, derselbe AV-Vertrag | kein neuer Vertrag |
-| Verarbeitet, nicht gespeichert | **nicht belegt — siehe unten** |
+| Nicht gespeichert, nicht zur Verbesserung der Dienste verwendet | **belegt am 14.10.2026** — siehe unten |
 | Abschaltbar mit einer Zeile | `JUSPERFECT_OCR=keine`; gescannte Blätter bleiben dann ungelesen |
 
 > **Berichtigt am 05.10.2026 nach der Zweitprüfung (Befund F12).** Die
@@ -460,13 +463,38 @@ dass sich an Anbieter, Region oder Vertrag etwas ändert.
 > bei einer wirksamen **AI-services-Opt-out-Richtlinie** des Kontos. Ohne
 > diesen Nachweis ist „nicht gespeichert" eine Vermutung.
 >
-> **[KANZLEI 19]** — die wirksame Opt-out-Richtlinie für dieses AWS-Konto
-> beschaffen und datiert ablegen. Ein bloß erstellter Entwurf in AWS
-> Organizations ist nicht dasselbe wie eine wirksame Richtlinie. Bis dahin
-> darf die Unterlage keine Nicht-Speicherung behaupten.
+> **[KANZLEI 19] — eingelöst am 14.10.2026.** Für das AWS-Konto
+> 579138738703 ist eine **wirksame** Abmelderichtlinie für KI-Services
+> (*AI services opt-out policy*) festgestellt worden. Die Konsole gibt als
+> effektive Richtlinie des Kontos aus:
 >
-> Abschalten der Texterkennung bis zur Klärung: `JUSPERFECT_OCR=keine` in
-> `START-JURNODES.bat` — **nicht** `aus`, wie es hier zuvor stand.
+> ```json
+> { "services": { "default": { "opt_out_policy": "optOut" } } }
+> ```
+>
+> Festgestellt am **14.10.2026, 17:11 MESZ**; die Richtlinie
+> `jusperfect-keine-ki-nutzung` ist an der Stammorganisation verknüpft, AWS
+> meldet keine Validierungsprobleme. Die Bildschirmausdrucke liegen in der
+> Datenschutzakte. **Damit ist belegt:** Inhalte der erfassten KI-Dienste —
+> Textract gehört dazu — werden nicht gespeichert und nicht zur Entwicklung
+> und Verbesserung der AWS-KI-Dienste verwendet.
+>
+> **Was damit nicht belegt ist, und was deshalb eine eigene Frage bleibt.**
+>
+> 1. **Bedrock ist von dieser Richtlinienart nicht erfasst.** Die Abmeldung
+>    sagt über die Verarbeitung im Modell nichts. AWS führt dafür an, Bedrock
+>    verwende Inhalte ohnehin nicht zur Verbesserung der Dienste; eine
+>    Auskunft dazu ist beim AWS-Support angefragt
+>    (`AWS-ZWEI-HANDGRIFFE.md`, Support-Text, Punkt 3). Bis sie vorliegt,
+>    gilt für Bedrock die vertragliche Grundlage und nicht diese Richtlinie.
+> 2. **Die Abmeldung betrifft Speicherung und Verwendung zur Entwicklung und
+>    Verbesserung der Dienste** — den Wortlaut der Konsole. Aufbewahrung zu
+>    anderen Zwecken, etwa zum Betrieb, hängt am Auftragsverarbeitungsvertrag
+>    und nicht hieran.
+>
+> Abschalten der Texterkennung, falls sie je zu klären ist:
+> `JUSPERFECT_OCR=keine` in `START-JURNODES.bat` — **nicht** `aus`, wie es
+> hier zuvor stand.
 
 **[KANZLEI 12]** — Erlaubnistatbestand nach Art. 9 Abs. 2 benennen, und
 bewerten, ob eine Beschränkung nach Rechtsgebiet getroffen werden soll. Das

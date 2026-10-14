@@ -182,7 +182,13 @@ AWS schaltet diese Richtlinienart nicht von selbst frei.
 
 1. Auf **Richtlinie erstellen** (*Create policy*).
 2. **Name:** `jusperfect-keine-ki-nutzung`
-3. **Beschreibung:** `Kein Opt-in zur Nutzung von Inhalten durch AWS-KI-Dienste. Kanzlei Dortschy & Thunert, 08.10.2026.`
+3. **Beschreibung:** `Kein Opt-in zur Nutzung von Inhalten durch AWS-KI-Dienste. Kanzlei Dortschy & Thunert, TT.MM.JJJJ.`
+
+   > **Das Datum ist der Tag, an dem Sie die Richtlinie anlegen** — nicht der
+   > Tag, an dem dieser Text geschrieben wurde. Hier stand bis zum 14.10.2026
+   > ein festes Datum, und es ist so in die Konsole gewandert. In einer Akte,
+   > deren Bildschirmfoto einen anderen Tag trägt, ist das eine
+   > Unstimmigkeit, über die ein Prüfer stolpert.
 4. Auf **JSON** umschalten und als Inhalt genau dies eintragen:
 
 ```json
@@ -238,14 +244,24 @@ Erstellt ist nicht wirksam. Sie muss an das Konto gehängt werden.
 
 1. In **AWS Organizations** links auf **AWS-Konten**, dann das Konto
    **579138738703** anklicken.
-2. Reiter **Richtlinien** (*Policies*). Dort steht unter
-   „Abmelderichtlinien für KI-Services" die **wirksame** Richtlinie — nicht
-   die erstellte, sondern die, die für dieses Konto tatsächlich gilt.
-3. Davon einen **Bildschirmausdruck** machen, mit sichtbarem Datum.
-4. Den Ausdruck zur Datenschutzakte nehmen, mit dem Vermerk:
+2. Reiter **Richtlinien** (*Policies*). Unter „Abmelderichtlinien für
+   KI-Services" steht dann die Tabelle **Angewendete Richtlinien** mit der
+   Richtlinie und der Quelle „Verknüpft mit Root".
+3. **Darüber steht der Link, auf den es ankommt:** „Effektive AI-Richtlinie
+   für dieses AWS-Konto anzeigen". Anklicken.
+
+   > **Angewendet** heißt: die Richtlinie hängt an diesem Konto.
+   > **Effektiv** heißt: das ist das Ergebnis, nachdem AWS alle Richtlinien
+   > zusammengerechnet hat — der Text, in dem `optOut` tatsächlich steht.
+   > Der Nachweis ist der zweite.
+
+4. Davon einen **Bildschirmausdruck** machen, mit sichtbarem Datum; die
+   Tabelle mit der Quelle „Verknüpft mit Root" am besten als zweites Blatt
+   dazu.
+5. Die Ausdrucke zur Datenschutzakte nehmen, mit dem Vermerk:
    *„Wirksame AI-services-Opt-out-Richtlinie für Konto 579138738703,
    festgestellt am TT.MM.JJJJ."*
-5. Mir Bescheid geben — dann trage ich `[KANZLEI 19]` in `DSFA-ENTWURF.md`
+6. Mir Bescheid geben — dann trage ich `[KANZLEI 19]` in `DSFA-ENTWURF.md`
    nach und nehme den Vorbehalt aus `SICHERHEIT.md` heraus.
 
 > **Der Unterschied zwischen „erstellt" und „wirksam" ist hier der ganze
@@ -253,21 +269,25 @@ Erstellt ist nicht wirksam. Sie muss an das Konto gehängt werden.
 > Konsole fast genauso aus und bewirkt nichts. Deshalb wird der Nachweis am
 > **Konto** abgelesen und nicht an der Richtlinie.
 
-> **Dieser Schritt beantwortet nebenbei eine Frage, die bei einer
-> Ein-Konto-Organisation offen ist:** ob eine Richtlinie, die an der
+> **Eine Frage, die bei einer Ein-Konto-Organisation offen war, ist hier am
+> 14.10.2026 beantwortet worden:** ob eine Richtlinie, die an der
 > Stammorganisation hängt, auch für das **Verwaltungskonto** gilt — also für
 > genau dieses Konto. Für die Service-Kontrollrichtlinien (SCP) ist bekannt,
-> dass sie das Verwaltungskonto *nicht* erfassen. Ob das für die
-> Abmelderichtlinien ebenso ist, war von hier aus nicht zu klären. Schritt 5 liest den Stand am Konto ab und zeigt
-> es deshalb: Steht dort die Richtlinie, gilt sie. Steht dort nichts, ist der
-> Weg über den Support zu gehen — dann ist auch der Handgriff nicht erledigt,
-> und `[KANZLEI 19]` bleibt offen.
+> dass sie das Verwaltungskonto *nicht* erfassen; für die Abmelderichtlinien
+> war es von hier aus nicht zu klären.
+>
+> **Sie gilt.** Die Konsole führt sie am Konto 579138738703 unter
+> „Angewendete Richtlinien" mit der Quelle „Verknüpft mit Root". Eine
+> Organisation mit einem einzigen Konto reicht für diesen Zweck also aus.
+> Abgelesen und nicht angenommen — dafür steht Schritt 5 hier und nicht als
+> Nebensatz.
 
 ### Der Weg über den Support
 
 Wenn Schritt 1a nicht in Frage kommt oder die Konsole etwas anderes zeigt als
 hier beschrieben, geht es auch über ein Support-Ticket. Dieser Text ist dafür
-fertig:
+fertig. **Punkt 3 steht auch dann an, wenn die Handgriffe geglückt sind** —
+er betrifft Bedrock und wird von der Abmelderichtlinie nicht beantwortet:
 
 > Sehr geehrte Damen und Herren,
 >
@@ -279,12 +299,10 @@ fertig:
 >    ausschließt? Falls ja: seit wann, und für welche Dienste?
 > 2. Falls nein: Wie richten wir sie für ein Konto ein, das keiner
 >    Organisation angehört?
-> 3. Gilt diese Richtlinie auch für das Verwaltungskonto der Organisation,
->    wenn sie an der Stammorganisation hängt? Und: Ist Amazon Bedrock von
->    dieser Richtlinienart erfasst? Falls nein — auf welcher vertraglichen
->    Grundlage ist ausgeschlossen, dass Inhalte, die wir an Bedrock senden,
->    zur Verbesserung der Dienste verwendet werden, und wie lange werden sie
->    zu anderen Zwecken aufbewahrt?
+> 3. Ist Amazon Bedrock von dieser Richtlinienart erfasst? Falls nein — auf
+>    welcher vertraglichen Grundlage ist ausgeschlossen, dass Inhalte, die wir
+>    an Bedrock senden, zur Verbesserung der Dienste verwendet werden, und wie
+>    lange werden sie zu anderen Zwecken aufbewahrt?
 >
 > Hintergrund ist eine Datenschutz-Folgenabschätzung nach Art. 35 DSGVO. Wir
 > verarbeiten mit Amazon Textract und Amazon Bedrock Unterlagen, die dem
