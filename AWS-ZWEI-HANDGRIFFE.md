@@ -384,22 +384,48 @@ Webseite.
 3. In der linken Spalte stehen zwei Bereiche, und Sie brauchen beide:
    **Berichte** (*Reports*) und **Vereinbarungen** (*Agreements*).
 
-### Schritt 2 — Die Vereinbarungen ansehen
+### Schritt 2 — Die Vereinbarungen ansehen, und nichts annehmen
 
-**Das ist der kürzeste Weg zu einem Nachweis, den Sie sonst nicht bekommen.**
-Unter **Vereinbarungen** steht, welche Vereinbarungen für *dieses Konto*
-gelten und angenommen sind — darunter das **AWS GDPR Data Processing
-Addendum**, also der Auftragsverarbeitungsvertrag.
+**Hier steht der AV-Vertrag NICHT, und das ist richtig so.** Diese Seite hat
+mich am 14.10.2026 widerlegt; was hier stand, war geraten. Die Kanzlei hat
+nachgesehen, und so sieht es wirklich aus:
 
-1. **Vereinbarungen** anklicken, dann **Konto-Vereinbarungen** (*Account
-   agreements*).
-2. Das Data Processing Addendum heraussuchen und den **Status** ansehen.
-3. **Bildschirmausdruck mit sichtbarem Datum** machen.
+1. **Vereinbarungen** anklicken. Oben sind zwei Reiter:
+   **Kontovereinbarungen** und **Organisationsvereinbarungen**. Beide kurz
+   ansehen.
+2. Die Liste der Kontovereinbarungen hat **zehn** Einträge, alle auf
+   „Inaktiv": Zusätze für Australien, Neuseeland, US-Gesundheitsdaten
+   (HIPAA), die US-Wertpapieraufsicht (SEC), Japan und kostenlose
+   Beratungsleistungen. **Keiner davon geht eine deutsche Kanzlei etwas an,
+   und alle bleiben zu Recht inaktiv.**
+3. Der Reiter **Organisationsvereinbarungen** zeigt nahezu dieselben Zusätze
+   (am 14.10.2026 nachgesehen). Auch dort ist nichts anzunehmen.
+4. **Bildschirmausdruck machen** — gerade weil nichts Passendes darauf steht.
 
-> **Warum das mehr wert ist als das PDF, das Sie mir geschickt haben.** Das
-> PDF zeigt, *was* im Vertrag steht. Dieser Ausdruck zeigt, dass er **für
-> Ihr Konto gilt** — mit Datum. Das ist der Unterschied zwischen „erstellt"
-> und „wirksam", derselbe wie bei Handgriff 2, Schritt 5.
+> **Warum der Auftragsverarbeitungsvertrag hier fehlt.** AWS hat den
+> DSGVO-Zusatz fest in die **Kundenvereinbarung** aufgenommen; er gilt ohne
+> gesonderte Annahme, und deshalb gibt es hier keinen Haken dafür. Der
+> Nachweis ist die Kundenvereinbarung selbst (Fassung 01.06.2026, in der
+> Datenschutzakte) und nicht ein Status in dieser Liste.
+
+> **Warum der Ausdruck trotzdem in die Akte gehört.** Er belegt, dass
+> nachgesehen worden ist und dass nichts anzunehmen war. Bei § 43e Abs. 2
+> BRAO ist genau das die Art von Nachweis, die sonst fehlt: nicht das
+> Ergebnis, sondern dass die Frage gestellt wurde.
+
+> **UND HIER WIRD NICHTS ANGENOMMEN.** Oben rechts steht „Vereinbarung
+> akzeptieren". Das sind Verträge. Ein angenommener Vertrag erzeugt
+> Pflichten, auch wenn man ihn nie braucht — das *Business Associate
+> Addendum* etwa verlangt, in diesem Konto nur HIPAA-taugliche Dienste zu
+> verwenden. Steht eines Tages hier etwas an, das die Kanzlei wirklich
+> betrifft, wird es vorher besprochen.
+
+> **Ein Satz aus dem blauen Kasten, der zu heute gehört:** „Sie sind beim
+> Verwaltungskonto einer Organisation angemeldet. Wenn akzeptiert, gelten die
+> folgenden Vereinbarungen nur für Ihr Verwaltungskonto." Seit Handgriff 2
+> gibt es die Organisation, und seitdem trennt die Konsole in zwei Reiter.
+> Bei einem einzigen Konto ist das dasselbe — nachsehen muss man trotzdem in
+> beiden.
 
 ### Schritt 3 — Die Berichte herunterladen
 
@@ -430,8 +456,9 @@ nicht heraus.
 
 1. Alle Stücke in die **Datenschutzakte**, mit dem Vermerk:
    *„AWS-Nachweise für Konto 579138738703, abgerufen aus AWS Artifact am
-   TT.MM.JJJJ: ISO 27001, 27017, 27018, 27701, SOC 2 Typ II, SOC 3; Status
-   des Data Processing Addendum."*
+   TT.MM.JJJJ: ISO 27001, 27017, 27018, 27701, SOC 2 Typ II, SOC 3; dazu die
+   Liste der Kontovereinbarungen — keine davon einschlägig, keine
+   angenommen."*
 2. **Nicht** in den jusperfect-Ordner und nicht ins Programm — die Berichte
    sind vertraulich, und der Ordner wird weitergegeben.
 3. Mir Bescheid geben — dann trage ich `[KANZLEI 10]` in `DSFA-ENTWURF.md`
