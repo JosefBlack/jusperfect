@@ -193,7 +193,7 @@ def test_die_arbeitsakte_steht_bei_den_dokumenten(html: str) -> None:
 def test_der_pfeil_steht_rechts_in_der_kopfzeile(html: str) -> None:
     """„Wenn der Pfeil nicht links ist, sondern rechts, ist er besser zu sehen."""
     kopf = html[html.index('<section class="spalte dokument"'):html.index('id="dok-text"')]
-    assert kopf.index("<span>Dokument</span>") < kopf.index('data-fenster-zu="dokument"')
+    assert kopf.index("<span>Dokumente</span>") < kopf.index('data-fenster-zu="dokument"')
 
 
 def test_alle_pfeile_zeigen_in_dieselbe_richtung(html: str) -> None:
@@ -294,4 +294,4 @@ def test_rechts_steht_der_pfeil_links_in_der_kopfzeile(html: str) -> None:
 
     # Am Dokument bleibt er rechts - dort ist das die innere Kante.
     dok = html[html.index('<section class="spalte dokument"'):html.index('id="dok-text"')]
-    assert dok.index("<span>Dokument</span>") < dok.index('data-fenster-zu="dokument"')
+    assert dok.index("<span>Dokumente</span>") < dok.index('data-fenster-zu="dokument"')

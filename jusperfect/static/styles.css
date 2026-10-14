@@ -26,7 +26,21 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
 .kopf { display: flex; align-items: center; gap: 16px; padding: 8px 18px; background: var(--flaeche);
   border-bottom: 1px solid var(--linie); flex: none; }
-.marke { font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+/* Die Marke ist ein Knopf - sie soll nur nicht danach aussehen, solange man
+   sie nicht anfasst. Aus der Kanzlei am 14.10.2026: die Kopfzeile soll
+   ausklappbar sein, "wenn man auf jusperfect drueckt". */
+.marke { font-size: 19px; font-weight: 700; letter-spacing: -.01em;
+  border: 1px solid transparent; border-radius: 8px; background: transparent;
+  padding: 2px 6px; margin-left: -6px; cursor: pointer; }
+.marke:hover { border-color: var(--linie); background: var(--flaeche-2); }
+/* Schmal: Verbrauch, Verbindungsstand und Benutzer gehen weg - drei Angaben,
+   die man einmal am Tag braucht und den ganzen Tag ansieht. Was bleibt, ist
+   die Akte und der Weg zurueck. */
+.kopf.schmal { padding: 1px 18px; gap: 10px; }
+.kopf.schmal .marke { font-size: 14px; }
+.kopf.schmal .kopf-rechts { display: none; }
+.kopf.schmal .akte-name { font-size: 12px; }
+.kopf.schmal .akte-wechseln { padding: 1px 7px; font-size: 11px; }
 .marke .jus { color: var(--akzent); }
 .kopf-mitte { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
   font-size: 13px; color: var(--gedaempft); }
@@ -170,10 +184,19 @@ button, input, textarea, select { font: inherit; color: inherit; }
 /* Der Pfeil und der Arbeitsakte-Knopf sitzen am rechten Rand der Kopfzeile:
    Aus der Kanzlei - "wenn der Pfeil nicht links ist, sondern rechts von der
    Leiste, ist er einfach besser zu sehen." */
-.spalte.dokument .spalte-kopf { gap: 6px; flex-wrap: nowrap; }
+/* Die erste Reihe bricht nicht um - sonst stuende "Arbeitsakte" allein unter
+   der Dokumentwahl. Die Suchzeile darunter ist eine eigene Reihe und bekommt
+   sie ueber `flex: 1 0 100%`; dafuer muss der Kopf umbrechen DUERFEN. */
+.spalte.dokument .spalte-kopf { gap: 6px 6px; flex-wrap: wrap; }
+.spalte.dokument .spalte-kopf > span,
+.spalte.dokument .spalte-kopf > button { flex: none; }
 /* Die Dokumentwahl gibt nach, die Knoepfe nicht: Sonst rutschen sie in einer
    schmalen Spalte in eine zweite Zeile und stehen dort verloren. */
-.spalte.dokument .spalte-kopf .dok-filter { margin-right: auto; min-width: 0; flex: 1 1 auto; }
+/* Zwei Reihen, nicht drei: Die Beschriftung und die Knoepfe teilen sich die
+   erste, Dokumentwahl und Suche die zweite. Bei vierhundert Pixeln Spalte
+   geht beides nicht nebeneinander. */
+.spalte.dokument .spalte-kopf > span { margin-right: auto; }
+.dok-suche-zeile .dok-filter { flex: 0 1 42%; min-width: 0; margin: 0; }
 .spalte.dokument .spalte-kopf > button { flex: none; }
 
 .fensterknopf[aria-pressed="true"] { background: var(--akzent-hell); color: var(--akzent);
@@ -330,7 +353,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
 .dok-filter { border: 1px solid var(--linie); background: var(--flaeche-2); border-radius: 6px; padding: 3px 6px; font-size: 12px; max-width: 55%; }
 
 /* Dokumentspalte */
-.dok-text { flex: 1; overflow: auto; padding: 16px 18px; background: var(--flaeche); }
+.dok-text { flex: 1; overflow: auto; padding: 14px 16px; background: var(--flaeche);
+  font-size: 13.5px; line-height: 1.45; }
 .passage { margin: 0 0 12px; scroll-margin-top: 12px; border-radius: 6px; padding: 4px 6px; transition: background .25s; }
 .passage .kennung { display: inline-block; font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; color: var(--gedaempft);
   background: var(--flaeche-2); border: 1px solid var(--linie); border-radius: 4px; padding: 0 5px; margin-bottom: 4px; }
@@ -390,7 +414,11 @@ button, input, textarea, select { font: inherit; color: inherit; }
   padding: 8px 12px 0; }
 .karte-c.user { background: var(--flaeche-2); }
 .karte-c.user .inhalt { padding: 4px 12px 10px; white-space: pre-wrap; }
-.karte-c .inhalt { padding: 2px 12px 10px; }
+/* Kleiner als die Oberflaeche. Aus der Kanzlei am 14.10.2026: "Die Schrift
+   im Chat und bei den Dokumenten verkleinern, was die Uebersicht
+   verstaerkt." Eine Akte liest man anders als eine Bedienoberflaeche: Dort
+   zaehlt, wie viel auf einmal im Blick ist. */
+.karte-c .inhalt { padding: 2px 12px 10px; font-size: 13.5px; line-height: 1.45; }
 .karte-c .inhalt p { margin: 6px 0; white-space: pre-wrap; }
 
 /* Textsatz der Modellantworten. Zurueckhaltend: Eine Antwort in der Akte ist
@@ -441,8 +469,20 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 
    Sie waechst nach oben, nicht in die Breite: Ein Umbruch macht die Leiste
    hoeher, und die Eingabe bleibt, wo sie ist. */
-.bibliothek { margin-bottom: 8px; }
-.bib-kopf { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+/* Die Bibliothek ist eine Lade. Zugeklappt eine Zeile - aus der Kanzlei am
+   14.10.2026: "Promptbibliothek unten versperrt den Chat." */
+.bibliothek { margin-bottom: 8px; border: 1px solid var(--linie); border-radius: 10px;
+  background: var(--flaeche); overflow: hidden; }
+.bib-kopf { display: flex; align-items: baseline; gap: 10px; cursor: pointer;
+  padding: 6px 12px; list-style: none; }
+.bib-kopf::-webkit-details-marker { display: none; }
+.bib-kopf::before { content: "▸"; font-size: 10px; color: var(--gedaempft);
+  transition: transform .12s ease; align-self: center; }
+.bibliothek[open] > .bib-kopf::before { transform: rotate(90deg); }
+.bib-kopf:hover { background: var(--flaeche-2); }
+.bib-anzahl { font-size: 12px; color: var(--gedaempft); margin-left: auto; }
+.bib-leiste { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  padding: 2px 12px 6px; }
 /* Eine normale Ueberschrift - die grosse gehoert dem Chat. */
 .bib-titel { margin: 0; font-size: 13px; font-weight: 600; color: var(--tinte); }
 .bib-wahl { display: inline-flex; align-items: baseline; gap: 5px;
@@ -451,13 +491,14 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
   border: 1px solid var(--linie); border-radius: 6px; background: var(--flaeche-2);
   padding: 2px 5px; max-width: 220px; }
 .bib-gebiet { font-size: 12px; color: var(--amber); }
-.bib-kopf .mini { margin-left: auto; }
+.bib-leiste .mini { margin-left: auto; }
 /* Zwei Zeilen hoch, der Rest wird gerollt: Die Leiste ist ein Griffbrett,
    keine Liste. Bei vier Gruppen und neununddreissig Prompts waere sie sonst
    hoeher als der Chat darueber. */
 /* Hoeher als vorher, weil die Reiter zugeklappt wenig Platz brauchen - und
    wer einen aufmacht, will auch etwas davon sehen. */
-.bib-liste { display: flex; flex-direction: column; max-height: 168px; overflow-y: auto; }
+.bib-liste { display: flex; flex-direction: column; max-height: 168px; overflow-y: auto;
+  padding: 0 12px 8px; }
 /* Ein Reiter je Gruppe. Aus der Kanzlei am 14.10.2026: "Mit ausklappbaren
    Reitern." Neununddreissig Prompts auf einmal sind keine Auswahl mehr,
    sondern eine Liste, die man durchsuchen muesste.
@@ -492,7 +533,7 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 /* Mitgeliefertes sieht anders aus als Eigenes - sonst raetselt man, warum
    etwas dasteht, das man nie eingetippt hat. */
 .bib-chip.mitgeliefert { background: var(--flaeche-2); border-style: dashed; }
-.bib-hinweis { margin: 6px 0 0; font-size: 12px; color: var(--amber); }
+.bib-hinweis { margin: 0; padding: 0 12px 8px; font-size: 12px; color: var(--amber); }
 
 /* Der Umschalter ueber dem Eingabefeld: Was getippt wird, aendert den
    Entwurf. Deutlich sichtbar - ein Modus, den man nicht sieht, ist der
@@ -1248,9 +1289,13 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
    Aus der Kanzlei am 13.10.2026: „Eine Suchfunktion in den Dokumenten wäre
    sehr gut, da ich z. B. schnell Anträge finden muss." Sie sitzt über dem
    Text, nicht in der Kopfzeile: Dort stehen schon vier Dinge. */
-.dok-suche-zeile { flex: none; display: flex; align-items: center; gap: 8px;
-  padding: 6px 10px; border-bottom: 1px solid var(--linie);
-  background: var(--flaeche); }
+/* Die Suchzeile steht IM Kopf, als zweite Reihe desselben Balkens.
+
+   Aus der Kanzlei am 14.10.2026: "Bekommen wir links einen einheitlichen
+   Balken hin." Sie hatte eine eigene Hintergrundfarbe und eine eigene
+   Trennlinie und sah aus wie ein zweiter Kopf. */
+.dok-suche-zeile { flex: 1 0 100%; display: flex; align-items: center; gap: 8px;
+  padding: 0; margin-top: 2px; }
 .dok-suche { flex: 1 1 auto; min-width: 0; font: inherit; font-size: 13px;
   padding: 5px 8px; border: 1px solid var(--linie); border-radius: 7px;
   background: var(--flaeche-2); color: var(--tinte); }

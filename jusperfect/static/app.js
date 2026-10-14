@@ -124,6 +124,35 @@ function anmeldungAnzeigen() {
   knopf.textContent = angemeldet() ? "Abmelden" : "Anmelden";
 }
 
+// ── Die Kopfzeile: schmal oder ganz ────────────────────────────────────────
+//
+// Aus der Kanzlei am 14.10.2026: "Auch die obere Zeile jusperfect nimmt viel
+// Platz und sollte ausklappbar sein, wenn man auf jusperfect drueckt."
+//
+// Schmal bleibt stehen, woran man ist - die Akte und der Weg zurueck. Weg
+// sind Verbrauch, Verbindungsstand und Benutzer: drei Angaben, die man
+// einmal am Tag braucht und den ganzen Tag ansieht.
+
+function kopfzeileHerstellen() {
+  const kopf = $("kopf"), schalter = $("kopf-schalter");
+  if (!kopf || !schalter) return;
+  let schmal = false;
+  try { schmal = localStorage.getItem("jusperfect.kopf") === "schmal"; }
+  catch (e) { /* dann eben ganz */ }
+  const anwenden = () => {
+    kopf.classList.toggle("schmal", schmal);
+    schalter.setAttribute("aria-expanded", String(!schmal));
+    schalter.title = schmal ? "Kopfzeile wieder aufklappen" : "Kopfzeile schmal machen";
+  };
+  anwenden();
+  schalter.addEventListener("click", () => {
+    schmal = !schmal;
+    try { localStorage.setItem("jusperfect.kopf", schmal ? "schmal" : "ganz"); }
+    catch (e) { /* Bequemlichkeit, keine Arbeit */ }
+    anwenden();
+  });
+}
+
 // ── API ──────────────────────────────────────────────────────────────────
 
 function kopfzeilen() {
@@ -3067,6 +3096,26 @@ function bibHinweis(text) {
 /** Welches Rechtsgebiet gerade in der Leiste steht. "" = das der Akte. */
 let bibGebietswahl = "";
 
+/** Ist die ganze Bibliothek aufgeklappt? Zugeklappt ist die Voreinstellung.
+ *
+ * Aus der Kanzlei am 14.10.2026: "Promptbibliothek unten versperrt den
+ * Chat." Vier Gruppen standen dauerhaft ueber dem Eingabefeld, auch wenn
+ * gerade nur gefragt wurde. Wer sie aufklappt, findet sie beim naechsten
+ * Mal offen - und wer sie zumacht, hat sie zu.
+ */
+function bibLadeHerstellen() {
+  const kasten = $("bibliothek");
+  if (!kasten) return;
+  let offen = false;
+  try { offen = localStorage.getItem("jusperfect.bib.offen") === "ja"; }
+  catch (e) { /* dann eben zu */ }
+  kasten.open = offen;
+  kasten.addEventListener("toggle", () => {
+    try { localStorage.setItem("jusperfect.bib.offen", kasten.open ? "ja" : "nein"); }
+    catch (e) { /* Bequemlichkeit, keine Arbeit */ }
+  });
+}
+
 /** Welche Reiter zugeklappt sind - je Gruppe, ueber die Sitzung hinaus. */
 function bibZu() {
   try {
@@ -3096,6 +3145,11 @@ function bibliothekZeichnen(daten) {
   const kasten = $("bibliothek");
   if (!kasten) return;
   kasten.hidden = false;
+
+  // Wie viel dahintersteckt, steht an der Ueberschrift - sonst muesste man
+  // aufklappen, um zu sehen, ob sich das Aufklappen lohnt.
+  const gesamt = (daten.gruppen || []).reduce((summe, g) => summe + (g.eintraege || []).length, 0);
+  $("bib-anzahl").textContent = gesamt ? `${gesamt} Prompts` : "noch leer";
 
   // Die Wahl des Rechtsgebiets. Das der Akte steht als solches benannt da -
   // sonst weiss nach dem Wechseln niemand mehr, wozu die Akte gehoert.
@@ -5166,6 +5220,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("explorer-dialog").returnValue === "uebernehmen") mitKnopf(null, explorerUebernehmen);
   });
   $("frage-form").addEventListener("submit", (ev) => { ev.preventDefault(); mitKnopf($("senden"), frageStellen); });
+  bibLadeHerstellen();
+  kopfzeileHerstellen();
   $("bib-neu").addEventListener("click", bibNeu);
   $("bib-gebietswahl").addEventListener("change", (ev) => mitKnopf(null, async () => {
     bibGebietswahl = ev.target.value || "";

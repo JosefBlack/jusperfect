@@ -107,12 +107,15 @@ class DieLeiste(unittest.TestCase):
         self.assertIsNotNone(mitte)
         self.assertIn("display: flex", mitte.group(1))
 
-        name = re.search(r"\.akte-name \{([^}]*)\}", CSS)
+        # Die Grundregel, nicht die fuer die schmale Kopfzeile: Seit dem
+        # 14.10.2026 gibt es eine zweite Regel fuer `.akte-name`, und ein
+        # loses Muster nahm die.
+        name = re.search(r"^\.akte-name \{([^}]*)\}", CSS, re.M)
         self.assertIsNotNone(name, "Regel für .akte-name fehlt.")
         self.assertIn("text-overflow: ellipsis", name.group(1))
         self.assertIn("min-width: 0", name.group(1))
 
-        knopf = re.search(r"\.akte-wechseln \{([^}]*)\}", CSS)
+        knopf = re.search(r"^\.akte-wechseln \{([^}]*)\}", CSS, re.M)
         self.assertIsNotNone(knopf, "Regel für .akte-wechseln fehlt.")
         self.assertIn("flex: none", knopf.group(1))
 

@@ -8,8 +8,19 @@
 <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-<header class="kopf">
-  <div class="marke"><span class="jus">jus</span>perfect</div>
+<header class="kopf" id="kopf">
+  <!-- Die Marke ist der Schalter fuer die ganze Zeile.
+
+       Aus der Kanzlei am 14.10.2026: "Auch die obere Zeile jusperfect nimmt
+       viel Platz und sollte ausklappbar sein, wenn man auf jusperfect
+       drueckt."
+
+       Zugeklappt bleibt stehen, woran man ist - die Akte und der Weg
+       zurueck. Weg sind Verbrauch, Verbindungsstand und Benutzer: drei
+       Angaben, die man einmal am Tag braucht und den ganzen Tag ansieht. -->
+  <button type="button" id="kopf-schalter" class="marke"
+          title="Kopfzeile schmal machen oder wieder aufklappen"
+          aria-expanded="true"><span class="jus">jus</span>perfect</button>
   <div class="kopf-mitte" id="akte-leiste" hidden>
     <button id="akte-wechseln" type="button" class="akte-wechseln"
             title="Zurueck zur Aktenliste. Die Sitzung wird geschlossen und die temporaeren Texte werden geloescht.">← Akte wechseln</button>
@@ -152,9 +163,15 @@
 
 <main id="flaeche" class="flaeche" hidden>
   <section class="spalte dokument" id="spalte-dokument">
-    <div class="spalte-kopf">
-      <span>Dokument</span>
-      <select id="dok-filter" class="dok-filter" title="Dokument wählen"></select>
+    <!-- Ein Balken, nicht zwei.
+
+         Aus der Kanzlei am 14.10.2026: "Bekommen wir links einen
+         einheitlichen Balken hin." Die Suchzeile hatte eine eigene
+         Hintergrundfarbe und eine eigene Trennlinie und sah aus wie ein
+         zweiter Kopf. Sie steht jetzt IM Kopf, in einer zweiten Reihe
+         desselben Balkens. -->
+    <div class="spalte-kopf dokument-kopf">
+      <span>Dokumente</span>
       <!-- Der Knopf, mit dem die Arbeitsakte zusammengestellt wird, stand oben
            in der Leiste - neben dem Knopf, der diese Spalte ein- und
            ausblendet. Zwei Knoepfe mit dem Wort "Dokument" nebeneinander, die
@@ -173,7 +190,6 @@
               aria-label="Dokumente in einem eigenen Fenster öffnen">⧉</button>
       <button type="button" class="fenster-zu" data-fenster-zu="dokument"
               title="Dokumente ausblenden" aria-label="Dokumente ausblenden">‹</button>
-    </div>
     <!-- Aus der Kanzlei am 13.10.2026: "Eine Suchfunktion in den Dokumenten
          waere sehr gut, da ich z. B. schnell Antraege finden muss."
 
@@ -182,10 +198,12 @@
          heisst. Dieses hier sucht im TEXT. Es kostet nichts: Die Passagen
          liegen bereits im Programm, es geht keine Anfrage hinaus und kein
          Modell wird gefragt. -->
-    <div class="dok-suche-zeile">
-      <input type="search" id="dok-suche" class="dok-suche" autocomplete="off"
-             placeholder="Im Text dieser Dokumente suchen – z. B. Antrag">
-      <span id="dok-treffer" class="dok-treffer"></span>
+      <div class="dok-suche-zeile">
+        <select id="dok-filter" class="dok-filter" title="Dokument wählen"></select>
+        <input type="search" id="dok-suche" class="dok-suche" autocomplete="off"
+               placeholder="Im Text dieser Dokumente suchen – z. B. Antrag">
+        <span id="dok-treffer" class="dok-treffer"></span>
+      </div>
     </div>
     <div id="dok-text" class="dok-text" tabindex="0"></div>
   </section>
@@ -238,14 +256,22 @@
            Promptbibliothek nicht waehrend der Arbeit fuellen?" - Ja, und das
            ist der bessere Weg: Gemerkt wird eine Frage in dem Augenblick, in
            dem ihre Antwort getaugt hat. -->
-      <div id="bibliothek" class="bibliothek" hidden>
-        <div class="bib-kopf">
-          <!-- Eine normale Ueberschrift, wie aus der Kanzlei am 14.10.2026
-               gewuenscht - die grosse gehoert dem Chat. Daneben die Wahl des
-               Rechtsgebiets: Voreingestellt ist das der Akte, aber eine
-               Verkehrssache kann eine arbeitsrechtliche Frage aufwerfen, und
-               dann will man dorthin, ohne die Akte zu wechseln. -->
+      <!-- Die Bibliothek klappt ganz zu.
+
+           Aus der Kanzlei am 14.10.2026: "Promptbibliothek unten versperrt
+           den Chat." Stimmt: Vier Gruppen und neununddreissig Prompts
+           standen dauerhaft ueber dem Eingabefeld, auch wenn gerade nur
+           gefragt wurde. Zugeklappt ist sie eine Zeile.
+
+           Die Ueberschrift ist der Griff - und sie sagt zugleich, wie viel
+           dahinter steckt. Rechtsgebiet und "+ Neu" stehen INNEN: In einer
+           summary wuerde ein Klick auf das Auswahlfeld die Lade zuwerfen. -->
+      <details id="bibliothek" class="bibliothek" hidden>
+        <summary class="bib-kopf">
           <h2 class="bib-titel">Promptbibliothek</h2>
+          <span id="bib-anzahl" class="bib-anzahl"></span>
+        </summary>
+        <div class="bib-leiste">
           <label class="bib-wahl">Rechtsgebiet
             <select id="bib-gebietswahl"></select>
           </label>
@@ -254,7 +280,7 @@
         </div>
         <div id="bib-liste" class="bib-liste"></div>
         <p id="bib-hinweis" class="bib-hinweis" hidden></p>
-      </div>
+      </details>
       <!-- Der Umschalter: Was unten getippt wird, aendert den Entwurf statt
            die Akte zu befragen. Er steht hier und nicht nur im
            Vorschaufenster, weil er hier wirkt - und weil ein Modus, den man
@@ -295,7 +321,13 @@
              aus wie ein Fehler. Er steht jetzt fest neben den beiden
              Arbeitsknoepfen; ist das Gedaechtnis aus, sagt der Klick, wie
              es wieder angeht. -->
-        <button data-aktion="gedaechtnis" class="mini">Gedächtnis</button>
+        <!-- Hiess "Gedaechtnis" - genau wie der Knopf zwei Zeilen darunter,
+             der das Gedaechtnisfenster auf- und zuklappt. Aus der Kanzlei am
+             14.10.2026: "Zweimal Gedaechtnis?" Derselbe Fehler wie bei
+             "Entwurf" und "Vorschau", und derselbe Weg hinaus: Der Knopf
+             heisst, was er TUT. Er schreibt den jetzigen Stand ins
+             Gedaechtnis; das Fenster zeigt, was darin liegt. -->
+        <button data-aktion="gedaechtnis" class="mini">Gedächtnis sichern</button>
         <div class="mehr">
           <button id="mehr-knopf" type="button" class="mini leise" aria-expanded="false">Mehr ▾</button>
           <div id="mehr-menue" class="mehr-menue" hidden>
