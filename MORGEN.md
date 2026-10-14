@@ -70,13 +70,24 @@ nicht heraus. Eine zurückgehaltene Aussage wird gezählt und benannt.
      **wirksame** Richtlinie am Konto ablesen und datiert ablegen. Eine
      erstellte, aber nicht angehängte Richtlinie sieht fast genauso aus und
      bewirkt nichts.
+
+     > **Die Anleitung ist am 14.10.2026 an drei Stellen berichtigt worden**,
+     > nachdem die Kanzlei Bildschirmfotos aus der Konsole geschickt hat:
+     > Die deutsche Konsole nennt die Richtlinienart **„Abmelderichtlinien
+     > für KI-Services"** und nicht „Opt-out-Richtlinien"; daneben steht ein
+     > Eintrag „Bedrock-Richtlinien", der etwas anderes ist und nicht
+     > angefasst wird. Und der Satz, `default` decke „auch Bedrock" ab, war
+     > zu weit — er widersprach unserer eigenen Berichtigung vom 05.10.2026.
+     > Die Frage steht jetzt im Support-Text.
    * **`[KANZLEI 20]` — die festzuhaltende Entscheidung**, ob es bei dieser
      Bauweise bleibt: Verarbeitung bei einem Auftragsverarbeiter (AWS
-     Frankfurt). Die Alternative wäre eigene Hardware ohne
-     Auftragsverarbeiter; ihr Preis an Qualität, Kosten und Betriebsaufwand
-     ist **nicht gemessen** und darf in der Folgenabschätzung nicht behauptet
-     werden. Zu tun ist keine Konsolenarbeit, sondern ein paar Sätze mit
-     Begründung und Datum in `DSFA-ENTWURF.md`, Abschnitt 2.
+     Frankfurt). **Am 14.10.2026 entschieden: es bleibt dabei.** Der Abschnitt
+     steht formuliert in `DSFA-ENTWURF.md`, Abschnitt 2.4 — mit dem, was
+     belegt ist, dem, was Bewertung der Kanzlei ist, und den drei Sätzen, die
+     daraus ausdrücklich **nicht** folgen (unter anderem, dass AWS den Inhalt
+     nicht lesen könne; er wird im Klartext verarbeitet). Zu tun bleibt: lesen
+     und unterschreiben. Die Entscheidung steht unter der Bedingung, dass
+     `[KANZLEI 19]` eingelöst wird.
 
    > **Berichtigt am 14.10.2026:** Hier stand, `[KANZLEI 20]` sei der
    > Auftragsverarbeitungsvertrag. Das ist falsch — der AVV mit AWS ist

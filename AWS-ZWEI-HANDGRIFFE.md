@@ -138,6 +138,19 @@ kostet nichts und ändert an der Abrechnung nichts.
    anklicken.
 3. Danach weiter bei Schritt 2.
 
+> **Die drei Warnungen, die AWS dabei anzeigt** — alle drei betreffen
+> Kanzleien mit mehreren AWS-Konten und nicht diesen Fall:
+>
+> 1. *„Dieses Konto wird zum Verwaltungskonto."* Richtig, und bei einem
+>    einzigen Konto auch die einzige Möglichkeit.
+> 2. *„AWS empfiehlt ein Konto ohne Ressourcen als Verwaltungskonto."* Das
+>    ist eine Empfehlung für große Strukturen: Dort soll das Konto, das die
+>    Regeln setzt, selbst nichts betreiben. Ihr folgen hieße, ein zweites
+>    AWS-Konto anzulegen, nur um dieser Empfehlung zu folgen.
+> 3. *„Das Verwaltungskonto lässt sich später nicht wechseln."* Das stimmt
+>    und ist der Grund, warum hier nichts zurückzunehmen ist. Rückgängig
+>    machen ließe sich nur die Organisation als Ganzes.
+
 > **Wenn Sie das nicht selbst entscheiden wollen:** Eine Organisation
 > anzulegen ist eine Entscheidung über die Kontostruktur der Kanzlei, nicht
 > über jusperfect. Dann ist der andere Weg, den AWS-Support zu fragen — siehe
@@ -148,10 +161,22 @@ kostet nichts und ändert an der Abrechnung nichts.
 AWS schaltet diese Richtlinienart nicht von selbst frei.
 
 1. In **AWS Organizations** links auf **Richtlinien** (*Policies*).
-2. In der Liste **Opt-out-Richtlinien für KI-Services**
-   (*AI services opt-out policies*) anklicken.
+2. In der Liste **Abmelderichtlinien für KI-Services** anklicken — das ist
+   die *AI services opt-out policy*. Sie steht in der deutschen Konsole
+   **ganz oben** in der Liste.
 3. Oben auf **Aktivieren** (*Enable*). Steht dort schon „Aktiviert", ist
    nichts zu tun.
+
+> **Zwei Einträge der Liste sehen passend aus und sind es nicht.**
+>
+> * **Bedrock-Richtlinien** regeln die *Konfiguration* von Bedrock über
+>   mehrere Konten hinweg. Das ist nicht die Abmeldung und wird hier nicht
+>   angefasst.
+> * **Service-Kontrollrichtlinien** (SCP) beschränken Berechtigungen. Steht
+>   dort „Aktiviert", gehört das zur Organisation und nicht zu diesem
+>   Handgriff.
+>
+> Gesucht ist allein **Abmelderichtlinien für KI-Services**.
 
 ### Schritt 3 — Die Richtlinie anlegen
 
@@ -174,10 +199,27 @@ AWS schaltet diese Richtlinienart nicht von selbst frei.
 
 5. Auf **Richtlinie erstellen** speichern.
 
-> **Warum `default` und nicht `textract`.** `default` deckt **alle**
-> KI-Dienste von AWS ab — auch Bedrock, über das die Analyse läuft, und jeden
-> Dienst, der später dazukäme. Eine Richtlinie, die nur Textract nennt, müsste
-> man bei jedem neuen Dienst nachziehen, und das vergisst man.
+> **Warum `default` und nicht `textract`.** `default` deckt jeden Dienst ab,
+> den diese Richtlinienart kennt — Textract ist darunter —, und auch jeden,
+> der später dazukommt. Eine Richtlinie, die nur Textract nennt, müsste man
+> bei jedem neuen Dienst nachziehen, und das vergisst man.
+
+> **Berichtigt am 14.10.2026. Hier stand, `default` decke „auch Bedrock" ab.
+> Das ist nicht belegt und widerspricht unserer eigenen Unterlage**
+> (`DSFA-ENTWURF.md`, Berichtigung vom 05.10.2026: „für die KI-Dienste von
+> AWS — *anders als für Bedrock*"). Bedrock gehört nach allem, was sich von
+> außen finden lässt, **nicht** zu den Diensten dieser Richtlinienart; AWS
+> führt dafür an, Bedrock verwende Inhalte ohnehin nicht zur Verbesserung der
+> Dienste, es gebe also nichts abzumelden. Dass die Konsole eine eigene
+> Richtlinienart „Bedrock-Richtlinien" führt, passt dazu.
+>
+> **Belegt ist das von hier aus nicht.** Die Dokumentationsseiten von AWS sind
+> von diesem Rechner aus nicht erreichbar, und was Dritte darüber schreiben,
+> ist kein Nachweis für eine Datenschutz-Folgenabschätzung. Deshalb steht die
+> Frage jetzt als Punkt 3 im Support-Text unten. Die Richtlinie mit `default`
+> anzulegen bleibt in jedem Fall richtig: Trifft sie Bedrock nicht, schadet
+> sie dort auch nicht; Textract — der Dienst, um den es in `[KANZLEI 19]`
+> geht — ist sicher erfasst.
 
 ### Schritt 4 — Die Richtlinie anhängen
 
@@ -196,9 +238,9 @@ Erstellt ist nicht wirksam. Sie muss an das Konto gehängt werden.
 
 1. In **AWS Organizations** links auf **AWS-Konten**, dann das Konto
    **579138738703** anklicken.
-2. Reiter **Richtlinien** (*Policies*). Dort steht unter „Opt-out-Richtlinien
-   für KI-Services" die **wirksame** Richtlinie — nicht die erstellte, sondern
-   die, die für dieses Konto tatsächlich gilt.
+2. Reiter **Richtlinien** (*Policies*). Dort steht unter
+   „Abmelderichtlinien für KI-Services" die **wirksame** Richtlinie — nicht
+   die erstellte, sondern die, die für dieses Konto tatsächlich gilt.
 3. Davon einen **Bildschirmausdruck** machen, mit sichtbarem Datum.
 4. Den Ausdruck zur Datenschutzakte nehmen, mit dem Vermerk:
    *„Wirksame AI-services-Opt-out-Richtlinie für Konto 579138738703,
@@ -210,6 +252,16 @@ Erstellt ist nicht wirksam. Sie muss an das Konto gehängt werden.
 > Punkt.** Eine erstellte, aber nicht angehängte Richtlinie sieht in der
 > Konsole fast genauso aus und bewirkt nichts. Deshalb wird der Nachweis am
 > **Konto** abgelesen und nicht an der Richtlinie.
+
+> **Dieser Schritt beantwortet nebenbei eine Frage, die bei einer
+> Ein-Konto-Organisation offen ist:** ob eine Richtlinie, die an der
+> Stammorganisation hängt, auch für das **Verwaltungskonto** gilt — also für
+> genau dieses Konto. Für die Service-Kontrollrichtlinien (SCP) ist bekannt,
+> dass sie das Verwaltungskonto *nicht* erfassen. Ob das für die
+> Abmelderichtlinien ebenso ist, war von hier aus nicht zu klären. Schritt 5 liest den Stand am Konto ab und zeigt
+> es deshalb: Steht dort die Richtlinie, gilt sie. Steht dort nichts, ist der
+> Weg über den Support zu gehen — dann ist auch der Handgriff nicht erledigt,
+> und `[KANZLEI 19]` bleibt offen.
 
 ### Der Weg über den Support
 
@@ -227,6 +279,12 @@ fertig:
 >    ausschließt? Falls ja: seit wann, und für welche Dienste?
 > 2. Falls nein: Wie richten wir sie für ein Konto ein, das keiner
 >    Organisation angehört?
+> 3. Gilt diese Richtlinie auch für das Verwaltungskonto der Organisation,
+>    wenn sie an der Stammorganisation hängt? Und: Ist Amazon Bedrock von
+>    dieser Richtlinienart erfasst? Falls nein — auf welcher vertraglichen
+>    Grundlage ist ausgeschlossen, dass Inhalte, die wir an Bedrock senden,
+>    zur Verbesserung der Dienste verwendet werden, und wie lange werden sie
+>    zu anderen Zwecken aufbewahrt?
 >
 > Hintergrund ist eine Datenschutz-Folgenabschätzung nach Art. 35 DSGVO. Wir
 > verarbeiten mit Amazon Textract und Amazon Bedrock Unterlagen, die dem

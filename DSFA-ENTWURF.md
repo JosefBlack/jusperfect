@@ -184,11 +184,71 @@ Auftragsverarbeitungsvertrag und — für die KI-Dienste — an der
 warum die Textract-Zeile in Abschnitt 2.1 heute „offen" sagt und nicht mehr
 „nicht gespeichert".
 
-**[KANZLEI 20]** — zu entscheiden und festzuhalten: ob die Kanzlei es bei
-dieser Bauweise belässt. Die Alternative wäre eine Verarbeitung auf eigener
-Hardware ohne Auftragsverarbeiter; deren Preis an Qualität, Kosten und
-Betriebsaufwand ist nicht gemessen und darf hier nicht behauptet werden
-(siehe `[KANZLEI 4]` und die Gegenlesung zu Abschnitt 3.2 vom 12.10.2026).
+### [KANZLEI 20] — die Entscheidung über die Bauweise
+
+**Entschieden am 14.10.2026: Es bleibt bei dieser Bauweise.** Die Kanzlei
+verarbeitet weiterhin mit AWS als Auftragsverarbeiter nach Art. 28 DSGVO und
+richtet ihre Maßnahmen darauf aus, statt die Verarbeitung auf eigene Hardware
+zu verlegen.
+
+**Worauf sich die Entscheidung stützt.** Belegbar ist nur, was das Programm
+tut; was AWS vertraglich zusagt, steht nicht im Programm (siehe oben).
+
+| Umstand | belegt an |
+|---|---|
+| Verarbeitung und Ablage in Frankfurt (`eu-central-1`); eine Region außerhalb von EU und EWR lässt das Programm nicht zu, sondern bricht ab | `jusperfect/config.py:118`, `:286`, `:629` |
+| Zum Modell gehen die Systemanweisung, die vom Bearbeiter ausgewählten Passagen und die Aufgabe — **nicht die Akte** | Abschnitt 2.1, `jusperfect/providers/bedrock.py` |
+| Die dauerhafte Ablage ist mit dem KMS-Schlüssel der Kanzlei verschlüsselt; über die Schlüsselrichtlinie verfügt die Kanzlei allein, jede Entschlüsselung steht in CloudTrail | Abschnitt 2.4, `SICHERHEIT.md` |
+| In den Protokollen steht kein Akteninhalt; das ist nicht Vorsatz des Bearbeiters, sondern im Programm erzwungen | `jusperfect/security/protokoll.py` |
+| Der Auftragsverarbeitungsvertrag mit AWS liegt vor und ist geprüft | `SICHERHEIT.md`, Zeile 524 |
+
+**Was daran Bewertung der Kanzlei ist und kein Beleg:** dass diese
+Mengenbegrenzung, diese Verschlüsselung der Ablage und diese
+Nachvollziehbarkeit für Unterlagen, die dem Berufsgeheimnis unterliegen
+(§ 203 StGB), angemessen sind. Das ist eine Abwägung und keine Messung;
+sie steht der Kanzlei zu und ist hier als ihre Abwägung ausgewiesen.
+
+**Was mit dieser Entscheidung ausdrücklich NICHT behauptet wird.** Drei Sätze,
+die aus ihr nicht folgen und an keiner Stelle aus ihr abgeleitet werden
+dürfen:
+
+1. **Nicht**, dass AWS den Inhalt nicht lesen könne. Bedrock und Textract
+   verarbeiten im Klartext; das lässt sich nicht anders bauen (Abschnitt 2.4).
+2. **Nicht**, dass die Alternative geprüft und schlechter befunden worden
+   wäre. Der Preis eigener Hardware an Qualität, Kosten und Betriebsaufwand
+   ist **nicht gemessen** (`[KANZLEI 4]`, Gegenlesung zu Abschnitt 3.2 vom
+   12.10.2026). Die Entscheidung fällt ohne diese Messung — bewusst, weil die
+   Kanzlei den Aufwand der Messung nicht für verhältnismäßig hält, und nicht,
+   weil das Ergebnis feststünde.
+3. **Nicht**, dass die Frage der Speicherung beim Auftragsverarbeiter geklärt
+   wäre. Sie steht als `[KANZLEI 19]` offen.
+
+**Unter welcher Bedingung sie gilt.** Die Entscheidung setzt voraus, dass
+`[KANZLEI 19]` eingelöst wird — die wirksame AI-services-Opt-out-Richtlinie
+für das Konto, nachgewiesen und datiert. Solange sie aussteht, gilt die
+Entscheidung für die Bauweise, **nicht** für den Betrieb mit gescannten
+Unterlagen: Bis zum Nachweis bleibt die Texterkennung abschaltbar zu halten
+(`JUSPERFECT_OCR=keine`), und keine Unterlage der Kanzlei darf eine
+Nicht-Speicherung behaupten.
+
+**Wann sie neu zu treffen ist.** Wenn eines davon eintritt, ist dieser
+Abschnitt neu zu schreiben und nicht fortzuschreiben:
+
+* `[KANZLEI 19]` lässt sich nicht einlösen — AWS gibt den Nachweis nicht oder
+  nur eingeschränkt;
+* AWS ändert die Bedingungen für Bedrock oder Textract in der Region
+  Frankfurt, insbesondere zur Verwendung von Inhalten;
+* die Kanzlei verarbeitet mit dem Programm Unterlagen einer Art, die hier
+  nicht bewertet ist;
+* es wird eine Bauweise verfügbar, die in der Qualität trägt und ohne
+  Auftragsverarbeiter auskommt — dann ist die Messung nachzuholen, die hier
+  unterblieben ist.
+
+Im Übrigen mit der Unterlage im Ganzen, jährlich.
+
+Festgehalten für die Kanzlei Dortschy & Thunert am 14.10.2026.
+
+Ort, Datum ........................  Unterschrift ........................
 
 ---
 
