@@ -505,7 +505,9 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
    durchkommen, soll sie wenigstens mitwachsen und nicht in fester Groesse
    aus dem geskalierten Blatt ragen. */
 .blatt-koerper .beleg { font-size: .9em; background: #eef3f2; color: #26514f; border-color: #cfdedd; }
-.blatt-fuss-hinweis { margin: 8px 0 0; font-size: 11px; color: var(--gedaempft); }
+.blatt-fuss { display: flex; align-items: flex-start; gap: 10px; margin-top: 8px; }
+.blatt-fuss .mini { flex: none; white-space: nowrap; }
+.blatt-fuss-hinweis { margin: 0; font-size: 11px; color: var(--gedaempft); }
 
 .frage-form { display: flex; gap: 8px; padding: 8px; border: 1px solid var(--linie);
   border-radius: 14px; background: var(--flaeche); box-shadow: 0 4px 20px rgba(0,0,0,.09); }

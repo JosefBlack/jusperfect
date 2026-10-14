@@ -416,6 +416,37 @@
      Der Text steht hier zum Lesen und Aendern, bevor er abgelegt wird. Das
      ist Absicht: Ein Prompt aus der Arbeit kann einen Namen enthalten, und
      die Bibliothek ueberdauert die Akte. -->
+<!-- Was am Blatt eingestellt werden kann.
+
+     Aus der Kanzlei am 14.10.2026: "Stellt sich auch die Frage, ob die KI
+     das Schreiben inklusive Briefbogen generieren kann, so dass die
+     Vorschau besser anpassbar ist."
+
+     Der Briefbogen bleibt die Datei der Kanzlei - er traegt
+     Pflichtangaben, und ein nachgebildeter waere irgendwo falsch.
+     Anpassbar ist, was zwischen Briefbogen und Text liegt. Jedes Feld darf
+     leer bleiben; dann gilt, was in der Vorlage steht. -->
+<dialog id="blatt-dialog" class="entwurf-dialog">
+  <form method="dialog" class="entwurf-form">
+    <h2>Blatt einstellen</h2>
+    <p class="dialog-hinweis">Leer lassen heißt: wie in Ihrer Word-Vorlage. Die
+      Werte gelten für die Ansicht <b>und</b> für die Word-Datei.</p>
+    <label>Textbeginn ab Blattoberkante (mm)
+      <input id="blatt-beginn" type="number" min="0" max="250" step="1" autocomplete="off"></label>
+    <label>Schrift
+      <input id="blatt-schrift" maxlength="80" autocomplete="off"></label>
+    <label>Schriftgröße (pt)
+      <input id="blatt-groesse" type="number" min="6" max="24" step="0.5" autocomplete="off"></label>
+    <label>Zeilenabstand
+      <input id="blatt-abstand" type="number" min="0.8" max="3" step="0.05" autocomplete="off"></label>
+    <div class="dialog-knoepfe">
+      <button value="zuruecksetzen" class="knopf leise">Alles zurücksetzen</button>
+      <button value="abbrechen" class="knopf leise">Abbrechen</button>
+      <button value="setzen" class="knopf">Übernehmen</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="prompt-dialog" class="entwurf-dialog">
   <form method="dialog" class="entwurf-form">
     <h2>Prompt in die Bibliothek</h2>

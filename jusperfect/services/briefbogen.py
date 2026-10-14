@@ -32,8 +32,11 @@ neues ZIP ueberleben.
 
 from __future__ import annotations
 
+import json
+import os
 import re
 import shutil
+import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -179,20 +182,22 @@ def _xml_text(wert: str) -> str:
     return (sauber.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
-def _absatz(zeile: str) -> str:
+def _absatz(zeile: str, schrift: str = "", abstand: str = "") -> str:
     """Eine Zeile als Word-Absatz. Leere Zeilen bleiben leere Absaetze.
 
     Ohne eigene Formatierung: Welche Schrift, welcher Abstand und welcher
     Rand gelten, steht in der Vorlage der Kanzlei. Ein hier gesetzter Wert
     wuerde ihn ueberschreiben, und zwar unsichtbar.
     """
+    pruefmass = f"<w:pPr>{abstand}</w:pPr>" if abstand else ""
     if not zeile.strip():
-        return "<w:p/>"
-    return ('<w:p><w:r><w:t xml:space="preserve">'
+        return f"<w:p>{pruefmass}</w:p>" if pruefmass else "<w:p/>"
+    return (f"<w:p>{pruefmass}<w:r>{schrift}" + '<w:t xml:space="preserve">'
             + _xml_text(zeile) + "</w:t></w:r></w:p>")
 
 
-def _rumpf_ersetzen(xml: str, text: str, vorlauf_mm: float = 0.0) -> str:
+def _rumpf_ersetzen(xml: str, text: str, vorlauf_mm: float = 0.0,
+                    bild: dict[str, object] | None = None) -> str:
     """Den leeren Rumpf durch den Entwurfstext ersetzen.
 
     Der Abschnittsblock ``w:sectPr`` am Ende bleibt stehen, und das ist der
@@ -212,10 +217,39 @@ def _rumpf_ersetzen(xml: str, text: str, vorlauf_mm: float = 0.0) -> str:
     stelle = alt.rfind("<w:sectPr")
     if stelle >= 0:
         sect = alt[stelle:]
-    absaetze = [_absatz(z) for z in text.replace("\r\n", "\n").split("\n")]
+    schrift, abstand = _wortform(bild)
+    absaetze = [_absatz(z, schrift, abstand) for z in text.replace("\r\n", "\n").split("\n")]
     if absaetze and vorlauf_mm > 0:
         absaetze[0] = _mit_vorlauf(absaetze[0], vorlauf_mm)
     return xml[:anfang] + "".join(absaetze) + sect + xml[ende:]
+
+
+def _wortform(bild: dict[str, object] | None) -> tuple[str, str]:
+    """Schrift und Zeilenabstand als Word-Bausteine - nur, was abweicht.
+
+    Was die Vorlage ohnehin vorgibt, wird nicht noch einmal hingeschrieben.
+    Eine Angabe, die dasselbe sagt wie die Formatvorlage, ist kein Fehler -
+    aber sie haelt die Vorlage fest: Aendert die Kanzlei spaeter ihre
+    Schrift, aendert sich der Brief dann nicht mit.
+    """
+    if not bild:
+        return "", ""
+    gesetzt = bild.get("einstellungen") or {}
+    jetzt = bild.get("grundschrift") or {}
+    teile = []
+    if gesetzt.get("schrift"):
+        name = _xml_text(str(jetzt.get("name", "")))
+        teile.append(f'<w:rFonts w:ascii="{name}" w:hAnsi="{name}" w:cs="{name}"/>')
+    if gesetzt.get("groesse_pt"):
+        halbe = round(float(jetzt.get("groesse_pt", 10)) * 2)
+        teile.append(f'<w:sz w:val="{halbe}"/><w:szCs w:val="{halbe}"/>')
+    schrift = f"<w:rPr>{''.join(teile)}</w:rPr>" if teile else ""
+    abstand = ""
+    if gesetzt.get("zeilenabstand"):
+        # 240 Zwanzigstelpunkte sind einfacher Zeilenabstand.
+        zeilen = round(float(jetzt.get("zeilenabstand", 1.0)) * 240)
+        abstand = f'<w:spacing w:line="{zeilen}" w:lineRule="auto"/>'
+    return schrift, abstand
 
 
 def _mit_vorlauf(absatz: str, vorlauf_mm: float) -> str:
@@ -226,10 +260,120 @@ def _mit_vorlauf(absatz: str, vorlauf_mm: float) -> str:
     Leere Absaetze waeren eine Schaetzung in Zeilen, und eine Schaetzung, die
     um zwei danebenliegt, schiebt den Brief auf die zweite Seite.
     """
-    abstand = f'<w:pPr><w:spacing w:before="{round(vorlauf_mm * TWIPS_JE_MM)}"/></w:pPr>'
+    twips = round(vorlauf_mm * TWIPS_JE_MM)
     if absatz == "<w:p/>":
-        return f"<w:p>{abstand}</w:p>"
-    return absatz.replace("<w:p>", f"<w:p>{abstand}", 1)
+        return f'<w:p><w:pPr><w:spacing w:before="{twips}"/></w:pPr></w:p>'
+    if "<w:spacing " in absatz:
+        # Steht schon ein Abstandselement da (Zeilenabstand), bekommt es das
+        # Merkmal dazu. Ein zweites `w:spacing` daneben waere kein Fehler
+        # beim Oeffnen - Word naehme einfach das letzte, und der Vorlauf
+        # waere lautlos weg.
+        return absatz.replace("<w:spacing ", f'<w:spacing w:before="{twips}" ', 1)
+    if absatz.startswith("<w:p><w:pPr>"):
+        # Zwei `w:pPr` in einem Absatz sind kein gueltiges Word-Dokument.
+        return absatz.replace("<w:p><w:pPr>",
+                              f'<w:p><w:pPr><w:spacing w:before="{twips}"/>', 1)
+    return absatz.replace("<w:p>", f'<w:p><w:pPr><w:spacing w:before="{twips}"/></w:pPr>', 1)
+
+
+# ── Was die Kanzlei am Blatt einstellen kann ───────────────────────────────
+#
+# Aus der Kanzlei am 14.10.2026: „Stellt sich auch die Frage, ob die KI das
+# Schreiben inklusive Briefbogen generieren kann, so dass die Vorschau besser
+# anpassbar ist."
+#
+# Der Briefbogen bleibt eine Datei - die Begruendung steht im Kopf dieses
+# Moduls. Anpassbar wird stattdessen das, was zwischen Briefbogen und Text
+# liegt und sich von Haus zu Haus unterscheidet: wo der Text anfaengt, in
+# welcher Schrift, in welcher Groesse, mit welchem Zeilenabstand.
+#
+# Vier Werte, keiner davon erfunden: Jeder ist leer voreingestellt und
+# bedeutet dann „wie in der Vorlage". Wer einen setzt, setzt ihn fuer die
+# Ansicht UND fuer die Word-Datei - eine Ansicht, die anders aussieht als das
+# Blatt, waere schlimmer als gar keine.
+
+#: Die Datei mit den Einstellungen. Neben dem Briefbogen, aus demselben Grund.
+EINSTELLUNGEN_NAME = "jusperfect-blatt.json"
+
+#: Was eingestellt werden kann, und was „nicht eingestellt" heisst.
+EINSTELLUNGEN_LEER: dict[str, object] = {
+    "textbeginn_mm": None,   # vom oberen Blattrand; None = aus dem Briefkopf
+    "schrift": "",           # "" = wie in der Vorlage
+    "groesse_pt": None,      # None = wie in der Vorlage
+    "zeilenabstand": None,   # None = wie in der Vorlage; 1.0 = einfach
+}
+
+
+def einstellungen_ort() -> Path:
+    """Neben dem Briefbogen, sonst neben dem Programmordner."""
+    vorhanden = finden()
+    return (vorhanden.parent if vorhanden else orte()[0].parent) / EINSTELLUNGEN_NAME
+
+
+def einstellungen() -> dict[str, object]:
+    """Die eingestellten Werte - fehlende bleiben leer.
+
+    Faellt die Datei aus, faellt nur sie aus: Dann gilt die Vorlage, und das
+    ist der Zustand, in dem alles angefangen hat. Ein Briefbogen, der wegen
+    einer kaputten Einstellungsdatei gar nicht mehr geht, waere der
+    schlechtere Tausch.
+    """
+    gesetzt = dict(EINSTELLUNGEN_LEER)
+    try:
+        roh = json.loads(einstellungen_ort().read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError):
+        return gesetzt
+    if not isinstance(roh, dict):
+        return gesetzt
+    for name in EINSTELLUNGEN_LEER:
+        wert = roh.get(name)
+        if name == "schrift":
+            gesetzt[name] = " ".join(str(wert).split())[:80] if wert else ""
+        elif isinstance(wert, (int, float)) and not isinstance(wert, bool):
+            gesetzt[name] = float(wert)
+    return _einstellungen_begrenzen(gesetzt)
+
+
+def _einstellungen_begrenzen(gesetzt: dict[str, object]) -> dict[str, object]:
+    """Werte, mit denen kein Blatt entsteht, werden nicht uebernommen.
+
+    Ein Textbeginn von 400 Millimetern ergaebe ein leeres Blatt und eine
+    Word-Datei, in der der Brief auf Seite zwei anfaengt - ohne dass
+    irgendwo stuende, warum.
+    """
+    grenzen = {"textbeginn_mm": (0.0, 250.0), "groesse_pt": (6.0, 24.0),
+               "zeilenabstand": (0.8, 3.0)}
+    for name, (klein, gross) in grenzen.items():
+        wert = gesetzt.get(name)
+        if isinstance(wert, float) and not (klein <= wert <= gross):
+            gesetzt[name] = None
+    return gesetzt
+
+
+def einstellungen_speichern(neu: dict[str, object]) -> dict[str, object]:
+    """Die Werte ablegen - erst daneben schreiben, dann umbenennen."""
+    gesetzt = dict(EINSTELLUNGEN_LEER)
+    for name in EINSTELLUNGEN_LEER:
+        wert = neu.get(name)
+        if name == "schrift":
+            gesetzt[name] = " ".join(str(wert).split())[:80] if wert else ""
+        elif isinstance(wert, (int, float)) and not isinstance(wert, bool):
+            gesetzt[name] = float(wert)
+    gesetzt = _einstellungen_begrenzen(gesetzt)
+    ort = einstellungen_ort()
+    try:
+        ort.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False,
+                                         dir=str(ort.parent),
+                                         prefix=ort.name + ".", suffix=".neu") as datei:
+            datei.write(json.dumps(gesetzt, ensure_ascii=False, indent=2) + "\n")
+            vorlaeufig = Path(datei.name)
+        os.replace(vorlaeufig, ort)
+    except OSError as fehler:
+        raise BriefbogenFehler(
+            f"Die Blatteinstellungen liessen sich nicht nach {ort} schreiben: {fehler}"
+        ) from fehler
+    return gesetzt
 
 
 # ── Das Blatt ansehen, ohne Word zu oeffnen ────────────────────────────────
@@ -456,29 +600,62 @@ def seitenbild(vorlage: Path | None = None) -> dict[str, object]:
     vorlauf = (max(0.0, unterkante + ABSTAND_NACH_KOPF_MM - raender["oben"])
                if unterkante else 0.0)
 
+    aus_vorlage = _grundschrift(vorlage)
+    gesetzt = einstellungen()
+    # Was eingestellt ist, gilt; was nicht, kommt aus der Vorlage. Beides
+    # steht in der Antwort: Die Oberflaeche zeigt im Einstellfenster den Wert
+    # der Vorlage als Voreinstellung an, damit niemand raten muss.
+    schrift = {
+        "name": str(gesetzt["schrift"] or aus_vorlage["name"]),
+        "groesse_pt": float(gesetzt["groesse_pt"] or aus_vorlage["groesse_pt"]),
+        "zeilenabstand": float(gesetzt["zeilenabstand"] or 1.0),
+    }
+    textbeginn = (float(gesetzt["textbeginn_mm"]) if gesetzt["textbeginn_mm"] is not None
+                  else round(raender["oben"] + vorlauf, 1))
     return {"seite_mm": seite, "raender_mm": raender, "stuecke": stuecke,
-            "vorlauf_mm": round(vorlauf, 1), "erste_seite_eigen": erste_seite,
-            "grundschrift": _grundschrift(vorlage), "datei": vorlage.name}
+            "vorlauf_mm": round(max(0.0, textbeginn - raender["oben"]), 1),
+            "textbeginn_mm": round(textbeginn, 1),
+            "erste_seite_eigen": erste_seite,
+            "grundschrift": schrift,
+            "aus_vorlage": {"textbeginn_mm": round(raender["oben"] + vorlauf, 1),
+                            **aus_vorlage, "zeilenabstand": 1.0},
+            "einstellungen": gesetzt, "datei": vorlage.name}
 
 
 def _grundschrift(vorlage: Path) -> dict[str, object]:
-    """Schrift und Groesse, die in der Vorlage voreingestellt sind.
+    """Schrift und Groesse, in denen der Brief wirklich gesetzt wird.
 
-    Fehlt die Groesse, gilt Words eigene Voreinstellung von zehn Punkt. Eine
-    Ansicht in elf Punkt saehe laenger aus als das Blatt, das herauskommt -
-    und genau danach wird hier geschaut.
+    **Hier stand zuerst nur ``w:docDefaults``, und das war falsch.** Aus der
+    Kanzlei am 14.10.2026: „Schrift ist Franklin Gothic Book." In den
+    docDefaults dieser Vorlage steht Times New Roman - und daneben, in der
+    Standard-Absatzformatvorlage (``w:default="1"``), steht Franklin Gothic
+    Book in zwoelf Punkt. Word setzt nach der Formatvorlage; die
+    docDefaults sind nur das, was gilt, wenn gar nichts anderes dasteht.
+
+    Die Groesse ist dabei so wichtig wie der Name: Eine Ansicht in zehn
+    statt zwoelf Punkt zeigt einen Brief, der auf eine Seite passt, obwohl
+    er auf zwei geht - und das Abschaetzen der Laenge ist der Grund, warum
+    die Ansicht ueberhaupt da ist.
     """
     try:
         with zipfile.ZipFile(vorlage) as paket:
             stile = paket.read("word/styles.xml").decode("utf-8")
     except (OSError, KeyError, zipfile.BadZipFile, UnicodeDecodeError):
         return {"name": "", "groesse_pt": 10.0}
-    block = re.search(r"<w:docDefaults>.*?</w:docDefaults>", stile, re.S)
-    roh = block.group(0) if block else ""
-    schrift = re.search(r'<w:rFonts[^>]*w:ascii="([^"]+)"', roh)
-    groesse = _GROESSE_RE.search(roh)
-    return {"name": schrift.group(1) if schrift else "",
-            "groesse_pt": int(groesse.group(1)) / 2 if groesse else 10.0}
+    # Erst die Standard-Absatzformatvorlage, dann die docDefaults.
+    standard = re.search(
+        r'<w:style [^>]*w:type="paragraph"[^>]*w:default="1".*?</w:style>', stile, re.S)
+    grund = re.search(r"<w:docDefaults>.*?</w:docDefaults>", stile, re.S)
+    name, groesse = "", 0.0
+    for block in (standard, grund):
+        roh = block.group(0) if block else ""
+        if not name:
+            treffer = re.search(r'<w:rFonts[^>]*w:ascii="([^"]+)"', roh)
+            name = treffer.group(1) if treffer else ""
+        if not groesse:
+            treffer = _GROESSE_RE.search(roh)
+            groesse = int(treffer.group(1)) / 2 if treffer else 0.0
+    return {"name": name, "groesse_pt": groesse or 10.0}
 
 
 def bild_lesen(kennung: str, vorlage: Path | None = None) -> tuple[bytes, str]:
@@ -515,10 +692,13 @@ def erzeugen(text: str, vorlage: Path | None = None) -> bytes:
     vorlage = vorlage or finden()
     if vorlage is None:
         raise BriefbogenFehler(_FEHLT.format(name=DATEINAME, ordner=orte()[0].parent))
-    # Wie weit der Text unter dem oberen Rand beginnt - gelesen aus dem
-    # Briefbogen selbst, nicht geschaetzt. Siehe `seitenbild`.
-    vorlauf = float(seitenbild(vorlage)["vorlauf_mm"])
-    neuer_rumpf = _rumpf_ersetzen(_rumpf_lesen(vorlage), text, vorlauf)
+    # Wie weit der Text unter dem oberen Rand beginnt, in welcher Schrift und
+    # mit welchem Zeilenabstand - alles aus demselben Aufruf wie die Ansicht.
+    # Zwei Rechenwege waeren zwei Ergebnisse, und das eine davon stuende auf
+    # dem Bildschirm und das andere auf dem Papier.
+    bild = seitenbild(vorlage)
+    neuer_rumpf = _rumpf_ersetzen(_rumpf_lesen(vorlage), text,
+                                  float(bild["vorlauf_mm"]), bild)
     puffer = BytesIO()
     try:
         with zipfile.ZipFile(vorlage) as alt, \

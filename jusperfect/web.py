@@ -242,6 +242,14 @@ class ReferenzenWaehlen(BaseModel):
     namen: list[str] = Field(default_factory=list, max_length=20)
 
 
+class BlattEinstellen(BaseModel):
+    """Vier Werte; jeder leer bedeutet „wie in der Vorlage"."""
+    textbeginn_mm: float | None = Field(default=None, ge=0, le=250)
+    schrift: str = Field(default="", max_length=80)
+    groesse_pt: float | None = Field(default=None, ge=6, le=24)
+    zeilenabstand: float | None = Field(default=None, ge=0.8, le=3)
+
+
 class EntwurfAendern(BaseModel):
     anweisung: str = Field(max_length=4000)
 
@@ -1116,6 +1124,25 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         Kanzlei ihren Briefbogen, ändert sich diese Ansicht mit.
         """
         d.berechtigungen.nutzer(ident)
+        return briefbogen.seitenbild()
+
+    @app.put("/api/briefbogen/einstellungen")
+    def briefbogen_einstellen(daten: BlattEinstellen,
+                              ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Was am Blatt eingestellt werden kann - und sonst nichts.
+
+        Aus der Kanzlei am 14.10.2026: „ob die KI das Schreiben inklusive
+        Briefbogen generieren kann, so dass die Vorschau besser anpassbar
+        ist." Der Briefbogen bleibt eine Datei; anpassbar wird, was
+        dazwischen liegt: Textbeginn, Schrift, Größe, Zeilenabstand.
+
+        Die Werte gelten für die Ansicht UND für die Word-Datei. Eine
+        Ansicht, die anders aussieht als das Blatt, wäre schlimmer als
+        keine.
+        """
+        d.berechtigungen.nutzer(ident)
+        briefbogen.einstellungen_speichern(daten.model_dump())
+        ereignis(_log, "blatt_eingestellt", nutzer=ident.nutzer_id)
         return briefbogen.seitenbild()
 
     @app.get("/api/briefbogen/bild")

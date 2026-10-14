@@ -4378,6 +4378,7 @@ function blattBauen(b, text) {
   koerper.style.top = ((b.raender_mm.oben + (b.vorlauf_mm || 0)) * mm) + "px";
   koerper.style.width = ((b.seite_mm.breite - b.raender_mm.links - b.raender_mm.rechts) * mm) + "px";
   koerper.style.fontSize = (grund * MM_JE_PUNKT * mm) + "px";
+  koerper.style.lineHeight = String(1.15 * ((b.grundschrift && b.grundschrift.zeilenabstand) || 1));
   // Zeile fuer Zeile, genau wie `_absatz` in services/briefbogen.py die
   // Word-Datei baut. NICHT ueber `antworttext`: Der setzt zwei Zeilen
   // hintereinander zu einem Absatz zusammen, Word macht daraus zwei. Dann
@@ -4523,10 +4524,19 @@ function entwurfInhalt(text) {
   if (entwurfAnsicht === "blatt" && blattBild) {
     const rahmen = document.createElement("div"); rahmen.className = "blatt-rahmen";
     rahmen.appendChild(blattBauen(blattBild, text));
+    const fuss = document.createElement("div"); fuss.className = "blatt-fuss";
     const satz = document.createElement("p"); satz.className = "blatt-fuss-hinweis";
-    satz.textContent = "Ansicht, gesetzt aus Ihrer Word-Vorlage (" + (blattBild.datei || "")
-      + "). Das Blatt baut Word; Zeilenumbruch und Schriftschnitt können geringfügig abweichen.";
-    rahmen.appendChild(satz);
+    satz.textContent = blattHinweis(blattBild);
+    fuss.appendChild(satz);
+    if (!nebenfenster) {
+      const stellen = document.createElement("button");
+      stellen.type = "button"; stellen.className = "mini leise";
+      stellen.textContent = "Blatt einstellen";
+      stellen.title = "Textbeginn, Schrift, Größe und Zeilenabstand";
+      stellen.addEventListener("click", blattEinstellenOeffnen);
+      fuss.appendChild(stellen);
+    }
+    rahmen.appendChild(fuss);
     return rahmen;
   }
   const block = document.createElement("div"); block.className = "entwurf-text";
@@ -4537,6 +4547,82 @@ function entwurfInhalt(text) {
   }
   antworttext(block, text);
   return block;
+}
+
+/** Was unter dem Blatt steht - und ob die Schrift ueberhaupt da ist.
+ *
+ * Eine Ansicht in einer Ersatzschrift sagt ueber die Laenge wenig: Franklin
+ * Gothic Book und Times New Roman brauchen fuer denselben Satz
+ * unterschiedlich viel Platz. Fehlt die Schrift auf diesem Rechner, steht
+ * das hier - und nicht erst in Word.
+ */
+function blattHinweis(b) {
+  const name = (b.grundschrift && b.grundschrift.name) || "";
+  let satz = "Ansicht, gesetzt aus Ihrer Word-Vorlage (" + (b.datei || "")
+           + "). Das Blatt baut Word; Zeilenumbruch und Schriftschnitt können geringfügig abweichen.";
+  if (name && !schriftVorhanden(name)) {
+    satz += " Die Schrift „" + name + "“ ist auf diesem Rechner nicht vorhanden – "
+          + "die Ansicht zeigt eine Ersatzschrift, die Länge kann deshalb abweichen.";
+  }
+  return satz;
+}
+
+/** Hat dieser Rechner die Schrift?
+ *
+ * Gemessen und nicht geraten: Derselbe Satz wird einmal in der gesuchten
+ * Schrift mit Rueckfall auf eine Standardschrift gezeichnet und einmal nur
+ * in der Standardschrift. Sind beide gleich breit, hat der Browser auf die
+ * Standardschrift zurueckgegriffen - die gesuchte gibt es also nicht.
+ */
+const schriftGemessen = new Map();
+function schriftVorhanden(name) {
+  if (schriftGemessen.has(name)) return schriftGemessen.get(name);
+  let da = true;
+  try {
+    const flaeche = document.createElement("canvas").getContext("2d");
+    const probe = "ABCDEFGHIJKLMnopqrstuvwxyz 0123456789";
+    da = ["monospace", "serif", "sans-serif"].some((ersatz) => {
+      flaeche.font = `16px ${ersatz}`;
+      const ohne = flaeche.measureText(probe).width;
+      flaeche.font = `16px "${name}", ${ersatz}`;
+      return flaeche.measureText(probe).width !== ohne;
+    });
+  } catch (e) { /* kein Canvas: dann lieber nichts behaupten */ }
+  schriftGemessen.set(name, da);
+  return da;
+}
+
+function blattEinstellenOeffnen() {
+  const b = blattBild;
+  if (!b) return;
+  const gesetzt = b.einstellungen || {};
+  const vorlage = b.aus_vorlage || {};
+  const setzen = (id, wert, hinweis) => {
+    const feld = $(id);
+    feld.value = (wert === null || wert === undefined || wert === "") ? "" : wert;
+    feld.placeholder = "wie in der Vorlage: " + hinweis;
+  };
+  setzen("blatt-beginn", gesetzt.textbeginn_mm, (vorlage.textbeginn_mm || 0) + " mm");
+  setzen("blatt-schrift", gesetzt.schrift, vorlage.name || "—");
+  setzen("blatt-groesse", gesetzt.groesse_pt, (vorlage.groesse_pt || 0) + " pt");
+  setzen("blatt-abstand", gesetzt.zeilenabstand, "einfach (1,0)");
+  $("blatt-dialog").showModal();
+}
+
+async function blattEinstellen(zuruecksetzen) {
+  const zahl = (id) => {
+    const roh = ($(id).value || "").trim().replace(",", ".");
+    const wert = Number(roh);
+    return roh && Number.isFinite(wert) ? wert : null;
+  };
+  const daten = zuruecksetzen
+    ? { textbeginn_mm: null, schrift: "", groesse_pt: null, zeilenabstand: null }
+    : { textbeginn_mm: zahl("blatt-beginn"), schrift: ($("blatt-schrift").value || "").trim(),
+        groesse_pt: zahl("blatt-groesse"), zeilenabstand: zahl("blatt-abstand") };
+  blattBild = await api("PUT", "/api/briefbogen/einstellungen", daten);
+  entwurfFensterZeichnen();
+  nebenfensterGleichziehen();
+  melden(zuruecksetzen ? "Zurückgesetzt – es gilt wieder die Vorlage." : "Übernommen.");
 }
 
 function entwurfKnoepfe(e) {
@@ -4994,6 +5080,11 @@ document.addEventListener("DOMContentLoaded", () => {
   $("frage-form").addEventListener("submit", (ev) => { ev.preventDefault(); mitKnopf($("senden"), frageStellen); });
   $("bib-neu").addEventListener("click", bibNeu);
   $("entwurf-modus-aus").addEventListener("click", entwurfModusAus);
+  $("blatt-dialog").addEventListener("close", () => {
+    const wahl = $("blatt-dialog").returnValue;
+    if (wahl === "setzen" || wahl === "zuruecksetzen")
+      mitKnopf(null, () => blattEinstellen(wahl === "zuruecksetzen"));
+  });
   $("prompt-dialog").addEventListener("close", () => {
     if ($("prompt-dialog").returnValue === "ablegen") mitKnopf(null, bibAblegen);
   });

@@ -43,7 +43,8 @@ WURZEL = Path(__file__).resolve().parent.parent
 #: Verweis auf eine Kopfzeile, und ein Bild, das unberuehrt bleiben muss.
 RUMPF_XML = (
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+    ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
     "<w:body>"
     "<w:p/><w:p/><w:p/>"
     '<w:sectPr><w:headerReference w:type="default" r:id="rId7"/>'
@@ -158,10 +159,6 @@ class DerTextKommtAnWieErIst(unittest.TestCase):
     def test_das_dokument_bleibt_wohlgeformtes_xml(self):
         from xml.etree import ElementTree
         roh = self._rumpf('Ein "Zitat" & <Klammern> und ein   Leerzeichen')
-        # r: ist in der kleinen Vorlage nicht deklariert; fuer die Pruefung der
-        # Wohlgeformtheit genuegt es, den Namensraum nachzureichen.
-        roh = roh.replace("<w:document ",
-                          '<w:document xmlns:r="http://x/" ', 1)
         ElementTree.fromstring(roh)
 
     def test_steuerzeichen_werden_entfernt(self):
@@ -220,6 +217,147 @@ class EineUnbrauchbareVorlage(unittest.TestCase):
         self.assertEqual(ziel.read_bytes(), quelle.read_bytes())
 
 
+class DieSchriftKommtAusDerFormatvorlage(unittest.TestCase):
+    """Aus der Kanzlei am 14.10.2026: „Schrift ist Franklin Gothic Book."
+
+    Gelesen wurde bis dahin ``w:docDefaults`` - und dort steht in dieser
+    Vorlage Times New Roman. Die Standard-Absatzformatvorlage daneben sagt
+    Franklin Gothic Book, zwölf Punkt, und danach setzt Word.
+
+    Die Größe wiegt so schwer wie der Name: Eine Ansicht in zehn statt zwölf
+    Punkt zeigt einen Brief, der auf eine Seite passt, obwohl er auf zwei
+    geht - und das Abschätzen der Länge ist der Grund für die Ansicht.
+    """
+
+    def _vorlage_mit_stilen(self, ordner: str, stile: str) -> Path:
+        ort = Path(ordner) / briefbogen.DATEINAME
+        with zipfile.ZipFile(ort, "w") as paket:
+            paket.writestr("[Content_Types].xml", "<Types/>")
+            paket.writestr(briefbogen.RUMPF, RUMPF_XML)
+            paket.writestr("word/styles.xml", stile)
+        return ort
+
+    def test_die_formatvorlage_gewinnt_gegen_die_docdefaults(self):
+        stile = (
+            '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+            "<w:docDefaults><w:rPrDefault><w:rPr>"
+            '<w:rFonts w:ascii="Times New Roman"/><w:sz w:val="20"/>'
+            "</w:rPr></w:rPrDefault></w:docDefaults>"
+            '<w:style w:type="paragraph" w:default="1" w:styleId="Standard"><w:rPr>'
+            '<w:rFonts w:ascii="Franklin Gothic Book"/><w:sz w:val="24"/>'
+            "</w:rPr></w:style></w:styles>")
+        with TemporaryDirectory() as ordner:
+            bild = briefbogen.seitenbild(self._vorlage_mit_stilen(ordner, stile))
+        self.assertEqual(bild["grundschrift"]["name"], "Franklin Gothic Book")
+        self.assertEqual(bild["grundschrift"]["groesse_pt"], 12.0)
+
+    def test_ohne_formatvorlage_gelten_die_docdefaults(self):
+        stile = (
+            '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+            "<w:docDefaults><w:rPrDefault><w:rPr>"
+            '<w:rFonts w:ascii="Times New Roman"/><w:sz w:val="20"/>'
+            "</w:rPr></w:rPrDefault></w:docDefaults></w:styles>")
+        with TemporaryDirectory() as ordner:
+            bild = briefbogen.seitenbild(self._vorlage_mit_stilen(ordner, stile))
+        self.assertEqual(bild["grundschrift"]["name"], "Times New Roman")
+        self.assertEqual(bild["grundschrift"]["groesse_pt"], 10.0)
+
+
+class WasSichEinstellenLaesst(unittest.TestCase):
+    """Aus der Kanzlei am 14.10.2026: „ob die KI das Schreiben inklusive
+    Briefbogen generieren kann, so dass die Vorschau besser anpassbar ist."
+
+    Der Briefbogen bleibt eine Datei. Anpassbar ist, was dazwischen liegt -
+    und jeder Wert gilt für die Ansicht **und** für die Word-Datei.
+    """
+
+    def setUp(self):
+        self._ordner = TemporaryDirectory()
+        self.addCleanup(self._ordner.cleanup)
+        self.vorlage = _vorlage(self._ordner.name)
+        alt = briefbogen.orte
+        briefbogen.orte = lambda: (self.vorlage,)
+        self.addCleanup(lambda: setattr(briefbogen, "orte", alt))
+
+    def test_ohne_datei_ist_nichts_eingestellt(self):
+        self.assertEqual(briefbogen.einstellungen(), briefbogen.EINSTELLUNGEN_LEER)
+
+    def test_die_datei_liegt_neben_dem_briefbogen(self):
+        self.assertEqual(briefbogen.einstellungen_ort().parent, self.vorlage.parent)
+        self.assertFalse(str(briefbogen.einstellungen_ort()).startswith(
+            str(briefbogen.PROGRAMMORDNER) + "/"))
+
+    def test_eingestelltes_kommt_wieder(self):
+        briefbogen.einstellungen_speichern(
+            {"textbeginn_mm": 100, "schrift": "Arial", "groesse_pt": 11, "zeilenabstand": 1.15})
+        self.assertEqual(briefbogen.einstellungen()["schrift"], "Arial")
+        bild = briefbogen.seitenbild(self.vorlage)
+        self.assertEqual(bild["grundschrift"]["name"], "Arial")
+        self.assertEqual(bild["textbeginn_mm"], 100.0)
+
+    def test_die_vorlage_steht_daneben_damit_niemand_raten_muss(self):
+        briefbogen.einstellungen_speichern({"schrift": "Arial"})
+        bild = briefbogen.seitenbild(self.vorlage)
+        self.assertIn("name", bild["aus_vorlage"])
+        self.assertNotEqual(bild["aus_vorlage"]["name"], "Arial")
+
+    def test_unsinnige_werte_werden_nicht_uebernommen(self):
+        """Ein Textbeginn von 400 mm ergaebe ein leeres Blatt - und eine
+        Word-Datei, in der der Brief auf Seite zwei anfaengt."""
+        briefbogen.einstellungen_speichern(
+            {"textbeginn_mm": 400, "groesse_pt": 200, "zeilenabstand": 0.1})
+        gesetzt = briefbogen.einstellungen()
+        self.assertIsNone(gesetzt["textbeginn_mm"])
+        self.assertIsNone(gesetzt["groesse_pt"])
+        self.assertIsNone(gesetzt["zeilenabstand"])
+
+    def test_eine_kaputte_datei_nimmt_nicht_den_briefbogen_mit(self):
+        """Dann gilt die Vorlage - der Zustand, in dem alles angefangen hat."""
+        briefbogen.einstellungen_ort().write_text("{kein json", encoding="utf-8")
+        self.assertEqual(briefbogen.einstellungen(), briefbogen.EINSTELLUNGEN_LEER)
+        self.assertTrue(briefbogen.erzeugen("Text", self.vorlage))
+
+    def _rumpf_mit(self, einstellungen: dict) -> str:
+        briefbogen.einstellungen_speichern(einstellungen)
+        with zipfile.ZipFile(BytesIO(briefbogen.erzeugen("Erste\n\nZweite", self.vorlage))) as p:
+            return p.read(briefbogen.RUMPF).decode("utf-8")
+
+    def test_die_word_datei_bekommt_dieselben_werte_wie_die_ansicht(self):
+        rumpf = self._rumpf_mit({"textbeginn_mm": 100, "schrift": "Arial",
+                                 "groesse_pt": 11, "zeilenabstand": 1.15})
+        self.assertIn('w:ascii="Arial"', rumpf)
+        self.assertIn('<w:sz w:val="22"/>', rumpf)
+        self.assertIn('w:line="276"', rumpf)
+
+    def test_der_erste_absatz_hat_genau_ein_abstandselement(self):
+        """Zwei davon sind kein Fehler beim Oeffnen - Word naehme einfach das
+        letzte, und der Textbeginn waere lautlos weg."""
+        rumpf = self._rumpf_mit({"textbeginn_mm": 100, "zeilenabstand": 1.15})
+        erster = rumpf[rumpf.index("<w:body>"):rumpf.index("</w:p>")]
+        self.assertEqual(erster.count("<w:spacing"), 1, erster)
+        self.assertIn("w:before=", erster)
+        self.assertIn("w:line=", erster)
+
+    def test_das_dokument_bleibt_wohlgeformt(self):
+        from xml.etree import ElementTree
+        ElementTree.fromstring(self._rumpf_mit(
+            {"textbeginn_mm": 100, "schrift": "Arial", "groesse_pt": 11, "zeilenabstand": 1.15}))
+
+    def test_ohne_einstellung_steht_nichts_ueberfluessiges_im_dokument(self):
+        """Eine Angabe, die dasselbe sagt wie die Formatvorlage, haelt sie
+        fest: Aendert die Kanzlei spaeter ihre Schrift, aendert sich der
+        Brief dann nicht mit."""
+        rumpf = self._rumpf_mit(dict(briefbogen.EINSTELLUNGEN_LEER))
+        self.assertNotIn("<w:rFonts", rumpf)
+        self.assertNotIn("<w:sz ", rumpf)
+        self.assertNotIn("w:line=", rumpf)
+
+    def test_zuruecksetzen_stellt_die_vorlage_wieder_her(self):
+        briefbogen.einstellungen_speichern({"schrift": "Arial", "groesse_pt": 11})
+        briefbogen.einstellungen_speichern(dict(briefbogen.EINSTELLUNGEN_LEER))
+        self.assertEqual(briefbogen.einstellungen(), briefbogen.EINSTELLUNGEN_LEER)
+
+
 class DasProgrammSchreibtNichts(unittest.TestCase):
     """„Das Programm schreibt nicht. Keine Datei, kein Vermerk, kein Ordner."""
 
@@ -237,14 +375,34 @@ class DasProgrammSchreibtNichts(unittest.TestCase):
             briefbogen.erzeugen("Text", vorlage)
             self.assertEqual(vorlage.read_bytes(), vorher)
 
+    #: Die beiden Stellen, an denen die Kanzlei ausdruecklich etwas ablegt.
+    SCHREIBENDE = ("hinterlegen", "einstellungen_speichern")
+
     def test_im_quelltext_wird_nichts_geschrieben(self):
-        """Ausser in hinterlegen, wo die Kanzlei es ausdruecklich will."""
+        """Ausser dort, wo die Kanzlei ausdruecklich etwas ablegt.
+
+        Geschnitten wird nach Funktionen und nicht nach Zeilennummern:
+        Kommt eine Funktion dazu, faellt sie auf, statt stillschweigend in
+        einen Ausschnitt zu rutschen.
+        """
         quelle = (WURZEL / "jusperfect" / "services" / "briefbogen.py").read_text(encoding="utf-8")
-        ohne_hinterlegen = quelle[:quelle.index("def hinterlegen")] + \
-            quelle[quelle.index("def _rumpf_lesen"):]
+        teile = re.split(r"^def ", quelle, flags=re.M)
+        uebrig = "".join(t for t in teile[1:]
+                         if not t.startswith(self.SCHREIBENDE))
         for verboten in ("write_text(", "write_bytes(", "open(", "mkdir("):
             with self.subTest(verboten=verboten):
-                self.assertNotIn(verboten, ohne_hinterlegen)
+                self.assertNotIn(verboten, uebrig)
+
+    def test_die_schreibenden_stellen_sind_genau_diese_zwei(self):
+        """Wer eine dritte anlegt, soll es hier begruenden muessen."""
+        quelle = (WURZEL / "jusperfect" / "services" / "briefbogen.py").read_text(encoding="utf-8")
+        schreibend = [name for name in re.findall(r"^def ([a-z_]+)", quelle, re.M)
+                      if re.search(rf"^def {name}\b.*?(?=^def |\Z)", quelle, re.M | re.S)
+                      and any(w in re.search(rf"^def {name}\b.*?(?=^def |\Z)", quelle,
+                                             re.M | re.S).group(0)
+                              for w in ("write_text(", "write_bytes(", "copyfile(",
+                                        "NamedTemporaryFile(", "os.replace("))]
+        self.assertEqual(sorted(schreibend), sorted(self.SCHREIBENDE))
 
 
 class WasAufDemBlattSteht(unittest.TestCase):
