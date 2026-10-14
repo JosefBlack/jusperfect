@@ -4395,6 +4395,83 @@ function ohneBelege(text) {
     .replace(/[ \t]{2,}/g, " ");
 }
 
+// ── Aus der Modellsprache wird ein Brief ───────────────────────────────────
+//
+// Dieselbe Lesart wie `briefzeile` in services/briefbogen.py, und das ist
+// der Punkt: Was dort zur Ueberschrift wird, muss hier auch eine sein. Sonst
+// zeigt die Vorschau etwas anderes, als auf dem Papier steht - und genau
+// darum geht es bei einer Vorschau.
+//
+// Aus der Kanzlei am 14.10.2026: "Formatierungen waren drin." Das Modell
+// schreibt Markdown; bis hierher ging es roh in die Word-Datei und roh aufs
+// Blatt.
+
+const BRIEF_UEBERSCHRIFT = /^\s{0,3}(#{1,3})\s+(.*)$/;
+const BRIEF_PUNKT = /^\s{0,3}[-*\u2022]\s+(.*)$/;
+const BRIEF_NUMMER = /^\s{0,3}(\d{1,2}[.)])\s+(.*)$/;
+const BRIEF_TRENNLINIE = /^\s{0,3}([-*_])\s*(?:\1\s*){2,}$/;
+const BRIEF_FETT = /\*\*(.+?)\*\*|__(.+?)__/gs;
+const BRIEF_KURSIV = /(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])/gs;
+
+/** Ein Text als Stücke [Wortlaut, fett, kursiv]. Fett zuerst. */
+function briefStuecke(text) {
+  const fertig = [];
+  const kursiv = (stueck, fett) => {
+    let stelle = 0;
+    for (const treffer of stueck.matchAll(BRIEF_KURSIV)) {
+      if (treffer.index > stelle) fertig.push([stueck.slice(stelle, treffer.index), fett, false]);
+      fertig.push([treffer[1], fett, true]);
+      stelle = treffer.index + treffer[0].length;
+    }
+    if (stelle < stueck.length) fertig.push([stueck.slice(stelle), fett, false]);
+  };
+  let stelle = 0;
+  for (const treffer of String(text).matchAll(BRIEF_FETT)) {
+    if (treffer.index > stelle) kursiv(text.slice(stelle, treffer.index), false);
+    kursiv(treffer[1] || treffer[2] || "", true);
+    stelle = treffer.index + treffer[0].length;
+  }
+  if (stelle < text.length) kursiv(text.slice(stelle), false);
+  return fertig.filter(([w]) => w);
+}
+
+/** Eine Zeile des Entwurfs als Bauplan - oder null, wenn sie entfällt. */
+function briefzeile(zeile) {
+  const roh = String(zeile).replace(/\s+$/, "");
+  if (!roh.trim()) return { art: "leer", einzug: false, stuecke: [] };
+  if (BRIEF_TRENNLINIE.test(roh)) return null;
+  let treffer = BRIEF_UEBERSCHRIFT.exec(roh);
+  if (treffer) return { art: "ueberschrift", einzug: false, stuecke: briefStuecke(treffer[2].trim()) };
+  treffer = BRIEF_PUNKT.exec(roh);
+  if (treffer)
+    return { art: "punkt", einzug: true,
+             stuecke: [["\u2022\u00a0\u00a0", false, false]].concat(briefStuecke(treffer[1].trim())) };
+  treffer = BRIEF_NUMMER.exec(roh);
+  if (treffer)
+    return { art: "punkt", einzug: true,
+             stuecke: [[treffer[1] + "\u00a0\u00a0", false, false]].concat(briefStuecke(treffer[2].trim())) };
+  return { art: "absatz", einzug: false, stuecke: briefStuecke(roh) };
+}
+
+/** Eine Briefzeile als Element - oder null. Nie innerHTML: Es ist Modelltext. */
+function briefZeileZeichnen(zeile) {
+  const bauplan = briefzeile(zeile);
+  if (bauplan === null) return null;
+  const z = document.createElement("div");
+  z.className = "blatt-zeile"
+    + (bauplan.art === "ueberschrift" ? " blatt-ueberschrift" : "")
+    + (bauplan.einzug ? " blatt-einzug" : "");
+  if (!bauplan.stuecke.length) { z.textContent = "\u00a0"; return z; }
+  for (const [wortlaut, fett, kursiv] of bauplan.stuecke) {
+    const teil = document.createElement("span");
+    teil.textContent = wortlaut;
+    if (fett || bauplan.art === "ueberschrift") teil.style.fontWeight = "600";
+    if (kursiv) teil.style.fontStyle = "italic";
+    z.appendChild(teil);
+  }
+  return z;
+}
+
 async function blattBildHolen() {
   if (blattBild !== null) return blattBild;
   try {
@@ -4492,10 +4569,8 @@ function blattBauen(b, text) {
   // saehe die Ansicht anders aus als das Blatt - und das ist der eine
   // Fehler, den eine Ansicht nicht machen darf.
   for (const zeile of ohneBelege(text).replace(/\r\n/g, "\n").split("\n")) {
-    const z = document.createElement("div");
-    z.className = "blatt-zeile";
-    z.textContent = zeile.trim() ? zeile : "\u00a0";
-    koerper.appendChild(z);
+    const z = briefZeileZeichnen(zeile);
+    if (z) koerper.appendChild(z);
   }
   blatt.appendChild(koerper);
 
@@ -4950,7 +5025,14 @@ async function briefbogenHolen(entwurfId) {
   // Aufraeumen: Ohne das bleibt der ganze Entwurf im Speicher des Browsers
   // liegen, bis die Seite neu geladen wird.
   setTimeout(() => URL.revokeObjectURL(url), 10000);
-  melden("Der Entwurf liegt als Word-Datei im Download-Ordner.");
+  // Die Hinweise der Belegpruefung stehen seit dem 14.10.2026 nicht mehr IM
+  // Schreiben - ein Brief, an dem vor dem Versand noch etwas zu loeschen
+  // ist, ist kein fertiger Brief. Dafuer stehen sie hier, im Augenblick des
+  // Herunterladens, und im Vorschaufenster daneben.
+  const offen = ((entwurfStand && entwurfStand.hinweise) || []).length;
+  melden("Der Entwurf liegt als Word-Datei im Download-Ordner."
+    + (offen ? ` ${offen} Hinweis(e) der Belegprüfung stehen im Vorschaufenster – `
+             + "sie sind nicht im Schreiben." : ""));
 }
 
 // ── Aus einer Anweisung ein Muster machen ──────────────────────────────────

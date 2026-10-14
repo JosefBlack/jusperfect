@@ -1326,33 +1326,34 @@ def _kostenschaetzung(d: Dienste, sitzung: Any) -> dict[str, Any]:
 
 
 def briefbogentext(entwurf: Any) -> str:
-    """Was auf dem Briefbogen steht: Betreff, Text, und was zurueckgehalten wurde.
+    """Was auf dem Briefbogen steht: der Betreff und der Brief. Sonst nichts.
 
-    Die Hinweise gehoeren mit aufs Blatt. Ein Entwurf, dem eine Aussage
-    fehlt, weil sie keinen Beleg hatte, sieht ohne diesen Satz aus wie ein
-    fertiger Brief - und genau so wuerde er unterschrieben. Auf dem Papier
-    ist das noch wichtiger als auf dem Bildschirm: Das Blatt verlaesst den
-    Rechner, die Oberflaeche nicht.
+    **Hier stand bis zum 14.10.2026 auch ein Block mit den Hinweisen der
+    Belegpruefung**, eingeleitet von einer Trennlinie. Die Begruendung war
+    ernst gemeint: Ein Entwurf, dem eine Aussage fehlt, sieht ohne diesen
+    Satz aus wie ein fertiger Brief.
 
-    Die Fundstellen kommen nicht mit. Sie sind der Weg zum Beleg im
-    Programm; in einem Schreiben an die Gegenseite haetten sie nichts zu
-    suchen - der Auftragstext sagt dem Modell dasselbe: „die Kanzlei
+    Am gedruckten Blatt gemessen war sie trotzdem falsch. Aus der Kanzlei:
+    „Es gab keinen vernuenftigen Text." Der Block schob den Brief auf eine
+    zweite Seite, auf der dann drei Zeilen interner Vermerk unter dem
+    vollstaendigen Briefkopf standen - und die haette jemand loeschen
+    muessen, bevor das Schreiben hinausgeht. Ein Brief, an dem vor dem
+    Versand noch etwas zu entfernen ist, ist kein fertiger Brief.
+
+    Die Hinweise sind damit nicht verschwunden: Sie stehen im
+    Vorschaufenster unmittelbar ueber dem Entwurf, in der Blattansicht
+    daneben, in der Chatkarte und in der Meldung beim Herunterladen. Vier
+    Stellen im Programm statt einer auf dem Papier, das hinausgeht.
+
+    Die Fundstellen kommen ebenfalls nicht mit - sie sind der Weg zum Beleg
+    im Programm; der Auftragstext sagt dem Modell dasselbe: „die Kanzlei
     entfernt sie nach der Pruefung."
-
-    **Hier stand das nur im Text und nicht im Code.** Bis zum 13.10.2026
-    ging der Entwurf mitsamt seinen ``[Q: …]`` auf den Briefbogen; die
-    Pruefung dazu gab es, nur enthielt ihr Beispieltext keine einzige Marke
-    und war deshalb von Anfang an gruen. Aus der Kanzlei kam die Frage, ob
-    der Entwurf „nicht gleich das fertige Schreiben" sein koenne - und das
-    war der Grund, warum er es nicht war.
     """
     zeilen: list[str] = []
     if entwurf.betreff:
-        zeilen += [entwurf.betreff, ""]
+        # Fett, wie die Betreffzeile eines deutschen Geschaeftsbriefs.
+        zeilen += [f"**{entwurf.betreff}**", ""]
     zeilen.append(ohne_belege(entwurf.text))
-    if entwurf.hinweise:
-        zeilen += ["", "---", "Hinweise aus der Belegprüfung (nicht Teil des Schreibens):"]
-        zeilen += [f"- {h}" for h in entwurf.hinweise]
     return "\n".join(zeilen)
 
 

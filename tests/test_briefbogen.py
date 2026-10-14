@@ -421,18 +421,36 @@ class WasAufDemBlattSteht(unittest.TestCase):
         self.assertIn("Ihr Schreiben", blatt)
         self.assertIn("Sehr geehrte Damen und Herren,", blatt)
 
-    def test_zurueckgehaltenes_steht_drauf(self):
-        """Ein Entwurf, dem eine Aussage fehlt, sieht sonst aus wie ein
-        fertiger Brief - und genau so wuerde er unterschrieben."""
+    def test_zurueckgehaltenes_steht_NICHT_drauf(self):
+        """**Berichtigt am 14.10.2026, am gedruckten Blatt gemessen.**
+
+        Hier stand das Gegenteil, und die Begruendung war ernst gemeint: Ein
+        Entwurf, dem eine Aussage fehlt, sieht ohne diesen Satz aus wie ein
+        fertiger Brief.
+
+        Aus der Kanzlei, nachdem der Briefbogen hinterlegt war: „Es gab
+        keinen vernuenftigen Text." Der Block schob den Brief auf eine
+        zweite Seite, auf der dann drei Zeilen interner Vermerk unter dem
+        vollstaendigen Briefkopf standen - und die haette jemand loeschen
+        muessen, bevor das Schreiben hinausgeht. Ein Brief, an dem vor dem
+        Versand noch etwas zu entfernen ist, ist kein fertiger Brief.
+
+        Verschwunden sind die Hinweise nicht: Vorschaufenster, Blattansicht,
+        Chatkarte und die Meldung beim Herunterladen nennen sie. Vier
+        Stellen im Programm statt einer auf dem Papier, das hinausgeht.
+        """
         from jusperfect.web import briefbogentext
         blatt = briefbogentext(self._entwurf(
             hinweise=["2 Aussagen wurden ohne belastbaren Beleg entfernt."]))
-        self.assertIn("ohne belastbaren Beleg entfernt", blatt)
-        self.assertIn("nicht Teil des Schreibens", blatt)
+        self.assertNotIn("ohne belastbaren Beleg entfernt", blatt)
+        self.assertNotIn("nicht Teil des Schreibens", blatt)
 
-    def test_ohne_hinweise_steht_kein_leerer_block_drauf(self):
+    def test_auf_dem_blatt_steht_nur_der_brief(self):
         from jusperfect.web import briefbogentext
-        self.assertNotIn("---", briefbogentext(self._entwurf()))
+        blatt = briefbogentext(self._entwurf())
+        self.assertNotIn("---", blatt)
+        self.assertEqual(blatt.splitlines()[0], "**Ihr Schreiben**")
+        self.assertIn("Sehr geehrte Damen und Herren,", blatt)
 
     def test_die_fundstellen_kommen_nicht_mit(self):
         """Sie sind der Weg zum Beleg im Programm. In einem Schreiben an die

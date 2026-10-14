@@ -182,18 +182,135 @@ def _xml_text(wert: str) -> str:
     return (sauber.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
 
 
-def _absatz(zeile: str, schrift: str = "", abstand: str = "") -> str:
-    """Eine Zeile als Word-Absatz. Leere Zeilen bleiben leere Absaetze.
+# ── Aus der Modellsprache wird ein Brief ───────────────────────────────────
+#
+# Aus der Kanzlei am 14.10.2026: „Briefbogen hinterlegt - es gab keinen
+# vernuenftigen Text, Formatierungen waren drin, Fusszeile wurde
+# ueberschrieben, keine vernuenftige Formatierung."
+#
+# Nachgesehen, und zwar zum ersten Mal an einem gedruckten Blatt: Das
+# Modell schreibt Markdown - `**Unser Zeichen:**`, `## Zum Unfallhergang`,
+# `- Reparaturkosten`, `---`. Im Programm setzt `antworttext` das um; die
+# Word-Datei bekam die Zeichen roh. Auf dem Briefbogen der Kanzlei stand
+# dann woertlich `## Zum Unfallhergang`.
+#
+# Hier wird dieselbe Sprache gelesen und in Word-Absaetze uebersetzt. Nur
+# das, was Modelle wirklich schreiben; alles andere bleibt Text.
 
-    Ohne eigene Formatierung: Welche Schrift, welcher Abstand und welcher
-    Rand gelten, steht in der Vorlage der Kanzlei. Ein hier gesetzter Wert
-    wuerde ihn ueberschreiben, und zwar unsichtbar.
+#: Eine Ueberschriftszeile: ein bis drei Rauten und ein Leerzeichen.
+_UEBERSCHRIFT_RE = re.compile(r"^\s{0,3}(#{1,3})\s+(.*)$")
+
+#: Ein Aufzaehlungspunkt: Strich, Stern oder Punkt am Zeilenanfang.
+_PUNKT_RE = re.compile(r"^\s{0,3}[-*\u2022]\s+(.*)$")
+
+#: Eine nummerierte Zeile. Die Nummer bleibt stehen - sie kann gemeint sein.
+_NUMMER_RE = re.compile(r"^\s{0,3}(\d{1,2}[.)])\s+(.*)$")
+
+#: Eine Trennlinie. Im Brief hat sie nichts zu suchen.
+_TRENNLINIE_RE = re.compile(r"^\s{0,3}([-*_])\s*(?:\1\s*){2,}$")
+
+#: Fett und kursiv. Fett zuerst, sonst nimmt kursiv die halben Sternchen.
+_FETT_RE = re.compile(r"\*\*(.+?)\*\*|__(.+?)__", re.S)
+_KURSIV_RE = re.compile(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", re.S)
+
+
+def _stuecke_inline(text: str) -> list[tuple[str, bool, bool]]:
+    """Ein Text als Stuecke (Wortlaut, fett, kursiv).
+
+    Zwei Durchgaenge, fett vor kursiv: Ginge kursiv zuerst, fraesse es die
+    inneren Sternchen von ``**fett**`` und liesse zwei einzelne stehen.
     """
-    pruefmass = f"<w:pPr>{abstand}</w:pPr>" if abstand else ""
-    if not zeile.strip():
+    fertig: list[tuple[str, bool, bool]] = []
+
+    def kursiv_zerlegen(stueck: str, fett: bool) -> None:
+        stelle = 0
+        for treffer in _KURSIV_RE.finditer(stueck):
+            if treffer.start() > stelle:
+                fertig.append((stueck[stelle:treffer.start()], fett, False))
+            fertig.append((treffer.group(1), fett, True))
+            stelle = treffer.end()
+        if stelle < len(stueck):
+            fertig.append((stueck[stelle:], fett, False))
+
+    stelle = 0
+    for treffer in _FETT_RE.finditer(text):
+        if treffer.start() > stelle:
+            kursiv_zerlegen(text[stelle:treffer.start()], False)
+        kursiv_zerlegen(treffer.group(1) or treffer.group(2) or "", True)
+        stelle = treffer.end()
+    if stelle < len(text):
+        kursiv_zerlegen(text[stelle:], False)
+    return [(w, f, k) for w, f, k in fertig if w]
+
+
+def briefzeile(zeile: str) -> dict[str, object] | None:
+    """Eine Zeile des Entwurfs als Bauplan - oder ``None``, wenn sie entfaellt.
+
+    ``{"art": "absatz"|"ueberschrift"|"punkt", "einzug": bool,
+       "stuecke": [(Wortlaut, fett, kursiv), …]}``
+
+    Dieselbe Lesart gilt in der Ansicht: Was hier zur Ueberschrift wird, muss
+    dort auch eine sein, sonst zeigt die Vorschau etwas anderes als das Blatt.
+    """
+    roh = zeile.rstrip()
+    if not roh.strip():
+        return {"art": "leer", "einzug": False, "stuecke": []}
+    if _TRENNLINIE_RE.match(roh):
+        return None
+    treffer = _UEBERSCHRIFT_RE.match(roh)
+    if treffer:
+        return {"art": "ueberschrift", "einzug": False,
+                "stuecke": _stuecke_inline(treffer.group(2).strip())}
+    treffer = _PUNKT_RE.match(roh)
+    if treffer:
+        return {"art": "punkt", "einzug": True,
+                "stuecke": [("\u2022\u00a0\u00a0", False, False)]
+                           + _stuecke_inline(treffer.group(1).strip())}
+    treffer = _NUMMER_RE.match(roh)
+    if treffer:
+        return {"art": "punkt", "einzug": True,
+                "stuecke": [(treffer.group(1) + "\u00a0\u00a0", False, False)]
+                           + _stuecke_inline(treffer.group(2).strip())}
+    return {"art": "absatz", "einzug": False, "stuecke": _stuecke_inline(roh)}
+
+
+def _lauf(wortlaut: str, schrift: str, fett: bool, kursiv: bool) -> str:
+    merkmale = ("<w:b/>" if fett else "") + ("<w:i/>" if kursiv else "")
+    if merkmale:
+        # Die eingestellte Schrift steht in `schrift` schon als `w:rPr`; die
+        # Merkmale muessen hinein und nicht daneben.
+        rpr = (schrift[:-len("</w:rPr>")] + merkmale + "</w:rPr>") if schrift \
+            else f"<w:rPr>{merkmale}</w:rPr>"
+    else:
+        rpr = schrift
+    return (f"<w:r>{rpr}" + '<w:t xml:space="preserve">'
+            + _xml_text(wortlaut) + "</w:t></w:r>")
+
+
+def _absatz(zeile: str, schrift: str = "", abstand: str = "") -> str:
+    """Eine Zeile als Word-Absatz.
+
+    Welche Schrift, welcher Rand und welche Groesse gelten, steht in der
+    Vorlage der Kanzlei; hier kommt nur dazu, was die Zeile selbst sagt -
+    fett, kursiv, Ueberschrift, Aufzaehlung.
+    """
+    bauplan = briefzeile(zeile)
+    if bauplan is None:
+        return ""
+    teile = [abstand]
+    if bauplan["art"] == "ueberschrift":
+        # Luft davor, damit ein Abschnitt als einer zu sehen ist.
+        teile.append('<w:spacing w:before="200"/>' if not abstand else "")
+    if bauplan["einzug"]:
+        teile.append('<w:ind w:left="340"/>')
+    pruefmass = "".join(t for t in teile if t)
+    pruefmass = f"<w:pPr>{pruefmass}</w:pPr>" if pruefmass else ""
+    if bauplan["art"] == "leer" or not bauplan["stuecke"]:
         return f"<w:p>{pruefmass}</w:p>" if pruefmass else "<w:p/>"
-    return (f"<w:p>{pruefmass}<w:r>{schrift}" + '<w:t xml:space="preserve">'
-            + _xml_text(zeile) + "</w:t></w:r></w:p>")
+    fett_ganz = bauplan["art"] == "ueberschrift"
+    laeufe = "".join(_lauf(w, schrift, f or fett_ganz, k)
+                     for w, f, k in bauplan["stuecke"])
+    return f"<w:p>{pruefmass}{laeufe}</w:p>"
 
 
 def _rumpf_ersetzen(xml: str, text: str, vorlauf_mm: float = 0.0,
@@ -217,11 +334,37 @@ def _rumpf_ersetzen(xml: str, text: str, vorlauf_mm: float = 0.0,
     stelle = alt.rfind("<w:sectPr")
     if stelle >= 0:
         sect = alt[stelle:]
+    sect = _unterrand_setzen(sect, bild)
     schrift, abstand = _wortform(bild)
     absaetze = [_absatz(z, schrift, abstand) for z in text.replace("\r\n", "\n").split("\n")]
     if absaetze and vorlauf_mm > 0:
         absaetze[0] = _mit_vorlauf(absaetze[0], vorlauf_mm)
     return xml[:anfang] + "".join(absaetze) + sect + xml[ende:]
+
+
+def _unterrand_setzen(sect: str, bild: dict[str, object] | None) -> str:
+    """Den Unterrand so weit heben, dass der Text nicht auf der Fusszeile steht.
+
+    Das ist der einzige Eingriff in den Abschnittsblock der Vorlage, und er
+    ist einer: ``w:bottom``. Alles andere - Kopf- und Fusszeilenverweise,
+    Seitenmass, die erste Seite - bleibt Zeichen fuer Zeichen.
+    """
+    if not bild:
+        return sect
+    raender = bild.get("raender_mm") or {}
+    noetig = float(raender.get("unten_noetig") or 0.0)
+    if noetig <= float(raender.get("unten") or 0.0) + 0.1:
+        return sect
+    twips = round(noetig * TWIPS_JE_MM)
+    if re.search(r'<w:pgMar\b[^>]*\sw:bottom="-?\d+"', sect):
+        return re.sub(r'(<w:pgMar\b[^>]*?)\sw:bottom="-?\d+"',
+                      rf'\1 w:bottom="{twips}"', sect, count=1)
+    # Eine Vorlage ohne eigenen Unterrand: Dann wird er hier gesetzt statt
+    # stillschweigend nicht. Gefunden an einer Pruefvorlage, die nur `top`
+    # und `left` nannte - der Text waere wieder auf der Fusszeile gelandet.
+    if "<w:pgMar" in sect:
+        return re.sub(r'<w:pgMar\b', f'<w:pgMar w:bottom="{twips}"', sect, count=1)
+    return sect.replace("<w:sectPr>", f'<w:sectPr><w:pgMar w:bottom="{twips}"/>', 1)
 
 
 def _wortform(bild: dict[str, object] | None) -> tuple[str, str]:
@@ -400,8 +543,12 @@ def einstellungen_speichern(neu: dict[str, object]) -> dict[str, object]:
 EMU_JE_MM = 36000
 TWIPS_JE_MM = 1440 / 25.4
 
-#: Luft zwischen dem untersten Stueck des Briefkopfes und dem ersten Satz.
+#: Luft zwischen dem untersten Stueck des Briefkopfes und dem ersten Satz -
+#: und ebenso zwischen dem letzten Satz und der Fusszeile.
 ABSTAND_NACH_KOPF_MM = 6.0
+
+#: Ein typografischer Punkt sind 0,3528 Millimeter.
+MM_JE_PUNKT = 0.3528
 
 _ANKER_RE = re.compile(r"<wp:anchor\b.*?</wp:anchor>", re.S)
 _H_RE = re.compile(r'<wp:positionH relativeFrom="([^"]+)">\s*<wp:posOffset>(-?\d+)')
@@ -583,6 +730,7 @@ def seitenbild(vorlage: Path | None = None) -> dict[str, object]:
     #
     # Gezaehlt wird nur, was im Textspalt steht: Eine Falzmarke am linken
     # Blattrand schiebt nichts.
+    aus_vorlage_groesse = float(_grundschrift(vorlage)["groesse_pt"])
     links, rechts = raender["links"], seite["breite"] - raender["rechts"]
     #: 0.0 heisst: im Textspalt steht gar nichts, der Text faengt oben an.
     #: Der Abstand kommt erst dazu, wenn es etwas gibt, wovon er abstehen
@@ -600,6 +748,32 @@ def seitenbild(vorlage: Path | None = None) -> dict[str, object]:
     vorlauf = (max(0.0, unterkante + ABSTAND_NACH_KOPF_MM - raender["oben"])
                if unterkante else 0.0)
 
+    # Und dasselbe von unten.
+    #
+    # Aus der Kanzlei am 14.10.2026: „Fusszeile wurde ueberschrieben."
+    # Nachgemessen an einem gedruckten Blatt: Der Satzspiegel endet auf
+    # diesem Briefbogen bei 271,6 mm, die Fusszeile beginnt bei 272,5 mm.
+    # Ein Brief, der die Seite fuellt, steht damit unmittelbar auf ihr.
+    #
+    # Der Unterrand wird deshalb aus der Fusszeile gerechnet, wie der
+    # Vorlauf aus dem Kopf: bis ueber ihr oberstes Stueck, plus Luft. Nur
+    # vergroessert, nie verkleinert - eine Vorlage, die schon genug Rand
+    # laesst, behaelt ihren.
+    fuss_oben = seite["hoehe"]
+    for stueck in stuecke:
+        if not stueck.get("fuss"):
+            continue
+        if stueck["art"] == "fluss":
+            zeilen = [z for z in stueck["zeilen"] if z["text"]]
+            hoehe = sum((float(z["groesse_pt"]) or aus_vorlage_groesse) * 1.25 * MM_JE_PUNKT
+                        for z in zeilen) if zeilen else 0.0
+            fuss_oben = min(fuss_oben, seite["hoehe"] - raender.get("fuss", 0.0) - hoehe)
+        else:
+            fuss_oben = min(fuss_oben, float(stueck["y_mm"]))
+    unterrand = max(raender["unten"],
+                    seite["hoehe"] - fuss_oben + ABSTAND_NACH_KOPF_MM
+                    if fuss_oben < seite["hoehe"] else 0.0)
+
     aus_vorlage = _grundschrift(vorlage)
     gesetzt = einstellungen()
     # Was eingestellt ist, gilt; was nicht, kommt aus der Vorlage. Beides
@@ -612,6 +786,7 @@ def seitenbild(vorlage: Path | None = None) -> dict[str, object]:
     }
     textbeginn = (float(gesetzt["textbeginn_mm"]) if gesetzt["textbeginn_mm"] is not None
                   else round(raender["oben"] + vorlauf, 1))
+    raender["unten_noetig"] = round(unterrand, 1)
     return {"seite_mm": seite, "raender_mm": raender, "stuecke": stuecke,
             "vorlauf_mm": round(max(0.0, textbeginn - raender["oben"]), 1),
             "textbeginn_mm": round(textbeginn, 1),

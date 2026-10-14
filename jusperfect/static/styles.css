@@ -579,6 +579,10 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .blatt-linie { position: absolute; border-top: 1px solid #999999; height: 0; }
 .blatt-bild { display: block; object-fit: contain; }
 .blatt-zeile { white-space: pre-wrap; }
+/* Ueberschrift und Aufzaehlung wie in der Word-Datei: Luft davor, Einzug
+   dahinter. Eine Ansicht, die anders gliedert als das Blatt, taeuscht. */
+.blatt-ueberschrift { margin-top: .9em; }
+.blatt-einzug { padding-left: 2.2em; text-indent: -1.2em; }
 /* Im Blatt gelten die Farben des Papiers, nicht die der Oberflaeche. */
 .blatt-koerper p { margin: 0 0 .7em; line-height: 1.35; }
 .blatt-koerper h4 { margin: 0 0 .5em; font-size: 1em; }
