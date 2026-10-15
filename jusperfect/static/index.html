@@ -867,6 +867,61 @@
   </form>
 </dialog>
 
+<!-- Der zweite Faktor beim Oeffnen des Programms.
+
+     Aus der Folgenabschaetzung, Risiko R7 - das einzige, das dort auf "hoch"
+     steht: Die Anmeldung ist kein Kennwort, sondern eine Kennung. Wer am
+     Rechner sitzt, kann eine andere eintragen.
+
+     Der Dialog hat kein Kreuz: Ohne zweiten Faktor ist das Programm zu. -->
+<dialog id="zf-dialog" class="explorer-dialog zf-dialog">
+  <form method="dialog" class="explorer-form">
+    <h2 id="zf-titel">Zweiter Faktor</h2>
+    <p id="zf-text" class="nachweis-hinweis"></p>
+    <div id="zf-einrichtung" hidden>
+      <p class="zf-geheimnis-zeile">
+        <span class="zf-beschriftung">Geheimnis zum Eintippen</span>
+        <code id="zf-geheimnis" class="zf-geheimnis"></code>
+      </p>
+      <p class="nachweis-hinweis">In der Authentifizierungs-App (etwa Microsoft
+        Authenticator, Google Authenticator, Aegis) ein neues Konto anlegen,
+        dieses Geheimnis eintragen und dann das angezeigte Einmalkennwort unten
+        eingeben. <strong>Das Geheimnis wird nur jetzt angezeigt.</strong></p>
+    </div>
+    <label class="zf-feld">Einmalkennwort
+      <input type="text" id="zf-code" inputmode="numeric" autocomplete="one-time-code"
+             maxlength="6" placeholder="000000">
+    </label>
+    <p id="zf-fehler" class="zf-fehler" hidden></p>
+    <div class="dialog-knoepfe">
+      <button type="button" id="zf-einrichten" class="knopf leise">Einrichten</button>
+      <button type="button" id="zf-senden" class="knopf">Weiter</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Laeuft die Akte noch?
+
+     Aus der Kanzlei am 15.10.2026: "Du musst fragen: Laeuft die Akte noch.
+     Akten laufen manchmal jahrelang."
+
+     Der Dialog hat KEIN Kreuz und keine Esc-Taste: Er ist die eine Stelle,
+     an der eine Antwort verlangt wird. Wer nicht antworten will, klickt
+     "Spaeter" - dann bleibt die Frage faellig und steht beim naechsten Mal
+     wieder da. Verschwinden kann sie nicht. -->
+<dialog id="laeuft-dialog" class="explorer-dialog laeuft-dialog">
+  <form method="dialog" class="explorer-form">
+    <h2 id="laeuft-frage">Läuft die Akte noch?</h2>
+    <p id="laeuft-akte" class="laeuft-akte"></p>
+    <p id="laeuft-grund" class="nachweis-hinweis"></p>
+    <div class="dialog-knoepfe">
+      <button type="button" id="laeuft-spaeter" class="knopf leise">Später</button>
+      <button type="button" id="laeuft-nein" class="knopf leise">Nein, sie ist beendet</button>
+      <button type="button" id="laeuft-ja" class="knopf">Ja, sie läuft noch</button>
+    </div>
+  </form>
+</dialog>
+
 <div id="rueckgaengig" class="rueckgaengig" hidden>
   <span id="rueckgaengig-text"></span>
   <button id="rueckgaengig-tun" class="mini">Rückgängig</button>

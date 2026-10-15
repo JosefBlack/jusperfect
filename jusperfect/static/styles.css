@@ -1368,3 +1368,30 @@ mark.aktuell { outline: 2px solid var(--amber); outline-offset: 1px; }
 .dok-treffer.ohne-treffer { color: var(--rot); }
 .passage .satz mark { background: var(--amber-hell); color: var(--tinte);
   border-radius: 3px; padding: 0 1px; }
+
+/* Laeuft die Akte noch?
+
+   Die Frage steht gross da und nicht als Hinweiszeile: Sie ist der einzige
+   Weg, auf dem eine Arbeitskopie je geloescht wird. Eine Frist, die von
+   selbst ablaeuft, gibt es hier nicht - und soll es nicht geben. */
+.laeuft-dialog .explorer-form { max-width: 520px; }
+.laeuft-akte { font-size: 15px; font-weight: 600; color: var(--tinte);
+  margin: 4px 0 10px; }
+
+/* Der zweite Faktor. Schlicht und ohne Ausweg: Ohne ihn ist das Programm zu. */
+.zf-dialog .explorer-form { max-width: 460px; }
+.zf-feld { display: block; margin: 14px 0 6px; font-size: 13px; color: var(--gedaempft); }
+.zf-feld input { display: block; margin-top: 6px; width: 100%; font: inherit;
+  font-size: 22px; letter-spacing: .3em; text-align: center;
+  font-variant-numeric: tabular-nums; padding: 8px 10px;
+  border: 1px solid var(--linie); border-radius: 8px;
+  background: var(--flaeche-2); color: var(--tinte); }
+.zf-geheimnis-zeile { margin: 12px 0 6px; }
+.zf-beschriftung { display: block; font-size: 12px; color: var(--gedaempft); }
+/* Zum Abtippen: feste Breite, grosse Schrift, Umbruch erlaubt. Zweiunddreissig
+   Zeichen von einem Bildschirm abzuschreiben ist muehsam genug. */
+.zf-geheimnis { display: block; margin-top: 4px; font-family: Consolas, monospace;
+  font-size: 15px; letter-spacing: .08em; word-break: break-all;
+  background: var(--flaeche-2); border: 1px solid var(--linie);
+  border-radius: 8px; padding: 8px 10px; color: var(--tinte); }
+.zf-fehler { color: var(--rot); font-size: 13px; margin: 6px 0 0; }

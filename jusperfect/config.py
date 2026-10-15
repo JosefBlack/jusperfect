@@ -434,6 +434,14 @@ class Einstellungen:
     # Identität und Berechtigungen
     identitaet: str = "header"                 # "header" (lokal) | "cognito" (aws)
     nutzer_datei: Path | None = Path("testdaten/nutzer.json")
+    #: Zweiter Faktor beim Oeffnen des Programms: "aus" oder "an".
+    #:
+    #: Voreingestellt aus. Eine Kanzlei mit geschuetztem Einzelplatz soll
+    #: nicht zu einem zweiten Geraet gezwungen werden; wer ihn einschaltet,
+    #: schaltet ihn fuer alle ein. Siehe Risiko R7 der Folgenabschaetzung.
+    zweiter_faktor: str = "aus"
+    #: Wo die Geheimnisse liegen - nicht in der Nutzerdatei.
+    zweiter_faktor_datei: Path = Path("zweiter-faktor.json")
     gruppe_alle_akten: str = "alle-akten"      # Cognito-Gruppe mit Zugriff auf alle Akten
 
     # Sitzungsspeicher
@@ -465,6 +473,9 @@ class Einstellungen:
     # Sie beginnt ausschließlich mit diesem Ereignis, niemals durch Zeitablauf
     # oder Nichtbenutzung. Vor dem Ende der Frist wird nichts gelöscht.
     gedaechtnis_uebergangsfrist_tage: int = 30
+    #: Nach wie vielen Monaten ohne Sitzung gefragt wird, ob die Akte noch
+    #: laeuft. Die Frist loest die FRAGE aus, nicht die Loeschung.
+    gedaechtnis_nachfrage_monate: int = 12
 
     # OCR
     ocr: str = "keine"                         # "keine" | "textract"
@@ -578,6 +589,8 @@ class Einstellungen:
             archiv_kennung=env.get("JUSPERFECT_ARCHIV_KENNUNG", cls.archiv_kennung).strip(),
             identitaet=_wahl(env, "JUSPERFECT_IDENTITAET", "cognito" if in_aws else cls.identitaet, ("header", "cognito")),
             nutzer_datei=Path(nutzer_datei) if nutzer_datei else (None if in_aws else cls.nutzer_datei),
+            zweiter_faktor=env.get("JUSPERFECT_ZWEITER_FAKTOR", cls.zweiter_faktor).strip().lower() or cls.zweiter_faktor,
+            zweiter_faktor_datei=Path(env.get("JUSPERFECT_ZWEITER_FAKTOR_DATEI", "").strip() or cls.zweiter_faktor_datei),
             gruppe_alle_akten=env.get("JUSPERFECT_GRUPPE_ALLE_AKTEN", cls.gruppe_alle_akten).strip() or cls.gruppe_alle_akten,
             speicher=_wahl(env, "JUSPERFECT_SPEICHER", "aws" if in_aws else cls.speicher, ("lokal", "aws")),
             dynamodb_tabelle=env.get("JUSPERFECT_DYNAMODB_TABELLE", "").strip(),
@@ -592,6 +605,7 @@ class Einstellungen:
             gedaechtnis_max_fragen=int(_zahl(env, "JUSPERFECT_GEDAECHTNIS_MAX_FRAGEN", cls.gedaechtnis_max_fragen)),
             gedaechtnis_max_chronologie=int(_zahl(env, "JUSPERFECT_GEDAECHTNIS_MAX_CHRONOLOGIE", cls.gedaechtnis_max_chronologie)),
             gedaechtnis_uebergangsfrist_tage=int(_zahl(env, "JUSPERFECT_GEDAECHTNIS_UEBERGANGSFRIST_TAGE", cls.gedaechtnis_uebergangsfrist_tage)),
+            gedaechtnis_nachfrage_monate=int(_zahl(env, "JUSPERFECT_GEDAECHTNIS_NACHFRAGE_MONATE", cls.gedaechtnis_nachfrage_monate)),
             ocr=_wahl(env, "JUSPERFECT_OCR", "textract" if in_aws else cls.ocr, ("keine", "textract")),
             haufe_url=env.get("JUSPERFECT_HAUFE_URL", cls.haufe_url).strip(),
             haufe_suche_param=env.get("JUSPERFECT_HAUFE_SUCHE_PARAM", "").strip(),
@@ -747,6 +761,12 @@ class Einstellungen:
             raise KonfigurationsFehler("JUSPERFECT_GEDAECHTNIS_MAX_FRAGEN muss positiv sein.")
         if self.gedaechtnis_max_chronologie <= 0:
             raise KonfigurationsFehler("JUSPERFECT_GEDAECHTNIS_MAX_CHRONOLOGIE muss positiv sein.")
+        if self.zweiter_faktor not in {"an", "aus"}:
+            raise KonfigurationsFehler(
+                "JUSPERFECT_ZWEITER_FAKTOR muss 'an' oder 'aus' sein.")
+        if self.gedaechtnis_nachfrage_monate < 1:
+            raise KonfigurationsFehler(
+                "JUSPERFECT_GEDAECHTNIS_NACHFRAGE_MONATE muss mindestens 1 sein.")
         if self.gedaechtnis_uebergangsfrist_tage < 0:
             raise KonfigurationsFehler("JUSPERFECT_GEDAECHTNIS_UEBERGANGSFRIST_TAGE darf nicht negativ sein.")
         if self.dialog_max_runden <= 0:

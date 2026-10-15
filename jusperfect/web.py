@@ -47,7 +47,10 @@ from jusperfect.services.entwuerfe import (
     EntwurfFehler, EntwurfNichtGefunden, Entwurfsdienst, freigabevorlage,
 )
 from jusperfect.services.kosten import BudgetErschoepft, Kostenwaechter
+from jusperfect.security import zweiter_faktor as zf
 from jusperfect.services.abschluss import AbschlussFehler, Abschlussdienst
+from jusperfect.services.aufbewahrung import (FRAGE as AUFBEWAHRUNG_FRAGE,
+                                              AufbewahrungFehler, Aufbewahrungsdienst)
 from jusperfect.services.aufsicht import Aufsichtsdienst
 from jusperfect.services import briefbogen
 from jusperfect.services.briefbogen import BriefbogenFehler
@@ -179,6 +182,11 @@ class Dienste:
         self.workflow = Workflowdienst()
         self.abschluss = Abschlussdienst(self.gedaechtnis, self.adapter, self.berechtigungen,
                                          self.speicher, self.freigabestelle, e)
+        self.aufbewahrung = Aufbewahrungsdienst(self.gedaechtnis, self.berechtigungen, e)
+        # Der zweite Faktor: Geheimnisse auf der Platte, Bestaetigungen nur im
+        # Arbeitsspeicher. Ein Neustart verlangt ihn erneut - das ist gewollt.
+        self.zf_ablage = zf.Geheimnisablage(e.zweiter_faktor_datei)
+        self.zf_bestaetigt = zf.Bestaetigungen()
         self.aufsicht = Aufsichtsdienst(self.gedaechtnis, self.adapter, self.berechtigungen)
         self.posteingang = Posteingangsdienst(e, self.ocr)
         self.auftraege = Auftragsdienst(e.auftrag_ordner)
@@ -187,6 +195,18 @@ class Dienste:
 
 
 # ── Anfragemodelle ──────────────────────────────────────────────────────────
+
+class ZfCode(BaseModel):
+    """Ein Einmalkennwort aus der Authentifizierungs-App."""
+
+    code: str
+
+
+class LaeuftNoch(BaseModel):
+    """Die Antwort auf die Frage, ob die Akte noch läuft."""
+
+    laeuft_noch: bool
+
 
 class SitzungAnlegen(BaseModel):
     akte_id: str
@@ -312,11 +332,38 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
                 raise NichtAngemeldet("Kopfzeilen-Identität ist in Lambda nicht zulässig.")
             ident = aus_kopfzeile(request.headers.get("x-jusperfect-nutzer"))
             d.berechtigungen.nutzer(ident)  # unbekannte Kennung -> 403
+            _zweiten_faktor_verlangen(request, ident)
             return ident
         except NichtAngemeldet as ex:
             raise HTTPException(401, str(ex)) from ex
         except UnbekannterNutzer as ex:
             raise HTTPException(403, str(ex)) from ex
+
+    #: Die Wege, die ohne zweiten Faktor offenstehen muessen - sonst kaeme
+    #: man nie dahin, ihn zu zeigen.
+    OHNE_ZWEITEN_FAKTOR = ("/api/anmeldung/",)
+
+    def _zweiten_faktor_verlangen(request: Request, ident: Identitaet) -> None:
+        """Ohne zweiten Faktor kein Zugriff – wenn er eingeschaltet ist.
+
+        Die Sperre sitzt in der Identitaet und nicht an den einzelnen Wegen:
+        Ein halb geschuetztes Programm ist keines, und ein vergessener
+        Endpunkt waere genau das Loch, gegen das der Faktor gebaut ist.
+
+        Der Code 428 sagt der Oberflaeche, dass noch etwas zu tun ist - im
+        Unterschied zu 401 (nicht angemeldet) und 403 (nicht berechtigt).
+        """
+        if e.zweiter_faktor != "an":
+            return
+        if request.url.path.startswith(OHNE_ZWEITEN_FAKTOR):
+            return
+        if d.zf_bestaetigt.gilt(ident.nutzer_id):
+            return
+        raise HTTPException(
+            428,
+            "Zweiter Faktor erforderlich."
+            if d.zf_ablage.eingerichtet(ident.nutzer_id)
+            else "Zweiter Faktor ist noch nicht eingerichtet.")
 
     # Fachliche Fehler -> verständliche Antworten
     _abbildung: list[tuple[type[Exception], int]] = [
@@ -672,8 +719,15 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
 
     @app.post("/api/sitzungen", status_code=201)
     def sitzung_anlegen(daten: SitzungAnlegen, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        # Die Rueckfrage ZUERST lesen, dann die Nutzung vermerken: Sonst
+        # verschoebe das Oeffnen der Akte den Fragetermin, und die Frage
+        # waere nie faellig, solange jemand hineinschaut.
+        stand = d.aufbewahrung.stand(ident, daten.akte_id)
         sitzung = d.sitzungen.eroeffnen(ident, daten.akte_id)
-        return _sitzung_antwort(d, sitzung)
+        d.aufbewahrung.benutzt(daten.akte_id)
+        antwort = _sitzung_antwort(d, sitzung)
+        antwort["aufbewahrung"] = stand.als_dict()
+        return antwort
 
     @app.get("/api/sitzungen/{sitzung_id}")
     def sitzung_lesen(sitzung_id: str, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
@@ -795,6 +849,101 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
     # ── Abschluss der Akte ────────────────────────────────────────────────
     # Erst exportieren, dann löschen. Ausgelöst wird der Abschluss vom
     # Aktenstatus in jurnodes, nie vom Zeitablauf.
+
+    # ── Der zweite Faktor ─────────────────────────────────────────────────
+    #
+    # Diese Wege stehen ohne ihn offen - sonst kaeme man nie dahin, ihn zu
+    # zeigen. Sie geben nichts preis: Der Stand sagt nur, ob einer noetig und
+    # ob einer eingerichtet ist.
+
+    @app.get("/api/anmeldung/zweiter-faktor")
+    def zf_stand(request: Request) -> dict[str, Any]:
+        ident = aus_kopfzeile(request.headers.get("x-jusperfect-nutzer"))
+        return {
+            "noetig": e.zweiter_faktor == "an",
+            "eingerichtet": d.zf_ablage.eingerichtet(ident.nutzer_id),
+            "bestaetigt": d.zf_bestaetigt.gilt(ident.nutzer_id),
+            "stellen": zf.STELLEN,
+        }
+
+    @app.post("/api/anmeldung/zweiter-faktor/einrichten")
+    def zf_einrichten(request: Request) -> dict[str, Any]:
+        """Ein neues Geheimnis – einmal angezeigt, dann nie wieder.
+
+        Abgelegt wird es erst, wenn der Nutzer mit einem Einmalkennwort
+        nachweist, dass seine App es gelesen hat. Sonst sperrte ein
+        misslungener Scan den Zugang aus.
+        """
+        ident = aus_kopfzeile(request.headers.get("x-jusperfect-nutzer"))
+        d.berechtigungen.nutzer(ident)
+        if d.zf_ablage.eingerichtet(ident.nutzer_id):
+            raise HTTPException(409, "Für diese Kennung ist bereits ein zweiter Faktor eingerichtet.")
+        geheimnis = zf.geheimnis_erzeugen()
+        app.state.zf_offen = getattr(app.state, "zf_offen", {})
+        app.state.zf_offen[ident.nutzer_id] = geheimnis
+        return {"geheimnis": geheimnis,
+                "link": zf.einrichtungslink(ident.nutzer_id, geheimnis),
+                "hinweis": "Dieses Geheimnis wird nur jetzt angezeigt. "
+                           "In die Authentifizierungs-App übernehmen und dann "
+                           "das angezeigte Einmalkennwort eingeben."}
+
+    @app.post("/api/anmeldung/zweiter-faktor/bestaetigen")
+    def zf_bestaetigen(daten: ZfCode, request: Request) -> dict[str, Any]:
+        ident = aus_kopfzeile(request.headers.get("x-jusperfect-nutzer"))
+        d.berechtigungen.nutzer(ident)
+        offen = getattr(app.state, "zf_offen", {}).get(ident.nutzer_id)
+        if not offen:
+            raise HTTPException(409, "Es ist keine Einrichtung offen. Bitte neu beginnen.")
+        if not zf.code_pruefen(offen, daten.code):
+            raise HTTPException(401, "Das Einmalkennwort stimmt nicht.")
+        d.zf_ablage.merken(ident.nutzer_id, offen)
+        app.state.zf_offen.pop(ident.nutzer_id, None)
+        d.zf_bestaetigt.bestaetigen(ident.nutzer_id, daten.code)
+        ereignis(_log, "zweiter_faktor_eingerichtet", nutzer=ident.nutzer_id)
+        return {"eingerichtet": True, "bestaetigt": True}
+
+    @app.post("/api/anmeldung/zweiter-faktor/pruefen")
+    def zf_pruefen(daten: ZfCode, request: Request) -> dict[str, Any]:
+        ident = aus_kopfzeile(request.headers.get("x-jusperfect-nutzer"))
+        d.berechtigungen.nutzer(ident)
+        geheimnis = d.zf_ablage.geheimnis(ident.nutzer_id)
+        if not geheimnis:
+            raise HTTPException(409, "Für diese Kennung ist kein zweiter Faktor eingerichtet.")
+        # Ein Einmalkennwort gilt EINMAL. Ohne das waere ein abgelesener Code
+        # dreissig Sekunden lang ein Nachschluessel.
+        if d.zf_bestaetigt.schon_benutzt(ident.nutzer_id, daten.code):
+            raise HTTPException(401, "Dieses Einmalkennwort wurde schon verwendet. "
+                                     "Bitte das nächste abwarten.")
+        if not zf.code_pruefen(geheimnis, daten.code):
+            ereignis(_log, "zweiter_faktor_falsch", nutzer=ident.nutzer_id)
+            raise HTTPException(401, "Das Einmalkennwort stimmt nicht.")
+        d.zf_bestaetigt.bestaetigen(ident.nutzer_id, daten.code)
+        ereignis(_log, "zweiter_faktor_bestaetigt", nutzer=ident.nutzer_id)
+        return {"bestaetigt": True}
+
+    # ── Läuft die Akte noch? ───────────────────────────────────────────────
+    #
+    # Die Frage ist ein eigener Weg und nicht Teil des Abschlusses: Sie wird
+    # gestellt, BEVOR irgendetwas vorgemerkt ist, und eine unbeantwortete
+    # Frage loescht nichts.
+
+    @app.get("/api/aufbewahrung/faellig")
+    def aufbewahrung_faellig(ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        staende = d.aufbewahrung.faellige(ident)
+        return {"frage": AUFBEWAHRUNG_FRAGE, "monate": d.aufbewahrung.monate,
+                "akten": [s.als_dict() for s in staende]}
+
+    @app.get("/api/akten/{akte_id}/aufbewahrung")
+    def aufbewahrung_stand(akte_id: str, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        return d.aufbewahrung.stand(ident, akte_id).als_dict()
+
+    @app.post("/api/akten/{akte_id}/aufbewahrung/antwort")
+    def aufbewahrung_antwort(akte_id: str, daten: LaeuftNoch,
+                             ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        try:
+            return d.aufbewahrung.beantworten(ident, akte_id, daten.laeuft_noch).als_dict()
+        except AufbewahrungFehler as fehler:
+            raise HTTPException(status_code=409, detail=str(fehler)) from fehler
 
     @app.get("/api/akten/{akte_id}/abschluss")
     def abschluss_stand(akte_id: str, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:

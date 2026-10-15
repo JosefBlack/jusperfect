@@ -535,9 +535,13 @@ jur|nodes die Löschung auslösen kann, ist seit dem 28.09.2026 technisch belegt
 
 > **Zur Löschung der Arbeitskopie.** Die Arbeitskopie einer Akte wird
 > gelöscht, wenn die Akte in jusperfect abgeschlossen wird und danach
-> **30 Tage** verstrichen sind. Unabhängig davon wird sie gelöscht, wenn
-> **zwölf Monate** lang keine Sitzung zu dieser Akte stattgefunden hat. Die
-> Akte selbst bleibt davon unberührt; sie unterliegt § 50 Abs. 1 BRAO.
+> **30 Tage** verstrichen sind. Hat zwölf Monate lang keine Sitzung zu dieser
+> Akte stattgefunden, fragt das Programm beim nächsten Öffnen, **ob die Akte
+> noch läuft**. Wird das bejaht, verlängert sich die Frist um weitere zwölf
+> Monate; die Antwort wird mit Datum und Bearbeiter vermerkt. Wird es
+> verneint, beginnt die Übergangsfrist von 30 Tagen. Ohne Antwort wird nichts
+> gelöscht. Die Akte selbst bleibt davon unberührt; sie unterliegt § 50
+> Abs. 1 BRAO.
 
 **Warum eine zweite Frist, und warum gerade diese.** Heute beginnt eine
 Löschfrist **nie von selbst**: Wer eine Akte nicht abschließt, behält die
@@ -551,11 +555,29 @@ aber lebende Akte — die, bei der ein Gutachten erwartet wird oder ein Verfahre
 ruht. Nach einem Jahr ohne jede Sitzung ist die Arbeitskopie kein Hilfsmittel
 mehr, sondern ein Vorrat.
 
-> **Was dafür noch zu tun ist, und es ist eine Programmaufgabe:** Die
-> zwölfmonatige Frist ist **nicht gebaut**. Heute gibt es nur den Weg über
-> den Abschluss. Vor der Übernahme dieses Absatzes ist entweder die Frist
-> einzubauen oder der zweite Satz zu streichen — eine Unterlage, die eine
-> Löschung zusagt, die das Programm nicht vornimmt, wäre schlimmer als keine.
+> **Am 15.10.2026 gebaut — und auf Weisung der Kanzlei anders, als hier
+> zuerst stand.** Der Entwurf von heute früh sah vor, nach zwölf Monaten ohne
+> Sitzung zu **löschen**. Aus der Kanzlei dazu:
+>
+> > „Du musst fragen: Läuft die Akte noch. Akten laufen manchmal
+> > jahrelang. Wenn die Frage mit Ja beantwortet wird, dann verlängert sich
+> > die Löschfrist um 12 Monate.“
+>
+> **Das ist der bessere Entwurf, und der Grund ist nicht Vorsicht, sondern
+> Richtigkeit.** Eine Akte, in der ein Gutachten erwartet wird oder ein
+> Verfahren ruht, läuft weiter, auch wenn niemand sie öffnet. Sie zu löschen,
+> weil die Zeit vergangen ist, nähme der Kanzlei die Arbeitskopie eines
+> lebenden Mandats.
+>
+> **Deshalb löst die Zeit jetzt die FRAGE aus und nicht die Löschung.** Nach
+> zwölf Monaten ohne Sitzung fragt das Programm beim Öffnen der Akte:
+> *Läuft die Akte noch?* „Ja“ verlängert um zwölf Monate und wird
+> mit Datum und Bearbeiter vermerkt. „Nein“ setzt die
+> Übergangsfrist in Gang. Wer nicht antwortet, verliert nichts — die Frage
+> bleibt und kommt wieder.
+>
+> `jusperfect/services/aufbewahrung.py`, 19 Prüfungen in
+> `tests/test_laeuft_die_akte_noch.py`.
 
 > **Und die Probe aus dem vorigen Kasten gehört dazu:** Solange nicht
 > feststeht, welche Wörter der Bestand im Feld `recordStatus` führt, kann die
@@ -1355,8 +1377,27 @@ benutzen.
 > Nachweis nicht mehr, wer gefragt hat — und damit fällt die
 > Rechenschaftspflicht nach Art. 5 Abs. 2 an dieser Stelle aus.
 
-**Drei Dinge, die ohne Programmänderung sofort gehen** und die ich in die
-Einweisung aufnehmen würde, wenn die Kanzlei zustimmt:
+**Seit dem 15.10.2026 gibt es dafür einen zweiten Faktor.** Auf Weisung der
+Kanzlei: *„Ich möchte für die Programmöffnung jusperfect und die
+Möglichkeit der Einrichtung einer 2-Faktor-Authentifizierung.“*
+
+Ein Einmalkennwort aus einer Authentifizierungs-App (TOTP nach RFC 6238 —
+dieselbe Technik wie bei AWS und bei der Bank) tritt vor das Programm.
+Eingeschaltet wird er mit `JUSPERFECT_ZWEITER_FAKTOR=an`; voreingestellt ist
+„aus“, damit eine Kanzlei mit geschütztem Einzelplatz nicht zu
+einem zweiten Gerät gezwungen wird.
+
+> **Was er leistet und was nicht.** Er ersetzt den Schutz des Windows-Kontos
+> nicht. Er sorgt dafür, dass ein unbeaufsichtigter Rechner allein nicht
+> genügt, um eine Mandatsakte zu öffnen — und dass der Nutzungsnachweis den
+> Richtigen nennt. Die Geheimnisse liegen in einer eigenen Datei, nicht in
+> der Nutzerdatei: Die wird von Hand gepflegt und liegt in der Sicherung.
+>
+> `jusperfect/security/zweiter_faktor.py`, 21 Prüfungen in
+> `tests/test_zweiter_faktor.py`.
+
+**Drei Dinge, die auch ohne ihn gelten** und die ich in die Einweisung
+aufnehmen würde, wenn die Kanzlei zustimmt:
 
 1. Bildschirmsperre beim Verlassen des Platzes, automatisch nach wenigen
    Minuten.
@@ -1540,13 +1581,13 @@ Auskunft von Dritten oder eine Arbeit am Programm.
 | 4 | Modell auf eigener Hardware? | **Entwurf: nein**, jährlich neu zu prüfen | 3.2 |
 | 5 | Einstufung der acht Risiken | **Entwurf liegt vor** — sieben „mittel" oder darunter, **R7 hoch** | 4 |
 | ~~6~~ | ~~R1, Art. 4 Nr. 12~~ | **Von der Kanzlei entschieden** | R1 |
-| 7 | Wann wird die Fallkopie gelöscht? | Entwurf: Abschluss + 30 Tage **und** 12 Monate ohne Sitzung. **Die zweite Frist ist noch zu bauen** | R3 |
+| 7 | Wann wird die Fallkopie gelöscht? | **Gebaut am 15.10.2026:** Abschluss + 30 Tage, dazu die Rückfrage „Läuft die Akte noch?“ nach 12 Monaten | R3 |
 | 8 | Ablage des Vertragswerks | Service Terms liegen bei (Anlage 15). **Offen: Standardvertragsklauseln und Unterauftragsverarbeiterliste** | R4 |
 | 9 | Verschwiegenheitsverpflichtung § 43e BRAO | **Die schwächste Stelle.** Entwurf: einseitige Belehrung absenden und ablegen | R4 |
 | 10 | Dienstleisterauswahl § 43e Abs. 2 | Nachweise in der Akte, **Bewertung ausformuliert.** Nur zu übernehmen | R4 |
 | 11 | Regionen des Geländerprofils | **Wartet auf AWS.** Der Text der Anfrage steht bereit | R5 |
 | 12 | Art. 9 Abs. 2; Beschränkung nach Rechtsgebiet? | Entwurf: lit. f; **keine** Beschränkung nach Rechtsgebiet | R6 |
-| 13 | Zugriffsbeschränkung je Bearbeiter? | **Das einzige hohe Risiko.** Entwurf: einführen | R7 |
+| 13 | Zugriffsbeschränkung je Bearbeiter? | **Der zweite Faktor ist seit 15.10.2026 da.** Offen: die Beschränkung je Bearbeiter einschalten | R7 |
 | 14 | Was den Betroffenen gesagt wird | **Erledigt** — steht in den Hinweisen, Ziffer 3 | R8 |
 | 15 | Schulung und KI-Kompetenz (Art. 4 KI-VO) | **Entwurf liegt vor** — sechs Punkte, eine Stunde | 6 |
 | 17 | Restrisiko, Art. 36, DSB, Überprüfungsfrist | **Entwurf liegt vor.** Zu zeichnen erst nach 7, 11 und 13 | 7 |
@@ -1560,12 +1601,14 @@ Auskunft von Dritten oder eine Arbeit am Programm.
 
 **Drei Dinge, und nur drei:**
 
-1. **`[KANZLEI 13]` — die Zugriffsbeschränkung.** Das einzige hohe Risiko,
-   und das einzige, das im Haus liegt und nicht bei AWS.
-2. **`[KANZLEI 9]` — die Belehrung an AWS.** Ein Schreiben, ein
+1. **`[KANZLEI 9]` — die Belehrung an AWS.** Ein Schreiben, ein
    Sendenachweis, ein Blatt zur Akte.
-3. **`[KANZLEI 7]` — die zwölfmonatige Löschfrist.** Eine Programmaufgabe,
-   nicht eine Entscheidung.
+2. **`[KANZLEI 13]` — die Zugriffsbeschränkung je Bearbeiter.** Der zweite
+   Faktor ist seit dem 15.10.2026 gebaut; die Beschränkung je Bearbeiter ist
+   eine Entscheidung und eine Arbeit an der Nutzerverwaltung.
+
+**`[KANZLEI 7]` ist seit dem 15.10.2026 erledigt** — die Rückfrage
+„Läuft die Akte noch?“ ist gebaut.
 
 **Zwei warten auf Dritte:** die Auskunft von AWS zum Geländerprofil
 (`[KANZLEI 11]`) und die Hamburger Muss-Liste (`[KANZLEI 16]`).

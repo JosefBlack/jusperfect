@@ -173,6 +173,18 @@ class ChronologieEintrag(BaseModel):
     quellen: list[Quelle] = Field(default_factory=list)
 
 
+class Weiterfuehrung(BaseModel):
+    """Eine Antwort auf die Frage, ob die Akte noch laeuft.
+
+    Der Nachweis besteht aus zwei Angaben und keiner weiteren: wann und wer.
+    Warum die Akte noch laeuft, steht in der Akte und geht diesen Vermerk
+    nichts an.
+    """
+
+    am: datetime
+    nutzer_id: str
+
+
 class Aktengedaechtnis(BaseModel):
     """Dauerhafte, aktenbezogene Arbeitskopie im eigenen Kanzlei-AWS-Konto."""
 
@@ -188,7 +200,7 @@ class Aktengedaechtnis(BaseModel):
     # weil sie nicht mehr zum Inhalt gehoerte, den sie schuetzen sollte.
     _revision: str | None = PrivateAttr(default=None)
 
-    schema_version: int = 4
+    schema_version: int = 5
     akte_id: str
     aktenzeichen: str = ""
     bezeichnung: str = ""
@@ -199,6 +211,22 @@ class Aktengedaechtnis(BaseModel):
     status_geprueft_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     abgeschlossen_am: datetime | None = None
     loeschung_vorgesehen_am: datetime | None = None
+    # ── Die Rueckfrage "Laeuft die Akte noch?" ─────────────────────────────
+    #
+    # Aus der Kanzlei am 15.10.2026: "Du musst fragen: Laeuft die Akte noch.
+    # Akten laufen manchmal jahrelang. Wenn die Frage mit Ja beantwortet wird,
+    # dann verlaengert sich die Loeschfrist um 12 Monate."
+    #
+    # Das ist der Unterschied zu einer Frist, die von selbst laeuft: Es wird
+    # nichts geloescht, weil die Zeit vergangen ist, sondern weil jemand
+    # gesagt hat, dass die Akte nicht mehr laeuft. Die Zeit loest nur die
+    # FRAGE aus, nicht die Loeschung.
+    zuletzt_benutzt_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    nachfrage_faellig_am: datetime | None = None
+    #: Jede Antwort "Ja, laeuft noch" - Datum und wer. Kein Inhalt.
+    weiterfuehrungen: list[Weiterfuehrung] = Field(default_factory=list)
+    #: Wann jemand "Nein" geantwortet hat. Dann laeuft die Uebergangsfrist.
+    nicht_mehr_laufend_seit: datetime | None = None
     dokumente: list[GedaechtnisDokument] = Field(default_factory=list)
     # Der Zähler für die festen Dokumentnummern. Er wird nur hochgezählt, nie
     # zurückgesetzt: Eine einmal vergebene Nummer gehört diesem Dokument, und

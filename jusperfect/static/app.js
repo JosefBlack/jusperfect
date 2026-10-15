@@ -561,10 +561,113 @@ async function nutzerlisteLaden() {
   if (zuletzt && !liste.some((n) => n.id === zuletzt)) $("nutzer-eigen").value = zuletzt;
 }
 
+// ── Der zweite Faktor ────────────────────────────────────────────────────
+//
+// Aus der Kanzlei am 15.10.2026: "Ich moechte fuer die Programmoeffnung
+// jusperfect und die Moeglichkeit der Einrichtung einer
+// 2-Faktor-Authentifizierung."
+//
+// Der Anlass steht in der Folgenabschaetzung, Risiko R7 - dem einzigen, das
+// dort auf "hoch" steht: Die Anmeldung ist kein Kennwort, sondern eine
+// Kennung. Wer am Rechner sitzt, kann eine andere eintragen.
+//
+// Der Dialog kommt NACH der Wahl des Benutzers und VOR allem anderen. Ohne
+// ihn ist das Programm zu; deshalb hat er kein Kreuz und keine Esc-Taste.
+
+async function zfStand() {
+  const antwort = await fetch(K.apiBasis + "/api/anmeldung/zweiter-faktor",
+                              { headers: kopfzeilen() });
+  if (!antwort.ok) return { noetig: false };
+  return await antwort.json();
+}
+
+async function zfSenden(pfad, code) {
+  const antwort = await fetch(K.apiBasis + pfad, {
+    method: "POST", headers: kopfzeilen(), body: JSON.stringify({ code }),
+  });
+  let inhalt = null;
+  try { inhalt = await antwort.json(); } catch (e) { /* leer */ }
+  if (!antwort.ok) throw new Error((inhalt && inhalt.fehler)
+    || (inhalt && inhalt.detail) || `Fehler ${antwort.status}`);
+  return inhalt;
+}
+
+/** Den zweiten Faktor verlangen. Liefert true, wenn der Weg frei ist. */
+async function zweiterFaktorVerlangen() {
+  const stand = await zfStand();
+  if (!stand.noetig || stand.bestaetigt) return true;
+  const dialog = $("zf-dialog");
+  if (!dialog) return true;
+  const feld = $("zf-code"), fehler = $("zf-fehler");
+  const einrichtung = $("zf-einrichtung"), knopfEin = $("zf-einrichten");
+  let eingerichtet = !!stand.eingerichtet;
+
+  const zeigen = () => {
+    $("zf-titel").textContent = eingerichtet
+      ? "Zweiter Faktor" : "Zweiten Faktor einrichten";
+    $("zf-text").textContent = eingerichtet
+      ? "Bitte das Einmalkennwort aus Ihrer Authentifizierungs-App eingeben."
+      : "Für diese Kennung ist noch kein zweiter Faktor eingerichtet. "
+        + "Mit \u201EEinrichten\u201C beginnen.";
+    knopfEin.hidden = eingerichtet;
+    $("zf-senden").hidden = !eingerichtet && einrichtung.hidden;
+    fehler.hidden = true;
+    feld.value = "";
+  };
+  zeigen();
+  einrichtung.hidden = true;
+  dialog.showModal();
+  feld.focus();
+
+  return await new Promise((fertig) => {
+    const schliessen = (frei) => {
+      dialog.close();
+      knopfEin.removeEventListener("click", aufEinrichten);
+      $("zf-senden").removeEventListener("click", aufSenden);
+      feld.removeEventListener("keydown", aufTaste);
+      fertig(frei);
+    };
+    const aufEinrichten = async () => {
+      try {
+        const auf = await (await fetch(K.apiBasis + "/api/anmeldung/zweiter-faktor/einrichten",
+                                       { method: "POST", headers: kopfzeilen() })).json();
+        if (!auf.geheimnis) throw new Error(auf.fehler || "Die Einrichtung ist fehlgeschlagen.");
+        $("zf-geheimnis").textContent = auf.geheimnis;
+        einrichtung.hidden = false;
+        knopfEin.hidden = true;
+        $("zf-senden").hidden = false;
+        $("zf-text").textContent = "Geheimnis in die App übernehmen, dann das "
+          + "angezeigte Einmalkennwort eingeben.";
+        feld.focus();
+      } catch (f) { fehler.hidden = false; fehler.textContent = f.message; }
+    };
+    const aufSenden = async () => {
+      const code = (feld.value || "").trim();
+      try {
+        await zfSenden(eingerichtet
+          ? "/api/anmeldung/zweiter-faktor/pruefen"
+          : "/api/anmeldung/zweiter-faktor/bestaetigen", code);
+        schliessen(true);
+      } catch (f) {
+        fehler.hidden = false;
+        fehler.textContent = f.message;
+        feld.value = ""; feld.focus();
+      }
+    };
+    const aufTaste = (e) => { if (e.key === "Enter") { e.preventDefault(); aufSenden(); } };
+    knopfEin.addEventListener("click", aufEinrichten);
+    $("zf-senden").addEventListener("click", aufSenden);
+    feld.addEventListener("keydown", aufTaste);
+  });
+}
+
 async function benutzerWaehlen(kennung) {
   kennung = (kennung || "").trim();
   if (!kennung) { anmeldeFehler("Bitte einen Benutzer wählen."); return; }
   $("nutzer").value = kennung;
+  // Der zweite Faktor VOR dem Status: Der Status ist schon ein Zugriff, und
+  // genau den soll der Faktor schützen.
+  if (!(await zweiterFaktorVerlangen())) { $("nutzer").value = ""; return; }
   if (!(await ladeStatus())) {
     // Der Status traegt bereits den Grund - eine unbekannte Kennung, ein
     // Server, der nicht antwortet. Ihn hier zu wiederholen waere genauer als
@@ -741,7 +844,82 @@ async function akteOeffnen(akteId) {
   schlussHinweisZeigen("");
   sitzung = await api("POST", "/api/sitzungen", { akte_id: akteId });
   verlaufMerken(sitzung.sitzung.akte);
+  // Die Rueckfrage kommt VOR dem Dokumentfenster: Sie betrifft die Akte als
+  // Ganzes, und wer erst Dokumente anhakt und dann gefragt wird, ob die Akte
+  // noch laeuft, liest die Frage als Stoerung statt als Frage.
+  await laeuftNochFragen();
   explorerStarten(true);
+}
+
+// ── Läuft die Akte noch? ─────────────────────────────────────────────────
+//
+// Aus der Kanzlei am 15.10.2026: "Du musst fragen: Laeuft die Akte noch.
+// Akten laufen manchmal jahrelang. Wenn die Frage mit Ja beantwortet wird,
+// dann verlaengert sich die Loeschfrist um 12 Monate."
+//
+// Die Zeit loest hier die FRAGE aus und nicht die Loeschung. Das ist der
+// ganze Unterschied zu einer Frist, die von selbst ablaeuft - und der Grund,
+// warum dieser Dialog kein Kreuz hat.
+
+function laeuftNochZeigen(stand) {
+  const dialog = $("laeuft-dialog");
+  if (!dialog || !stand || !stand.faellig) return false;
+  const a = (sitzung && sitzung.sitzung && sitzung.sitzung.akte) || {};
+  $("laeuft-frage").textContent = stand.frage || "Läuft die Akte noch?";
+  $("laeuft-akte").textContent = `${a.aktenzeichen || stand.aktenzeichen || ""} · `
+    + `${a.bezeichnung || stand.bezeichnung || ""}`;
+  const seit = stand.zuletzt_benutzt_am ? datumKurz(stand.zuletzt_benutzt_am) : null;
+  $("laeuft-grund").textContent =
+    (seit ? `In dieser Akte wurde seit dem ${seit} nicht mehr gearbeitet. ` : "")
+    + `Nach ${stand.monate} Monaten ohne Sitzung wird gefragt. `
+    + "Ja heißt: die Arbeitskopie bleibt und es wird in "
+    + `${stand.monate} Monaten erneut gefragt. Nein heißt: Die Akte wird zum `
+    + "Abschluss vorgemerkt. Es wird nichts gelöscht, solange nicht geantwortet ist.";
+  dialog.showModal();
+  return true;
+}
+
+async function laeuftNochFragen() {
+  const stand = sitzung && sitzung.aufbewahrung;
+  if (!laeuftNochZeigen(stand)) return;
+  const dialog = $("laeuft-dialog");
+  await new Promise((fertig) => {
+    const antworten = async (laeuft) => {
+      try {
+        await api("POST", `/api/akten/${encodeURIComponent(stand.akte_id)}/aufbewahrung/antwort`,
+                  { laeuft_noch: laeuft });
+        melden(laeuft
+          ? `Vermerkt: Die Akte läuft noch. Die nächste Rückfrage kommt in ${stand.monate} Monaten.`
+          : "Vermerkt: Die Akte ist beendet. Sie ist zum Abschluss vorgemerkt.");
+      } catch (f) {
+        melden(f.message || "Die Antwort konnte nicht vermerkt werden.", true);
+      }
+      schliessen();
+    };
+    const schliessen = () => {
+      dialog.close();
+      ja.removeEventListener("click", aufJa);
+      nein.removeEventListener("click", aufNein);
+      spaeter.removeEventListener("click", aufSpaeter);
+      fertig();
+    };
+    const ja = $("laeuft-ja"), nein = $("laeuft-nein"), spaeter = $("laeuft-spaeter");
+    const aufJa = () => antworten(true);
+    // Nein ist die einzige Antwort, die etwas in Gang setzt. Deshalb wird
+    // sie bestaetigt - und deshalb steht im Text, was danach geschieht.
+    const aufNein = () => {
+      if (!confirm("Die Akte ist beendet?\n\nDie Arbeitskopie wird dann zum Abschluss "
+                   + "vorgemerkt. Gelöscht wird sie erst beim Abschluss, nach dem Export "
+                   + "des Arbeitsstands. Die Akte selbst bleibt unberührt.")) return;
+      antworten(false);
+    };
+    // "Spaeter" beantwortet nichts - und genau deshalb bleibt die Frage
+    // faellig und steht beim naechsten Oeffnen wieder da.
+    const aufSpaeter = () => { melden("Die Frage bleibt offen und kommt wieder."); schliessen(); };
+    ja.addEventListener("click", aufJa);
+    nein.addEventListener("click", aufNein);
+    spaeter.addEventListener("click", aufSpaeter);
+  });
 }
 
 async function dokumenteVerwalten() {

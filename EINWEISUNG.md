@@ -2,7 +2,7 @@
 
 **Kanzlei Dortschy & Thunert**
 
-**Stand: 15. Oktober 2026.** Gilt für alle, die mit jusperfect arbeiten.
+**Stand: 15. Oktober 2026** (zweite Fassung dieses Tages). Gilt für alle, die mit jusperfect arbeiten.
 
 Dieses Blatt sammelt die Regeln, die sich **nicht** aus der Bedienung ergeben
 und die das Programm auch nicht erzwingen kann. Wer sie nicht kennt, macht
@@ -85,6 +85,65 @@ bringen eigene Vertragsbedingungen mit, die wir nicht geprüft haben.
 Die Seite wird bei der jährlichen Durchsicht der Folgenabschätzung erneut
 angesehen. Sie ist **Dokumentation und kein Vertrag** — AWS kann sie ohne
 Ankündigung ändern und ein Modell aufnehmen, auch unseres.
+
+---
+
+## Regel 1a — Wird gefragt, ob die Akte noch läuft, wird geantwortet
+
+Hat zwölf Monate lang niemand in einer Akte gearbeitet, fragt jusperfect beim
+Öffnen: **„Läuft die Akte noch?"**
+
+* **Ja** — die Arbeitskopie bleibt, und in zwölf Monaten wird erneut gefragt.
+  Die Antwort wird mit Datum und Bearbeiter vermerkt.
+* **Nein** — die Akte wird zum Abschluss vorgemerkt. Gelöscht wird erst beim
+  Abschluss, nach dem Export des Arbeitsstands.
+* **Später** — die Frage bleibt offen und kommt wieder. **Es wird nichts
+  gelöscht, solange nicht geantwortet ist.**
+
+### Warum das eine Hausregel ist
+
+Art. 5 Abs. 1 lit. e DSGVO verlangt, dass nicht länger aufbewahrt wird als
+nötig. Eine Frist, die von selbst abläuft, wäre hier falsch: **Akten laufen
+manchmal jahrelang**, und eine Arbeitskopie zu löschen, weil ein Jahr
+vergangen ist, nähme der Kanzlei die Vorarbeit eines lebenden Mandats.
+
+Deshalb löst die Zeit die **Frage** aus und nicht die Löschung. Die Frage
+ersetzt die Frist — aber nur, wenn sie beantwortet wird. Wer immer „Später"
+klickt, hat den alten Zustand wiederhergestellt.
+
+**Die Akte selbst ist davon nie betroffen.** Gelöscht wird allenfalls die
+Arbeitskopie in jusperfect; die Handakte unterliegt § 50 Abs. 1 BRAO.
+
+---
+
+## Regel 1b — Der zweite Faktor, wenn er eingeschaltet ist
+
+Die Anmeldung in jusperfect ist im Laufwerksbetrieb **kein Kennwort**,
+sondern eine Kennung: Wer am Rechner sitzt, kann eine andere eintragen. Das
+ist das einzige Risiko, das die Folgenabschätzung als **hoch** einstuft
+(R7) — und es liegt nicht bei AWS, sondern im Flur.
+
+Seit dem 15.10.2026 lässt sich ein **zweiter Faktor** davorsetzen: ein
+Einmalkennwort aus einer Authentifizierungs-App, wie bei der Bank.
+
+### Wenn er eingeschaltet ist
+
+1. Beim ersten Mal **„Einrichten"** klicken. Das angezeigte Geheimnis in die
+   Authentifizierungs-App übernehmen (Microsoft Authenticator, Google
+   Authenticator, Aegis oder eine andere).
+2. **Das Geheimnis wird nur einmal angezeigt.** Wer es verliert, braucht eine
+   Neueinrichtung.
+3. Danach bei jedem Programmstart das sechsstellige Einmalkennwort eingeben.
+
+### Was er nicht ersetzt
+
+Den Schutz des Windows-Kontos. **Bildschirm sperren beim Verlassen des
+Platzes, keine geteilten Konten, jeder trägt seine eigene Kennung ein** —
+das gilt mit zweitem Faktor genauso. Er sorgt nur dafür, dass ein
+unbeaufsichtigter Rechner allein nicht genügt, um eine Mandatsakte zu öffnen.
+
+**Eingeschaltet wird er in `START-JURNODES.bat`**, Eintrag
+`JUSPERFECT_ZWEITER_FAKTOR=an`. Voreingestellt ist „aus".
 
 ---
 
