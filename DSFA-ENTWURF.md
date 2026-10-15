@@ -46,8 +46,8 @@ der Sicht dessen, der das Programm gebaut hat:
 | **Art. 35 Abs. 3 lit. b** — umfangreiche Verarbeitung besonderer Kategorien (Art. 9) oder von Daten über Straftaten (Art. 10) | Trifft je nach Rechtsgebiet regelmäßig zu: Gesundheitsdaten in Unfall-, Arzthaftungs- und Sozialrechtsakten, Art.-10-Daten im Strafrecht. Das Programm unterscheidet **nicht** nach Rechtsgebiet |
 | **Neue Technologie** (Art. 35 Abs. 1) | Ein Sprachmodell wertet Mandatsakten aus. Das ist für die Kanzlei neu |
 | **Berufsgeheimnis** | Der verarbeitete Inhalt unterliegt § 203 StGB und § 43a BRAO |
-| **Muster-Liste der deutschen Aufsichtsbehörden (DSK)** | Dort ist die Verarbeitung von Daten, die einem Berufsgeheimnis unterliegen, durch einen Auftragsverarbeiter aufgeführt. **[KANZLEI 16]** — die einschlägige Landesliste ist heranzuziehen; die Entwicklung kann sie nicht auswählen |
-| **Umfang** | Der Bestand umfasst rund 2.950 Akten und etwa 78.000 Dateien (gemessen 02.10.2026). Ob das „umfangreich" im Sinne der Norm ist: **[KANZLEI 2]** |
+| **Muster-Liste der deutschen Aufsichtsbehörden (DSK)** | Dort ist die Verarbeitung von Daten, die einem Berufsgeheimnis unterliegen, durch einen Auftragsverarbeiter aufgeführt. **[KANZLEI 16] — beantwortet, soweit es ohne die Liste selbst geht.** Zuständig ist **Hamburg** (Kanzleisitz Stolper Straße 4, 22145 Hamburg), also die Muss-Liste des **Hamburgischen Beauftragten für Datenschutz und Informationsfreiheit für den nicht-öffentlichen Bereich** (Stand 17.10.2018, Fassung 1.1), abrufbar unter `datenschutz-hamburg.de`. **Ihr Wortlaut liegt nicht vor** — die Seite ist vom Entwicklungsrechner aus nicht erreichbar. Sie ist aufzurufen und auszudrucken; ein Blatt für die Akte |
+| **Umfang** | Der Bestand umfasst rund 2.950 Akten und etwa 78.000 Dateien (gemessen 02.10.2026). Ob das „umfangreich" im Sinne der Norm ist: **[KANZLEI 2]** — Entwurf unten |
 
 **Was dagegen sprechen könnte** — und ebenfalls bewertet gehört: Es findet
 keine automatisierte Entscheidung im Sinne des Art. 22 statt, keine
@@ -58,6 +58,56 @@ ausschließlich dem einzelnen Mandat.
 > dem Ergebnis kommt, dass keine DSFA erforderlich ist, gehört **diese
 > Prüfung selbst** dokumentiert (Rechenschaftspflicht, Art. 5 Abs. 2). Dieser
 > Entwurf taugt dann als Dokumentation der Prüfung.
+
+**[KANZLEI 1] — die Bewertung. Entwurf zur Übernahme, geschrieben am
+15.10.2026.**
+
+> **Zur Erforderlichkeit einer Datenschutz-Folgenabschätzung.** Die Kanzlei
+> hält eine Folgenabschätzung nach Art. 35 DSGVO für erforderlich. Die
+> Verarbeitung erfasst regelmäßig besondere Kategorien personenbezogener
+> Daten (Art. 9) und Daten über strafrechtliche Verurteilungen und Straftaten
+> (Art. 10), sie betrifft durchweg Inhalte, die dem Berufsgeheimnis des
+> § 203 StGB unterliegen, sie bedient sich dafür eines Auftragsverarbeiters
+> und einer für die Kanzlei neuen Technologie. Die Folgenabschätzung wird
+> deshalb durchgeführt, ohne dass es auf die Auslegung einzelner Merkmale
+> ankommt.
+
+**Warum ich dazu rate, und zwar ohne Zögern.** Drei Gründe, in dieser
+Reihenfolge:
+
+1. **Die Gegenargumente treffen andere Merkmale.** Dass es keine
+   automatisierte Entscheidung nach Art. 22, keine Profilbildung und keine
+   systematische Überwachung gibt, ist richtig — nur sind das die Merkmale
+   des Art. 35 Abs. 3 lit. a und lit. c. Getragen wird die Pflicht hier von
+   **lit. b**, und den berührt keines dieser Argumente.
+2. **Die Kosten sind asymmetrisch.** Eine Folgenabschätzung, die sich später
+   als nicht erforderlich erweist, hat Arbeit gekostet. Eine unterlassene,
+   die erforderlich war, ist ein Verstoß gegen Art. 35 — und sie fällt
+   ausgerechnet dann auf, wenn ohnehin etwas schiefgegangen ist.
+3. **Die Unterlage wird ohnehin gebraucht.** Was hier steht, trägt zugleich
+   das Verzeichnis nach Art. 30, die Dienstleisterauswahl nach § 43e Abs. 2
+   BRAO und die Hinweise nach Art. 13. Der Aufwand ist nicht verloren, auch
+   wenn die Pflicht verneint würde.
+
+**[KANZLEI 2] — „umfangreich"? Entwurf zur Übernahme.**
+
+> **Zum Merkmal „umfangreich".** Verarbeitet wird der gesamte Aktenbestand
+> der Kanzlei — rund 2.950 Akten und etwa 78.000 Dateien (Stand 02.10.2026)
+> —, fortlaufend, systematisch und ohne Beschränkung auf einzelne
+> Rechtsgebiete. Die Kanzlei sieht das Merkmal als erfüllt an.
+
+> **Das Gegenargument, das zu kennen ist.** **Erwägungsgrund 91** nimmt die
+> Verarbeitung durch „einen einzelnen Arzt, sonstigen Angehörigen eines
+> Gesundheitsberufs oder Rechtsanwalt" ausdrücklich davon aus, als
+> umfangreich zu gelten. Darauf könnte man sich stützen — **aber nur mit
+> Mühe:** Der Erwägungsgrund spricht vom *einzelnen* Berufsträger, und hier
+> geht es um eine Partnerschaftsgesellschaft und um ein Programm, das den
+> ganzen Bestand erfasst.
+>
+> **Es kommt darauf aber nicht an**, und das ist der eigentliche Grund, es
+> nicht auszufechten: Der Eintrag der Muss-Liste zum Berufsgeheimnis
+> (`[KANZLEI 16]`) trägt die Pflicht unabhängig vom Umfang, und Art. 35
+> Abs. 1 trägt sie über die neue Technologie ohnehin.
 
 ---
 
@@ -259,7 +309,31 @@ Ort, Datum ........................  Unterschrift ........................
 
 ## 3. Notwendigkeit und Verhältnismäßigkeit
 
-**[KANZLEI 3]** — die Abwägung selbst. Was die Entwicklung dazu beitragen kann:
+**[KANZLEI 3] — die Abwägung. Entwurf zur Übernahme, geschrieben am
+15.10.2026.**
+
+> **Zur Verhältnismäßigkeit.** Der Zweck — die sorgfältige und zügige
+> Bearbeitung des Mandats — ist legitim und deckt sich mit dem Interesse der
+> Mandantschaft. Das Mittel ist geeignet: An einer echten Akte sind aus 55
+> Dokumenten ein belegter Lebenssachverhalt, ein Zeitstrahl und eine Analyse
+> entstanden, zu Kosten von rund 28 Cent. Es ist erforderlich: Anonymisierung
+> und Pseudonymisierung nehmen der Auswertung ihren Gegenstand, die
+> Beschränkung auf Teile der Akte ist bereits umgesetzt, und ein Modell auf
+> eigener Hardware ist nach heutigem Stand kein gleich wirksames Mittel
+> (`[KANZLEI 4]`). Es ist angemessen, weil der Eingriff durch die
+> Datenminimierung, die Verarbeitung ausschließlich in der Europäischen
+> Union, den Ausschluss jeder Nutzung über die Dienstleistung hinaus, die
+> fortbestehende anwaltliche Prüfung und das jederzeitige Ablehnungsrecht der
+> Mandantschaft begrenzt ist. Die Kanzlei hält die Verarbeitung für
+> verhältnismäßig.
+
+**Der Satz, auf den es in dieser Abwägung ankommt**, ist nicht der von den
+28 Cent, sondern der vom Ablehnungsrecht. Eine Verarbeitung, der die
+Betroffene widersprechen kann, ohne einen Nachteil zu erleiden, ist etwas
+anderes als eine, der sie ausgeliefert ist — und diese Möglichkeit steht seit
+dem 15.10.2026 in § 3a der Mandatsbedingungen.
+
+Was die Entwicklung sonst dazu beitragen kann:
 
 ### 3.1 Was die Verarbeitung erreicht
 
@@ -276,7 +350,30 @@ Dokument 44 — Stellen, die beim Lesen übersehen werden.
 | **Anonymisierung vor der Übermittlung** | Der Gegenstand der Auswertung sind gerade die Personen, Daten und Beträge. Eine Akte, aus der Namen und Daten entfernt sind, beantwortet die Fragen nicht mehr, die gestellt werden |
 | **Pseudonymisierung** | Dasselbe für Namen; für Beträge, Daten und Sachverhaltsschilderungen nicht durchführbar. Die Kanzlei betreibt mit *Perfect Shield* ein getrenntes Programm für Schwärzungen; es löst eine andere Aufgabe |
 | **Nur ein Teil der Akte** | Ist umgesetzt: Es geht nur hinaus, was der Bearbeiter anhakt — nicht die Akte je Frage. Seit dem 05.10.2026 kommen Rechnungen und RSV-Korrespondenz schon ohne Haken ins Fenster |
-| **Modell auf eigener Hardware** | Wäre das mildere Mittel hinsichtlich der Übermittlung. **[KANZLEI 4]** — zu bewerten, ob der Aufwand verhältnismäßig ist. Die Entwicklung kann sagen: technisch möglich, aber mit erheblichem Qualitätsverlust bei den Modellgrößen, die auf Kanzleihardware laufen |
+| **Modell auf eigener Hardware** | Wäre das mildere Mittel hinsichtlich der Übermittlung. **[KANZLEI 4]** — Entwurf unten. Die Entwicklung kann sagen: technisch möglich, aber mit erheblichem Qualitätsverlust bei den Modellgrößen, die auf Kanzleihardware laufen |
+
+**[KANZLEI 4] — das Modell auf eigener Hardware. Entwurf zur Übernahme,
+geschrieben am 15.10.2026.**
+
+> **Zum Betrieb eines Modells auf eigener Hardware.** Die Kanzlei hat geprüft,
+> ob die Auswertung auf eigenen Geräten erfolgen kann, und sieht davon nach
+> heutigem Stand ab. Die Modellgrößen, die auf Kanzleihardware lauffähig
+> sind, erreichen die Güte nicht, auf der die Belegpflicht beruht; eine
+> Auswertung, deren Fundstellen weniger verlässlich sind, verlagert das
+> Risiko von der Übermittlung auf die Richtigkeit. Die Entscheidung wird bei
+> der jährlichen Durchsicht erneut geprüft.
+
+**Ein Gesichtspunkt, der dabei gern übersehen wird — und er spricht nicht für
+die eigene Hardware.** Ein Modell im eigenen Haus beseitigt die Übermittlung,
+aber es verlagert die Sicherheit der Verarbeitung von einem Anbieter mit
+geprüftem Informationssicherheits-Managementsystem (ISO 27001, SOC 2 Typ 2,
+Anlagen 7 bis 13) auf die Kanzlei selbst. Ob ein Server im Keller besser
+geschützt ist als ein Rechenzentrum in Frankfurt, ist keine rhetorische Frage
+— sie ist nur selten zugunsten des Kellers zu beantworten.
+
+**Was den Befund umkehren würde:** ein Modell, das auf einem einzelnen
+Arbeitsplatzgerät mit vertretbarem Aufwand läuft und die Belegpflicht trägt.
+Das ist der Punkt, auf den die jährliche Durchsicht zu sehen hat.
 
 ### 3.3 Datenminimierung, die umgesetzt ist
 
@@ -294,9 +391,47 @@ Dokument 44 — Stellen, die beim Lesen übersehen werden.
 ## 4. Die Risiken — und was ihnen entgegensteht
 
 Acht Risiken, in der Reihenfolge, in der sie die Entwicklung für erheblich
-hält. **Die Einstufung in „gering / mittel / hoch" ist bewusst leer gelassen**
-([KANZLEI 5]): Sie hängt davon ab, welche Rechtsgebiete bearbeitet werden und
-wie die Kanzlei das Berufsgeheimnis gewichtet.
+hält.
+
+**[KANZLEI 5] — die Einstufung. Entwurf zur Übernahme, geschrieben am
+15.10.2026.** Bewertet ist das Risiko **nach** den beschriebenen Maßnahmen,
+aus Schwere für die Betroffenen und Wahrscheinlichkeit des Eintritts.
+
+| Risiko | Schwere | Wahrscheinlichkeit | **Nach Maßnahmen** |
+|---|---|---|---|
+| **R1** Fremde Dokumente in einer Akte | hoch — Kernbereich des § 203 StGB | gering: der Weg ist ausgebaut, nicht nur abgeschaltet | **mittel** |
+| **R2** Eine falsche Aussage wird für wahr genommen | mittel bis hoch — sie könnte in einen Schriftsatz geraten | gering: Belegpflicht, Rückhalt bei fehlendem Beleg, anwaltliche Prüfung | **mittel** |
+| **R3** Die Arbeitskopie bleibt liegen | mittel | **erhöht**, solange keine Frist von selbst läuft (`[KANZLEI 7]`) | **mittel** |
+| **R4** Übermittlung an den Auftragsverarbeiter | hoch — Berufsgeheimnis | gering: Vertrag, kein Training, keine Aufbewahrung beim eingesetzten Modell, Zero Operator Access | **mittel** |
+| **R5** Drittlandbezug | hoch, falls er bestünde | **nicht abschließend feststellbar**, solange die Auskunft zum Geländerprofil fehlt (`[KANZLEI 11]`) | **mittel** |
+| **R6** Besondere Kategorien, verstärkt durch die Texterkennung | hoch — Art. 9 | gering: dieselben Maßnahmen wie R4, dazu die wirksame Abmelderichtlinie | **mittel** |
+| **R7** Zugriff innerhalb der Kanzlei | hoch — jede Akte für jeden | **hoch**: heute keine Beschränkung je Bearbeiter, und die Anmeldung ist kein Kennwort | **hoch** |
+| **R8** Auskunft, Berichtigung, Löschung | mittel | gering: gezielte Löschung einzelner Einträge seit 05.10.2026 | **gering** |
+
+> **Der Befund, der aus dieser Tabelle herausfällt, ist R7 — und er liegt
+> nicht bei AWS, sondern im Flur.** Sechs der acht Risiken betreffen die
+> Übermittlung nach außen und sind durch Vertrag, Modellwahl und Technik auf
+> „mittel" gebracht. Das einzige **hohe** Risiko ist, dass im Haus jeder
+> jede Akte öffnen kann und die Anmeldung kein Kennwort verlangt. Wer die
+> Folgenabschätzung liest und nur die Hälfte davon umsetzt, sollte diese
+> Hälfte nehmen.
+>
+> **Die Einstufung hängt an zwei offenen Stellen.** Mit einer Entscheidung zu
+> `[KANZLEI 7]` (Löschfrist) fiele R3 auf „gering"; mit der Auskunft zu
+> `[KANZLEI 11]` fiele R5 auf „gering"; mit `[KANZLEI 13]`
+> (Zugriffsbeschränkung) fiele R7 auf „mittel". Drei Entscheidungen, drei
+> Stufen.
+
+**Warum keines der acht auf „gering" steht außer R8.** Weil in einer
+Mandatsakte die *Schwere* immer hoch ist, auch wenn die Wahrscheinlichkeit
+klein wird. Ein Verstoß gegen das Berufsgeheimnis ist nicht teilbar. Die
+Maßnahmen wirken auf die Wahrscheinlichkeit, nicht auf die Schwere — und
+deshalb endet die Bewertung bei „mittel" und nicht tiefer.
+
+**Was die Entwicklung zu dieser Einstufung nicht sagen kann:** wie die
+Kanzlei das Berufsgeheimnis im Verhältnis zur Bearbeitungsqualität gewichtet
+und welche Rechtsgebiete sie führt. Fällt diese Gewichtung anders aus, ist
+die Tabelle zu ändern.
 
 ---
 
@@ -326,9 +461,14 @@ der Schnittstelle zurück und hielt fest, das Programm habe richtig gearbeitet.
 | **Was das Programm selbst prüft** | Der Durchlauf durch die Ordner meldet ausdrücklich, wenn er die Akte verlässt |
 | **Der richtige Weg** | ist seit dem 05.10.2026 belegt (`POST /correspondence/search`) und in der Probe gemessen, aber **noch nicht im Betrieb**. Erst ein Lauf an einer echten Akte zeigt, was der Server liefert |
 
-**[KANZLEI 6]** — zu bewerten: ob dies eine Verletzung nach Art. 4 Nr. 12 ist
-und ob Art. 33 greift. Aus Sicht der Entwicklung **kein Abfluss nach außen**:
-eigener Aktenbestand, eigenes AWS-Konto, derselbe Auftragsverarbeiter.
+**~~[KANZLEI 6]~~ — von der Kanzlei entschieden.** Die Kanzlei hat diesen
+Punkt als erledigt bezeichnet; er wird hier nicht erneut aufgeworfen. Für die
+Akte bleibt festgehalten, was ohnehin gilt: Der Vorgang ist in dieser
+Unterlage und in `MORGEN.md` nach Hergang, Ursache, Umfang und Abhilfe
+beschrieben, und damit ist er dokumentiert.
+
+Aus Sicht der Entwicklung **kein Abfluss nach außen**: eigener Aktenbestand,
+eigenes AWS-Konto, derselbe Auftragsverarbeiter.
 
 **Für diese Bewertung erheblich:** Die Ursache liegt im Programm und damit beim
 Verantwortlichen, nicht beim Auftragsverarbeiter und nicht beim Hersteller der
@@ -390,6 +530,37 @@ jur|nodes die Löschung auslösen kann, ist seit dem 28.09.2026 technisch belegt
 > die in jur|nodes anders abgeschlossen heißt, wird nie abschlussreif. Welche
 > Wörter der Bestand wirklich führt, zeigt die Probe an.
 
+**[KANZLEI 7] — die Löschfrist. Entwurf zur Übernahme, geschrieben am
+15.10.2026.**
+
+> **Zur Löschung der Arbeitskopie.** Die Arbeitskopie einer Akte wird
+> gelöscht, wenn die Akte in jusperfect abgeschlossen wird und danach
+> **30 Tage** verstrichen sind. Unabhängig davon wird sie gelöscht, wenn
+> **zwölf Monate** lang keine Sitzung zu dieser Akte stattgefunden hat. Die
+> Akte selbst bleibt davon unberührt; sie unterliegt § 50 Abs. 1 BRAO.
+
+**Warum eine zweite Frist, und warum gerade diese.** Heute beginnt eine
+Löschfrist **nie von selbst**: Wer eine Akte nicht abschließt, behält die
+Arbeitskopie für immer. Das ist die sichere Richtung — und zugleich ein
+Verstoß gegen Art. 5 Abs. 1 lit. e, der keine Frist kennt, die vom Fleiß des
+Bearbeiters abhängt. Die zweite Frist knüpft deshalb an eine Tatsache, die
+nicht vergessen werden kann: dass nichts geschieht.
+
+**Zwölf Monate, nicht drei.** Eine kürzere Frist träfe die liegengebliebene,
+aber lebende Akte — die, bei der ein Gutachten erwartet wird oder ein Verfahren
+ruht. Nach einem Jahr ohne jede Sitzung ist die Arbeitskopie kein Hilfsmittel
+mehr, sondern ein Vorrat.
+
+> **Was dafür noch zu tun ist, und es ist eine Programmaufgabe:** Die
+> zwölfmonatige Frist ist **nicht gebaut**. Heute gibt es nur den Weg über
+> den Abschluss. Vor der Übernahme dieses Absatzes ist entweder die Frist
+> einzubauen oder der zweite Satz zu streichen — eine Unterlage, die eine
+> Löschung zusagt, die das Programm nicht vornimmt, wäre schlimmer als keine.
+
+> **Und die Probe aus dem vorigen Kasten gehört dazu:** Solange nicht
+> feststeht, welche Wörter der Bestand im Feld `recordStatus` führt, kann die
+> erste Frist bei einem Teil der Akten nie anlaufen.
+
 ---
 
 ### R4 · Übermittlung an einen Auftragsverarbeiter, der dem Berufsgeheimnis unterliegt
@@ -400,11 +571,61 @@ des § 203 Abs. 3 StGB und des § 43e BRAO.
 | Maßnahme | Stand |
 |---|---|
 | AV-Vertrag und Hauptvertrag | liegen vor: **AWS Data Processing Addendum**, **AWS-Kundenvereinbarung** (01.06.2026), **AWS-Datenschutzhinweis** (18.05.2026) — alle drei unten gelesen; `[KANZLEI 8]` nur noch für Ablage |
-| Verpflichtung zur Verschwiegenheit in Textform (§ 43e Abs. 3 BRAO) | **[KANZLEI 9]** — prüfen und dokumentieren |
+| Verpflichtung zur Verschwiegenheit in Textform (§ 43e Abs. 3 BRAO) | **[KANZLEI 9]** — Entwurf unten. **Die schwächste Stelle des Vertragswerks** |
 | Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **Material beschafft am 14.10.2026** — sieben Nachweise aus AWS Artifact, Anlagen 7 bis 13; die Bewertung ist am 15.10.2026 geschrieben, siehe unten. `[KANZLEI 10]` nur noch für die Übernahme |
 | Kein Modelltraining | **Kundenvereinbarung Ziffer 1.4 und 6.1** (Fassung 01.06.2026) — nicht im AV-Vertrag, siehe unten |
 | Ein einziger Ausgang im Programm | `services/ausgang.py` — genau eine Stelle führt zum Modell |
 | Kein zweiter Anbieter | andere sind vorbereitet, keiner angebunden |
+
+**[KANZLEI 9] — die Verschwiegenheitsverpflichtung nach § 43e BRAO. Entwurf
+zur Übernahme, geschrieben am 15.10.2026. Dies ist die Stelle, an der ich am
+wenigsten beruhigt bin.**
+
+**Was das Berufsrecht verlangt.** § 43e BRAO erlaubt dem Rechtsanwalt, sich
+eines Dienstleisters zu bedienen, knüpft das aber an einen Vertrag in
+**Textform**, in dem der Dienstleister **zur Verschwiegenheit verpflichtet**
+und **darüber belehrt** wird, dass er strafrechtlich wie ein Gehilfe des
+Rechtsanwalts behandelt wird (§ 203 Abs. 4 StGB).
+
+**Was der Vertrag mit AWS enthält.** Eine Verschwiegenheitsregelung besteht;
+sie ist oben Abschnitt für Abschnitt gelesen. **Was er nicht enthält, ist die
+Belehrung** — eine auf § 203 StGB zugeschnittene Erklärung steht in keinem der
+drei Stücke, und AWS verhandelt seine Verträge nicht.
+
+> **Das ist kein Mangel dieser Kanzlei, sondern der Lage.** Kein großer
+> Cloud-Anbieter unterzeichnet eine Verpflichtungserklärung nach deutschem
+> Berufsrecht. Wer diese Dienste nutzt, steht vor derselben Frage — nur
+> beantworten die wenigsten sie schriftlich. Genau deshalb steht sie hier.
+
+**Der Weg, zu dem ich rate.** Die Belehrung ist eine Pflicht **der Kanzlei**,
+nicht eine Leistung des Dienstleisters. Sie lässt sich einseitig erfüllen:
+
+> **Zur Verschwiegenheitsverpflichtung nach § 43e BRAO.** Die Kanzlei hat den
+> Auftragsverarbeiter am TT.MM.JJJJ in Textform über die Verschwiegenheit nach
+> § 43a Abs. 2 BRAO und über § 203 Abs. 4 StGB belehrt und ihn zur
+> Verschwiegenheit verpflichtet. Eine gesonderte Gegenerklärung liegt nicht
+> vor; der Auftragsverarbeitungsvertrag enthält eine
+> Verschwiegenheitsregelung. Die Belehrung ist nebst Sendenachweis zur
+> Datenschutzakte genommen.
+
+**Drei Dinge, die diesen Absatz tragen — und eines, das er nicht leistet.**
+
+1. **Die Belehrung ist zugangsbedürftig, nicht zustimmungsbedürftig.** Sie
+   wirkt, wenn sie den Empfänger erreicht; ob er sie bestätigt, steht im
+   Gesetz nicht.
+2. **Der Sendenachweis ist der Beleg**, nicht die Antwort. Deshalb gehört er
+   in die Akte.
+3. **Die Datenminimierung trägt mit.** Je weniger hinausgeht, desto weniger
+   hängt an dieser Stelle — und es geht nur hinaus, was angehakt ist.
+4. **Was er nicht leistet:** Er macht aus einer bestrittenen Rechtslage keine
+   sichere. Wer meint, § 43e verlange eine beidseitige Erklärung, wird das
+   weiter meinen. **Diese Stelle bleibt das größte rechtliche Restrisiko des
+   ganzen Vorhabens**, und sie gehört in die Bewertung nach `[KANZLEI 17]`.
+
+> **Mein Rat, ausdrücklich:** Die Belehrung absenden, den Nachweis ablegen,
+> und den Vorbehalt in Abschnitt 7 stehen lassen. Nicht: die Stelle für
+> geklärt erklären, weil der Vertrag „eine Verschwiegenheitsregelung
+> enthält". Das ist sie nicht.
 
 #### Der Auftragsverarbeitungsvertrag, Abschnitt für Abschnitt
 
@@ -798,6 +1019,29 @@ er nicht enthält: die **Standardvertragsklauseln** (Abschn. 17, zwei
 verlinkte Stücke), die **Liste der Unterauftragsverarbeiter** (Abschn. 6.1)
 und die **AWS Service Terms** (Abschn. 16).
 
+**[KANZLEI 8] — die Ablage. Entwurf zur Übernahme, geschrieben am 15.10.2026.**
+
+Von den dreien liegen die **Service Terms** seit dem 15.10.2026 als Ausdruck
+bei (Anlage 15). Offen sind zwei, und beide sind Webseiten, keine Verträge:
+
+| Noch zu holen | Wo | Was festzuhalten ist |
+|---|---|---|
+| **Standardvertragsklauseln** | die beiden in Abschnitt 17 des AV-Vertrages verlinkten Stücke | Tag des Abrufs, Adresse, Ausdruck |
+| **Liste der Unterauftragsverarbeiter** | die in Abschnitt 6.1 genannte Seite | dasselbe, und sie ist **zu beobachten**: Der Vertrag sieht eine Unterrichtung über neue Unterauftragsverarbeiter vor, und ein Widerspruchsrecht nützt nur, wer die Liste kennt |
+
+> **Zur Ablage des Vertragswerks.** Zur Datenschutzakte genommen sind der
+> Auftragsverarbeitungsvertrag, die AWS-Kundenvereinbarung (Fassung
+> 01.06.2026), der AWS-Datenschutzhinweis (Fassung 18.05.2026) und die AWS
+> Service Terms (Stand 15.09.2026), jeweils mit dem Tag des Abrufs und der
+> Fundstelle. Die Standardvertragsklauseln und die Liste der
+> Unterauftragsverarbeiter sind am TT.MM.JJJJ abgerufen und beigefügt.
+
+**Warum der Tag des Abrufs zu jedem Stück gehört.** Der Vertrag gilt „in der
+jeweils geänderten Fassung", und keines der Stücke trägt eine
+Fassungsnummer. Ohne das Abrufdatum lässt sich später nicht sagen, **welchem
+Text** die Kanzlei zugestimmt hat — und das ist die einzige Frage, die im
+Streitfall zählt.
+
 #### Die Nutzungsrichtlinie des Modellanbieters
 
 *Aufgenommen am 15.10.2026, nachdem die Kanzlei die „Usage Policy" von
@@ -925,6 +1169,50 @@ und genau deshalb darf es nicht aus zweiter Hand übernommen werden. **Beim
 AWS-Support zu erfragen**, ausdrücklich für das Geländerprofil und für die drei
 benutzten Modellkennungen.
 
+**[KANZLEI 11] — der Text für die Anfrage. Geschrieben am 15.10.2026.**
+Abzusenden über den AWS-Support, Fall vom Typ „Account and billing" oder
+„Technical", Dienst „Amazon Bedrock".
+
+> **Betreff: In welchen Regionen verarbeiten das EU-Inferenzprofil und das
+> Geländerprofil?**
+>
+> für unser Konto 579138738703 (Region eu-central-1) bitten wir um eine
+> verbindliche Auskunft, **in welchen Regionen** die folgenden Profile
+> Anfragen verarbeiten:
+>
+> 1. das EU-Inferenzprofil für die von uns genutzten Modellkennungen,
+> 2. das Geländerprofil `eu.guardrail.v1:0`.
+>
+> Wir bitten um eine **namentliche Aufzählung der Regionen**. Die Angabe, es
+> handele sich um „EU-Regionen" oder um Regionen mit dem Vorsatz `eu-`,
+> genügt uns nicht: `eu-central-2` liegt in Zürich und `eu-west-2` in London,
+> also außerhalb der Europäischen Union und des Europäischen
+> Wirtschaftsraums.
+>
+> Hintergrund ist eine Datenschutz-Folgenabschätzung nach Art. 35 DSGVO. Für
+> sie ist erheblich, ob eine Verarbeitung außerhalb der EU und des EWR
+> stattfindet.
+
+> **Was in diese Anfrage nicht gehört, und das ist keine Förmelei:** kein
+> Akteninhalt, kein Beispiel, kein Bildschirmfoto mit Text. Nach Ziffer 6.5
+> der AWS-Kundenvereinbarung überträgt ein „Vorschlag" an AWS diesem
+> unwiderruflich sämtliche Rechte daran. Die Anfrage oben enthält deshalb
+> nichts als Kontonummer, Profilnamen und die Frage.
+
+**Was mit der Antwort geschieht — drei Fälle:**
+
+1. **Nur Regionen in der EU und im EWR:** Der Satz „Übermittlung in
+   Drittländer findet nicht statt" darf in die Hinweise nach Art. 13
+   (`DATENSCHUTZHINWEISE-ENTWURF.md`, dort `[KANZLEI 2]`), und R5 fällt auf
+   „gering".
+2. **Zürich oder London sind dabei:** Der Satz darf **nicht** hinein. Dann
+   ist zu prüfen, ob sich das Geländerprofil auf EU-Regionen einschränken
+   lässt; wenn nicht, ist der Drittlandbezug in den Hinweisen zu beschreiben
+   und auf Art. 46 zu stützen.
+3. **AWS antwortet ausweichend oder gar nicht:** Dann bleibt es bei der
+   heutigen Lage — die Angabe ist ungesichert, R5 bleibt „mittel", und der
+   Satz bleibt draußen. **Bei Dritten wird gewartet, nicht geraten.**
+
 ---
 
 ### R6 · Besondere Kategorien, verstärkt durch die Texterkennung
@@ -942,6 +1230,42 @@ dass sich an Anbieter, Region oder Vertrag etwas ändert.
 | Derselbe Auftragsverarbeiter, derselbe AV-Vertrag | kein neuer Vertrag |
 | Nicht gespeichert, nicht zur Verbesserung der Dienste verwendet | **belegt am 14.10.2026** — siehe unten |
 | Abschaltbar mit einer Zeile | `JUSPERFECT_OCR=keine`; gescannte Blätter bleiben dann ungelesen |
+
+**[KANZLEI 12] — Erlaubnistatbestand und die Frage nach dem Rechtsgebiet.
+Entwurf zur Übernahme, geschrieben am 15.10.2026.**
+
+> **Zum Erlaubnistatbestand.** Soweit besondere Kategorien personenbezogener
+> Daten verarbeitet werden, stützt sich die Kanzlei auf **Art. 9 Abs. 2
+> lit. f DSGVO**: Die Verarbeitung ist zur Geltendmachung, Ausübung oder
+> Verteidigung von Rechtsansprüchen erforderlich. Soweit Daten über
+> strafrechtliche Verurteilungen und Straftaten betroffen sind, beruht die
+> Verarbeitung auf **Art. 10 DSGVO in Verbindung mit § 22 BDSG**. Eine
+> Beschränkung des Programms auf einzelne Rechtsgebiete erfolgt nicht.
+
+**Warum lit. f und nicht die Einwilligung.** Art. 9 Abs. 2 lit. a verlangt
+eine **ausdrückliche** Einwilligung und ist jederzeit widerruflich — mitten im
+Mandat. Lit. f ist nicht widerruflich und beschreibt genau das, was eine
+Kanzlei tut. Dieselbe Überlegung trägt die Entscheidung gegen eine
+Einwilligung in den Mandatsbedingungen.
+
+**Warum keine Beschränkung nach Rechtsgebiet — und warum ich darüber
+nachgedacht habe.** Es wäre naheliegend, das Programm etwa für Strafsachen
+oder Arzthaftungssachen zu sperren. Dagegen sprechen drei Dinge:
+
+1. **Die Abgrenzung trüge nicht.** Gesundheitsdaten stehen in der
+   Verkehrsunfallsache so gut wie in der Arzthaftungssache. Eine Sperre nach
+   Rechtsgebiet erzeugt ein Gefühl von Sicherheit, wo keine Grenze verläuft.
+2. **Die wirksame Grenze liegt eine Ebene tiefer.** Was zum Modell geht,
+   entscheidet der Haken je Dokument — nicht das Rechtsgebiet. Das ist die
+   Auswahl im Dokumentfenster, und sie steht als Hausregel in der Einweisung.
+3. **Eine Sperre, die umgangen werden kann, ist keine.** Das Rechtsgebiet
+   steht in der Akte, nicht im Programm; eine Akte ohne gepflegtes
+   Rechtsgebiet fiele durch jede Sperre hindurch.
+
+> **Was stattdessen trägt:** `JUSPERFECT_OCR=keine` schaltet die
+> Texterkennung ab, wenn die Kanzlei den Umfang der Art.-9-Verarbeitung
+> verkleinern will — eine Zeile, nachvollziehbar, und sie wirkt für alle
+> Akten gleich.
 
 > **Berichtigt am 05.10.2026 nach der Zweitprüfung (Befund F12).** Die
 > Unterlagen schlossen aus dem Versand als Bytes **ohne** eigenen S3-Zwischen&shy;speicher,
@@ -1003,9 +1327,41 @@ organisatorisch zu treffen.
 | Technisch möglich | eine Beschränkung je Nutzer auf einzelne Akten; im Programm vorhanden und in den Testdaten benutzt |
 | Die Anmeldung | ist im Laufwerks- und Schnittstellenbetrieb **kein Kennwort**, sondern eine Kennung. Wer am Rechner sitzt, kann eine andere eintragen |
 
-**[KANZLEI 13]** — zu entscheiden: ob die Zugriffsbeschränkung je Bearbeiter
-eingeführt wird, und ob der Schutz des Windows-Kontos als Zugangsschutz genügt.
-Die Entwicklung kann dazu nur sagen, was ist, nicht was reicht.
+**[KANZLEI 13] — Entwurf zur Übernahme, geschrieben am 15.10.2026. Dies ist
+nach der Einstufung unter `[KANZLEI 5]` das einzige hohe Risiko.**
+
+> **Zum Zugriff innerhalb der Kanzlei.** Die Zugriffsbeschränkung je
+> Bearbeiter wird eingeführt. Bis dahin gilt: Der Zugang zu jusperfect ist
+> durch das Windows-Konto geschützt; die Rechner werden bei Verlassen des
+> Arbeitsplatzes gesperrt, Konten werden nicht geteilt, und jeder Bearbeiter
+> trägt seine eigene Kennung ein.
+
+**Warum ich dazu rate, und es ist nicht die Technik.** Die Beschränkung je
+Bearbeiter **ist gebaut** und wird in den Testdaten benutzt; sie
+einzuschalten ist Arbeit an der Nutzerverwaltung, nicht am Programm. Was
+dagegen spricht, ist der Aufwand in einer Kanzlei, in der jeder einspringen
+können muss. Was dafür spricht, ist § 32 BDSG und Art. 32 DSGVO — und der
+Umstand, dass ein Zugriff, den niemand braucht, auch niemandem fehlt.
+
+**Zum Zugangsschutz, und hier bin ich deutlicher.** Die Anmeldung in
+jusperfect ist **kein Kennwort, sondern eine Kennung**: Wer am Rechner sitzt,
+kann eine andere eintragen. Das ist vertretbar, **solange** der Rechner selbst
+geschützt ist. Es ist nicht mehr vertretbar, sobald ein Arbeitsplatz
+unbeaufsichtigt entsperrt bleibt oder zwei Personen dasselbe Windows-Konto
+benutzen.
+
+> **Die Zuordnung im Nachweis hängt daran.** Jeder Nutzungseintrag trägt die
+> eingetragene Kennung. Teilen sich zwei Personen ein Konto, sagt der
+> Nachweis nicht mehr, wer gefragt hat — und damit fällt die
+> Rechenschaftspflicht nach Art. 5 Abs. 2 an dieser Stelle aus.
+
+**Drei Dinge, die ohne Programmänderung sofort gehen** und die ich in die
+Einweisung aufnehmen würde, wenn die Kanzlei zustimmt:
+
+1. Bildschirmsperre beim Verlassen des Platzes, automatisch nach wenigen
+   Minuten.
+2. Keine geteilten Windows-Konten.
+3. Jeder trägt seine eigene Kennung ein — auch wer nur kurz nachsieht.
 
 ---
 
@@ -1027,10 +1383,24 @@ weichen für Bedrock aber nicht von ihr ab (R4, Abschnitt 50.12). **Beim Auftrag
 wird darüber hinaus nichts aufbewahrt:** Die Missbrauchserkennung nach 50.12.2
 greift für das eingesetzte Modell nicht (`[KANZLEI 22]`). Bei einem gelisteten
 Modell läge es anders — dann lägen Ein- und Ausgaben bis zu dreißig Tage bei
-AWS, und eine Löschung durch die Kanzlei erreichte sie nicht. **[KANZLEI 14]**
-— in den Hinweisen an die Betroffenen zu beschreiben; der Satz dazu steht seit
-dem 14.10.2026 im Hinweiskasten von `DATENSCHUTZHINWEISE-ENTWURF.md` und ist
-nur noch zu behalten oder zu streichen.
+AWS, und eine Löschung durch die Kanzlei erreichte sie nicht. **[KANZLEI 14] — erledigt am 15.10.2026, bis auf eine Entscheidung.** Der
+Satz steht jetzt nicht mehr nur im Entwurf, sondern in der Unterlage, die die
+Mandantschaft erhält: `HINWEISE-DATENVERARBEITUNG.md`, Ziffer 3, zweimal —
+einmal nüchtern („Die zur Auswertung übermittelten Texte werden dort nicht
+aufbewahrt") und einmal im freiwilligen Kasten („Was einmal zur Auswertung
+übermittelt wurde, lässt sich nicht zurückrufen").
+
+**Zu entscheiden bleibt nur, ob der Kasten bleibt** (dort als `[KANZLEI 4]`
+geführt). **Mein Rat: behalten.** Er beantwortet die Frage, die Mandanten
+stellen, bevor sie gestellt wird — und er sagt eine unangenehme Wahrheit,
+bevor jemand anders sie sagt.
+
+> **Und die Abhängigkeit, die dabei nicht untergehen darf:** Der Satz „wird
+> dort nicht aufbewahrt" ist richtig, **weil** das eingesetzte Modell nicht
+> auf der Missbrauchserkennungsseite steht. Bei einem gelisteten Modell lägen
+> Ein- und Ausgaben bis zu dreißig Tage bei AWS, eine Löschung durch die
+> Kanzlei erreichte sie nicht — und die Hinweise wären unrichtig. Davor
+> schützt Regel 1 der Einweisung.
 
 ---
 
@@ -1057,10 +1427,39 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 
 | | |
 |---|---|
-| **[KANZLEI 15] · Schulung** | Wer das Programm bedient, muss wissen, dass jede Ausgabe zu prüfen ist und dass eine Fundstelle nur sagt, *worauf* ein Satz beruht — nicht, dass sie ihn trägt. Zugleich die KI-Kompetenz nach Art. 4 KI-VO: eine Stunde, dokumentiert |
+| **[KANZLEI 15] · Schulung** | Entwurf unten |
 | Nutzerverwaltung | siehe R7 |
 | Kostengrenze | 100 USD im Monat, meldet und bremst nicht |
 | Weitergabe von Befunddateien | Die Prüfprogramme schreiben Dateien ohne Akteninhalt; ein Blick vor dem Weitergeben bleibt vorgesehen |
+
+**[KANZLEI 15] — die Schulung. Entwurf zur Übernahme, geschrieben am
+15.10.2026.** Eine Stunde, dokumentiert; sie erfüllt zugleich die KI-Kompetenz
+nach **Art. 4 KI-VO**.
+
+| | Inhalt | Dauer |
+|---|---|---|
+| **1** | **Was das Programm tut und was nicht.** Es wertet aus und entwirft; es entscheidet nicht, berechnet keine Fristen und versendet nichts | 10 min |
+| **2** | **Die Belegpflicht und ihre Grenze.** Jede Aussage zeigt auf eine Stelle der Akte. Eine Fundstelle sagt, **worauf** ein Satz beruht — **nicht**, dass sie ihn trägt. Das ist der Satz, auf den es ankommt | 15 min |
+| **3** | **Die Auswahl im Dokumentfenster.** Zum Modell geht nur, was angehakt ist. Das ist Datenminimierung nach Art. 5 Abs. 1 lit. c und die wirksamste Maßnahme in der Hand des Bearbeiters | 10 min |
+| **4** | **Die beiden Hausregeln** aus `EINWEISUNG.md`: kein gelistetes Modell, und die Kontoadresse wird gelesen | 10 min |
+| **5** | **Was zu tun ist, wenn etwas auffällt** — eine Aussage ohne Beleg, ein fremdes Dokument, eine Fehlermeldung ohne Grund. Wem es gemeldet wird und dass es gemeldet wird | 10 min |
+| **6** | **Fragen** | 5 min |
+
+> **Nachweis.** Datum, Dauer, Inhalt in Stichworten, Namen und Unterschriften
+> der Teilnehmenden; ein Blatt zur Datenschutzakte. Die Einweisung
+> (`EINWEISUNG.md`) trägt die Unterschriftenzeilen bereits und kann als
+> dieser Nachweis dienen, wenn die sechs Punkte oben darauf vermerkt werden.
+
+**Warum Punkt 2 doppelt so lang ist wie die anderen.** Weil dort der Fehler
+liegt, den das Programm nicht verhindern kann. Ein Satz mit Fundstelle sieht
+geprüft aus. Er ist es nicht — die Fundstelle sagt nur, aus welcher Stelle der
+Akte er stammt. Wer das nicht verstanden hat, liest die Belege als Siegel
+statt als Verweis, und dann arbeitet das Programm gegen ihn.
+
+**Art. 4 KI-VO verlangt nicht mehr als das.** Die Vorschrift will, dass die
+Menschen, die ein KI-System bedienen, es hinreichend verstehen, um seine
+Ergebnisse einzuordnen. Genau das leisten die sechs Punkte — und sie leisten
+es für diese Kanzlei und dieses Programm, nicht allgemein.
 
 ---
 
@@ -1078,34 +1477,100 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 > Auftragsverarbeiter, ein neuer Speicherort, eine neue Übermittlung
 > (die Texterkennung war eine), oder eine Antwort des Herstellers zu R1.
 
+**[KANZLEI 17] — der Abschluss. Entwurf zur Übernahme, geschrieben am
+15.10.2026.** Er setzt voraus, dass die Entwürfe zu `[KANZLEI 7]`,
+`[KANZLEI 11]` und `[KANZLEI 13]` übernommen und umgesetzt sind; ohne sie
+stimmt der erste Satz nicht.
+
+> **Zum verbleibenden Risiko.** Nach den beschriebenen Maßnahmen hält die
+> Kanzlei das verbleibende Risiko für die Rechte und Freiheiten der
+> betroffenen Personen für **tragbar**. Sieben der acht bewerteten Risiken
+> stehen nach den Maßnahmen auf „mittel" oder darunter; das Risiko R7 wird
+> durch die Zugriffsbeschränkung je Bearbeiter auf „mittel" geführt. Ein
+> hohes Risiko im Sinne des **Art. 36 Abs. 1 DSGVO** verbleibt nach
+> Auffassung der Kanzlei nicht; eine vorherige Konsultation der
+> Aufsichtsbehörde erfolgt daher nicht.
+>
+> **Ein Vorbehalt gehört dazu:** Die Verschwiegenheitsverpflichtung des
+> Auftragsverarbeiters nach § 43e BRAO (`[KANZLEI 9]`) ist einseitig erklärt
+> und nicht gegengezeichnet. Die Kanzlei sieht darin ein hinnehmbares, aber
+> fortbestehendes rechtliches Risiko.
+>
+> **Datenschutzbeauftragter.** Ein Datenschutzbeauftragter ist nicht benannt,
+> da keine Benennungspflicht besteht; eine Beteiligung nach Art. 35 Abs. 2
+> DSGVO entfällt.
+>
+> **Überprüfung (Art. 35 Abs. 11).** Die Folgenabschätzung wird **jährlich**
+> überprüft, erstmals zum TT.MM.JJJJ, und außerdem unverzüglich, sobald eines
+> dieser Ereignisse eintritt: ein neuer Auftragsverarbeiter; ein neuer
+> Speicherort; eine neue Art der Übermittlung; ein Wechsel des eingesetzten
+> Modells; eine Änderung der Nutzungsrichtlinie des Modellanbieters; eine
+> Antwort des Herstellers der Aktenverwaltung zu Risiko R1.
+
+**Wo ich mir sicher bin, und wo nicht.**
+
+**Sicher:** dass Art. 36 nicht greift, wenn `[KANZLEI 13]` umgesetzt ist. Die
+Vorschrift verlangt eine Konsultation nur, wenn trotz der Maßnahmen ein
+**hohes** Risiko bliebe. Das ist hier nicht die Lage — die Maßnahmen sind
+nicht Absichtserklärungen, sondern geprüft und zum Teil technisch erzwungen.
+
+**Nicht sicher:** `[KANZLEI 9]`. Deshalb steht der Vorbehalt im Text und nicht
+in einer Fußnote. Eine Folgenabschätzung, die ihre schwächste Stelle
+verschweigt, ist keine Bewertung, sondern eine Werbeschrift.
+
+> **Und ein letzter Punkt zur Reihenfolge:** Dieser Abschluss wird
+> unterschrieben, **nachdem** die drei genannten Stellen entschieden sind —
+> nicht vorher. Wer ihn vorher zeichnet, bestätigt eine Einstufung, die auf
+> Maßnahmen beruht, die es noch nicht gibt.
+
 ---
 
 ## 8. Die zweiundzwanzig Stellen für die Kanzlei auf einen Blick
 
-| Nr. | Was zu entscheiden ist | Abschnitt |
-|---|---|---|
-| 1 | Ist eine DSFA erforderlich? | 1 |
-| 2 | Ist der Umfang „umfangreich" im Sinne der Norm? | 1 |
-| 16 | Welche Muster-Liste der Aufsichtsbehörden gilt? | 1 |
-| 3 | Verhältnismäßigkeit insgesamt | 3 |
-| 4 | Modell auf eigener Hardware als milderes Mittel? | 3.2 |
-| 5 | Einstufung der acht Risiken | 4 |
-| 6 | R1: Verletzung nach Art. 4 Nr. 12? Meldung nach Art. 33? | R1 |
-| 7 | Wann wird die Fallkopie gelöscht? | R3 |
-| 8 | Ablage: Tag des Abrufs, Quelle, Ausdruck — je deutsch **und** englisch; dazu SCC, Unterauftragsverarbeiterliste, Service Terms | R4 |
-| 9 | Verschwiegenheitsverpflichtung § 43e Abs. 3 BRAO | R4 |
-| 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 — Nachweise seit 14.10.2026 in der Akte (Anlagen 7–13), **die Bewertung ist am 15.10.2026 ausformuliert**. Zu entscheiden bleibt, ob sie so übernommen wird | R4 |
-| 11 | Regionen des Geländerprofils — bei AWS erfragen | R5 |
-| 12 | Erlaubnistatbestand Art. 9 Abs. 2; Beschränkung nach Rechtsgebiet? | R6 |
-| 13 | Zugriffsbeschränkung je Bearbeiter? Zugangsschutz? | R7 |
-| 14 | Was den Betroffenen über die Übermittlung gesagt wird | R8 |
-| 15 | Schulung und KI-Kompetenz nach Art. 4 KI-VO | 6 |
-| 17 | Verbleibendes Risiko, Art. 36, Beteiligung des DSB, Überprüfungsfrist | 7 |
-| ~~18~~ | ~~Sollen Aktenzeichen und Dokumenttitel an das Modell gehen?~~ **Entschieden am 05.10.2026: Dateiname nein, Art des Schriftstücks ja, Aktenzeichen nur beim Entwurf** | 2.1 |
-| ~~19~~ | ~~Wirksame AI-services-Opt-out-Richtlinie für Textract nachweisen~~ **Eingelöst am 14.10.2026, 17:11 MESZ — Nachweis in der Datenschutzakte** | R6 |
-| ~~20~~ | ~~Bleibt es bei der Verarbeitung durch einen Auftragsverarbeiter, obwohl der Inhalt dort im Klartext vorliegt?~~ **Entschieden am 14.10.2026: ja, es bleibt dabei** | 2.4 |
-| ~~21~~ | ~~Einschlägigen Abschnitt der AWS Service Terms zu Amazon Bedrock beschaffen~~ **Beschafft und gelesen am 14.10.2026: keine Abweichung von Ziffer 1.4, kein Training** | R4 |
-| 22 | Missbrauchserkennung nach 50.12.2: **am 14.10.2026 geklärt** — Abschnitt 1.24 betrifft uns nicht, das eingestellte Modell `claude-opus-4-6-v1` ist nicht gelistet, die Hausregeln stehen in `EINWEISUNG.md`, und die Art.-13-Frage ist entschieden und in `DATENSCHUTZHINWEISE-ENTWURF.md` eingearbeitet. Bleibt: die jährliche Durchsicht der Liste | R4 |
+**Stand 15.10.2026: Zu jeder offenen Stelle liegt ein Entwurf vor.** Die
+Spalte „Stand" sagt, was noch fehlt — eine Entscheidung der Kanzlei, eine
+Auskunft von Dritten oder eine Arbeit am Programm.
+
+| Nr. | Worum es geht | Stand | Abschnitt |
+|---|---|---|---|
+| 1 | Ist eine DSFA erforderlich? | **Entwurf: ja.** Nur zu übernehmen | 1 |
+| 2 | Ist der Umfang „umfangreich"? | **Entwurf: ja** — und es kommt nicht darauf an | 1 |
+| 16 | Welche Muster-Liste gilt? | **Hamburg**, nicht-öffentlicher Bereich. Die Liste selbst ist noch aufzurufen | 1 |
+| 3 | Verhältnismäßigkeit insgesamt | **Entwurf: verhältnismäßig.** Nur zu übernehmen | 3 |
+| 4 | Modell auf eigener Hardware? | **Entwurf: nein**, jährlich neu zu prüfen | 3.2 |
+| 5 | Einstufung der acht Risiken | **Entwurf liegt vor** — sieben „mittel" oder darunter, **R7 hoch** | 4 |
+| ~~6~~ | ~~R1, Art. 4 Nr. 12~~ | **Von der Kanzlei entschieden** | R1 |
+| 7 | Wann wird die Fallkopie gelöscht? | Entwurf: Abschluss + 30 Tage **und** 12 Monate ohne Sitzung. **Die zweite Frist ist noch zu bauen** | R3 |
+| 8 | Ablage des Vertragswerks | Service Terms liegen bei (Anlage 15). **Offen: Standardvertragsklauseln und Unterauftragsverarbeiterliste** | R4 |
+| 9 | Verschwiegenheitsverpflichtung § 43e BRAO | **Die schwächste Stelle.** Entwurf: einseitige Belehrung absenden und ablegen | R4 |
+| 10 | Dienstleisterauswahl § 43e Abs. 2 | Nachweise in der Akte, **Bewertung ausformuliert.** Nur zu übernehmen | R4 |
+| 11 | Regionen des Geländerprofils | **Wartet auf AWS.** Der Text der Anfrage steht bereit | R5 |
+| 12 | Art. 9 Abs. 2; Beschränkung nach Rechtsgebiet? | Entwurf: lit. f; **keine** Beschränkung nach Rechtsgebiet | R6 |
+| 13 | Zugriffsbeschränkung je Bearbeiter? | **Das einzige hohe Risiko.** Entwurf: einführen | R7 |
+| 14 | Was den Betroffenen gesagt wird | **Erledigt** — steht in den Hinweisen, Ziffer 3 | R8 |
+| 15 | Schulung und KI-Kompetenz (Art. 4 KI-VO) | **Entwurf liegt vor** — sechs Punkte, eine Stunde | 6 |
+| 17 | Restrisiko, Art. 36, DSB, Überprüfungsfrist | **Entwurf liegt vor.** Zu zeichnen erst nach 7, 11 und 13 | 7 |
+| ~~18~~ | ~~Aktenzeichen und Dokumenttitel an das Modell?~~ | **Entschieden am 05.10.2026:** Dateiname nein, Art des Schriftstücks ja, Aktenzeichen nur beim Entwurf | 2.1 |
+| ~~19~~ | ~~Opt-out-Richtlinie für Textract nachweisen~~ | **Eingelöst am 14.10.2026, 17:11 MESZ** | R6 |
+| ~~20~~ | ~~Bleibt es beim Auftragsverarbeiter?~~ | **Entschieden am 14.10.2026: ja** | 2.4 |
+| ~~21~~ | ~~Service Terms zu Bedrock beschaffen~~ | **Gelesen am 14.10.2026**, Ausdruck seit 15.10.2026 (Anlage 15) | R4 |
+| 22 | Missbrauchserkennung nach 50.12.2 | **Geklärt am 14.10.2026.** Bleibt: die jährliche Durchsicht der Liste | R4 |
+
+### Was davon wirklich noch Arbeit ist
+
+**Drei Dinge, und nur drei:**
+
+1. **`[KANZLEI 13]` — die Zugriffsbeschränkung.** Das einzige hohe Risiko,
+   und das einzige, das im Haus liegt und nicht bei AWS.
+2. **`[KANZLEI 9]` — die Belehrung an AWS.** Ein Schreiben, ein
+   Sendenachweis, ein Blatt zur Akte.
+3. **`[KANZLEI 7]` — die zwölfmonatige Löschfrist.** Eine Programmaufgabe,
+   nicht eine Entscheidung.
+
+**Zwei warten auf Dritte:** die Auskunft von AWS zum Geländerprofil
+(`[KANZLEI 11]`) und die Hamburger Muss-Liste (`[KANZLEI 16]`).
+
+**Alles Übrige ist Lesen und Zeichnen.**
 
 ---
 
