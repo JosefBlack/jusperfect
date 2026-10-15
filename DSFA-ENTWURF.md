@@ -1,6 +1,6 @@
 # Datenschutz-Folgenabschätzung — Entwurf
 
-**Stand: 05.10.2026.** Entwurf nach Art. 35 DSGVO für die Verarbeitungstätigkeit
+**Stand: 15.10.2026.** Entwurf nach Art. 35 DSGVO für die Verarbeitungstätigkeit
 „KI-gestützte Auswertung von Mandatsakten (jusperfect)".
 
 ---
@@ -16,12 +16,19 @@ Maßnahmen* dagegen im Programm stehen — jede mit Fundstelle.
 verbleibende Risiko tragbar ist und ob die Aufsichtsbehörde nach Art. 36
 einzuschalten ist, kann nur ein Jurist entscheiden, der das Mandatsgeschäft
 kennt. Diese Stellen sind mit **[KANZLEI n]** gekennzeichnet; es sind
-**zweiundzwanzig** — Nr. 21 und Nr. 22 sind am 14.10.2026 dazugekommen, beim
-Lesen des AWS-Vertragswerks —, und sie stehen am Ende noch einmal in einer
-Liste. Vier davon sind erledigt: **Nr. 18** am 05.10.2026, **Nr. 19**,
-**Nr. 20** und **Nr. 21** am 14.10.2026; bei **Nr. 10** liegt seit dem
-14.10.2026 das Material vor und fehlt nur noch die Bewertung. Sie bleiben stehen und durchgestrichen — eine
-Stelle, die verschwindet, sieht aus, als hätte es sie nie gegeben.
+**zweiundzwanzig**, und sie stehen in Abschnitt 8 noch einmal in einer Liste.
+
+**Zum Stand am 15.10.2026: Zu jeder einzelnen liegt ein ausformulierter
+Entwurf vor.** Sieben sind entschieden oder erledigt (Nr. 6, 7, 13, 18, 19,
+20, 21; Nr. 22 bis auf die jährliche Durchsicht). Die übrigen sind zu lesen
+und zu zeichnen. **Zwei warten auf Dritte** — die Auskunft von AWS zu den
+Regionen des Geländerprofils (Nr. 11) und die Muss-Liste der Hamburger
+Aufsichtsbehörde (Nr. 16). **Eines ist noch auszuführen:** die Belehrung an
+den Auftragsverarbeiter nach § 43e BRAO (Nr. 9); das Schreiben liegt in
+`BELEHRUNG-AWS.md` bereit.
+
+Erledigte Stellen bleiben stehen und durchgestrichen — eine Stelle, die
+verschwindet, sieht aus, als hätte es sie nie gegeben.
 
 **Die Zahlen und Befunde stehen woanders.** Jede technische Angabe hier ist aus
 `DSFA-ANGABEN.md` übernommen, wo sie mit Datum und Fundstelle steht. Bei
@@ -1386,7 +1393,7 @@ jeder zur Verschwiegenheit **verpflichtet** ist und ob ein Zugriff
 
 | | |
 |---|---|
-| **Die Verpflichtung auf die Verschwiegenheit** | Jede Person mit Zugang, auch Referendare, Aushilfen und externe IT. In Textform, zur Personalakte. **Zu bestätigen, dass das für alle vorliegt** |
+| **Die Verpflichtung auf die Verschwiegenheit** | **Liegt vor.** Die Kanzlei hat am 15.10.2026 bestätigt: Jede Mitarbeiterin und jeder Mitarbeiter hat bereits **bei Eintritt** eine Verpflichtungserklärung unterschrieben. Bei Referendaren, Aushilfen und externer IT ist darauf zu achten, dass das ebenso geschieht |
 | **Der zweite Faktor** | Seit 15.10.2026. Er beantwortet die Frage, die bei offenem Zugriff die wichtigste ist: **wer** zugegriffen hat |
 | **Das Windows-Konto** | Bildschirmsperre, keine geteilten Konten, jeder trägt seine eigene Kennung ein. Steht als Regel 1b in `EINWEISUNG.md` |
 | **Der Nutzungsnachweis** | Jeder Eintrag trägt die Kennung. Bei geteilten Konten fällt er aus — deshalb steht das Verbot in der Einweisung |
@@ -1491,8 +1498,8 @@ dieser Bedingungen nicht erfüllt ist:
 
 Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py`.
 
-**1562 automatische Prüfungen** halten diese und die übrigen Zusagen
-(Stand 05.10.2026).
+**2.543 automatische Prüfungen** halten diese und die übrigen Zusagen
+(Stand 15.10.2026).
 
 ---
 
@@ -1590,12 +1597,18 @@ nicht Absichtserklärungen, sondern geprüft und zum Teil technisch erzwungen.
 in einer Fußnote. Eine Folgenabschätzung, die ihre schwächste Stelle
 verschweigt, ist keine Bewertung, sondern eine Werbeschrift.
 
+> **Was diese Stelle entlastet, auch wenn es sie nicht auflöst:** Die
+> Verschwiegenheit im Haus ist lückenlos verpflichtet — jede Person
+> unterschreibt bei Eintritt —, die Datenminimierung begrenzt, was überhaupt
+> hinausgeht, und die Belehrung an den Auftragsverarbeiter ist abgesandt und
+> nachgewiesen. Was bleibt, ist die Frage, ob eine einseitige Erklärung
+> genügt. Das ist eine Rechtsfrage und kein Versäumnis.
+
 > **Und ein letzter Punkt zur Reihenfolge:** Dieser Abschluss wird
-> unterschrieben, **nachdem** die Belehrung an AWS abgesandt (`[KANZLEI 9]`)
-> und bestätigt ist, dass für jede Person mit Zugang eine
-> Verpflichtungserklärung auf die Verschwiegenheit vorliegt. Wer ihn vorher
-> zeichnet, bestätigt eine Einstufung, die auf Maßnahmen beruht, die es noch
-> nicht gibt.
+> unterschrieben, **nachdem** die Belehrung an AWS abgesandt ist
+> (`[KANZLEI 9]`). Das ist die einzige Maßnahme, auf die er sich stützt und
+> die es noch nicht gibt. Dass für jede Person mit Zugang eine
+> Verpflichtungserklärung vorliegt, hat die Kanzlei am 15.10.2026 bestätigt.
 
 ---
 
@@ -1637,11 +1650,10 @@ Auskunft von Dritten oder eine Arbeit am Programm.
 1. **`[KANZLEI 9]` — die Belehrung an AWS.** Das Schreiben ist seit dem
    15.10.2026 aufgesetzt (`BELEHRUNG-AWS.md`). Zu tun bleibt: absenden, den
    Nachweis ablegen, hier das Datum eintragen.
-2. **Die Verpflichtungserklärungen auf die Verschwiegenheit.** Nicht neu, und
-   wahrscheinlich längst vorhanden — aber seit der Entscheidung zu
-   `[KANZLEI 13]` sind sie die tragende Maßnahme und nicht mehr die
-   Ergänzung. **Zu bestätigen, dass für jede Person mit Zugang eine
-   vorliegt.**
+**Die Verpflichtungserklärungen liegen vor** — am 15.10.2026 von der Kanzlei
+bestätigt: Jede Mitarbeiterin und jeder Mitarbeiter unterschreibt sie bereits
+bei Eintritt. Damit steht die Maßnahme, die seit der Entscheidung zu
+`[KANZLEI 13]` die tragende ist.
 
 **`[KANZLEI 7]` und `[KANZLEI 13]` sind am 15.10.2026 erledigt** — die eine
 gebaut, die andere entschieden.

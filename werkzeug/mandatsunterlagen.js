@@ -35,12 +35,16 @@ const zeilen = fs.readFileSync(quelle, "utf-8").split("\n");
 // als Grundton.
 function stuecke(text, grund = {}) {
   const aus = [];
-  const re = /(\*\*[^*]+?\*\*|`[^`]+`|\*[^*]+?\*)/g;
+  const re = /(\*\*[^*]+?\*\*|~~[^~]+?~~|`[^`]+`|\*[^*]+?\*)/g;
   let zuletzt = 0, t;
   while ((t = re.exec(text)) !== null) {
     if (t.index > zuletzt) aus.push(new TextRun({ text: text.slice(zuletzt, t.index), ...grund }));
     const s = t[0];
     if (s.startsWith("**")) aus.push(...stuecke(s.slice(2, -2), { ...grund, bold: true }));
+    // Durchgestrichen: Die Folgenabschaetzung streicht erledigte Stellen
+    // durch, statt sie zu entfernen. Die Zaehlung bleibt stehen, und wer
+    // spaeter fragt, warum eine Nummer fehlt, bekommt eine Antwort.
+    else if (s.startsWith("~~")) aus.push(...stuecke(s.slice(2, -2), { ...grund, strike: true }));
     else if (s.startsWith("`")) aus.push(new TextRun({ text: s.slice(1, -1), font: FEST, ...grund }));
     else aus.push(...stuecke(s.slice(1, -1), { ...grund, italics: true }));
     zuletzt = t.index + s.length;
@@ -116,8 +120,25 @@ while (i < zeilen.length) {
       i++;
     }
     const anzahl = kopf.length;
-    const breiten = anzahl === 2 ? [2400, BREITE - 2400]
-      : Array(anzahl).fill(Math.floor(BREITE / anzahl));
+    // Die Breiten richten sich nach dem Inhalt, nicht nach der Anzahl.
+    //
+    // Zu gleichen Teilen geteilt bekam eine Spalte mit der Nummer "1" ein
+    // Drittel der Seite und die Spalte daneben einen Text, der in acht
+    // Zeilen umbrach. Gerechnet wird mit der laengsten Zelle je Spalte,
+    // gedaempft durch die Wurzel - sonst zieht ein einzelner langer Absatz
+    // alles an sich - und jede Spalte behaelt ein Mindestmass.
+    const laengen = kopf.map((_, n) =>
+      Math.max(kopf[n].length, ...reihen.map((r) => (r[n] || "").length)));
+    const gewicht = laengen.map((l) => Math.sqrt(Math.max(l, 3)));
+    const summe = gewicht.reduce((a, b) => a + b, 0);
+    const MINDEST = Math.min(900, Math.floor(BREITE / (anzahl * 3)));
+    let breiten = gewicht.map((g) => Math.max(MINDEST, Math.round(BREITE * g / summe)));
+    const zuviel = breiten.reduce((a, b) => a + b, 0) - BREITE;
+    if (zuviel > 0) {
+      // Das Zuviel bei der breitesten Spalte abziehen: Sie verkraftet es.
+      const breiteste = breiten.indexOf(Math.max(...breiten));
+      breiten[breiteste] -= zuviel;
+    }
     // Eine Kopfzeile aus lauter leeren Zellen ist keine - dann wird sie
     // weggelassen, statt einen grauen Streifen ohne Text zu setzen.
     const mitKopf = kopf.some((t) => t !== "");
@@ -140,7 +161,7 @@ while (i < zeilen.length) {
     const teile = [];
     let gerade = "";
     while (i < zeilen.length && zeilen[i].trimEnd().startsWith(">")) {
-      const t = zeilen[i].trimEnd().replace(/^>\s?/, "");
+      const t = zeilen[i].trimEnd().replace(/^(>\s?)+/, "");
       if (!t.trim()) { if (gerade) { teile.push(gerade); gerade = ""; } }
       else gerade = gerade ? gerade + " " + t.trim() : t.trim();
       i++;
@@ -162,6 +183,11 @@ while (i < zeilen.length) {
   }
 
   // Ueberschriften
+  if (roh.startsWith("#### ")) {
+    inhalt.push(new Paragraph({ children: stuecke(roh.slice(5)),
+      heading: HeadingLevel.HEADING_3, spacing: { before: 240, after: 110 } }));
+    i++; continue;
+  }
   if (roh.startsWith("### ")) {
     inhalt.push(new Paragraph({ children: stuecke(roh.slice(4)),
       heading: HeadingLevel.HEADING_2, spacing: { before: 280, after: 120 } }));
@@ -246,6 +272,7 @@ const doc = new Document({
       title: { run: { font: SCHRIFT, size: 36, bold: true, color: "000000" }, paragraph: { spacing: { after: 200 } } },
       heading1: { run: { font: SCHRIFT, size: 26, bold: true, color: "000000" } },
       heading2: { run: { font: SCHRIFT, size: 23, bold: true, color: "000000" } },
+      heading3: { run: { font: SCHRIFT, size: 22, bold: true, color: "333333" } },
     },
   },
   sections: [{
