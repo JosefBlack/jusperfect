@@ -176,5 +176,68 @@ class KeineKarteBleibtVersteckt(_Quelle):
         self.assertIn("chatSucheZeigen(false)", self._funktion("threadWillkommen"))
 
 
+class DerTrefferlauf(_Quelle):
+    """Aus der Kanzlei am 15.10.2026: „Haben die Lupen eine Zählfunktion mit
+    anklicken, dass man gleich an die Stelle kommt?"
+
+    Bisher nicht: Die Zahl zählte und war sonst nichts. Bei dreizehn
+    Fundstellen in einem langen Dokument ist die Zahl aber erst die halbe
+    Auskunft — die andere Hälfte ist der Weg dorthin."""
+
+    def test_beide_spalten_haben_ihn(self):
+        for stueck in ('id="dok-lauf"', 'id="dok-stand"',
+                       'id="chat-lauf"', 'id="chat-stand"'):
+            self.assertIn(stueck, self.html)
+
+    def test_die_zahl_ist_selbst_der_knopf_nach_vorn(self):
+        """„mit anklicken“ — also muss die Zahl ein Knopf sein."""
+        for bereich in ("dok", "chat"):
+            stueck = self.html[self.html.index(f'id="{bereich}-lauf"'):]
+            stueck = stueck[:stueck.index("</span>\n        </span>")]
+            self.assertIn(f'class="lauf-zahl" data-lauf="{bereich}" data-richtung="1"', stueck)
+
+    def test_es_geht_auch_zurueck(self):
+        self.assertIn('data-richtung="-1"', self.html)
+
+    def test_ohne_treffer_ist_er_nicht_da(self):
+        zeigen = self._funktion("laufZeigen")
+        self.assertIn("anzeige.hidden = !marken.length", zeigen)
+
+    def test_eine_neue_suche_faengt_bei_der_ersten_stelle_an(self):
+        self.assertIn("l.stelle = 0", self._funktion("laufZeigen"))
+
+    def test_er_laeuft_um_statt_anzustossen(self):
+        """Nach der letzten Fundstelle kommt wieder die erste."""
+        self.assertIn("(l.stelle + richtung + marken.length) % marken.length",
+                      self._funktion("laufSpringen"))
+
+    def test_er_springt_wirklich_hin(self):
+        springen = self._funktion("laufSpringen")
+        self.assertIn("scrollIntoView", springen)
+        self.assertIn('block: "center"', springen)
+
+    def test_die_eingabetaste_tut_dasselbe(self):
+        """Wer sucht, tippt das Wort und drückt Eingabe."""
+        self.assertRegex(self.js, r'"Enter"[\s\S]{0,120}laufSpringen\("chat", 1\)')
+        self.assertRegex(self.js, r'"Enter"[\s\S]{0,120}laufSpringen\("dok", 1\)')
+
+    def test_im_dokument_laeuft_er_nur_ueber_die_suchmarken(self):
+        """satzFaerben setzt im selben Text eigene Marken — eine angeklickte
+        Fundstelle. Liefe der Lauf durch sie, zählte er Fremdes mit."""
+        self.assertIn('marken: "mark.such-treffer"', self.js)
+        self.assertIn('m.className = "such-treffer"', self._funktion("mitHervorhebung"))
+
+    def test_die_laufende_stelle_ist_zu_sehen(self):
+        self.assertIn("mark.aktuell", self.css)
+        self.assertIn('m.classList.toggle("aktuell"', self._funktion("laufStandSetzen"))
+
+    def test_die_zeile_bleibt_in_der_spalte(self):
+        """Der Lauf darf nicht aus der schmalen Dokumentspalte ragen."""
+        regel = self.css[self.css.index(".dok-suche-zeile { flex: 1 0 100%"):]
+        regel = regel[:regel.index("}")]
+        self.assertIn("nowrap", regel)
+        self.assertIn("max-width: 100%", regel)
+
+
 if __name__ == "__main__":
     unittest.main()

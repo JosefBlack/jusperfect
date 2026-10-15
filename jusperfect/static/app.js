@@ -1473,6 +1473,69 @@ function dokumentspalteZeichnen() {
   zeigeDokument(filter.value);
 }
 
+// ── Von Fundstelle zu Fundstelle ────────────────────────────────────────────
+//
+// Aus der Kanzlei am 15.10.2026: "Haben die Lupen eine Zaehlfunktion mit
+// anklicken, dass man gleich an die Stelle kommt?"
+//
+// Bisher nicht. Die Zahl zaehlte und war sonst nichts. Bei dreizehn
+// Fundstellen in einem langen Dokument ist die Zahl aber erst die halbe
+// Auskunft - die andere Haelfte ist der Weg dorthin.
+//
+// Gelaufen wird ueber die HERVORHEBUNGEN, nicht ueber die Absaetze: Gesucht
+// wird die Stelle und nicht der Abschnitt, in dem sie steht.
+
+const LAUF = {
+  // Im Dokumenttext stehen zweierlei Marken: die der Suche und die, mit denen
+  // eine angeklickte Fundstelle eingefaerbt wird (satzFaerben). Nur die der
+  // Suche traegt "such-treffer" - sonst liefe der Lauf durch fremde Marken.
+  dok: { bereich: "dok-text", marken: "mark.such-treffer", anzeige: "dok-lauf", stand: "dok-stand", stelle: 0 },
+  chat: { bereich: "thread", marken: "mark.chat-treffer", anzeige: "chat-lauf", stand: "chat-stand", stelle: 0 },
+};
+
+function laufMarken(l) {
+  const wurzel = $(l.bereich);
+  return wurzel ? [...wurzel.querySelectorAll(l.marken)] : [];
+}
+
+function laufStandSetzen(l, marken) {
+  marken.forEach((m, i) => m.classList.toggle("aktuell", i === l.stelle));
+  const feld = $(l.stand);
+  if (feld) feld.textContent = `${l.stelle + 1}/${marken.length}`;
+}
+
+/** Nach einer Suche: Zahl neu setzen, bei der ersten Fundstelle anfangen.
+ *
+ * `titel` traegt den ausgeschriebenen Satz - "3 von 4 Absaetzen". Er steht am
+ * Knopf und nicht in der Zeile: In einer vierhundert Pixel schmalen Spalte
+ * ist zwischen Dokumentwahl und Suchfeld kein Platz fuer einen Satz.
+ */
+function laufZeigen(name, titel) {
+  const l = LAUF[name];
+  if (!l) return;
+  const anzeige = $(l.anzeige);
+  if (!anzeige) return;
+  const marken = laufMarken(l);
+  anzeige.hidden = !marken.length;
+  anzeige.title = titel || "";
+  l.stelle = 0;
+  if (!marken.length) return;
+  laufStandSetzen(l, marken);
+}
+
+/** Einen Schritt weiter oder zurueck - und hin. */
+function laufSpringen(name, richtung) {
+  const l = LAUF[name];
+  if (!l) return;
+  const marken = laufMarken(l);
+  if (!marken.length) return;
+  l.stelle = (l.stelle + richtung + marken.length) % marken.length;
+  laufStandSetzen(l, marken);
+  // In die MITTE, nicht an den Rand: Eine Fundstelle unter der Oberkante
+  // sieht aus wie der Anfang des Textes.
+  marken[l.stelle].scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 /** Die Suchwoerter aus dem Feld - klein geschrieben, ohne Leeres. */
 function dokSuchwoerter() {
   const feld = $("dok-suche");
@@ -1504,6 +1567,7 @@ function mitHervorhebung(ziel, text, begriffe) {
     if (von < bis) continue;                      // ueberlappende Treffer
     if (von > bis) ziel.appendChild(document.createTextNode(text.slice(bis, von)));
     const m = document.createElement("mark");
+    m.className = "such-treffer";
     m.textContent = text.slice(von, ende);
     ziel.appendChild(m);
     bis = ende;
@@ -1550,9 +1614,12 @@ function zeigeDokument(nurDokument) {
     // saehe "nichts gefunden" aus wie "nichts geladen".
     marke.textContent = !begriffe.length ? ""
       : gefunden === 0 ? `kein Treffer in ${durchsucht} Absatz/Absaetzen`
-      : `${gefunden} von ${durchsucht} Absaetzen`;
+      : "";   // Bei Treffern sagt es der Lauf daneben, und zwar kuerzer.
     marke.classList.toggle("ohne-treffer", !!begriffe.length && gefunden === 0);
   }
+  laufZeigen("dok", begriffe.length && gefunden
+    ? `${gefunden} von ${durchsucht} Absaetzen - klicken springt zur naechsten Fundstelle`
+    : "");
 }
 
 // Die Passage ist bis zu 1.500 Zeichen lang. Sie ganz einzufaerben hiess: Der
@@ -2167,9 +2234,12 @@ function chatSuchen() {
     // Null Treffer ist eine Auskunft, kein leerer Chat.
     marke.textContent = !begriffe.length ? ""
       : gefunden === 0 ? `kein Treffer in ${beitraege.length} ${beitraege.length === 1 ? "Beitrag" : "Beiträgen"}`
-      : `${gefunden} von ${beitraege.length} Beiträgen`;
+      : "";   // Bei Treffern sagt es der Lauf daneben.
     marke.classList.toggle("ohne-treffer", !!begriffe.length && gefunden === 0);
   }
+  laufZeigen("chat", begriffe.length && gefunden
+    ? `${gefunden} von ${beitraege.length} Beiträgen - klicken springt zur nächsten Fundstelle`
+    : "");
 }
 
 /** Die Suchzeile auf- oder zuklappen. Zu heisst: ganzer Verlauf, kein Rest. */
@@ -5529,9 +5599,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("senden").disabled) return;
     mitKnopf($("senden"), frageStellen);
   });
+  // Die Knoepfe des Trefferlaufs - in beiden Spalten dieselben.
+  for (const knopf of document.querySelectorAll("[data-lauf]")) {
+    knopf.addEventListener("click", () =>
+      laufSpringen(knopf.dataset.lauf, Number(knopf.dataset.richtung)));
+  }
+
   const chatSuche = $("chat-suche");
   if (chatSuche) {
     chatSuche.addEventListener("input", chatSuchen);
+    // Eingabetaste im Suchfeld heisst ueberall "zur naechsten Fundstelle".
+    // Wer sucht, tippt das Wort und drueckt Eingabe - das darf nicht ins
+    // Leere gehen.
+    chatSuche.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); laufSpringen("chat", 1); }
+    });
     // Fluchtweg: Esc schliesst die Suche und stellt den ganzen Verlauf wieder
     // her. Ohne ihn muesste man das Feld von Hand leeren, um weiterzulesen.
     chatSuche.addEventListener("keydown", (e) => {
@@ -5542,6 +5624,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (chatLupe) chatLupe.addEventListener("click", () => chatSucheZeigen($("chat-suche-zeile").hidden));
   const chatSucheZu = $("chat-suche-zu");
   if (chatSucheZu) chatSucheZu.addEventListener("click", () => chatSucheZeigen(false));
+
+  const dokSucheFeld = $("dok-suche");
+  if (dokSucheFeld) dokSucheFeld.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); laufSpringen("dok", 1); }
+  });
 
   const dokSuche = $("dok-suche");
   if (dokSuche) dokSuche.addEventListener("input", () => {

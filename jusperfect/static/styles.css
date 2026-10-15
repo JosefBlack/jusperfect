@@ -196,7 +196,15 @@ button, input, textarea, select { font: inherit; color: inherit; }
    erste, Dokumentwahl und Suche die zweite. Bei vierhundert Pixeln Spalte
    geht beides nicht nebeneinander. */
 .spalte.dokument .spalte-kopf > span { margin-right: auto; }
-.dok-suche-zeile .dok-filter { flex: 0 1 42%; min-width: 0; margin: 0; }
+/* Seit dem 15.10.2026 steht in dieser Zeile auch der Trefferlauf. Die
+   Dokumentwahl gibt dafuer Platz ab: Sie ist das Einzige hier, das ihn
+   entbehren kann - ein abgeschnittener Dokumenttitel bleibt zu erkennen,
+   ein abgeschnittener Knopf nicht. */
+.dok-suche-zeile .dok-filter { flex: 0 1 34%; min-width: 0; margin: 0; }
+.dok-suche-zeile .trefferlauf { flex: none; }
+/* Leer nimmt die Trefferzeile keinen Platz - sonst kostete sie eine Luecke,
+   solange gar nicht gesucht wird. */
+.dok-treffer:empty { display: none; }
 .spalte.dokument .spalte-kopf > button { flex: none; }
 
 .fensterknopf[aria-pressed="true"] { background: var(--akzent-hell); color: var(--akzent);
@@ -1298,8 +1306,15 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
    Aus der Kanzlei am 14.10.2026: "Bekommen wir links einen einheitlichen
    Balken hin." Sie hatte eine eigene Hintergrundfarbe und eine eigene
    Trennlinie und sah aus wie ein zweiter Kopf. */
+/* Die Zeile bricht NICHT um. Mit Umbruch sprang die Dokumentwahl in eine
+   eigene Reihe, sobald der Trefferlauf dazukam - und aus zwei Reihen wurden
+   drei. Ohne ihn geben Feld und Dokumentwahl nach, und alles bleibt in einer.
+
+   max-width haelt die Zeile IN der Spalte. Ohne sie war sie 388 Pixel breit
+   in einem Kopf von 365 - das fiel erst auf, als rechts ein Knopf stand und
+   nicht mehr eine leere Zahl. */
 .dok-suche-zeile { flex: 1 0 100%; display: flex; align-items: center; gap: 8px;
-  padding: 0; margin-top: 2px; }
+  padding: 0; margin-top: 2px; flex-wrap: nowrap; max-width: 100%; min-width: 0; }
 .dok-suche { flex: 1 1 auto; min-width: 0; font: inherit; font-size: 13px;
   padding: 5px 8px; border: 1px solid var(--linie); border-radius: 7px;
   background: var(--flaeche-2); color: var(--tinte); }
@@ -1331,6 +1346,23 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 /* Dieselbe Farbe wie im Dokumenttext: Ein Treffer sieht ueberall gleich aus. */
 .karte-c mark.chat-treffer { background: var(--amber-hell); color: var(--tinte);
   border-radius: 3px; padding: 0 1px; }
+/* Von Fundstelle zu Fundstelle.
+
+   Aus der Kanzlei am 15.10.2026: „Haben die Lupen eine Zaehlfunktion mit
+   anklicken, dass man gleich an die Stelle kommt?" Die Zahl IST der Knopf
+   nach vorn; die Pfeile stehen daneben, weil ein Pfeil als Knopf zu erkennen
+   ist und eine Zahl nicht. */
+.trefferlauf { flex: none; display: inline-flex; align-items: center; gap: 2px; }
+.trefferlauf button { border: 1px solid var(--linie); background: var(--flaeche-2);
+  color: var(--gedaempft); border-radius: 6px; padding: 2px 5px; font: inherit;
+  font-size: 12px; line-height: 1.45; cursor: pointer; }
+.trefferlauf button:hover { border-color: var(--akzent); color: var(--akzent); }
+.trefferlauf .lauf-zahl { font-variant-numeric: tabular-nums; min-width: 40px;
+  text-align: center; }
+/* Die laufende Stelle: ein Rahmen, keine zweite Farbe. Eingefaerbt waere sie
+   von den uebrigen Treffern nicht mehr zu unterscheiden, und eine kraeftigere
+   Fuellung traegt in beiden Ansichten nicht. */
+mark.aktuell { outline: 2px solid var(--amber); outline-offset: 1px; }
 .dok-treffer { flex: none; font-size: 12px; color: var(--gedaempft); }
 /* Kein Treffer ist eine Auskunft, kein leeres Fenster. */
 .dok-treffer.ohne-treffer { color: var(--rot); }

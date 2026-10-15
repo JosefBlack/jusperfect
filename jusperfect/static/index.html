@@ -223,6 +223,23 @@
                  aria-label="Im Text dieser Dokumente suchen">
         </label>
         <span id="dok-treffer" class="dok-treffer"></span>
+        <!-- Aus der Kanzlei am 15.10.2026: „Haben die Lupen eine Zaehlfunktion
+             mit anklicken, dass man gleich an die Stelle kommt?" Bisher nicht:
+             Die Zahl zaehlte und war sonst nichts. Bei dreizehn Fundstellen in
+             einem langen Dokument ist die Zahl aber erst die halbe Auskunft —
+             die andere Haelfte ist der Weg dorthin.
+
+             Die Zahl selbst ist der Knopf nach vorn. Der Pfeil daneben tut
+             dasselbe und steht da, weil ein Pfeil als Knopf zu erkennen ist
+             und eine Zahl nicht. -->
+        <span id="dok-lauf" class="trefferlauf" hidden>
+          <button type="button" class="lauf-pfeil" data-lauf="dok" data-richtung="-1"
+                  title="vorige Fundstelle" aria-label="vorige Fundstelle">‹</button>
+          <button type="button" class="lauf-zahl" data-lauf="dok" data-richtung="1"
+                  title="zur nächsten Fundstelle springen"><span id="dok-stand"></span></button>
+          <button type="button" class="lauf-pfeil" data-lauf="dok" data-richtung="1"
+                  title="nächste Fundstelle" aria-label="nächste Fundstelle">›</button>
+        </span>
       </div>
     </div>
     <div id="dok-text" class="dok-text" tabindex="0"></div>
@@ -293,6 +310,23 @@
                  aria-label="Im bisherigen Chat suchen">
         </label>
         <span id="chat-treffer" class="dok-treffer"></span>
+        <!-- Aus der Kanzlei am 15.10.2026: „Haben die Lupen eine Zaehlfunktion
+             mit anklicken, dass man gleich an die Stelle kommt?" Bisher nicht:
+             Die Zahl zaehlte und war sonst nichts. Bei dreizehn Fundstellen in
+             einem langen Dokument ist die Zahl aber erst die halbe Auskunft —
+             die andere Haelfte ist der Weg dorthin.
+
+             Die Zahl selbst ist der Knopf nach vorn. Der Pfeil daneben tut
+             dasselbe und steht da, weil ein Pfeil als Knopf zu erkennen ist
+             und eine Zahl nicht. -->
+        <span id="chat-lauf" class="trefferlauf" hidden>
+          <button type="button" class="lauf-pfeil" data-lauf="chat" data-richtung="-1"
+                  title="vorige Fundstelle" aria-label="vorige Fundstelle">‹</button>
+          <button type="button" class="lauf-zahl" data-lauf="chat" data-richtung="1"
+                  title="zur nächsten Fundstelle springen"><span id="chat-stand"></span></button>
+          <button type="button" class="lauf-pfeil" data-lauf="chat" data-richtung="1"
+                  title="nächste Fundstelle" aria-label="nächste Fundstelle">›</button>
+        </span>
         <button type="button" id="chat-suche-zu" class="mini leise"
                 title="Suche schließen – der ganze Verlauf steht wieder da"
                 aria-label="Suche schließen">×</button>
