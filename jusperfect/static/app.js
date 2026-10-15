@@ -2313,6 +2313,59 @@ function gedaechtnisImThreadZeigen() {
 // vom Gesuchten verlaesst den Rechner. Derselbe Grundsatz wie bei der Suche im
 // Dokumenttext.
 
+// ── Fundstellen im Text: ein und aus ─────────────────────────────
+//
+// Aus der Kanzlei am 15.10.2026: „Aufgrund der ganzen Quellen und Anlagen im
+// Text ist der Text im Chat kaum lesbar. Es waere daher gut, wenn man das ein-
+// und ausschalten koennte."
+//
+// Die Belegpflicht bleibt, wie sie ist: Es stroemt nur Geprueftes, eine Aussage
+// ohne Beleg wird zurueckgehalten, und das Fenster „Belege" fuehrt jede
+// Fundstelle mit Dokument, Seite und Wortlaut. Geaendert wird allein, ob die
+// Kennungen MITTEN IM SATZ stehen - eine Frage des Lesens, keine der Pruefung.
+//
+// Ausgeblendet ist die Grundstellung: Gelesen wird oefter als nachgeschlagen.
+// Ein Klick holt sie zurueck, und zwar dieselben anklickbaren Marken - es wird
+// nichts verworfen und nichts neu geholt, nur die Anzeige umgeschaltet. Die
+// Wahl bleibt in diesem Rechner stehen.
+
+/** Stehen die Belegmarken im Text? */
+let fundstellenAn = false;
+try { fundstellenAn = localStorage.getItem("jusperfect.fundstellen") === "an"; } catch (e) { /* egal */ }
+
+/** Schalter und Verlauf auf den Stand bringen. */
+function fundstellenZeichnen() {
+  const thread = $("thread");
+  if (thread) thread.classList.toggle("ohne-fundstellen", !fundstellenAn);
+  const knopf = $("chat-fundstellen");
+  if (!knopf) return;
+  knopf.textContent = fundstellenAn ? "Fundstellen: an" : "Fundstellen: aus";
+  knopf.setAttribute("aria-pressed", fundstellenAn ? "true" : "false");
+}
+
+function fundstellenUmschalten() {
+  fundstellenAn = !fundstellenAn;
+  try { localStorage.setItem("jusperfect.fundstellen", fundstellenAn ? "an" : "aus"); }
+  catch (e) { /* egal */ }
+  fundstellenZeichnen();
+  // Gezaehlt wird in dem, was zu sehen ist: Eine ausgeblendete Kennung ist
+  // kein Treffer. Steht gerade eine Suche im Feld, wird sie neu gezaehlt.
+  chatSuchen();
+}
+
+/** Der Text eines Beitrags so, wie er auf dem Bildschirm steht.
+ *
+ * `textContent` liefert auch, was ausgeblendet ist. Wer bei ausgeschalteten
+ * Fundstellen nach „D1-S1-P1" sucht, bekaeme sonst einen Beitrag angezeigt,
+ * in dem nichts hervorgehoben waere - ein Treffer, den man nicht findet.
+ */
+function sichtbarerText(el) {
+  if (fundstellenAn) return el.textContent;
+  const klon = el.cloneNode(true);
+  for (const g of klon.querySelectorAll(".belegstelle")) g.remove();
+  return klon.textContent;
+}
+
 /** Die Suchwoerter aus dem Chatfeld - klein geschrieben, ohne Leeres. */
 function chatSuchwoerter() {
   const feld = $("chat-suche");
@@ -2337,7 +2390,13 @@ function markenSetzen(wurzel, begriffe) {
   if (!begriffe.length) return;
   const lauf = document.createTreeWalker(wurzel, NodeFilter.SHOW_TEXT);
   const knoten = [];
-  for (let n = lauf.nextNode(); n; n = lauf.nextNode()) if (n.nodeValue) knoten.push(n);
+  for (let n = lauf.nextNode(); n; n = lauf.nextNode()) {
+    if (!n.nodeValue) continue;
+    // Nichts hervorheben, was gar nicht zu sehen ist: Sonst zaehlte der Lauf
+    // Stellen mit, zu denen er nicht springen kann.
+    if (!fundstellenAn && n.parentElement && n.parentElement.closest(".belegstelle")) continue;
+    knoten.push(n);
+  }
   for (const n of knoten) {
     const text = n.nodeValue;
     const klein = text.toLowerCase();
@@ -2398,7 +2457,7 @@ function chatSuchen() {
 
   let gefunden = 0;
   for (const beitrag of beitraege) {
-    const text = beitrag.map((el) => el.textContent).join(" ").toLowerCase();
+    const text = beitrag.map((el) => sichtbarerText(el)).join(" ").toLowerCase();
     if (!begriffe.length || begriffe.every((b) => text.includes(b))) {
       gefunden++;
       for (const el of beitrag) markenSetzen(el, begriffe);
@@ -3468,7 +3527,17 @@ function textMitBelegen(ziel, text) {
     // gehoeren also zu dieser Fundstelle, und sie ist es auch, die den Klick
     // an die richtige Stelle fuehrt.
     const aussage = text.slice(letzte, m.index);
-    if (m.index > letzte) angabenAnklickbar(ziel, aussage, erste);
+    // Das Leerzeichen VOR der Fundstelle gehoert zur Fundstelle und nicht zum
+    // Satz. Wird sie ausgeblendet, stuende sonst "… geschlossen ." da - mit
+    // einer Luecke vor dem Punkt. Dieselbe Regel wie in `ohneBelege`.
+    const vorlauf = (aussage.match(/[ \t]*$/) || [""])[0];
+    const satz = vorlauf ? aussage.slice(0, aussage.length - vorlauf.length) : aussage;
+    if (satz) angabenAnklickbar(ziel, satz, erste);
+    // Eine Gruppe je Fundstelle: Sie ist es, die der Schalter ausblendet -
+    // samt Leerzeichen davor und samt der Trennzeichen zwischen zwei Marken.
+    const gruppe = document.createElement("span");
+    gruppe.className = "belegstelle";
+    if (vorlauf) gruppe.appendChild(document.createTextNode(vorlauf));
     const kennungen = m[1].split(",");
     kennungen.forEach((roh, i) => {
       const kennung = roh.trim();
@@ -3477,11 +3546,12 @@ function textMitBelegen(ziel, text) {
       chip.className = "beleg" + (bekannt ? "" : " fehlt");
       chip.textContent = bekannt ? kennung : "ohne Beleg";
       if (bekannt) chip.addEventListener("click", () => passageMarkieren(kennung, chip, aussage));
-      ziel.appendChild(chip);
+      gruppe.appendChild(chip);
       // Zwischen zwei Fundstellen ein Leerzeichen, hinter der letzten keines:
       // Sonst steht im Satz "… zu [Beleg] ." - der Punkt rutscht ab.
-      if (i < kennungen.length - 1) ziel.appendChild(document.createTextNode(" "));
+      if (i < kennungen.length - 1) gruppe.appendChild(document.createTextNode(" "));
     });
+    ziel.appendChild(gruppe);
     letzte = m.index + m[0].length;
   }
   if (letzte < text.length) ziel.appendChild(document.createTextNode(text.slice(letzte)));
@@ -5166,7 +5236,16 @@ function entwurfInhalt(text) {
     satz.textContent = blattFehler || "Es ist kein Briefbogen hinterlegt.";
     block.appendChild(satz);
   }
-  antworttext(block, text);
+  // OHNE Belegmarken. Aus der Kanzlei am 15.10.2026: „Die Quellen gehoeren
+  // nicht mehr in den Fliesstext des Entwurfs, da der Entwurf ansonsten nicht
+  // brauchbar ist." Der Entwurf ist das Schriftstueck, das das Haus verlaesst
+  // - auf dem Blatt und in der Word-Datei standen die Marken laengst nicht
+  // mehr, nur in dieser einen Ansicht noch. Jetzt nirgends.
+  //
+  // Verloren ist nichts: Gespeichert bleibt der Text mit Marken, und jede
+  // Fundstelle steht im Fenster „Belege“ - dort mit Dokument, Seite und
+  // Wortlaut, also mehr als eine Kennung im Satz je sagen koennte.
+  antworttext(block, ohneBelege(text));
   return block;
 }
 
@@ -5798,6 +5877,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === "Escape") { e.stopPropagation(); chatSucheZeigen(false); }
     });
   }
+  const chatFundstellen = $("chat-fundstellen");
+  if (chatFundstellen) chatFundstellen.addEventListener("click", fundstellenUmschalten);
+  fundstellenZeichnen();
   const chatLupe = $("chat-lupe");
   if (chatLupe) chatLupe.addEventListener("click", () => chatSucheZeigen($("chat-suche-zeile").hidden));
   const chatSucheZu = $("chat-suche-zu");

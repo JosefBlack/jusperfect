@@ -372,14 +372,24 @@ class DieOberflaecheZeigtDasFenster(unittest.TestCase):
         self.assertIn('"text", "Text"', block)
         self.assertIn('"blatt", "Blatt"', block)
 
-    def test_auf_dem_blatt_stehen_keine_belegmarken(self):
-        """Dort steht, was hinausgeht. Im Fließtext bleiben sie: Dort wird
-        geprüft."""
+    def test_im_entwurf_stehen_nirgends_belegmarken(self):
+        """Weder auf dem Blatt noch im Fließtext.
+
+        Bis zum 15.10.2026 blieben sie im Fließtext stehen, weil dort geprüft
+        wird. Aus der Kanzlei an diesem Tag: „Die Quellen gehören nicht mehr
+        in den Fließtext des Entwurfs, da sind diese entsprechend zu
+        entfernen, da der Entwurf ansonsten nicht brauchbar ist."
+
+        Geprüft wird seither über das Fenster „Belege": Dort steht jede
+        Fundstelle mit Dokument, Seite und Wortlaut. Gespeichert bleibt der
+        Entwurf mit Marken - entfernt werden sie erst beim Anzeigen.
+        """
         blatt = self.JS[self.JS.index("function blattBauen"):][:9000]
         self.assertIn("ohneBelege(text)", blatt)
         fliess = self.JS[self.JS.index("function entwurfInhalt"):
                          self.JS.index("function entwurfKnoepfe")]
-        self.assertIn("antworttext(block, text)", fliess)
+        self.assertIn("antworttext(block, ohneBelege(text))", fliess)
+        self.assertNotIn("antworttext(block, text)", fliess)
 
     def test_das_blatt_bricht_die_zeilen_wie_die_word_datei(self):
         """`antworttext` setzt zwei Zeilen hintereinander zu einem Absatz

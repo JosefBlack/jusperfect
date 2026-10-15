@@ -32,7 +32,7 @@ from jusperfect.services.fristen import (
 from jusperfect.services.ausgang import Ausgang, Ausgangskontext
 from jusperfect.services.json_ausgabe import AusgabeUnbrauchbar, json_extrahieren
 from jusperfect.services.passagen import budget_anwenden, relevante_passagen
-from jusperfect.services.quellen import ZITAT_RE, bis_zum_letzten_beleg, index_bauen
+from jusperfect.services.quellen import ZITAT_RE, bis_zum_letzten_beleg, index_bauen, ohne_belege
 from jusperfect.speicher.base import SitzungsSpeicher
 
 _log = protokoll("entwuerfe")
@@ -48,7 +48,7 @@ class EntwurfNichtGefunden(LookupError):
     pass
 
 
-FREIGABE_FASSUNG = "1"
+FREIGABE_FASSUNG = "2"
 
 
 def freigabevorlage(entwurf) -> str:
@@ -69,6 +69,14 @@ def freigabevorlage(entwurf) -> str:
     Die Fassungsnummer in der ersten Zeile ist kein Zierrat: Kommt ein Feld
     hinzu, bekommt sie eine neue Nummer, und alte Prüfsummen passen nicht mehr
     – was richtig ist, denn sie bezeugen eine Ansicht, die es nicht mehr gibt.
+
+    Fassung 2 seit dem 15.10.2026: Der Text steht hier **ohne** die
+    Belegmarken. Aus der Kanzlei: „Die Quellen gehören nicht mehr in den
+    Fließtext des Entwurfs, da der Entwurf ansonsten nicht brauchbar ist."
+    Geschrieben wird nach jurnodes seither der Text ohne Marken – und weil
+    diese Vorlage genau das bezeugen soll, was geschrieben wird, steht sie
+    hier genauso. Gespeichert bleibt der Entwurf mit Marken: Sie sind der Weg
+    zum Beleg im Programm, und die Prüfung lebt von ihnen.
     """
     return "\n".join([
         f"jusperfect-freigabe/{FREIGABE_FASSUNG}",
@@ -76,7 +84,7 @@ def freigabevorlage(entwurf) -> str:
         f"art: {getattr(entwurf.art, 'value', entwurf.art)}",
         f"betreff: {entwurf.betreff}",
         "text:",
-        entwurf.text,
+        ohne_belege(entwurf.text),
     ])
 
 
@@ -619,7 +627,10 @@ class Entwurfsdienst:
             # weiter. Ein zweiter Aufruf findet bis dahin "bereits freigegeben".
             gesperrt = entwurf.model_copy(update={"status": EntwurfStatus.FREIGEGEBEN})
             self._speicher.entwurf_ablegen(gesperrt)
-            text_fuer_akte = f"{KENNZEICHNUNG}\n{entwurf.betreff}\n\n{entwurf.text}"
+            # Ohne Belegmarken - dasselbe wie in der Freigabevorlage und in der
+            # Word-Datei. Der Vermerk steht danach in der Akte des Mandanten; ein
+            # "[Q: D1-S3-P2]" mitten im Satz macht ihn unbrauchbar.
+            text_fuer_akte = f"{KENNZEICHNUNG}\n{entwurf.betreff}\n\n{ohne_belege(entwurf.text)}"
             try:
                 freigabe = self._freigabestelle.erteilen(entwurf.id, entwurf.akte_id,
                                                          identitaet.nutzer_id, text_fuer_akte)

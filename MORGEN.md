@@ -1,7 +1,7 @@
 # Was als Nächstes zu tun ist
 
 Stand: **15.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-2492 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
+2562 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
 
 > Diese Datei wächst von unten: Jeder Tag kommt hinten dazu. Ganz oben steht
 > deshalb das, was man im Betrieb wissen muss, und nicht die Vorgeschichte.
@@ -5575,3 +5575,81 @@ Verbot für Strafverfolgung (das betrifft staatliche Entscheidungen, nicht die
 Verteidigung).
 
 2492 Prüfungen grün. Sperrliste und Aktenzeichenmuster sauber.
+
+---
+
+## 15.10.2026 — die Fundstellen aus dem Fließtext: ein Schalter im Chat, im Entwurf fort
+
+**Aus der Kanzlei:** „Aufgrund der ganzen Quellen und Anlagen im Text ist der
+Text im Chat kaum lesbar. Es wäre daher gut, wenn man das ein- und ausschalten
+könnte. Darüber hinaus gehören die Quellen nicht mehr in den Fließtext des
+Entwurfs, da sind diese entsprechend zu entfernen, da der Entwurf ansonsten
+nicht brauchbar ist."
+
+Zwei Sätze, zwei verschiedene Dinge — und sie sind verschieden behandelt.
+
+### Im Chat: ein Schalter, kein Verzicht
+
+Oben in der Chatleiste, links neben der Lupe, steht jetzt **Fundstellen: aus**.
+Ein Klick holt die Kennungen in den Satz zurück, ein zweiter nimmt sie wieder
+heraus. Die Grundstellung ist **aus**: Gelesen wird öfter als nachgeschlagen,
+und genau das war die Beschwerde. Die Wahl bleibt in diesem Rechner stehen.
+
+Ausgeblendet heißt **ausgeblendet, nicht gelöscht**. Die Marken stehen weiter
+im Text und sind nach einem Klick dieselben anklickbaren Kennungen wie vorher;
+es wird nichts verworfen und nichts neu geholt. Wer den Inhalt neu schriebe,
+um eine Kennung zu verstecken, nähme dem Bearbeiter die Belege unter der Hand
+weg — derselbe Grundsatz, der schon für die Hervorhebungen der Suche gilt.
+
+Zwei Kleinigkeiten, die man erst beim Hinsehen bemerkt:
+
+1. **Das Leerzeichen vor der Fundstelle gehört zur Fundstelle.** Sonst bliebe
+   „… die Fahrspur ." stehen — mit einer Lücke vor dem Punkt. Es wird deshalb
+   mit ausgeblendet, genau wie es `ohne_belege` beim Entfernen tut.
+2. **Die Suche zählt nur, was zu sehen ist.** Ein Treffer in einer
+   ausgeblendeten Kennung wäre ein Treffer, den man nicht findet: Der Beitrag
+   stünde da, die Farbe nirgends.
+
+Die Spalte **Belege** ist von dem Schalter nicht berührt. Sie führt jede
+Fundstelle mit Dokument, Seite und Wortlaut und lässt sich nicht abschalten —
+sie ist der Weg zur Quelle.
+
+### Im Entwurf: fort, und zwar überall
+
+Auf dem Blatt und in der Word-Datei standen die Marken schon vorher nicht
+mehr. Zwei Stellen trugen sie noch:
+
+| Wo | Vorher | Jetzt |
+|---|---|---|
+| Vorschaufenster, Ansicht „Text" | mit Marken (dort wurde geprüft) | ohne |
+| Der Vermerk, der nach jur\|nodes geschrieben wird | **mit Marken** | ohne |
+
+Die zweite war die ernstere: Was dort hineingeht, steht danach in der
+Mandatsakte. „Sachstand [Q: D1-S1-P1]." ist außerhalb dieses Programms kein
+Satz, sondern ein Fehler.
+
+Mit dem Vermerk musste die **Freigabevorlage** mitgehen. Sie bezeugt seit
+Befund F06 genau das, was geschrieben wird; schriebe man ohne Marken und
+bezeugte mit, signierte sie wieder etwas anderes als das Ergebnis. Sie trägt
+deshalb jetzt den Text ohne Marken und die **Fassungsnummer 2** — eine
+Prüfsumme von vorher passt nicht mehr, und das ist richtig: Sie bezeugt eine
+Ansicht, die es nicht mehr gibt.
+
+**Gespeichert bleibt der Entwurf mit Marken.** Entfernt werden sie beim
+Anzeigen und beim Schreiben, nie im Speicher — sonst wäre der Weg zum Beleg
+unwiederbringlich fort.
+
+### Was sich nicht geändert hat
+
+Die Belegpflicht. Es strömt nur Geprüftes, eine Aussage ohne Beleg wird
+zurückgehalten, unbekannte Kennungen werden gemeldet. Geändert wurde allein,
+**ob die Kennungen mitten im Satz stehen** — eine Frage des Lesens, keine der
+Prüfung.
+
+`ohne_belege` gibt es zweimal: in `jusperfect/services/quellen.py` für Word und
+den Vermerk, in `jusperfect/static/app.js` für Ansicht und Blatt. Zwei
+Fassungen derselben Regel laufen auseinander, sobald eine geändert wird.
+`tests/test_fundstellen_im_text.py` führt die Fassung aus der Oberfläche mit
+Node wirklich aus und vergleicht sie Fall für Fall mit der aus dem Programm.
+
+2562 Prüfungen grün. Sperrliste und Aktenzeichenmuster sauber.

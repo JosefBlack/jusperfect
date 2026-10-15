@@ -51,7 +51,10 @@ def test_jede_modellantwort_geht_durch_den_satz(app: str) -> None:
     for stelle in ("e.text", "entwurfVorschautext"):
         assert f"entwurfInhalt({stelle})" in app, stelle
     block = app[app.index("function entwurfInhalt("):app.index("function entwurfKnoepfe(")]
-    assert "antworttext(block, text)" in block
+    # Seit dem 15.10.2026 ohne Belegmarken - aus der Kanzlei: „Die Quellen
+    # gehören nicht mehr in den Fließtext des Entwurfs." Durch den Satz geht
+    # der Text trotzdem, sonst stünden die Sternchen wieder da.
+    assert "antworttext(block, ohneBelege(text))" in block
     # Das Blatt geht NICHT durch `antworttext`: Es setzt Zeile fuer Zeile,
     # genau wie services/briefbogen.py die Word-Datei baut. Ein Absatz, den
     # der Satz zusammenzieht, stuende dort anders als auf dem Papier.

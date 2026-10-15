@@ -1330,6 +1330,19 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
   pointer-events: none; fill: none; stroke: var(--gedaempft);
   stroke-width: 1.6; stroke-linecap: round; }
 .suchfeld .dok-suche { width: 100%; padding-left: 27px; }
+/* Der Schalter fuer die Fundstellen - links neben der Lupe, ganz rechts in
+   der Kopfzeile. Er traegt das `margin-left: auto`, damit beide Knoepfe als
+   ein Paar rechts stehen; zwei Mal `auto` verteilte den freien Platz
+   zwischen ihnen und riss sie auseinander. */
+.fundstellen-knopf { margin-left: auto; white-space: nowrap; }
+.fundstellen-knopf[aria-pressed="true"] { background: var(--akzent-hell);
+  color: var(--akzent); border-color: var(--akzent); }
+.fundstellen-knopf + .lupenknopf { margin-left: 6px; }
+/* Ausgeblendet heisst ausgeblendet, nicht geloescht: Die Marken bleiben im
+   Text stehen und kommen mit einem Klick zurueck. Das Leerzeichen VOR der
+   Fundstelle gehoert mit in die Gruppe - sonst bliebe „… geschlossen ."
+   stehen, mit einer Luecke vor dem Punkt. */
+.thread.ohne-fundstellen .belegstelle { display: none; }
 /* Die Lupe als Knopf - in der Kopfzeile des Chats, ganz rechts. */
 .lupenknopf { margin-left: auto; display: inline-flex; align-items: center;
   padding: 4px 8px; }
