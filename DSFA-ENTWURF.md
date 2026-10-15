@@ -731,6 +731,99 @@ er nicht enthält: die **Standardvertragsklauseln** (Abschn. 17, zwei
 verlinkte Stücke), die **Liste der Unterauftragsverarbeiter** (Abschn. 6.1)
 und die **AWS Service Terms** (Abschn. 16).
 
+#### Die Nutzungsrichtlinie des Modellanbieters
+
+*Aufgenommen am 15.10.2026, nachdem die Kanzlei die „Usage Policy" von
+Anthropic vorgelegt hat.*
+
+**Die Kette, über die sie uns bindet, ist kurz.** Nach **Service Terms
+50.12.1** sind Modelle von Drittanbietern „Inhalte von Drittanbietern", und
+ihre Nutzung heißt Zustimmung zu **deren eigenen Bedingungen**. Die
+Nutzungsrichtlinie ist eine solche eigene Bedingung. Sie sagt es auf ihrer
+ersten Seite selbst: Sie gilt für „developers and businesses using our API and
+developer platforms, **customers accessing Claude through cloud providers and
+authorized resellers**". Der Weg über Bedrock ist genau dieser Fall.
+
+> **Was die vorgelegte Fassung ist und was nicht.** Sie trägt oben einen
+> gelben Hinweis, sie sei „for reference purposes only and may not be the
+> current version", und ihr Datum lautet **„Effective Date: November 12,
+> 2026"** — sie tritt also erst **nach** dem heutigen Tag in Kraft. Welche
+> Fassung heute gilt, ist **nicht geprüft**; die geltende steht unter
+> `anthropic.com/legal/aup`. Die Bewertung unten gilt für die vorgelegte
+> Fassung und ist am 12.11.2026 gegen die dann geltende zu halten
+> (`MORGEN.md`).
+
+**„Legal" ist der erste von elf Hochrisikobereichen.** Die Richtlinie führt
+unter „High-risk AI Recommendations" auf:
+
+> **Legal** — advising an individual on their legal rights, obligations, or
+> liability, or on what to do in a specific legal matter, **or preparing
+> legal documents for them to sign or file**.
+
+Der letzte Halbsatz beschreibt die Entwurfsfunktion von jusperfect. Daran
+hängen zwei Anforderungen — und **beide sind erfüllt**, die zweite ohne dass
+die Kanzlei die Richtlinie kannte.
+
+| Anforderung | Wortlaut, verkürzt | Erfüllt durch |
+|---|---|---|
+| **Qualified human-in-the-loop** | Eine qualifizierte Person — „who holds a license where applicable law requires one" — muss die Ausgabe inhaltlich prüfen, sie ändern können und bleibt verantwortlich | Die Belegpflicht (Abschnitt 5); der Satz „Die anwaltliche Prüfung und jede Entscheidung bleiben bei der Kanzlei" in Fassung 1 der Mandatsklausel; `EINWEISUNG.md` |
+| **Disclosure for advice and decisions** | Wer eine Beratung erhält, muss **klar gesagt bekommen, dass KI eingesetzt wurde**. „Users do not need to identify Anthropic, Claude, or the model used" | Teil A der Hinweise nach Art. 13; deutlicher der erste Satz der Klausel in Fassung 1 — in dem Dokument, das die Mandantschaft unterschreibt |
+
+> **Der Nachsatz zur Offenlegung ist für eine Kanzlei wichtiger, als er
+> aussieht.** Die Richtlinie verlangt **nicht**, Anthropic, Claude oder das
+> Modell zu benennen. Die Klausel spricht von „einem Auftragsverarbeiter in
+> Rechenzentren innerhalb der Europäischen Union" und genügt damit — ohne
+> dass die Kanzlei gegenüber der Mandantschaft mehr offenlegt, als sie muss.
+
+**Eine Ausnahme, auf die hier bewusst nicht gebaut wird — Einschätzung.** Die
+Richtlinie nimmt aus: „Internal drafting, research, summarization, or analysis
+that is **not the ultimate High-risk AI Recommendation delivered**." Man kann
+vertreten, jusperfect falle darunter: Es antwortet dem Bearbeiter, nicht der
+Mandantschaft, und was hinausgeht, schreibt und verantwortet die Kanzlei.
+Dagegen steht, dass „preparing legal documents for them to sign or file"
+ausdrücklich **im** Hochrisikobereich aufgeführt ist, und ein geprüfter
+Entwurf, der hinausgeht, ist geliefert.
+
+**Die Frage muss nicht entschieden werden, und sie wird hier nicht
+entschieden.** Die Kanzlei erfüllt beide Anforderungen ohnehin — durch die
+anwaltliche Prüfung und durch die Offenlegung in der Mandatsklausel. Damit
+kommt es auf die Ausnahme nicht an. Das ist der ruhigere Weg: Wer sich auf
+eine Ausnahme stützt, muss sie bei jeder Änderung der Richtlinie neu prüfen;
+wer die Anforderungen erfüllt, nicht. **Aus demselben Grund steht hier keine
+offene Stelle für die Kanzlei:** Es ist nichts zu entscheiden, solange Fassung
+1 gewählt und die anwaltliche Prüfung eingehalten wird.
+
+**Drei weitere Stellen, kurz, damit nicht danach gesucht wird.**
+
+1. **Ein Verbot, kein Hochrisikobereich:** „Make or suggest decisions in law
+   enforcement or criminal justice processes, including decisions to
+   investigate, charge, arrest or detain, prosecute, sentence". Das sind
+   **staatliche** Entscheidungen. Strafverteidigung ist das Gegenteil davon
+   und nicht erfasst. Der Punkt steht hier, weil er beim ersten Lesen
+   erschrickt und weil der Selbsttest ausdrücklich eine
+   Körperverletzungssache durch das Schutzgeländer schickt.
+2. **Verbraucher-Chatbots:** „All consumer-facing chatbots or AI agents that
+   communicate directly with external users must disclose…". **Gilt nicht.**
+   jusperfect spricht nur mit dem Bearbeiter; es gibt keine externen Nutzer.
+   Die Stelle steht hier, weil sie auf den ersten Blick einschlägig aussieht.
+3. **Privatsphäre:** „Misuse, collect, solicit, or gain access **without
+   permission** to private information such as … health data … or
+   confidential or proprietary data." Eine rechtmäßig geführte Mandatsakte,
+   verarbeitet auf Art. 6 Abs. 1 lit. b und lit. f und Art. 9 Abs. 2 lit. f,
+   ist weder „misuse" noch Zugriff „without permission".
+
+> **Die Durchsetzung läuft über dasselbe Postfach wie alles andere.** Die
+> Richtlinie behält sich vor, bei Verdacht zu „warn you or throttle, limit,
+> suspend, or terminate your access". Über Bedrock geschieht das durch AWS —
+> und AWS fragt dafür an der Kontoadresse nach. Das ist **Regel 2 der
+> Einweisung**, und sie bekommt damit einen zweiten Grund.
+
+**Für die Akte:** Das PDF der vorgelegten Fassung gehört in die
+Datenschutzakte, mit dem Tag der Vorlage. Es ist kein Vertrag im Sinne von
+Abschnitt 10 des Auftragsverarbeitungsvertrags und gehört nicht zu den
+Artifact-Nachweisen; es ist die Bedingung des Modellanbieters, auf die
+50.12.1 verweist.
+
 ---
 
 ### R5 · Drittlandbezug durch das EU-Inferenzprofil und das Schutzgeländer
@@ -958,6 +1051,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | `SICHERHEIT.md` | die 16 Grundsätze und das Löschkonzept |
 | `MORGEN.md` | der Befund zum Korrespondenzordner vom 05.10.2026 |
 | `infra/IAM.md` | die Zugriffsrichtlinie im Wortlaut |
+| Anthropic, „Usage Policy" | die Bedingung des Modellanbieters, auf die Service Terms 50.12.1 verweist. Vorgelegt am 15.10.2026 in der Fassung mit Wirkung zum **12.11.2026**; die geltende steht unter `anthropic.com/legal/aup` |
 
 **Bei Widerspruch gilt `DSFA-ANGABEN.md`** — dort steht, was gemessen wurde,
 und an welchem Tag.

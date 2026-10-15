@@ -226,6 +226,31 @@ Aufbewahrungspflichten.
 > von Gegnern, Zeugen und Dritten gilt ohnehin Art. 6 Abs. 1 lit. f; deren
 > Einverständnis ist weder zu erlangen noch nötig.
 
+> **Ein zweiter Grund, am 15.10.2026 hinzugekommen — und er stammt nicht aus
+> der Datenschutz-Grundverordnung.**
+>
+> Die **Nutzungsrichtlinie des Modellanbieters**, die über **Service Terms
+> 50.12.1** gilt, führt „**Legal**" als ersten von elf Hochrisikobereichen
+> auf — ausdrücklich auch das „preparing legal documents for them to sign or
+> file". Daran hängt eine eigene Pflicht: Wer eine Beratung erhält, muss
+> **klar gesagt bekommen, dass KI eingesetzt wurde**.
+>
+> **Der erste Satz dieser Fassung tut genau das** — und zwar in dem Dokument,
+> das die Mandantschaft unterschreibt, nicht in einem Hinweisblatt, das sie
+> vielleicht liest. Fassung 2 genügte der Pflicht ebenfalls; Fassung 1 legt
+> sie dorthin, wo sie nachweisbar ist.
+>
+> Dass die Richtlinie **nicht** verlangt, den Anbieter oder das Modell zu
+> benennen („Users do not need to identify Anthropic, Claude, or the model
+> used"), passt zur Verschwiegenheitspflicht: „ein Auftragsverarbeiter in
+> Rechenzentren innerhalb der Europäischen Union" genügt.
+>
+> Die Einzelheiten stehen in `DSFA-ENTWURF.md`, R4, „Die Nutzungsrichtlinie
+> des Modellanbieters" — dort auch, dass die vorgelegte Fassung erst zum
+> **12.11.2026** in Kraft tritt und gegen die dann geltende zu halten ist.
+> **Für die Wahl der Fassung ändert das nichts:** Die Offenlegung schadet
+> nicht, falls die Pflicht anders ausfällt.
+
 ### Fassung 2 — bloßer Hinweis (ohne Vereinbarung)
 
 > **Einsatz KI-gestützter Hilfsmittel.** Die Kanzlei setzt bei der Bearbeitung
@@ -334,6 +359,15 @@ soll — Offenheit über den Einsatz und die Möglichkeit, ihn abzulehnen —, o
 die Rechtsgrundlage daran zu hängen. Der Unterschied zeigt sich erst im
 Streitfall, und dann ist er der ganze Unterschied.
 
+**Seit dem 15.10.2026 kommt ein sechster Umstand hinzu, und er steht nicht in
+der Tabelle, weil er nicht gegen die Einwilligung spricht, sondern für die
+Offenlegung:** Die Nutzungsrichtlinie des Modellanbieters verlangt sie
+ohnehin, weil anwaltliches Arbeiten dort als Hochrisikobereich geführt wird
+(oben bei Fassung 1; ausführlich in `DSFA-ENTWURF.md`, R4). Die Offenheit ist
+damit nicht mehr nur eine gute Entscheidung, sondern eine Pflicht aus dem
+Vertragswerk. **Die Einwilligung wird dadurch nicht nötiger** — die
+Offenlegung ist ihr Kern, und den leistet Fassung 1 ohne ihre fünf Nachteile.
+
 > **Das ist Vorarbeit und keine Rechtsberatung.** Die Einschätzung steht so
 > auch im Prüfpaket für die zweite Meinung (`PRUEFPAKET-14.10.2026.md`,
 > Abschnitt 2.4); fällt sie dort anders aus, ist dieser Abschnitt zu ändern.
@@ -349,5 +383,6 @@ Streitfall, und dann ist er der ganze Unterschied.
 | `DSFA-ANGABEN.md` | alle technischen Werte, mit Datum und Fundstelle |
 | `VERARBEITUNGSVERZEICHNIS-ENTWURF.md` | die Beschreibung nach Art. 30 |
 | `SICHERHEIT.md` | die 16 Grundsätze und das Löschkonzept |
+| Anthropic, „Usage Policy" | die Offenlegungspflicht bei anwaltlicher Nutzung; bewertet in `DSFA-ENTWURF.md`, R4 |
 
 Dieser Entwurf ist keine Rechtsberatung.

@@ -1,10 +1,29 @@
 # Was als Nächstes zu tun ist
 
-Stand: **14.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-2447 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
+Stand: **15.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
+2492 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
 
 > Diese Datei wächst von unten: Jeder Tag kommt hinten dazu. Ganz oben steht
 > deshalb das, was man im Betrieb wissen muss, und nicht die Vorgeschichte.
+
+---
+
+## Fristen und Wiedervorlagen
+
+*Angelegt am 15.10.2026. Hier stehen die Termine, die nicht aus der Arbeit
+heraus entstehen, sondern von außen kommen — und die deshalb sonst niemand
+bemerkt.*
+
+| Wann | Was | Warum |
+|---|---|---|
+| **12.11.2026** | Die **Nutzungsrichtlinie von Anthropic** unter `anthropic.com/legal/aup` in der dann geltenden Fassung nachlesen und gegen die Bewertung in `DSFA-ENTWURF.md`, R4, „Die Nutzungsrichtlinie des Modellanbieters" halten | Die am 15.10.2026 vorgelegte Fassung trägt „Effective Date: November 12, 2026" und den Hinweis, sie sei nur zur Bezugnahme. Welche Fassung **heute** gilt, ist nicht geprüft. Ändert sich an der Offenlegungspflicht etwas, ist auch `DATENSCHUTZHINWEISE-ENTWURF.md` zu prüfen |
+| **Jährlich**, mit der Durchsicht der Folgenabschätzung | **Zwei** Seiten, nicht eine: die **Missbrauchserkennungsseite** im Amazon Bedrock User Guide *und* die **Nutzungsrichtlinie** | Beide sind **Dokumentation und kein Vertrag** und ändern sich ohne Ankündigung. Die erste entscheidet, ob beim eingesetzten Modell Akteninhalt aufbewahrt wird (`EINWEISUNG.md`, Regel 1); die zweite, welche Pflichten die anwaltliche Nutzung auslöst |
+| **Jährlich**, dieselbe Durchsicht | Die **Nachweise aus AWS Artifact** erneut holen | Die Prüfberichte decken einen Zeitraum ab und laufen ab (`AWS-ZWEI-HANDGRIFFE.md`, Handgriff 3) |
+| **Vor jedem Modellwechsel** — keine Frist, ein Anlass | `AWS-ZWEI-HANDGRIFFE.md`, **Handgriff 4** | Nach Service Terms 50.12.1 hängt die Rechtslage am gewählten Modell. **Claude Fable 5 und 5.1 sind nicht zu verwenden**; Mythos 5 und 5.1 sind ungeprüft |
+
+> **Warum das hier oben steht und nicht in der Vorgeschichte:** Eine Frist, die
+> im Fließtext eines Tagesberichts steht, ist am Tag ihres Ablaufs nicht
+> auffindbar.
 
 ---
 
@@ -5481,3 +5500,78 @@ bewertet nicht, was dort sonst steht — Anmeldesachen gehören hinein —, sond
 genau das, woran es lag.
 
 2199 Prüfungen grün, eine übersprungen.
+
+---
+
+## 15.10.2026 — vier Befunde behoben, eine Lupe, und eine Richtlinie, die über AWS hereinkommt
+
+**Der Tag fing mit dem Prüfergebnis der zweiten KI an.** Vier Befunde, alle
+echt, alle nachgestellt, bevor sie angefasst wurden
+(`tests/test_befunde_15102026.py`, 22 Prüfungen):
+
+| | Was los war |
+|---|---|
+| **R04** | Ein regulärer Ausdruck griff im Modellstrom das Feld `text` auch dann, wenn es tiefer im Baum noch einmal vorkam. Jetzt zählt nur die oberste Ebene — und sind es mehrere, wird gar nichts gezeigt |
+| **R03** | Die zurückgenommene Fassung erkannte ihre Quellen an der Belegmarke im Text. Jetzt bringt jede Fassung sie selbst mit; für alte Fassungen bleibt der alte Weg **mit einem Hinweis**, wenn ein Nachweis fehlt |
+| **R01** | Ein unter derselben Kennung geändertes Original kam nie wieder herein. Jetzt sagt das Programm es — und der Knopf **„Neu einlesen"** liest wirklich, vergleicht über einen Fingerabdruck und nennt, was sich geändert hat |
+| **R02** | Die Frage war auf 4000 Zeichen begrenzt; mehrere mitgelieferte Prompts sind länger, und abgeschnitten wurden gerade die Zeilen zur Belegpflicht. Eine Stelle, `MAX_FRAGE`, jetzt 12000 |
+
+**Dann zwei Sätze aus der Kanzlei, die zusammen eine Lupe ergaben:** *„Im Text
+Dokumente suchen genügt eine Lupe. Die Lupe hätte übrigens auch gerne für den
+Chat."* Der lange Platzhalter ist weg; der Chat hat eine Suche bekommen, die
+in **Beiträgen** filtert — Frage und Antwort gehören zusammen — und die
+Fundstellen heil lässt.
+
+### Und am Nachmittag die Modellliste
+
+Die Kanzlei hat gezeigt, welche Modelle die Bedrock-Konsole heute führt.
+Darin: **Claude Fable 5 und 5.1** — genau die beiden, die am 14.10.2026 auf
+der Missbrauchserkennungsseite standen.
+
+> **Die Falle liegt andersherum, als man denkt.** Die Konsole beschreibt Fable
+> 5.1 als das stärkste Modell für „enterprise knowledge work" — also als
+> genau das, was eine Kanzlei zu brauchen glaubt. Dass bei ihm *aller*
+> Verkehr dreißig Tage liegt, steht dort nicht.
+
+Daraus **Handgriff 4** (`AWS-ZWEI-HANDGRIFFE.md`) und **zwei Namen in Regel 1**
+der Einweisung. Die Einweisung gibt es neu als Word und PDF, vier Seiten.
+
+### Die Nutzungsrichtlinie — der Befund, der nicht erwartet war
+
+Die Kanzlei hat die „Usage Policy" von Anthropic vorgelegt und gefragt, ob
+sie relevant ist. **Sie ist es**, und zwar über eine kurze Kette:
+
+**Service Terms 50.12.1** → Drittanbieter-Modelle bringen **ihre eigenen
+Bedingungen** mit → die Nutzungsrichtlinie ist eine solche → sie führt
+„**Legal**" als **ersten von elf Hochrisikobereichen**, ausdrücklich auch das
+*„preparing legal documents for them to sign or file"*.
+
+Daran hängen zwei Anforderungen, und **beide waren schon erfüllt**:
+
+1. **Qualifizierte menschliche Prüfung** — die Belegpflicht, die anwaltliche
+   Prüfung, die Einweisung.
+2. **Offenlegung gegenüber der Mandantschaft** — der erste Satz von
+   **Fassung 1** der Mandatsklausel. Geschrieben am 14.10.2026 aus
+   datenschutzrechtlichen Gründen; sie erfüllt seit dem 15.10. zugleich eine
+   Pflicht aus dem Vertragswerk des Modellanbieters.
+
+> **Das ist der seltene Fall, in dem eine Entscheidung sich nachträglich als
+> doppelt richtig erweist.** Fassung 1 wurde gewählt, weil eine Einwilligung
+> widerruflich ist und die Rechtsgrundlage mit sich risse. Dass sie außerdem
+> eine Offenlegungspflicht erfüllt, von der an diesem Tag niemand wusste, war
+> nicht geplant.
+
+**Bewusst nicht entschieden, und das ist die Einschätzung:** Die Richtlinie
+nimmt „internal drafting, research, summarization, or analysis" aus, soweit
+es nicht die gelieferte Empfehlung ist. Ob jusperfect darunter fällt, ist
+offen — **und es kommt nicht darauf an**, weil beide Anforderungen ohnehin
+erfüllt sind. Wer sich auf eine Ausnahme stützt, muss sie bei jeder Änderung
+neu prüfen; wer die Anforderungen erfüllt, nicht. Deshalb steht dazu **keine**
+neue offene Stelle in der Folgenabschätzung.
+
+**Was nicht gilt und wonach deshalb nicht gesucht werden muss:** die Regel für
+Verbraucher-Chatbots (jusperfect spricht nur mit dem Bearbeiter) und das
+Verbot für Strafverfolgung (das betrifft staatliche Entscheidungen, nicht die
+Verteidigung).
+
+2492 Prüfungen grün. Sperrliste und Aktenzeichenmuster sauber.
