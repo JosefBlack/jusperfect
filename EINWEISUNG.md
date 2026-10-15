@@ -137,13 +137,45 @@ Einmalkennwort aus einer Authentifizierungs-App, wie bei der Bank.
 
 ### Was er nicht ersetzt
 
-Den Schutz des Windows-Kontos. **Bildschirm sperren beim Verlassen des
-Platzes, keine geteilten Konten, jeder trägt seine eigene Kennung ein** —
-das gilt mit zweitem Faktor genauso. Er sorgt nur dafür, dass ein
-unbeaufsichtigter Rechner allein nicht genügt, um eine Mandatsakte zu öffnen.
+Den Schutz des Windows-Kontos. Er sorgt nur dafür, dass ein unbeaufsichtigter
+Rechner allein nicht genügt, um eine Mandatsakte zu öffnen.
 
 **Eingeschaltet wird er in `START-JURNODES.bat`**, Eintrag
 `JUSPERFECT_ZWEITER_FAKTOR=an`. Voreingestellt ist „aus".
+
+---
+
+## Regel 1c — Drei Dinge, die jeder einhält
+
+1. **Bildschirm sperren beim Verlassen des Platzes.** Windows-Taste + L.
+   Zusätzlich die automatische Sperre nach wenigen Minuten einstellen.
+2. **Keine geteilten Windows-Konten.** Jede Person hat ihr eigenes.
+3. **Jeder trägt seine eigene Kennung ein** — auch wer nur kurz nachsieht.
+
+### Warum das keine Nebensache ist
+
+**In jusperfect sieht jede Berufsträgerin und jeder Mitarbeitende jede
+Akte.** Das ist eine Entscheidung der Kanzlei vom 15.10.2026 und richtig so:
+In einer Kanzlei dieser Größe vertritt jeder jeden, und eine Berechtigung,
+die im Vertretungsfall regelmäßig aufgehoben werden müsste, schützt
+niemanden.
+
+**Diese Entscheidung verlagert den Schutz aber von der Technik auf die
+Organisation.** Wenn nicht die Berechtigung begrenzt, *wer* eine Akte öffnen
+kann, dann trägt die Last der Umstand, dass jeder Zugriff **einer Person
+zuzuordnen** ist — und dass jede Person zur **Verschwiegenheit verpflichtet**
+ist.
+
+Bei einem geteilten Konto fällt die Zuordnung aus. Dann sagt der
+Nutzungsnachweis nicht mehr, wer gefragt hat, und die Rechenschaftspflicht
+nach Art. 5 Abs. 2 DSGVO geht an dieser Stelle verloren. **Deshalb sind diese
+drei Punkte seit dem 15.10.2026 die tragende Maßnahme und nicht mehr die
+Ergänzung.**
+
+> **Für die Kanzleileitung, nicht für die Einweisung:** Für jede Person mit
+> Zugang — auch Referendare, Aushilfen und externe IT — muss eine
+> Verpflichtung auf die Verschwiegenheit in Textform vorliegen (§ 203 Abs. 4
+> StGB). Das ist zu bestätigen, nicht anzunehmen.
 
 ---
 
@@ -226,6 +258,9 @@ Hinweise auf Änderungen an Diensten, Fristen.
 | Regel | Fundstelle |
 |---|---|
 | 1 | `DSFA-ENTWURF.md`, Abschnitt 4, R4, `[KANZLEI 22]`; AWS Service Terms 50.12.1 und 50.12.2 (Stand 15.09.2026); Amazon Bedrock User Guide, „Abuse detection" (Anlage 17); `AWS-ZWEI-HANDGRIFFE.md`, Handgriff 4 |
+| 1a | `DSFA-ENTWURF.md`, Risiko R3, `[KANZLEI 7]`; Art. 5 Abs. 1 lit. e DSGVO |
+| 1b | ebenda, Risiko R7, `[KANZLEI 13]`; Art. 32 DSGVO |
+| 1c | ebenda; Art. 5 Abs. 2 und Art. 32 DSGVO, § 203 Abs. 4 StGB |
 | 2 | ebenda, letzter Absatz zu `[KANZLEI 22]`; Amazon Bedrock User Guide, „General information" |
 
 ---

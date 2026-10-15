@@ -401,26 +401,25 @@ aus Schwere für die Betroffenen und Wahrscheinlichkeit des Eintritts.
 |---|---|---|---|
 | **R1** Fremde Dokumente in einer Akte | hoch — Kernbereich des § 203 StGB | gering: der Weg ist ausgebaut, nicht nur abgeschaltet | **mittel** |
 | **R2** Eine falsche Aussage wird für wahr genommen | mittel bis hoch — sie könnte in einen Schriftsatz geraten | gering: Belegpflicht, Rückhalt bei fehlendem Beleg, anwaltliche Prüfung | **mittel** |
-| **R3** Die Arbeitskopie bleibt liegen | mittel | **erhöht**, solange keine Frist von selbst läuft (`[KANZLEI 7]`) | **mittel** |
+| **R3** Die Arbeitskopie bleibt liegen | mittel | gering: seit 15.10.2026 fragt das Programm nach zwölf Monaten, ob die Akte noch läuft. Eine unbeantwortete Frage löscht aber nichts | **mittel** |
 | **R4** Übermittlung an den Auftragsverarbeiter | hoch — Berufsgeheimnis | gering: Vertrag, kein Training, keine Aufbewahrung beim eingesetzten Modell, Zero Operator Access | **mittel** |
 | **R5** Drittlandbezug | hoch, falls er bestünde | **nicht abschließend feststellbar**, solange die Auskunft zum Geländerprofil fehlt (`[KANZLEI 11]`) | **mittel** |
 | **R6** Besondere Kategorien, verstärkt durch die Texterkennung | hoch — Art. 9 | gering: dieselben Maßnahmen wie R4, dazu die wirksame Abmelderichtlinie | **mittel** |
-| **R7** Zugriff innerhalb der Kanzlei | hoch — jede Akte für jeden | **hoch**: heute keine Beschränkung je Bearbeiter, und die Anmeldung ist kein Kennwort | **hoch** |
+| **R7** Zugriff innerhalb der Kanzlei | hoch — jede Akte für jeden | gering bis mittel: der offene Zugriff ist seit 15.10.2026 **entschieden** und getragen von Verschwiegenheitsverpflichtung, zweitem Faktor und Zuordnung jedes Zugriffs | **mittel** |
 | **R8** Auskunft, Berichtigung, Löschung | mittel | gering: gezielte Löschung einzelner Einträge seit 05.10.2026 | **gering** |
 
-> **Der Befund, der aus dieser Tabelle herausfällt, ist R7 — und er liegt
-> nicht bei AWS, sondern im Flur.** Sechs der acht Risiken betreffen die
-> Übermittlung nach außen und sind durch Vertrag, Modellwahl und Technik auf
-> „mittel" gebracht. Das einzige **hohe** Risiko ist, dass im Haus jeder
-> jede Akte öffnen kann und die Anmeldung kein Kennwort verlangt. Wer die
-> Folgenabschätzung liest und nur die Hälfte davon umsetzt, sollte diese
-> Hälfte nehmen.
+> **Kein Risiko steht mehr auf „hoch" — seit dem 15.10.2026.** Am Vormittag
+> stand R7 dort: im Haus konnte jeder jede Akte öffnen, und die Anmeldung
+> verlangte kein Kennwort. Beides ist beantwortet, aber auf verschiedene
+> Weise. Der **zweite Faktor** beantwortet, *wer* zugreift. Dass jeder jede
+> Akte sehen darf, ist eine **Entscheidung** der Kanzlei und kein Versäumnis
+> (`[KANZLEI 13]`).
 >
-> **Die Einstufung hängt an zwei offenen Stellen.** Mit einer Entscheidung zu
-> `[KANZLEI 7]` (Löschfrist) fiele R3 auf „gering"; mit der Auskunft zu
-> `[KANZLEI 11]` fiele R5 auf „gering"; mit `[KANZLEI 13]`
-> (Zugriffsbeschränkung) fiele R7 auf „mittel". Drei Entscheidungen, drei
-> Stufen.
+> **Die Einstufung hängt noch an zwei Stellen.** Mit der Auskunft zu
+> `[KANZLEI 11]` fiele R5 auf „gering"; R3 ist mit der Rückfrage „Läuft die
+> Akte noch?" vom 15.10.2026 bereits entschärft und bleibt nur deshalb auf
+> „mittel", weil eine unbeantwortete Frage nichts löscht — die sichere
+> Richtung, aber eben keine Frist.
 
 **Warum keines der acht auf „gering" steht außer R8.** Weil in einer
 Mandatsakte die *Schwere* immer hoch ist, auch wenn die Wahrscheinlichkeit
@@ -1349,21 +1348,51 @@ organisatorisch zu treffen.
 | Technisch möglich | eine Beschränkung je Nutzer auf einzelne Akten; im Programm vorhanden und in den Testdaten benutzt |
 | Die Anmeldung | ist im Laufwerks- und Schnittstellenbetrieb **kein Kennwort**, sondern eine Kennung. Wer am Rechner sitzt, kann eine andere eintragen |
 
-**[KANZLEI 13] — Entwurf zur Übernahme, geschrieben am 15.10.2026. Dies ist
-nach der Einstufung unter `[KANZLEI 5]` das einzige hohe Risiko.**
+**~~[KANZLEI 13]~~ — am 15.10.2026 von der Kanzlei entschieden.**
 
-> **Zum Zugriff innerhalb der Kanzlei.** Die Zugriffsbeschränkung je
-> Bearbeiter wird eingeführt. Bis dahin gilt: Der Zugang zu jusperfect ist
-> durch das Windows-Konto geschützt; die Rechner werden bei Verlassen des
-> Arbeitsplatzes gesperrt, Konten werden nicht geteilt, und jeder Bearbeiter
-> trägt seine eigene Kennung ein.
+Aus der Kanzlei, auf den Vorschlag einer Beschränkung je Bearbeiter:
 
-**Warum ich dazu rate, und es ist nicht die Technik.** Die Beschränkung je
-Bearbeiter **ist gebaut** und wird in den Testdaten benutzt; sie
-einzuschalten ist Arbeit an der Nutzerverwaltung, nicht am Programm. Was
-dagegen spricht, ist der Aufwand in einer Kanzlei, in der jeder einspringen
-können muss. Was dafür spricht, ist § 32 BDSG und Art. 32 DSGVO — und der
-Umstand, dass ein Zugriff, den niemand braucht, auch niemandem fehlt.
+> „Nein, dafür sind wir zu klein. Jeder darf die Akten des anderen
+> sehen.“
+
+> **Zum Zugriff innerhalb der Kanzlei.** Die Kanzlei hat geprüft, ob der
+> Zugriff auf einzelne Bearbeiter beschränkt wird, und sieht davon ab. In
+> einer Kanzlei dieser Größe vertritt jede Berufsträgerin und jeder
+> Berufsträger jede andere; eine Beschränkung, die im Vertretungsfall
+> regelmäßig aufgehoben werden müsste, schützt niemanden und erschwert die
+> Mandatsbearbeitung. Alle Personen, die Zugang haben, sind zur
+> Verschwiegenheit verpflichtet; jeder Zugriff wird einer namentlichen
+> Kennung zugeordnet. Die Entscheidung wird bei der jährlichen Durchsicht
+> erneut geprüft, insbesondere bei einer Veränderung der Kanzleigröße.
+
+**Das ist rechtlich tragfähig, und ich sage auch, warum.** Art. 32 DSGVO
+verlangt Maßnahmen, die dem Risiko **angemessen** sind — nicht die jeweils
+schärfsten. Angemessenheit hängt am Umfang und an den Umständen. Bei einer
+Kanzlei, in der die Vertretung der Regelfall und nicht die Ausnahme ist, wäre
+eine Beschränkung auf die eigene Akte eine Maßnahme, die im Alltag umgangen
+werden müsste; eine Berechtigung, die regelmäßig überschrieben wird, ist
+keine.
+
+**§ 203 StGB steht dem nicht entgegen.** Die Mitarbeitenden einer Kanzlei
+sind berufsmäßig tätige Gehilfen; die Offenbarung ihnen gegenüber ist keine
+unbefugte. Entscheidend ist nicht, ob jeder alles **sehen kann**, sondern ob
+jeder zur Verschwiegenheit **verpflichtet** ist und ob ein Zugriff
+**zuzuordnen** ist.
+
+**Was damit die Last trägt — und es ist jetzt die organisatorische Seite:**
+
+| | |
+|---|---|
+| **Die Verpflichtung auf die Verschwiegenheit** | Jede Person mit Zugang, auch Referendare, Aushilfen und externe IT. In Textform, zur Personalakte. **Zu bestätigen, dass das für alle vorliegt** |
+| **Der zweite Faktor** | Seit 15.10.2026. Er beantwortet die Frage, die bei offenem Zugriff die wichtigste ist: **wer** zugegriffen hat |
+| **Das Windows-Konto** | Bildschirmsperre, keine geteilten Konten, jeder trägt seine eigene Kennung ein. Steht als Regel 1b in `EINWEISUNG.md` |
+| **Der Nutzungsnachweis** | Jeder Eintrag trägt die Kennung. Bei geteilten Konten fällt er aus — deshalb steht das Verbot in der Einweisung |
+
+> **Ein Satz, der zu dieser Entscheidung gehört und nicht verschwiegen werden
+> soll:** Sie verlagert den Schutz von der Technik auf die Organisation. Das
+> ist zulässig und bei dieser Größe vernünftig — aber es heißt, dass die
+> Verpflichtungserklärungen und die Bildschirmsperre **nicht optional** sind.
+> Sie sind jetzt die Maßnahme und nicht mehr die Ergänzung.
 
 **Zum Zugangsschutz, und hier bin ich deutlicher.** Die Anmeldung in
 jusperfect ist **kein Kennwort, sondern eine Kennung**: Wer am Rechner sitzt,
@@ -1519,18 +1548,17 @@ es für diese Kanzlei und dieses Programm, nicht allgemein.
 > (die Texterkennung war eine), oder eine Antwort des Herstellers zu R1.
 
 **[KANZLEI 17] — der Abschluss. Entwurf zur Übernahme, geschrieben am
-15.10.2026.** Er setzt voraus, dass die Entwürfe zu `[KANZLEI 7]`,
-`[KANZLEI 11]` und `[KANZLEI 13]` übernommen und umgesetzt sind; ohne sie
-stimmt der erste Satz nicht.
+15.10.2026, nachgeführt am selben Tag.** `[KANZLEI 7]` ist gebaut und
+`[KANZLEI 13]` entschieden; offen bleibt allein die Auskunft zu
+`[KANZLEI 11]`, die den Satz zu R5 betrifft.
 
 > **Zum verbleibenden Risiko.** Nach den beschriebenen Maßnahmen hält die
 > Kanzlei das verbleibende Risiko für die Rechte und Freiheiten der
-> betroffenen Personen für **tragbar**. Sieben der acht bewerteten Risiken
-> stehen nach den Maßnahmen auf „mittel" oder darunter; das Risiko R7 wird
-> durch die Zugriffsbeschränkung je Bearbeiter auf „mittel" geführt. Ein
-> hohes Risiko im Sinne des **Art. 36 Abs. 1 DSGVO** verbleibt nach
-> Auffassung der Kanzlei nicht; eine vorherige Konsultation der
-> Aufsichtsbehörde erfolgt daher nicht.
+> betroffenen Personen für **tragbar**. Alle acht bewerteten Risiken stehen
+> nach den Maßnahmen auf „mittel“ oder darunter. Ein hohes Risiko im
+> Sinne des **Art. 36 Abs. 1 DSGVO** verbleibt nach Auffassung der Kanzlei
+> nicht; eine vorherige Konsultation der Aufsichtsbehörde erfolgt daher
+> nicht.
 >
 > **Ein Vorbehalt gehört dazu:** Die Verschwiegenheitsverpflichtung des
 > Auftragsverarbeiters nach § 43e BRAO (`[KANZLEI 9]`) ist einseitig erklärt
@@ -1550,7 +1578,7 @@ stimmt der erste Satz nicht.
 
 **Wo ich mir sicher bin, und wo nicht.**
 
-**Sicher:** dass Art. 36 nicht greift, wenn `[KANZLEI 13]` umgesetzt ist. Die
+**Sicher:** dass Art. 36 nicht greift. Die
 Vorschrift verlangt eine Konsultation nur, wenn trotz der Maßnahmen ein
 **hohes** Risiko bliebe. Das ist hier nicht die Lage — die Maßnahmen sind
 nicht Absichtserklärungen, sondern geprüft und zum Teil technisch erzwungen.
@@ -1560,9 +1588,11 @@ in einer Fußnote. Eine Folgenabschätzung, die ihre schwächste Stelle
 verschweigt, ist keine Bewertung, sondern eine Werbeschrift.
 
 > **Und ein letzter Punkt zur Reihenfolge:** Dieser Abschluss wird
-> unterschrieben, **nachdem** die drei genannten Stellen entschieden sind —
-> nicht vorher. Wer ihn vorher zeichnet, bestätigt eine Einstufung, die auf
-> Maßnahmen beruht, die es noch nicht gibt.
+> unterschrieben, **nachdem** die Belehrung an AWS abgesandt (`[KANZLEI 9]`)
+> und bestätigt ist, dass für jede Person mit Zugang eine
+> Verpflichtungserklärung auf die Verschwiegenheit vorliegt. Wer ihn vorher
+> zeichnet, bestätigt eine Einstufung, die auf Maßnahmen beruht, die es noch
+> nicht gibt.
 
 ---
 
@@ -1587,7 +1617,7 @@ Auskunft von Dritten oder eine Arbeit am Programm.
 | 10 | Dienstleisterauswahl § 43e Abs. 2 | Nachweise in der Akte, **Bewertung ausformuliert.** Nur zu übernehmen | R4 |
 | 11 | Regionen des Geländerprofils | **Wartet auf AWS.** Der Text der Anfrage steht bereit | R5 |
 | 12 | Art. 9 Abs. 2; Beschränkung nach Rechtsgebiet? | Entwurf: lit. f; **keine** Beschränkung nach Rechtsgebiet | R6 |
-| 13 | Zugriffsbeschränkung je Bearbeiter? | **Der zweite Faktor ist seit 15.10.2026 da.** Offen: die Beschränkung je Bearbeiter einschalten | R7 |
+| ~~13~~ | ~~Zugriffsbeschränkung je Bearbeiter?~~ | **Entschieden am 15.10.2026: keine Beschränkung** — dafür ist die Kanzlei zu klein. Getragen von Verschwiegenheit, zweitem Faktor und Zuordnung | R7 |
 | 14 | Was den Betroffenen gesagt wird | **Erledigt** — steht in den Hinweisen, Ziffer 3 | R8 |
 | 15 | Schulung und KI-Kompetenz (Art. 4 KI-VO) | **Entwurf liegt vor** — sechs Punkte, eine Stunde | 6 |
 | 17 | Restrisiko, Art. 36, DSB, Überprüfungsfrist | **Entwurf liegt vor.** Zu zeichnen erst nach 7, 11 und 13 | 7 |
@@ -1602,13 +1632,16 @@ Auskunft von Dritten oder eine Arbeit am Programm.
 **Drei Dinge, und nur drei:**
 
 1. **`[KANZLEI 9]` — die Belehrung an AWS.** Ein Schreiben, ein
-   Sendenachweis, ein Blatt zur Akte.
-2. **`[KANZLEI 13]` — die Zugriffsbeschränkung je Bearbeiter.** Der zweite
-   Faktor ist seit dem 15.10.2026 gebaut; die Beschränkung je Bearbeiter ist
-   eine Entscheidung und eine Arbeit an der Nutzerverwaltung.
+   Sendenachweis, ein Blatt zur Akte. **Das ist das Letzte, was noch Arbeit
+   ist.**
+2. **Die Verpflichtungserklärungen auf die Verschwiegenheit.** Nicht neu, und
+   wahrscheinlich längst vorhanden — aber seit der Entscheidung zu
+   `[KANZLEI 13]` sind sie die tragende Maßnahme und nicht mehr die
+   Ergänzung. **Zu bestätigen, dass für jede Person mit Zugang eine
+   vorliegt.**
 
-**`[KANZLEI 7]` ist seit dem 15.10.2026 erledigt** — die Rückfrage
-„Läuft die Akte noch?“ ist gebaut.
+**`[KANZLEI 7]` und `[KANZLEI 13]` sind am 15.10.2026 erledigt** — die eine
+gebaut, die andere entschieden.
 
 **Zwei warten auf Dritte:** die Auskunft von AWS zum Geländerprofil
 (`[KANZLEI 11]`) und die Hamburger Muss-Liste (`[KANZLEI 16]`).
