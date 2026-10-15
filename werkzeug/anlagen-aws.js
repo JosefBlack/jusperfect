@@ -19,6 +19,19 @@ const {
 } = d;
 
 const SCHRIFT = "Franklin Gothic Book";
+// WENN DIE BILDER VERSCHWUNDEN SIND - und das ist am 15.10.2026 passiert:
+// Sie stecken in der zuletzt gebauten Word-Datei und lassen sich daraus
+// zurueckholen. Eine .docx ist ein Zip-Archiv; die Bilder liegen unter
+// word/media/ mit unleserlichen Namen. Die ZUORDNUNG steht woanders:
+//
+//   1. word/_rels/document.xml.rels nennt zu jeder rId die Mediendatei.
+//   2. word/document.xml nennt die rIds in der Reihenfolge der Blaetter.
+//   3. Diese Reihenfolge ist die der Liste unten - also laesst sich jedem
+//      Bild sein Name aus `datei` wieder zuweisen.
+//
+// Nach der Reihenfolge im Zip zu gehen fuehrt in die Irre; die ist eine
+// andere. Nachgerechnet wird ueber die Anzahl: Sie muss stimmen.
+
 const ordner = process.argv[2];
 const ausgabe = process.argv[3];
 
@@ -122,6 +135,15 @@ const seiten = [
       "Wortlaut liegt deshalb zus\u00E4tzlich als vollst\u00E4ndiger Ausdruck \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C bei.",
   },
   {
+    datei: "druck-1.png",
+    masse: [1239, 1740],
+    anlage: "Anlage 14",
+    titel: "Vertraulichkeitsbedingungen — vollständiger Ausdruck (Blatt 2 von 2)",
+    fuss:
+      "Derselbe Text als Ausdruck über die Schaltfläche „Bedingungen ausdrucken“. Maßgeblich ist diese englische Fassung. Tragend sind vier Stellen: keine Auszüge ohne schriftliche Zustimmung; Weitergabe an einen Regulator nur vollständig und mit dem Antrag auf vertrauliche Behandlung; Weitergabe an einen Endnutzer nur mit eigener Vertraulichkeitsvereinbarung, die Amazon als begünstigten Dritten benennt; und die Pflicht, über jede Weitergabe Buch zu führen.",
+    quelle: "Ausdruck vom 15.10.2026, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026.",
+  },
+  {
     datei: "19.png",
     masse: [373, 81],
     anlage: "Anlage 15",
@@ -172,6 +194,33 @@ const seiten = [
       "Missbrauchserkennungsmechanismen von Amazon Bedrock. Abschnitt 1.24 liegt noch nicht vor.",
   },
   {
+    datei: "druck-2.png",
+    masse: [1237, 1744],
+    anlage: "Anlage 15",
+    titel: "Abschnitte 50.10.3 bis 50.12.3 — Ausdruck (Blatt 1 von 3)",
+    fuss:
+      "Deutsche Fassung. Hier stehen die beiden tragenden Stellen im Wortlaut: 50.12.1 — Drittanbieter-Modelle sind „Inhalte von Drittanbietern“, und ihre Nutzung heißt Zustimmung zu deren eigenen Bedingungen; 50.12.2 — die Speicherung von Ein- und Ausgaben bis zu 30 Tage für die auf der Missbrauchserkennungsseite namentlich genannten Modelle.",
+    quelle: "Ausdruck vom 15.10.2026, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026.",
+  },
+  {
+    datei: "druck-3.png",
+    masse: [1237, 1748],
+    anlage: "Anlage 15",
+    titel: "Abschnitte 50.12.4 bis 50.13.3 — Ausdruck (Blatt 2 von 3)",
+    fuss:
+      "Die Gegenprobe im Wortlaut: 50.13 (Amazon Q) räumt AWS ausdrücklich ein, was 50.12 für Amazon Bedrock gerade nicht einräumt — die Nutzung zur Entwicklung und Verbesserung einschließlich des Trainierens von Modellen. Wo AWS solche Rechte will, schreibt es sie hin.",
+    quelle: "Ausdruck vom 15.10.2026, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026.",
+  },
+  {
+    datei: "druck-4.png",
+    masse: [1239, 1749],
+    anlage: "Anlage 15",
+    titel: "Abschnitte 50.14 bis 50.15.4 — Ausdruck (Blatt 3 von 3)",
+    fuss:
+      "Anschluss des vorigen Blattes, mit 50.14.2 (Kiro) und dem dortigen Verweis auf Abschnitt 1.24. Mitgedruckt, weil ein Ausdruck, der mitten im Satz endet, als Beleg wenig taugt.",
+    quelle: "Ausdruck vom 15.10.2026, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026.",
+  },
+  {
     datei: "24.png",
     masse: [590, 550],
     anlage: "Anlage 16",
@@ -182,6 +231,24 @@ const seiten = [
       + "die Missbrauchserkennungsmechanismen von Bedrock f\u00FCr diese Dienste f\u00FCr anwendbar, 1.24.2 "
       + "nennt die regions\u00FCbergreifende Inferenz. jusperfect nutzt keinen dieser Dienste, sondern ruft "
       + "die Bedrock-Schnittstelle unmittelbar auf.",
+  },
+  {
+    datei: "druck-5.png",
+    masse: [1239, 1743],
+    anlage: "Anlage 16",
+    titel: "Abschnitte 1.20 bis 1.23 — Ausdruck (Blatt 1 von 2)",
+    fuss:
+      "Der Anlauf zu Abschnitt 1.24, mitgedruckt um der Vollständigkeit willen.",
+    quelle: "Ausdruck vom 15.10.2026, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026.",
+  },
+  {
+    datei: "druck-6.png",
+    masse: [1237, 1748],
+    anlage: "Anlage 16",
+    titel: "Abschnitte 1.24.1 bis 1.32 — Ausdruck (Blatt 2 von 2)",
+    fuss:
+      "Abschnitt 1.24 im Wortlaut. Er regelt AWS-Dienste mit eingebauter, von Amazon Bedrock betriebener KI-Funktion. jusperfect nutzt keinen dieser Dienste, sondern ruft die Bedrock-Schnittstelle unmittelbar auf — 1.24 betrifft die Kanzlei damit nicht.",
+    quelle: "Ausdruck vom 15.10.2026, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026.",
   },
   {
     wortlaut: [
@@ -212,6 +279,36 @@ const seiten = [
       "Amazon Bedrock User Guide, Abschnitt \u201EAbuse detection\u201C (Seiten 2152 f.), abgerufen am "
       + "14.10.2026, Kanzlei Dortschy & Thunert \u2014 Anlage zum Aktenvermerk gleichen Datums. Der User Guide "
       + "ist Dokumentation und kein Vertrag; AWS kann ihn ohne Ank\u00FCndigung \u00E4ndern.",
+  },
+  {
+    datei: "druck-7.png",
+    quer: true,
+    masse: [1740, 1237],
+    anlage: "Anlage 17",
+    titel: "Amazon Bedrock abuse detection — Ausdruck (Blatt 1 von 3)",
+    fuss:
+      "Der Ausdruck der Seite selbst, zu der die Abschrift auf dem vorigen Blatt gehört. Kopf der Seite und Beginn des Abschnitts. Abschrift und Ausdruck liegen beide bei, weil die Abschrift lesbar und der Ausdruck der Beleg ist.",
+    quelle: "Ausdruck der Seite vom 15.10.2026, 12:04 Uhr, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026. Der User Guide ist Dokumentation und kein Vertrag; AWS kann ihn ohne Ankündigung ändern.",
+  },
+  {
+    datei: "druck-8.png",
+    quer: true,
+    masse: [1749, 1238],
+    anlage: "Anlage 17",
+    titel: "Model-specific abuse detection — Ausdruck (Blatt 2 von 3)",
+    fuss:
+      "Das tragende Blatt: Hier stehen die Modelle, bei denen Ein- und Ausgaben aufbewahrt werden, namentlich. Das von der Kanzlei eingesetzte Modell anthropic.claude-opus-4-6-v1 ist in keiner der drei Aufzählungen genannt.",
+    quelle: "Ausdruck der Seite vom 15.10.2026, 12:04 Uhr, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026. Der User Guide ist Dokumentation und kein Vertrag; AWS kann ihn ohne Ankündigung ändern.",
+  },
+  {
+    datei: "druck-9.png",
+    quer: true,
+    masse: [1746, 1239],
+    anlage: "Anlage 17",
+    titel: "General information — Ausdruck (Blatt 3 von 3)",
+    fuss:
+      "Der Abschnitt, aus dem Regel 2 der Einweisung folgt: Bei Verdacht fragt AWS an der E-Mail-Adresse des Kontos nach und kann den Zugang sperren, wenn niemand antwortet.",
+    quelle: "Ausdruck der Seite vom 15.10.2026, 12:04 Uhr, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk vom 14.10.2026. Der User Guide ist Dokumentation und kein Vertrag; AWS kann ihn ohne Ankündigung ändern.",
   },
 ];
 
@@ -296,9 +393,13 @@ function blatt(s, erstes) {
       spacing: { before: 120 },
     }),
     new Paragraph({
+      // Je Blatt verschieden, seit Ausdrucke dazugekommen sind: Ein Ausdruck
+      // vom 15.10.2026 ist kein Bildschirmausdruck vom 14.10.2026, und in
+      // einer Akte ist das der Unterschied zwischen Beleg und Behauptung.
       children: [
         t(
-          "Bildschirmausdruck vom 14.10.2026, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk gleichen Datums.",
+          s.quelle ||
+            "Bildschirmausdruck vom 14.10.2026, Kanzlei Dortschy & Thunert — Anlage zum Aktenvermerk gleichen Datums.",
           { size: 18, color: "666666" }
         ),
       ],

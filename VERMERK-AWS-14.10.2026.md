@@ -283,9 +283,10 @@ Eine gesonderte Frist wird nicht notiert.
 14. Vertraulichkeitsbedingungen für den Abruf der SOC-Berichte —
     Bildschirmausdruck des Dialogs und vollständiger Ausdruck über die
     Schaltfläche „Bedingungen ausdrucken“
-15. Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12
-    (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich
-16. Bildschirmausdruck: AWS Service Terms, Abschnitt 1.24
+15. AWS Service Terms, Stand 15.09.2026 — Bildschirmausdrucke und Ausdrucke
+    zu Abschnitt 50.12 (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum
+    Vergleich
+16. AWS Service Terms, Abschnitt 1.24 — Bildschirmausdruck und Ausdruck
 17. Seite „Amazon Bedrock abuse detection" aus dem Amazon Bedrock User
     Guide, abgerufen am 14.10.2026 — Abschrift des Wortlauts und Ausdruck
     der Seite
