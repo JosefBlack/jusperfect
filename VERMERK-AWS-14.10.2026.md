@@ -280,15 +280,15 @@ Eine gesonderte Frist wird nicht notiert.
 11. SOC 2 Report, Typ 2, Berichtszeitraum 01.04.2025 – 31.03.2026
 12. SOC 3 Report
 13. SOC Continued Operations Letter
-14. Bildschirmausdruck der Vertraulichkeitsbedingungen für den Abruf der
-    SOC-Berichte — vollständiger Ausdruck über die Schaltfläche
-    „Bedingungen ausdrucken“ nachzureichen
+14. Vertraulichkeitsbedingungen für den Abruf der SOC-Berichte —
+    Bildschirmausdruck des Dialogs und vollständiger Ausdruck über die
+    Schaltfläche „Bedingungen ausdrucken“
 15. Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12
     (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich
 16. Bildschirmausdruck: AWS Service Terms, Abschnitt 1.24
-17. Abschrift der Seite „Amazon Bedrock abuse detection" aus dem Amazon
-    Bedrock User Guide, abgerufen am 14.10.2026 — ein Ausdruck der Seite
-    selbst ist nachzureichen
+17. Seite „Amazon Bedrock abuse detection" aus dem Amazon Bedrock User
+    Guide, abgerufen am 14.10.2026 — Abschrift des Wortlauts und Ausdruck
+    der Seite
 
 ---
 

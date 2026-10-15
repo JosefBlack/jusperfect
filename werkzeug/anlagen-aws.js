@@ -119,8 +119,7 @@ const seiten = [
       "Der Dialog \u201EBedingungen zum Herunterladen des Berichts akzeptieren\u201C, wie er beim Abruf des " +
       "ersten SOC-Berichts angezeigt wurde. Ob der sichtbare Text vollst\u00E4ndig ist, l\u00E4sst sich " +
       "an der Aufnahme nicht abschlie\u00DFend feststellen (Bildlaufleiste rechts). Der ma\u00DFgebliche " +
-      "Wortlaut ist \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C zu beziehen und " +
-      "dieser Anlage nachzureichen.",
+      "Wortlaut liegt deshalb zus\u00E4tzlich als vollst\u00E4ndiger Ausdruck \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C bei.",
   },
   {
     datei: "19.png",
@@ -206,7 +205,7 @@ const seiten = [
     fuss:
       "DIES IST EINE ABSCHRIFT UND KEIN BILDSCHIRMAUSDRUCK. Der Wortlaut ist unver\u00E4ndert \u00FCbernommen; "
       + "Hervorhebungen, Verweise und die Gliederung der Urfassung sind nicht wiedergegeben. Ein Ausdruck der "
-      + "Seite selbst ist nachzureichen. \u2014 Das von der Kanzlei genutzte Modell "
+      + "Seite selbst liegt bei. \u2014 Das von der Kanzlei genutzte Modell "
       + "anthropic.claude-opus-4-6-v1 ist in keiner der drei Aufz\u00E4hlungen genannt; f\u00FCr es gilt damit "
       + "das Zero-Operator-Access-Modell.",
     quelle:

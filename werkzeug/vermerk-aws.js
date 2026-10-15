@@ -385,10 +385,10 @@ inhalt.push(h1("7. Anlagen"));
   "SOC 2 Report, Typ 2, Berichtszeitraum 01.04.2025 – 31.03.2026",
   "SOC 3 Report",
   "SOC Continued Operations Letter",
-  "Bildschirmausdruck der Vertraulichkeitsbedingungen f\u00FCr den Abruf der SOC-Berichte \u2014 vollst\u00E4ndiger Ausdruck \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C nachzureichen",
+  "Vertraulichkeitsbedingungen f\u00FCr den Abruf der SOC-Berichte \u2014 Bildschirmausdruck des Dialogs und vollst\u00E4ndiger Ausdruck \u00FCber die Schaltfl\u00E4che \u201EBedingungen ausdrucken\u201C",
   "Bildschirmausdruck: AWS Service Terms, Stand 15.09.2026, Abschnitt 50.12 (Amazon Bedrock) nebst Abschnitt 50.13 (Amazon Q) zum Vergleich",
   "Bildschirmausdruck: AWS Service Terms, Abschnitt 1.24",
-  "Abschrift der Seite \u201EAmazon Bedrock abuse detection\u201C aus dem Amazon Bedrock User Guide, abgerufen am 14.10.2026 \u2014 ein Ausdruck der Seite selbst ist nachzureichen",
+  "Seite \u201EAmazon Bedrock abuse detection\u201C aus dem Amazon Bedrock User Guide, abgerufen am 14.10.2026 \u2014 Abschrift des Wortlauts und Ausdruck der Seite",
 ].forEach((z) =>
   inhalt.push(
     new Paragraph({
