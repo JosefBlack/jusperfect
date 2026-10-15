@@ -452,9 +452,11 @@ nachgesehen, und so sieht es wirklich aus:
 ### Schritt 3 — Die Berichte herunterladen
 
 Unter **Berichte** stehen die Nachweise der Prüfer — am 14.10.2026 waren es
-397. Diese sechs genügen. Die Titel stehen hier **wortgenau so, wie die
-Konsole sie führt**; am 14.10.2026 ergaben genau diese sechs Filter auch
-genau sechs Treffer:
+397. **Sie holen sieben Stücke: sechs über die Titelfilter, dazu das
+Überbrückungsschreiben**, das weiter unten eigens erklärt ist.
+
+Die sechs Titel stehen hier **wortgenau so, wie die Konsole sie führt**; am
+14.10.2026 ergaben genau diese sechs Filter auch genau sechs Treffer:
 
 | Titel in der Konsole | Wofür er steht |
 |---|---|
@@ -550,9 +552,17 @@ nicht heraus.
 
 1. Alle Stücke in die **Datenschutzakte**, mit dem Vermerk:
    *„AWS-Nachweise für Konto 579138738703, abgerufen aus AWS Artifact am
-   TT.MM.JJJJ: ISO 27001, 27017, 27018, 27701, SOC 2, SOC 3; dazu die
-   Liste der Kontovereinbarungen — keine davon einschlägig, keine
-   angenommen."*
+   TT.MM.JJJJ: ISO 27001, 27017, 27018, 27701, SOC 2, SOC 3 und das SOC
+   Continued Operations Letter; dazu die Bildschirmausdrucke der Konto- und
+   der Organisationsvereinbarungen — keine davon einschlägig, keine
+   angenommen — sowie der Ausdruck der Vertraulichkeitsvereinbarung."*
+
+   > **Sieben Stücke und drei Ausdrucke.** Das Überbrückungsschreiben stand
+   > bis zum 15.10.2026 nicht in diesem Vermerk, obwohl es oben schon
+   > mitzunehmen war — und die Ausdrucke standen zwar in den Schritten 2 und
+   > 3, aber nicht in der Liste dessen, was abzulegen ist. Was in einem
+   > Schritt gemacht und in keiner Ablageliste genannt wird, liegt am Ende
+   > lose auf dem Schreibtisch.
 2. **Nicht** in den jusperfect-Ordner und nicht ins Programm — die Berichte
    sind vertraulich, und der Ordner wird weitergegeben.
 3. Mir Bescheid geben — dann trage ich `[KANZLEI 10]` in `DSFA-ENTWURF.md`
