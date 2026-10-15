@@ -2,7 +2,7 @@
 
 **Kanzlei Dortschy & Thunert**
 
-**Stand: 14. Oktober 2026.** Gilt für alle, die mit jusperfect arbeiten.
+**Stand: 15. Oktober 2026.** Gilt für alle, die mit jusperfect arbeiten.
 
 Dieses Blatt sammelt die Regeln, die sich **nicht** aus der Bedienung ergeben
 und die das Programm auch nicht erzwingen kann. Wer sie nicht kennt, macht
@@ -31,6 +31,28 @@ Aufbewahrung ausweisen muss.
 Ein anderes Modell kann das ändern — ohne dass sich an der Bedienung etwas
 ändert und ohne dass eine Meldung erscheint.
 
+### Diese beiden Modelle nicht verwenden
+
+**Claude Fable 5** und **Claude Fable 5.1.** Sie stehen auf der Seite:
+**aller** Verkehr wird bis zu 30 Tage aufbewahrt, aufgefallener kann von
+**Menschen bei AWS** durchgesehen werden. Stand 14.10.2026, Anlage 17 zum
+Aktenvermerk gleichen Datums.
+
+Das steht hier mit Namen, weil die Modellliste in der AWS-Konsole davon
+**nichts** sagt. Dort wird Fable 5.1 als das stärkste Modell für
+„enterprise knowledge work" beschrieben — also als genau das, was eine
+Kanzlei zu brauchen glaubt. Wer nach dieser Beschreibung auswählt, wählt das
+Falsche.
+
+**Claude Mythos 5** und **Claude Mythos 5.1** sind nach dem 14.10.2026
+hinzugekommen; ob sie auf der Seite stehen, ist **nicht geprüft**. Vor jeder
+Verwendung nachsehen.
+
+Von den übrigen Claude-Modellen stand am 14.10.2026 keines auf der Seite.
+**Das ist kein Freibrief:** Die Seite ändert sich ohne Ankündigung, und die
+Prüfung unten ersetzt diese Liste nicht — sie ist nur der Vorsprung für den,
+der es eilig hat.
+
 ### Was zu tun ist, bevor ein Modell gewechselt wird
 
 1. Die Seite **„Amazon Bedrock abuse detection"** im Amazon Bedrock User Guide
@@ -38,8 +60,16 @@ Ein anderes Modell kann das ändern — ohne dass sich an der Bedienung etwas
    vom 14.10.2026 liegt als Anlage 17 zum Aktenvermerk gleichen Datums in der
    Datenschutzakte.
 2. **Steht es darauf: nicht verwenden**, jedenfalls nicht für Mandatsakten.
-3. Steht es nicht darauf: wechseln, den Tag der Prüfung notieren und den
-   Ausdruck der Seite zur Datenschutzakte nehmen.
+3. Steht es nicht darauf: nachsehen, ob es **in Frankfurt** und über das
+   **EU-Inferenzprofil** läuft. Was es dort nicht gibt, gibt es für uns nicht
+   — die Zusage, dass die Verarbeitung die EU nicht verlässt, steht in der
+   Folgenabschätzung und in der Klausel, die die Mandantschaft unterschreibt.
+4. Erst dann wechseln, den Tag der Prüfung notieren und den Ausdruck der
+   Seite zur Datenschutzakte nehmen.
+
+> **Schritt für Schritt steht das in `AWS-ZWEI-HANDGRIFFE.md`, Handgriff 4**
+> — mit dem, was dabei schiefgeht, und mit den drei Gründen, die *keine*
+> Gründe für einen Wechsel sind.
 
 **Dasselbe gilt für Modelle fremder Anbieter aus dem AWS-Marktplatz** — die
 bringen eigene Vertragsbedingungen mit, die wir nicht geprüft haben.
@@ -136,7 +166,7 @@ Hinweise auf Änderungen an Diensten, Fristen.
 
 | Regel | Fundstelle |
 |---|---|
-| 1 | `DSFA-ENTWURF.md`, Abschnitt 4, R4, `[KANZLEI 22]`; AWS Service Terms 50.12.1 und 50.12.2 (Stand 15.09.2026); Amazon Bedrock User Guide, „Abuse detection" |
+| 1 | `DSFA-ENTWURF.md`, Abschnitt 4, R4, `[KANZLEI 22]`; AWS Service Terms 50.12.1 und 50.12.2 (Stand 15.09.2026); Amazon Bedrock User Guide, „Abuse detection" (Anlage 17); `AWS-ZWEI-HANDGRIFFE.md`, Handgriff 4 |
 | 2 | ebenda, letzter Absatz zu `[KANZLEI 22]`; Amazon Bedrock User Guide, „General information" |
 
 ---

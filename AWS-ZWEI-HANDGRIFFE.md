@@ -1,8 +1,9 @@
 # Die Handgriffe in AWS
 
-**Stand 14.10.2026.** Es waren zwei; am 14.10.2026 ist ein dritter
-dazugekommen. **Die Datei heißt weiter `AWS-ZWEI-HANDGRIFFE.md`**, damit Sie
-sie dort wiederfinden, wo Sie sie gewohnt sind.
+**Stand 15.10.2026.** Es waren zwei; am 14.10.2026 ist ein dritter
+dazugekommen und am 15.10.2026 ein vierter. **Die Datei heißt weiter
+`AWS-ZWEI-HANDGRIFFE.md`**, damit Sie sie dort wiederfinden, wo Sie sie
+gewohnt sind.
 
 > ## Handgriff 1 ist bereits erledigt
 >
@@ -32,10 +33,15 @@ sie dort wiederfinden, wo Sie sie gewohnt sind.
 > den Tag, an dem jemand fragt, wie das zustande kam. **Offen ist nur noch
 > Handgriff 3**, und der ist Holen und nicht Einstellen.
 
-**Handgriff 1 und 2 sind am 14.10.2026 erledigt.** Handgriff 3 ist neu und
-anders als die beiden anderen: Dort wird nichts eingestellt, sondern etwas
-geholt — die Nachweise, die AWS für seine Kunden bereitlegt und die unsere
-Unterlagen brauchen.
+**Handgriff 1 und 2 sind am 14.10.2026 erledigt.** Handgriff 3 ist anders
+als die beiden anderen: Dort wird nichts eingestellt, sondern etwas geholt —
+die Nachweise, die AWS für seine Kunden bereitlegt und die unsere Unterlagen
+brauchen.
+
+**Handgriff 4 ist wieder anders.** Er ist nicht einmal zu tun, sondern
+**jedes Mal**, bevor jemand das Modell wechselt — und bis dahin ist nichts zu
+tun. Er steht hier, weil eine Prüfung, die nur im Gedächtnis steht, an dem
+Tag ausfällt, an dem es eilig ist.
 
 Alles betrifft das Konto **579138738703**, Region **eu-central-1**
 (Frankfurt).
@@ -558,13 +564,148 @@ nicht heraus.
 
 ---
 
+## Handgriff 4 — Vor dem Modellwechsel
+
+*Neu am 15.10.2026, auf die Modellliste aus der Bedrock-Konsole. Dieser
+Handgriff ist kein Einstellen und kein Holen, sondern ein **Nachsehen** — und
+er steht hier, weil er sonst im Gedächtnis stünde.*
+
+### Worum es geht, und warum die Liste in der Konsole nicht genügt
+
+Die Konsole zeigt zu jedem Modell einen Satz zum Können: „frontier model for
+ambitious coding", „most capable Opus model", „much lower cost per task". Zu
+der Frage, die für eine Kanzlei entscheidet, sagt sie **nichts**.
+
+Entschieden wird an drei Stellen, und keine davon steht in der Modellliste:
+
+1. **Wird bei diesem Modell der Akteninhalt aufbewahrt?** Das sagt allein die
+   Seite „Amazon Bedrock abuse detection".
+2. **Läuft es in Frankfurt, über das EU-Inferenzprofil?** Darauf ruht die
+   ganze Folgenabschätzung. Ein Modell, das es nur in den Vereinigten Staaten
+   gibt, bricht sie.
+3. **Wie lautet die Kennung genau?** `anthropic.…-v1`. Zusammensetzen führt
+   zu einer Abweisung, und die kann Akteninhalt enthalten.
+
+> **Und der Grund dahinter:** Nach **Service Terms 50.12.1** sind
+> Drittanbieter-Modelle „Inhalte von Drittanbietern", und ihre Nutzung heißt
+> Zustimmung zu **deren** Bedingungen. Die Rechtslage hängt damit am
+> gewählten Modell. `JUSPERFECT_MODELL_ID` zu ändern ist eine Entscheidung
+> mit Rechtsfolgen und keine Einstellung.
+
+### Was heute schon feststeht — dafür braucht niemand die Prüfung
+
+Die Seite ist am **14.10.2026** gelesen worden; der Wortlaut liegt als
+**Anlage 17** zum Aktenvermerk gleichen Datums in der Datenschutzakte.
+
+| Modell | Stand 14.10.2026 |
+|---|---|
+| **Claude Fable 5** und **Claude Fable 5.1** | **Nicht verwenden.** Namentlich genannt: *aller* Verkehr bis zu 30 Tage aufbewahrt, aufgefallener mit möglicher **Durchsicht durch Menschen** bei AWS |
+| Die meisten **OpenAI**-Modelle | Nicht verwenden. Aufgefallener Verkehr bis zu 30 Tage |
+| **Claude Opus 4.6** (`anthropic.claude-opus-4-6-v1`) | **Eingesetzt.** Steht nicht darauf — Zero Operator Access |
+| **Claude Mythos 5** und **Claude Mythos 5.1** | **Unbekannt.** Neu gegenüber dem 14.10.2026; vor jeder Verwendung nachzusehen |
+| Alle übrigen Claude-Modelle | Standen am 14.10.2026 nicht darauf — **aber die Seite ändert sich** |
+
+> **Die Falle liegt genau andersherum, als man denkt.** Fable 5.1 wird in der
+> Konsole als das stärkste Modell für „enterprise knowledge work" beschrieben
+> — also als das, was eine Kanzlei zu brauchen glaubt. Dass bei ihm der
+> gesamte Verkehr dreißig Tage liegt, steht dort nicht. Wer nach der
+> Modellliste auswählt, wählt das Falsche.
+
+### Schritt 1 — Die Missbrauchserkennungsseite ansehen
+
+1. Den **Amazon Bedrock User Guide** aufrufen und den Abschnitt
+   **„Abuse detection"** öffnen.
+2. Den Abschnitt **„Model-specific abuse detection"** lesen. Dort stehen die
+   Aufzählungen mit den **namentlich genannten** Modellen.
+3. **Steht das gewünschte Modell darauf: nicht verwenden**, jedenfalls nicht
+   für Mandatsakten. Hier endet die Prüfung.
+4. Steht es nicht darauf, gilt für es das **Zero-Operator-Access-Modell**:
+   nichts wird aufbewahrt, nichts wird mitgelesen. Weiter mit Schritt 2.
+5. **Die Seite ausdrucken** — mit Datum. Sie ist Dokumentation und kein
+   Vertrag; AWS kann sie ohne Ankündigung ändern.
+
+> **Ein Satz auf derselben Seite, der leicht übersehen wird:** *„If
+> cross-region inference is enabled for these models, retained inputs and
+> outputs are stored in destination regions."* Bei einem gelisteten Modell
+> landet das Aufbewahrte also dort, wo die Anfrage verarbeitet wurde. Beim
+> EU-Inferenzprofil bliebe es in der EU — **aufbewahrt wäre es trotzdem.**
+> Die Region rettet ein gelistetes Modell nicht.
+
+### Schritt 2 — Die Region prüfen
+
+1. In der **AWS-Konsole** oben rechts auf **eu-central-1 (Frankfurt)**
+   stellen.
+2. **Amazon Bedrock** öffnen, links **Modellzugriff** (*Model access*).
+3. Nachsehen, ob das gewünschte Modell **dort** aufgeführt ist. Was in
+   Frankfurt nicht erscheint, gibt es für uns nicht — gleich wie gut es ist.
+4. Prüfen, ob es über das **EU-Inferenzprofil** erreichbar ist (Kennungen mit
+   dem Vorsatz `eu.`). jusperfect ruft über dieses Profil auf.
+
+> **Warum das kein Nebenpunkt ist:** Die Folgenabschätzung sagt zu, dass die
+> Verarbeitung in Rechenzentren innerhalb der Europäischen Union stattfindet.
+> Derselbe Satz steht in der Klausel für den Mandatsvertrag, die die
+> Mandantschaft unterschreibt. Ein Modell außerhalb der EU macht beide
+> unrichtig.
+
+### Schritt 3 — Die Kennung abschreiben, nicht bilden
+
+1. Die Kennung in der Konsole **anzeigen lassen und kopieren** — nicht aus
+   dem Namen zusammensetzen.
+2. Sie beginnt mit `anthropic.` und endet auf `-v1`. Ein bloßes
+   `claude-opus-4-6` ist die Kennung der Anthropic-Schnittstelle und
+   funktioniert bei AWS nicht; `anthropic.claude-opus-4-6` ohne `-v1`
+   ebenfalls nicht (`AWS-EINRICHTEN.md`).
+
+> **Warum das hier steht und nicht nur in der Einrichtung:** Eine falsche
+> Kennung führt zu einer Abweisung von AWS — und eine Abweisung kann ein
+> Stück der Anfrage enthalten, also Akteninhalt. jusperfect reicht den
+> AWS-Wortlaut deshalb nie durch. Der Bearbeiter sieht dann einen Fehler ohne
+> Grund, und niemand weiß, warum.
+
+### Schritt 4 — Umstellen und festhalten
+
+1. In `START-JURNODES.bat` den Eintrag **`JUSPERFECT_MODELL_ID`** ändern.
+2. jusperfect neu starten und **unter einer Antwort nachsehen**, welches
+   Modell sie erzeugt hat. Dort steht es.
+3. In die Datenschutzakte, mit dem Vermerk:
+   *„Modellwechsel von … auf …, am TT.MM.JJJJ. Die Seite ‚Amazon Bedrock
+   abuse detection' wurde am selben Tag gelesen; das neue Modell ist dort
+   nicht genannt. Verfügbar in eu-central-1 über das EU-Inferenzprofil.
+   Ausdruck der Seite anbei."*
+4. Mir Bescheid geben — dann ziehe ich `DSFA-ENTWURF.md`, `EINWEISUNG.md` und
+   den Einrichtungsbogen nach.
+
+### Was **kein** Grund für einen Wechsel ist
+
+* **Ein neueres Modell ist da.** Ein Modell, das läuft, geprüft und
+  dokumentiert ist, ist mehr wert als ein halbes Prozent mehr Güte.
+* **Es ist günstiger.** Die Kosten stehen in der Oberfläche und sind bisher
+  kein Problem. Ein Wechsel kostet eine Prüfung, einen Vermerk und ein Risiko.
+* **Es steht als „frontier" oder „most capable" in der Liste.** Siehe oben —
+  genau das war am 14.10.2026 die Beschreibung des Modells, das die
+  Akteninhalte dreißig Tage aufbewahrt.
+
+> **Ehrlich dazu:** Die Schaltflächen in Schritt 2 habe ich **nicht** am
+> Bildschirm gesehen; die AWS-Seiten sind von meinem Rechner aus nicht
+> erreichbar. Was in Schritt 1 steht, stammt dagegen aus dem Wortlaut, den
+> die Kanzlei am 14.10.2026 selbst abgerufen hat. Heißt in der Konsole etwas
+> anders, schicken Sie mir ein Bild — ich ziehe die Anleitung nach, wie bei
+> Handgriff 2.
+
+---
+
 ## Was danach noch offen ist
 
-Nach den drei Handgriffen bleibt in der AWS-Konsole nichts mehr zu tun.
+Nach den Handgriffen 1 bis 3 bleibt in der AWS-Konsole nichts mehr zu tun.
 Außerhalb der Konsole bleiben zwei Webseiten abzurufen — die **Service
 Terms** zu Amazon Bedrock (`[KANZLEI 21]`) und die **Liste der
 Unterauftragsverarbeiter** —, und im Übrigen nur noch die Stellen in den drei
 Rechtsunterlagen; die sind Bewertung, keine Konsolenarbeit.
+
+**Handgriff 4 bleibt dauerhaft stehen.** Er wird nicht abgehakt: Er ist die
+Prüfung vor jedem Modellwechsel und gehört außerdem in die jährliche
+Durchsicht der Folgenabschätzung — die Seite, auf der die Modelle stehen,
+ändert sich ohne Ankündigung.
 
 ---
 

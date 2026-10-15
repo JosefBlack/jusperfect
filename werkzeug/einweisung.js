@@ -53,7 +53,7 @@ const inhalt = [];
 inhalt.push(
   new Paragraph({ text: "Einweisung zur Arbeit mit jusperfect", heading: HeadingLevel.TITLE, spacing: { after: 200 } }),
   p([t("Kanzlei Dortschy & Thunert", { bold: true })], { spacing: { after: 200 } }),
-  p([t("Stand: 14. Oktober 2026. ", { bold: true }), t("Gilt für alle, die mit jusperfect arbeiten.")], { spacing: { after: 160 } }),
+  p([t("Stand: 15. Oktober 2026. ", { bold: true }), t("Gilt für alle, die mit jusperfect arbeiten.")], { spacing: { after: 160 } }),
   p("Dieses Blatt sammelt die Regeln, die sich nicht aus der Bedienung ergeben und die das Programm auch nicht erzwingen kann. Wer sie nicht kennt, macht nichts falsch im Sinne der Bedienung — und verletzt doch eine Pflicht aus der Datenschutz-Folgenabschätzung.", { spacing: { after: 120 } }),
   linie()
 );
@@ -75,6 +75,36 @@ inhalt.push(
   ], { spacing: { after: 120 } }),
   p("Ein anderes Modell kann das ändern — ohne dass sich an der Bedienung etwas ändert und ohne dass eine Meldung erscheint.", { spacing: { after: 120 } }),
 
+  h2("Diese beiden Modelle nicht verwenden"),
+  p([
+    t("Claude Fable 5", { bold: true }),
+    t(" und "),
+    t("Claude Fable 5.1.", { bold: true }),
+    t(" Sie stehen auf der Seite: "),
+    t("aller", { bold: true }),
+    t(" Verkehr wird bis zu 30 Tage aufbewahrt, aufgefallener kann von "),
+    t("Menschen bei AWS", { bold: true }),
+    t(" durchgesehen werden. Stand 14.10.2026, Anlage 17 zum Aktenvermerk gleichen Datums."),
+  ], { spacing: { after: 120 } }),
+  p([
+    t("Das steht hier mit Namen, weil die Modellliste in der AWS-Konsole davon "),
+    t("nichts", { bold: true }),
+    t(" sagt. Dort wird Fable 5.1 als das stärkste Modell für „enterprise knowledge work“ beschrieben — also als genau das, was eine Kanzlei zu brauchen glaubt. Wer nach dieser Beschreibung auswählt, wählt das Falsche."),
+  ], { spacing: { after: 120 } }),
+  p([
+    t("Claude Mythos 5", { bold: true }),
+    t(" und "),
+    t("Claude Mythos 5.1", { bold: true }),
+    t(" sind nach dem 14.10.2026 hinzugekommen; ob sie auf der Seite stehen, ist "),
+    t("nicht geprüft", { bold: true }),
+    t(". Vor jeder Verwendung nachsehen."),
+  ], { spacing: { after: 120 } }),
+  p([
+    t("Von den übrigen Claude-Modellen stand am 14.10.2026 keines auf der Seite. "),
+    t("Das ist kein Freibrief:", { bold: true }),
+    t(" Die Seite ändert sich ohne Ankündigung, und die Prüfung unten ersetzt diese Liste nicht — sie ist nur der Vorsprung für den, der es eilig hat."),
+  ], { spacing: { after: 120 } }),
+
   h2("Was zu tun ist, bevor ein Modell gewechselt wird"),
   ((aktuelleListe = neueListe()), leer()),
   nr([
@@ -83,7 +113,20 @@ inhalt.push(
     t(" im Amazon Bedrock User Guide aufrufen und nachsehen, ob das neue Modell dort genannt ist. Der Wortlaut vom 14.10.2026 liegt als Anlage 17 zum Aktenvermerk gleichen Datums in der Datenschutzakte."),
   ]),
   nr([t("Steht es darauf: nicht verwenden", { bold: true }), t(", jedenfalls nicht für Mandatsakten.")]),
-  nr("Steht es nicht darauf: wechseln, den Tag der Prüfung notieren und den Ausdruck der Seite zur Datenschutzakte nehmen."),
+  nr([
+    t("Steht es nicht darauf: nachsehen, ob es "),
+    t("in Frankfurt", { bold: true }),
+    t(" und über das "),
+    t("EU-Inferenzprofil", { bold: true }),
+    t(" läuft. Was es dort nicht gibt, gibt es für uns nicht — die Zusage, dass die Verarbeitung die EU nicht verlässt, steht in der Folgenabschätzung und in der Klausel, die die Mandantschaft unterschreibt."),
+  ]),
+  nr("Erst dann wechseln, den Tag der Prüfung notieren und den Ausdruck der Seite zur Datenschutzakte nehmen."),
+  kasten([
+    t("Schritt für Schritt steht das in AWS-ZWEI-HANDGRIFFE.md, Handgriff 4", { bold: true }),
+    t(" — mit dem, was dabei schiefgeht, und mit den drei Gründen, die "),
+    t("keine", { italics: true }),
+    t(" Gründe für einen Wechsel sind."),
+  ]),
   p([
     t("Dasselbe gilt für Modelle fremder Anbieter aus dem AWS-Marktplatz", { bold: true }),
     t(" — die bringen eigene Vertragsbedingungen mit, die wir nicht geprüft haben."),
@@ -190,8 +233,8 @@ inhalt.push(
     width: { size: 9354, type: WidthType.DXA },
     rows: [
       new TableRow({ tableHeader: true, children: [zelle("Regel", 1200, true, true), zelle("Fundstelle", 8154, true, true)] }),
-      new TableRow({ children: [zelle("1", 1200), zelle("DSFA-ENTWURF.md, Abschnitt 4, R4, [KANZLEI 22]; AWS Service Terms 50.12.1 und 50.12.2 (Stand 15.09.2026); Amazon Bedrock User Guide, „Abuse detection“", 8154)] }),
-      new TableRow({ children: [zelle("2", 1200), zelle("ebenda, letzter Absatz zu [KANZLEI 22]; Amazon Bedrock User Guide, „General information“", 8154)] }),
+      new TableRow({ cantSplit: true, children: [zelle("1", 1200), zelle("DSFA-ENTWURF.md, Abschnitt 4, R4, [KANZLEI 22]; AWS Service Terms 50.12.1 und 50.12.2 (Stand 15.09.2026); Amazon Bedrock User Guide, „Abuse detection“ (Anlage 17); AWS-ZWEI-HANDGRIFFE.md, Handgriff 4", 8154)] }),
+      new TableRow({ cantSplit: true, children: [zelle("2", 1200), zelle("ebenda, letzter Absatz zu [KANZLEI 22]; Amazon Bedrock User Guide, „General information“", 8154)] }),
     ],
   }),
   leer()
