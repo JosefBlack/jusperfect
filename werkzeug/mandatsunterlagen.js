@@ -23,18 +23,26 @@ const ausgabe = process.argv[3];
 const zeilen = fs.readFileSync(quelle, "utf-8").split("\n");
 
 // ── Satz innerhalb einer Zeile ──────────────────────────────────────────────
+//
 // **fett**, `fest`, *kursiv*. In dieser Reihenfolge, sonst frisst der Stern
 // der Kursivschrift die Haelfte des Fettdrucks.
+//
+// INEINANDER, und das war am 15.10.2026 ein Fehler: Steht eine Kennung in
+// Festbreitenschrift INNERHALB eines fetten Satzes - "Eingestellt ist
+// `claude-opus-4-6-v1`." -, nahm die erste Fassung den ganzen Inhalt der
+// Fettschrift als Text. Auf dem Papier standen dann die Rueckstriche. Der
+// Aufruf geht deshalb in sich selbst hinein, mit der aeusseren Auszeichnung
+// als Grundton.
 function stuecke(text, grund = {}) {
   const aus = [];
-  const re = /(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g;
+  const re = /(\*\*[^*]+?\*\*|`[^`]+`|\*[^*]+?\*)/g;
   let zuletzt = 0, t;
   while ((t = re.exec(text)) !== null) {
     if (t.index > zuletzt) aus.push(new TextRun({ text: text.slice(zuletzt, t.index), ...grund }));
     const s = t[0];
-    if (s.startsWith("**")) aus.push(new TextRun({ text: s.slice(2, -2), bold: true, ...grund }));
+    if (s.startsWith("**")) aus.push(...stuecke(s.slice(2, -2), { ...grund, bold: true }));
     else if (s.startsWith("`")) aus.push(new TextRun({ text: s.slice(1, -1), font: FEST, ...grund }));
-    else aus.push(new TextRun({ text: s.slice(1, -1), italics: true, ...grund }));
+    else aus.push(...stuecke(s.slice(1, -1), { ...grund, italics: true }));
     zuletzt = t.index + s.length;
   }
   if (zuletzt < text.length) aus.push(new TextRun({ text: text.slice(zuletzt), ...grund }));
