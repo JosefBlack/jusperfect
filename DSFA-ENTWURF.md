@@ -565,10 +565,12 @@ ein Zertifikat mehr zu versprechen scheint, als es sagt.
   (`AWS-ZWEI-HANDGRIFFE.md`, Handgriff 4): Die Auswahl hängt am Modell, und
   eine Auswahl, die sich ändert, ist erneut zu dokumentieren.
 
-**Offen bleiben zwei Ausdrucke**, die als Bildschirmausdruck beziehungsweise
-Abschrift schon in der Akte liegen: der vollständige Ausdruck der
-Vertraulichkeitsbedingungen (Anlage 14) und ein Ausdruck der Seite „Amazon
-Bedrock abuse detection" (Anlage 17).
+**Vollständig seit dem 15.10.2026.** Die beiden Stücke, die der Aktenvermerk
+bei den Anlagen 14 und 17 noch als nachzureichen bezeichnet — der
+vollständige Ausdruck der Vertraulichkeitsbedingungen und ein Ausdruck der
+Seite „Amazon Bedrock abuse detection" —, liegen vor. Die Kanzlei hat das am
+15.10.2026 bestätigt. **Aus der AWS-Konsole ist für diese Unterlage nichts
+mehr zu holen**; die nächste Vorlage ist die jährliche Durchsicht.
 
 #### Die Kundenvereinbarung und der Datenschutzhinweis
 

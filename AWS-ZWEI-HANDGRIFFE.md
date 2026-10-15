@@ -48,17 +48,18 @@ gewohnt sind.
 > | 13 | SOC Continued Operations Letter |
 > | 14 | Die Vertraulichkeitsbedingungen |
 >
+> **Am 15.10.2026 hat die Kanzlei bestätigt: Handgriff 3 ist vollständig
+> erfüllt.** Damit sind auch die beiden Ausdrucke nachgereicht, die der
+> Aktenvermerk vom 14.10.2026 bei den Anlagen 14 und 17 noch als offen
+> bezeichnet — der vollständige Ausdruck der Vertraulichkeitsbedingungen über
+> die Schaltfläche „Bedingungen ausdrucken" und ein Ausdruck der Seite
+> „Amazon Bedrock abuse detection".
+>
 > **Dieser Vermerk hat bis zum 15.10.2026 gefehlt** — Handgriff 1 und 2
 > trugen ihn, Handgriff 3 nicht. Eine Anleitung ohne ihn liest sich wie eine
 > offene Aufgabe, und so ist sie auch zweimal vorgelesen worden. Teil 3
 > bleibt stehen: für die jährliche Wiederholung, bei der die Nachweise neu
 > abzurufen sind.
->
-> **Nachzureichen sind zwei Ausdrucke**, die als Bildschirmausdruck bzw.
-> Abschrift schon in der Akte liegen: der vollständige Ausdruck der
-> Vertraulichkeitsbedingungen über die Schaltfläche „Bedingungen ausdrucken"
-> (Anlage 14) und ein Ausdruck der Seite „Amazon Bedrock abuse detection"
-> (Anlage 17).
 
 **Handgriff 1, 2 und 3 sind am 14.10.2026 erledigt.** Handgriff 3 war anders
 als die beiden anderen: Dort wurde nichts eingestellt, sondern etwas geholt —
