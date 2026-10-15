@@ -401,7 +401,7 @@ des § 203 Abs. 3 StGB und des § 43e BRAO.
 |---|---|
 | AV-Vertrag und Hauptvertrag | liegen vor: **AWS Data Processing Addendum**, **AWS-Kundenvereinbarung** (01.06.2026), **AWS-Datenschutzhinweis** (18.05.2026) — alle drei unten gelesen; `[KANZLEI 8]` nur noch für Ablage |
 | Verpflichtung zur Verschwiegenheit in Textform (§ 43e Abs. 3 BRAO) | **[KANZLEI 9]** — prüfen und dokumentieren |
-| Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **Material beschafft am 14.10.2026** — sechs Nachweise aus AWS Artifact, siehe unten; `[KANZLEI 10]` nur noch für die Bewertung |
+| Dokumentation der Dienstleisterauswahl (§ 43e Abs. 2) | **Material beschafft am 14.10.2026** — sieben Nachweise aus AWS Artifact, Anlagen 7 bis 13; die Bewertung ist am 15.10.2026 geschrieben, siehe unten. `[KANZLEI 10]` nur noch für die Übernahme |
 | Kein Modelltraining | **Kundenvereinbarung Ziffer 1.4 und 6.1** (Fassung 01.06.2026) — nicht im AV-Vertrag, siehe unten |
 | Ein einziger Ausgang im Programm | `services/ausgang.py` — genau eine Stelle führt zum Modell |
 | Kein zweiter Anbieter | andere sind vorbereitet, keiner angebunden |
@@ -482,6 +482,7 @@ ist vertrauliche Information von AWS, und der Ordner wird weitergegeben.*
 | ISO/IEC 27701:2019 | Datenschutz-Managementsystem |
 | **SOC 2 Typ 2**, Berichtszeitraum **01.04.2025 – 31.03.2026** | Prüfurteil über die **Wirksamkeit** der Kontrollen, nicht nur über ihr Vorhandensein — geprüfte Kriterien: Security, Availability, **Confidentiality**, **Privacy** |
 | SOC 3 | dasselbe Prüfurteil in einer Fassung, die weitergegeben werden darf |
+| **SOC Continued Operations Letter** | schließt die Lücke zwischen dem Ende des Berichtszeitraums und heute |
 
 **Wozu das trägt.** § 43e Abs. 2 BRAO verlangt, dass die Auswahl des
 Dienstleisters dokumentiert ist — dass die Kanzlei ihn sich *angesehen* hat
@@ -501,9 +502,73 @@ diese Unterlagen in seinem Abschnitt 10; Artifact ist der Weg dorthin.
    Letter** aus derselben Quelle. Zur jährlichen Durchsicht dieser Unterlage
    gehört, die Nachweise neu abzurufen.
 
-**[KANZLEI 10]** — die Bewertung bleibt bei der Kanzlei: ob diese Nachweise
-die Auswahl nach § 43e Abs. 2 BRAO tragen und was darüber hinaus in die Akte
-soll. Das Material liegt vor; der Satz dazu fehlt.
+**[KANZLEI 10] — die Bewertung. Entwurf zur Übernahme, geschrieben am
+15.10.2026.**
+
+Bis dahin stand hier „das Material liegt vor; der Satz dazu fehlt". Der Satz
+ist jetzt geschrieben; zu entscheiden bleibt, ob er so übernommen wird.
+
+> **Zur Auswahl des Auftragsverarbeiters nach § 43e Abs. 2 BRAO.** Die
+> Kanzlei hat Amazon Web Services EMEA SARL vor der Beauftragung geprüft.
+> Geprüft wurden das Vertragswerk (Auftragsverarbeitungsvertrag,
+> Kundenvereinbarung, Datenschutzhinweis, Service Terms Abschnitt 50.12), die
+> technische Ausgestaltung des Kontos (Zugriffsrichtlinie auf sechs
+> EU-Regionen, Opt-out-Richtlinie für die KI-Dienste, Modellwahl) und die
+> Nachweise unabhängiger Prüfer. Die Prüfung ist im Aktenvermerk vom
+> 14.10.2026 nebst 17 Anlagen dokumentiert. Die Kanzlei hält den
+> Auftragsverarbeiter für die vorgesehene Verarbeitung für geeignet.
+
+**Was die Nachweise tragen — und was nicht.** Das gehört zur Bewertung, weil
+ein Zertifikat mehr zu versprechen scheint, als es sagt.
+
+| | |
+|---|---|
+| **ISO 27001:2022** | Es besteht ein geprüftes Managementsystem für Informationssicherheit. Das sagt, dass es *Verfahren gibt* — nicht, dass sie im Einzelfall gewirkt haben |
+| **ISO 27017 / 27018** | Dieselbe Art Aussage, zugeschnitten auf Cloud-Dienste und auf personenbezogene Daten darin |
+| **ISO/IEC 27701:2019** | Ein Datenschutz-Managementsystem besteht und ist geprüft |
+| **SOC 2 Typ 2** | **Das tragende Stück.** Typ 2 heißt: Ein unabhängiger Prüfer hat über einen Zeitraum hinweg beurteilt, ob die Kontrollen *wirksam waren* — nicht nur, ob sie eingerichtet sind. Geprüft wurden unter anderem die Kriterien **Confidentiality** und **Privacy**, und das sind die beiden, auf die es bei einer Mandatsakte ankommt |
+| **SOC 3** | Dasselbe Urteil in einer Fassung, die weitergegeben werden darf |
+| **Continued Operations Letter** | Schließt die Lücke zwischen dem Ende des Berichtszeitraums und heute |
+
+**Drei Grenzen, die zu nennen sind, weil sie sonst übersehen werden:**
+
+1. **Die Nachweise gelten dem Anbieter, nicht diesem Konto.** Geprüft ist AWS
+   als Dienst. Ob die Kanzlei ihr Konto richtig eingerichtet hat — Regionen,
+   Richtlinien, Modellwahl —, sagt kein Zertifikat. Das ist der Grund, warum
+   die Handgriffe 1 bis 3 und ihre Anlagen zur selben Dokumentation gehören:
+   **Die Zertifikate tragen den Anbieter, die eigenen Ausdrucke tragen die
+   Einrichtung.**
+2. **Der Berichtszeitraum endete am 31.03.2026.** Das Überbrückungsschreiben
+   trägt die Zeit danach; beides läuft ab und gehört in die jährliche
+   Durchsicht.
+3. **Ein Zertifikat ersetzt die Verschwiegenheitsverpflichtung nicht.**
+   § 43e Abs. 3 BRAO steht daneben und ist weiter offen (`[KANZLEI 9]`).
+
+> **Die Einschätzung, auf die es ankommt — und sie fällt anders aus, als man
+> erwartet.** Der eigentliche Nachweis nach § 43e Abs. 2 ist **nicht** der
+> Stapel fremder Zertifikate. Den könnte jeder herunterladen, der ein
+> AWS-Konto hat. Der Nachweis ist der **Aktenvermerk**: dass die Kanzlei das
+> Vertragswerk gelesen, die Missbrauchserkennungsseite geprüft, die
+> Modellwahl als Rechtsfrage behandelt und die Einrichtung des Kontos
+> belegt hat. Die Zertifikate untermauern das; sie sind nicht selbst die
+> Auswahl. **Die Norm verlangt eine Entscheidung, und eine Entscheidung
+> besteht nicht aus fremden Urkunden.**
+
+**Was darüber hinaus in die Akte soll** — die zweite Hälfte der Frage:
+
+* Der **Aktenvermerk vom 14.10.2026** mit allen Anlagen. Er *ist* die
+  Dokumentation; alles Übrige ist Beleg dazu.
+* Die **unterschriebene Einweisung** — sie zeigt, dass die Auswahl nicht nur
+  getroffen, sondern im Haus durchgesetzt wird.
+* Jede **Weitergabe des SOC-2-Berichts**, mit Datum und Empfänger.
+* Bei einem **Modellwechsel** der ausgefüllte Prüfbogen
+  (`AWS-ZWEI-HANDGRIFFE.md`, Handgriff 4): Die Auswahl hängt am Modell, und
+  eine Auswahl, die sich ändert, ist erneut zu dokumentieren.
+
+**Offen bleiben zwei Ausdrucke**, die als Bildschirmausdruck beziehungsweise
+Abschrift schon in der Akte liegen: der vollständige Ausdruck der
+Vertraulichkeitsbedingungen (Anlage 14) und ein Ausdruck der Seite „Amazon
+Bedrock abuse detection" (Anlage 17).
 
 #### Die Kundenvereinbarung und der Datenschutzhinweis
 
@@ -1027,7 +1092,7 @@ Das ist keine Warnung, sondern ein Abbruch — geprüft in `tests/test_config.py
 | 7 | Wann wird die Fallkopie gelöscht? | R3 |
 | 8 | Ablage: Tag des Abrufs, Quelle, Ausdruck — je deutsch **und** englisch; dazu SCC, Unterauftragsverarbeiterliste, Service Terms | R4 |
 | 9 | Verschwiegenheitsverpflichtung § 43e Abs. 3 BRAO | R4 |
-| 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 — **Nachweise liegen seit 14.10.2026 vor**, es fehlt die Bewertung | R4 |
+| 10 | Dokumentation der Dienstleisterauswahl § 43e Abs. 2 — Nachweise seit 14.10.2026 in der Akte (Anlagen 7–13), **die Bewertung ist am 15.10.2026 ausformuliert**. Zu entscheiden bleibt, ob sie so übernommen wird | R4 |
 | 11 | Regionen des Geländerprofils — bei AWS erfragen | R5 |
 | 12 | Erlaubnistatbestand Art. 9 Abs. 2; Beschränkung nach Rechtsgebiet? | R6 |
 | 13 | Zugriffsbeschränkung je Bearbeiter? Zugangsschutz? | R7 |

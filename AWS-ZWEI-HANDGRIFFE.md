@@ -30,11 +30,38 @@ gewohnt sind.
 > damit eingelöst.
 >
 > Auch Teil 2 bleibt stehen — für ein zweites Konto, einen neuen Dienst oder
-> den Tag, an dem jemand fragt, wie das zustande kam. **Offen ist nur noch
-> Handgriff 3**, und der ist Holen und nicht Einstellen.
+> den Tag, an dem jemand fragt, wie das zustande kam.
 
-**Handgriff 1 und 2 sind am 14.10.2026 erledigt.** Handgriff 3 ist anders
-als die beiden anderen: Dort wird nichts eingestellt, sondern etwas geholt —
+> ## Handgriff 3 ist am selben Tag erledigt worden
+>
+> Die Kanzlei hat Artifact geöffnet, beide Reiter der Vereinbarungen
+> angesehen (nichts angenommen — richtig so) und die sieben Stücke abgerufen.
+> Sie liegen als **Anlagen 3 und 7 bis 14** zum Aktenvermerk vom 14.10.2026
+> in der Datenschutzakte:
+>
+> | Anlage | Was |
+> |---|---|
+> | 3 | Konto- und Organisationsvereinbarungen, sechs Blätter |
+> | 7–10 | ISO 27001, 27017, 27018, 27701 |
+> | 11 | SOC 2 Typ 2, Berichtszeitraum 01.04.2025 – 31.03.2026 |
+> | 12 | SOC 3 |
+> | 13 | SOC Continued Operations Letter |
+> | 14 | Die Vertraulichkeitsbedingungen |
+>
+> **Dieser Vermerk hat bis zum 15.10.2026 gefehlt** — Handgriff 1 und 2
+> trugen ihn, Handgriff 3 nicht. Eine Anleitung ohne ihn liest sich wie eine
+> offene Aufgabe, und so ist sie auch zweimal vorgelesen worden. Teil 3
+> bleibt stehen: für die jährliche Wiederholung, bei der die Nachweise neu
+> abzurufen sind.
+>
+> **Nachzureichen sind zwei Ausdrucke**, die als Bildschirmausdruck bzw.
+> Abschrift schon in der Akte liegen: der vollständige Ausdruck der
+> Vertraulichkeitsbedingungen über die Schaltfläche „Bedingungen ausdrucken"
+> (Anlage 14) und ein Ausdruck der Seite „Amazon Bedrock abuse detection"
+> (Anlage 17).
+
+**Handgriff 1, 2 und 3 sind am 14.10.2026 erledigt.** Handgriff 3 war anders
+als die beiden anderen: Dort wurde nichts eingestellt, sondern etwas geholt —
 die Nachweise, die AWS für seine Kunden bereitlegt und die unsere Unterlagen
 brauchen.
 
@@ -706,7 +733,8 @@ Die Seite ist am **14.10.2026** gelesen worden; der Wortlaut liegt als
 
 ## Was danach noch offen ist
 
-Nach den Handgriffen 1 bis 3 bleibt in der AWS-Konsole nichts mehr zu tun.
+**In der AWS-Konsole ist nichts mehr zu tun.** Die Handgriffe 1 bis 3 sind
+am 14.10.2026 erledigt.
 Außerhalb der Konsole bleiben zwei Webseiten abzurufen — die **Service
 Terms** zu Amazon Bedrock (`[KANZLEI 21]`) und die **Liste der
 Unterauftragsverarbeiter** —, und im Übrigen nur noch die Stellen in den drei
