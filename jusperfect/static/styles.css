@@ -1303,6 +1303,34 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .dok-suche { flex: 1 1 auto; min-width: 0; font: inherit; font-size: 13px;
   padding: 5px 8px; border: 1px solid var(--linie); border-radius: 7px;
   background: var(--flaeche-2); color: var(--tinte); }
+/* Die Lupe im Feld.
+
+   Aus der Kanzlei am 15.10.2026: „Im Text Dokumente suchen genuegt eine
+   Lupe." Das Zeichen liegt IM Feld und nicht daneben: Daneben waere es ein
+   zweites Ding in einer Zeile, die schon drei traegt. Es faengt keine
+   Klicks ab (pointer-events: none) - wer darauf zielt, trifft das Feld. */
+.suchfeld { position: relative; display: flex; align-items: center;
+  flex: 1 1 auto; min-width: 0; }
+.suchfeld .lupe { position: absolute; left: 8px; width: 13px; height: 13px;
+  pointer-events: none; fill: none; stroke: var(--gedaempft);
+  stroke-width: 1.6; stroke-linecap: round; }
+.suchfeld .dok-suche { width: 100%; padding-left: 27px; }
+/* Die Lupe als Knopf - in der Kopfzeile des Chats, ganz rechts. */
+.lupenknopf { margin-left: auto; display: inline-flex; align-items: center;
+  padding: 4px 8px; }
+.lupenknopf .lupe { width: 15px; height: 15px; fill: none; stroke: currentColor;
+  stroke-width: 1.7; stroke-linecap: round; }
+.lupenknopf[aria-expanded="true"] { background: var(--akzent-hell); color: var(--akzent);
+  border-color: var(--akzent); }
+/* Die Suchzeile des Chats: zweite Reihe desselben Balkens, wie links. Das
+   Feld bleibt kurz - die Ueberschrift „Chat" steht mittig darueber und soll
+   nicht von einem Eingabefeld eingeholt werden. */
+.chat-suche-zeile { flex: 1 0 100%; display: flex; align-items: center; gap: 8px;
+  margin-top: 4px; }
+.chat-suche-zeile .suchfeld { flex: 0 1 320px; }
+/* Dieselbe Farbe wie im Dokumenttext: Ein Treffer sieht ueberall gleich aus. */
+.karte-c mark.chat-treffer { background: var(--amber-hell); color: var(--tinte);
+  border-radius: 3px; padding: 0 1px; }
 .dok-treffer { flex: none; font-size: 12px; color: var(--gedaempft); }
 /* Kein Treffer ist eine Auskunft, kein leeres Fenster. */
 .dok-treffer.ohne-treffer { color: var(--rot); }

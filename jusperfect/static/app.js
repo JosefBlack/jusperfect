@@ -1995,6 +1995,9 @@ function zeigeBelege() {
 // ── Cowork-Thread ────────────────────────────────────────────────────────────
 
 function threadWillkommen() {
+  // Ein neuer Verlauf, und im Suchfeld stuende noch das Wort von vorhin: Der
+  // Zaehler daneben meldete "kein Treffer", und das saehe aus wie ein Fehler.
+  chatSucheZeigen(false);
   const t = $("thread"); t.replaceChildren();
   const w = document.createElement("div"); w.className = "willkommen";
   w.textContent = "Fragen Sie die Akte.";
@@ -2048,6 +2051,141 @@ function gedaechtnisImThreadZeigen() {
   // Unten anfangen, nicht oben: Das Juengste ist das, woran weitergearbeitet
   // wird. Bei hundert Fragen stuende sonst die aelteste im Bild.
   t.scrollTop = t.scrollHeight;
+}
+
+// ── Suche im Chat ────────────────────────────────────────────────────────────
+//
+// Aus der Kanzlei am 15.10.2026: "Die Lupe haette ich uebrigens auch gerne
+// fuer den Chat."
+//
+// Der Anlass ist derselbe wie am 13.10. bei den Dokumenten, nur eine Spalte
+// weiter: Seit im Chat ALLE frueheren Fragen stehen und nicht mehr die
+// letzten fuenf, ist er zurueckverfolgbar - aber hundert Fragen durchblaettern
+// ist kein Wiederfinden.
+//
+// Sie kostet nichts. Gesucht wird in dem, was ohnehin schon auf dem Bildschirm
+// steht; es geht keine Anfrage hinaus, kein Modell wird gefragt, und nichts
+// vom Gesuchten verlaesst den Rechner. Derselbe Grundsatz wie bei der Suche im
+// Dokumenttext.
+
+/** Die Suchwoerter aus dem Chatfeld - klein geschrieben, ohne Leeres. */
+function chatSuchwoerter() {
+  const feld = $("chat-suche");
+  return feld ? feld.value.toLowerCase().split(/\s+/).filter(Boolean) : [];
+}
+
+/** Alle Hervorhebungen wieder herausnehmen.
+ *
+ * Gesetzt wird nur in TEXTKNOTEN, und hier wird auch nur dort geraeumt: Die
+ * Antworten tragen anklickbare Fundstellen, Ueberschriften und Aufzaehlungen.
+ * Wer den Inhalt neu schriebe, um eine Farbe zu entfernen, nimmt dem
+ * Bearbeiter die Belege unter der Hand weg.
+ */
+function markenEntfernen(wurzel) {
+  const marken = [...wurzel.querySelectorAll("mark.chat-treffer")];
+  for (const m of marken) m.replaceWith(document.createTextNode(m.textContent));
+  if (marken.length) wurzel.normalize();
+}
+
+/** Die Suchwoerter in einem Beitrag hervorheben - ohne die Struktur anzufassen. */
+function markenSetzen(wurzel, begriffe) {
+  if (!begriffe.length) return;
+  const lauf = document.createTreeWalker(wurzel, NodeFilter.SHOW_TEXT);
+  const knoten = [];
+  for (let n = lauf.nextNode(); n; n = lauf.nextNode()) if (n.nodeValue) knoten.push(n);
+  for (const n of knoten) {
+    const text = n.nodeValue;
+    const klein = text.toLowerCase();
+    const stellen = [];
+    for (const b of begriffe) {
+      let ab = 0;
+      for (;;) {
+        const i = klein.indexOf(b, ab);
+        if (i < 0) break;
+        stellen.push([i, i + b.length]);
+        ab = i + b.length;
+      }
+    }
+    if (!stellen.length) continue;
+    stellen.sort((a, b) => a[0] - b[0]);
+    const stueck = document.createDocumentFragment();
+    let bis = 0;
+    for (const [von, ende] of stellen) {
+      if (von < bis) continue;                      // ueberlappende Treffer
+      if (von > bis) stueck.appendChild(document.createTextNode(text.slice(bis, von)));
+      const m = document.createElement("mark");
+      m.className = "chat-treffer";
+      m.textContent = text.slice(von, ende);
+      stueck.appendChild(m);
+      bis = ende;
+    }
+    if (bis < text.length) stueck.appendChild(document.createTextNode(text.slice(bis)));
+    n.replaceWith(stueck);
+  }
+}
+
+/** Den Verlauf auf die Beitraege eindampfen, in denen jedes Suchwort vorkommt.
+ *
+ * Gezaehlt und gefiltert wird in BEITRAEGEN, nicht in Karten: Eine Frage
+ * eroeffnet, die Antwort darunter gehoert dazu. Bliebe nur die Antwort stehen,
+ * laese der Bearbeiter eine Auskunft, ohne zu wissen, worauf sie antwortet -
+ * und in einer Mandatsakte ist genau das die gefaehrliche Haelfte.
+ */
+function chatSuchen() {
+  const thread = $("thread");
+  if (!thread) return;
+  const begriffe = chatSuchwoerter();
+  markenEntfernen(thread);
+
+  const beitraege = [];
+  let jetzt = null;
+  for (const el of [...thread.children]) {
+    el.hidden = false;
+    if (!el.classList.contains("karte-c")) {
+      // Trennstriche und der Willkommensgruss sagen beim Suchen nichts und
+      // stuenden zwischen den Treffern.
+      if (begriffe.length) el.hidden = true;
+      continue;
+    }
+    if (el.classList.contains("user") || !jetzt) { jetzt = []; beitraege.push(jetzt); }
+    jetzt.push(el);
+  }
+
+  let gefunden = 0;
+  for (const beitrag of beitraege) {
+    const text = beitrag.map((el) => el.textContent).join(" ").toLowerCase();
+    if (!begriffe.length || begriffe.every((b) => text.includes(b))) {
+      gefunden++;
+      for (const el of beitrag) markenSetzen(el, begriffe);
+    } else {
+      for (const el of beitrag) el.hidden = true;
+    }
+  }
+
+  const marke = $("chat-treffer");
+  if (marke) {
+    // Null Treffer ist eine Auskunft, kein leerer Chat.
+    marke.textContent = !begriffe.length ? ""
+      : gefunden === 0 ? `kein Treffer in ${beitraege.length} ${beitraege.length === 1 ? "Beitrag" : "Beiträgen"}`
+      : `${gefunden} von ${beitraege.length} Beiträgen`;
+    marke.classList.toggle("ohne-treffer", !!begriffe.length && gefunden === 0);
+  }
+}
+
+/** Die Suchzeile auf- oder zuklappen. Zu heisst: ganzer Verlauf, kein Rest. */
+function chatSucheZeigen(an) {
+  const zeile = $("chat-suche-zeile");
+  if (!zeile) return;
+  zeile.hidden = !an;
+  const knopf = $("chat-lupe");
+  if (knopf) knopf.setAttribute("aria-expanded", an ? "true" : "false");
+  const feld = $("chat-suche");
+  if (!feld) return;
+  if (an) { feld.focus(); feld.select(); return; }
+  // Zugeklappt darf keine Karte versteckt bleiben: Ein halber Verlauf, dessen
+  // Grund nicht mehr zu sehen ist, sieht aus wie ein verlorener Verlauf.
+  feld.value = "";
+  chatSuchen();
 }
 
 // ── Gedächtnis: was liegt drin, was fehlt, wie groß ist es ─────────────
@@ -2844,6 +2982,11 @@ async function gedaechtnisAktualisieren() {
 }
 
 function threadKarte(klasse) {
+  // Eine neue Karte waehrend einer laufenden Suche waere versteckt, sobald
+  // sie nicht zu den Suchwoertern passt: Der Bearbeiter fragt - und sieht
+  // nichts. Wer weiterarbeitet, hat die Suche beendet.
+  const suchfeld = $("chat-suche");
+  if (suchfeld && suchfeld.value) chatSucheZeigen(false);
   const willkommen = $("thread").querySelector(".willkommen");
   if (willkommen) willkommen.remove();
   const karte = document.createElement("div"); karte.className = "karte-c " + klasse;
@@ -5386,6 +5529,20 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($("senden").disabled) return;
     mitKnopf($("senden"), frageStellen);
   });
+  const chatSuche = $("chat-suche");
+  if (chatSuche) {
+    chatSuche.addEventListener("input", chatSuchen);
+    // Fluchtweg: Esc schliesst die Suche und stellt den ganzen Verlauf wieder
+    // her. Ohne ihn muesste man das Feld von Hand leeren, um weiterzulesen.
+    chatSuche.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { e.stopPropagation(); chatSucheZeigen(false); }
+    });
+  }
+  const chatLupe = $("chat-lupe");
+  if (chatLupe) chatLupe.addEventListener("click", () => chatSucheZeigen($("chat-suche-zeile").hidden));
+  const chatSucheZu = $("chat-suche-zu");
+  if (chatSucheZu) chatSucheZu.addEventListener("click", () => chatSucheZeigen(false));
+
   const dokSuche = $("dok-suche");
   if (dokSuche) dokSuche.addEventListener("input", () => {
     const filter = $("dok-filter");

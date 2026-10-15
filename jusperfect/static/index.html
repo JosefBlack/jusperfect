@@ -206,8 +206,22 @@
          Modell wird gefragt. -->
       <div class="dok-suche-zeile">
         <select id="dok-filter" class="dok-filter" title="Dokument wählen"></select>
-        <input type="search" id="dok-suche" class="dok-suche" autocomplete="off"
-               placeholder="Im Text dieser Dokumente suchen – z. B. Antrag">
+        <!-- Aus der Kanzlei am 15.10.2026: „Im Text Dokumente suchen genuegt
+             eine Lupe." Zu Recht: Der Platzhalter „Im Text dieser Dokumente
+             suchen - z. B. Antrag" nahm die ganze Breite des Feldes und war
+             bei vierhundert Pixeln Spalte trotzdem abgeschnitten. Was er
+             sagte, sagt das Zeichen in einem Fuenftel des Platzes.
+
+             Der Satz ist nicht verschwunden: Er steht als title am Feld und
+             als aria-label darin. Wer die Maus daraufhaelt, liest ihn; wer
+             vorliest, hoert ihn. Nur sitzt er nicht mehr im Weg. -->
+        <label class="suchfeld" title="Im Text dieser Dokumente suchen – z. B. Antrag">
+          <svg class="lupe" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <circle cx="6.8" cy="6.8" r="4.3"/><line x1="10.1" y1="10.1" x2="14" y2="14"/>
+          </svg>
+          <input type="search" id="dok-suche" class="dok-suche" autocomplete="off"
+                 aria-label="Im Text dieser Dokumente suchen">
+        </label>
         <span id="dok-treffer" class="dok-treffer"></span>
       </div>
     </div>
@@ -249,6 +263,39 @@
           <button type="button" data-fenster="dokument" class="mini leise fensterknopf">‹ Dokumente</button>
         </span>
         <h1 class="chat-titel">Chat</h1>
+        <!-- Aus der Kanzlei am 15.10.2026: „Die Lupe haette ich uebrigens auch
+             gerne fuer den Chat."
+
+             Der Chat ist laenger geworden, seit alle frueheren Fragen darin
+             stehen und nicht nur die letzten fuenf. Hundert Fragen sind
+             zurueckverfolgbar - aber nur, wenn man die eine wiederfindet.
+
+             Die Lupe ist ein Knopf und keine Auswahl: Aus der Kanzlei am
+             14.10.2026 „eine grosse Ueberschrift Chat OHNE Auswahlfunktion".
+             Deshalb bleibt die Kopfzeile, wie sie ist, und die Suchzeile
+             klappt erst darunter auf, wenn sie gebraucht wird. -->
+        <button type="button" id="chat-lupe" class="mini leise lupenknopf" aria-expanded="false"
+                title="Im bisherigen Chat suchen" aria-label="Im bisherigen Chat suchen">
+          <svg class="lupe" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <circle cx="6.8" cy="6.8" r="4.3"/><line x1="10.1" y1="10.1" x2="14" y2="14"/>
+          </svg>
+        </button>
+      </div>
+      <!-- Gesucht wird in dem, was ohnehin schon auf dem Bildschirm steht.
+           Es geht keine Anfrage hinaus und kein Modell wird gefragt - derselbe
+           Grundsatz wie bei der Suche im Dokumenttext. -->
+      <div id="chat-suche-zeile" class="chat-suche-zeile" hidden>
+        <label class="suchfeld" title="Im bisherigen Chat suchen">
+          <svg class="lupe" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <circle cx="6.8" cy="6.8" r="4.3"/><line x1="10.1" y1="10.1" x2="14" y2="14"/>
+          </svg>
+          <input type="search" id="chat-suche" class="dok-suche" autocomplete="off"
+                 aria-label="Im bisherigen Chat suchen">
+        </label>
+        <span id="chat-treffer" class="dok-treffer"></span>
+        <button type="button" id="chat-suche-zu" class="mini leise"
+                title="Suche schließen – der ganze Verlauf steht wieder da"
+                aria-label="Suche schließen">×</button>
       </div>
     </div>
     <div id="thread" class="thread"></div>
