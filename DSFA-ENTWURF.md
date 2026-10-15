@@ -619,7 +619,10 @@ drei Stücke, und AWS verhandelt seine Verträge nicht.
 > beantworten die wenigsten sie schriftlich. Genau deshalb steht sie hier.
 
 **Der Weg, zu dem ich rate.** Die Belehrung ist eine Pflicht **der Kanzlei**,
-nicht eine Leistung des Dienstleisters. Sie lässt sich einseitig erfüllen:
+nicht eine Leistung des Dienstleisters. Sie lässt sich einseitig erfüllen —
+**das Schreiben ist am 15.10.2026 aufgesetzt** und liegt in
+`BELEHRUNG-AWS.md` als Word und PDF bereit, zum Übernehmen auf den
+Briefbogen. Nach dem Absenden ist hier einzutragen:
 
 > **Zur Verschwiegenheitsverpflichtung nach § 43e BRAO.** Die Kanzlei hat den
 > Auftragsverarbeiter am TT.MM.JJJJ in Textform über die Verschwiegenheit nach
@@ -1613,7 +1616,7 @@ Auskunft von Dritten oder eine Arbeit am Programm.
 | ~~6~~ | ~~R1, Art. 4 Nr. 12~~ | **Von der Kanzlei entschieden** | R1 |
 | 7 | Wann wird die Fallkopie gelöscht? | **Gebaut am 15.10.2026:** Abschluss + 30 Tage, dazu die Rückfrage „Läuft die Akte noch?“ nach 12 Monaten | R3 |
 | 8 | Ablage des Vertragswerks | Service Terms liegen bei (Anlage 15). **Offen: Standardvertragsklauseln und Unterauftragsverarbeiterliste** | R4 |
-| 9 | Verschwiegenheitsverpflichtung § 43e BRAO | **Die schwächste Stelle.** Entwurf: einseitige Belehrung absenden und ablegen | R4 |
+| 9 | Verschwiegenheitsverpflichtung § 43e BRAO | **Die schwächste Stelle.** Das Schreiben liegt seit 15.10.2026 bereit; es ist abzusenden | R4 |
 | 10 | Dienstleisterauswahl § 43e Abs. 2 | Nachweise in der Akte, **Bewertung ausformuliert.** Nur zu übernehmen | R4 |
 | 11 | Regionen des Geländerprofils | **Wartet auf AWS.** Der Text der Anfrage steht bereit | R5 |
 | 12 | Art. 9 Abs. 2; Beschränkung nach Rechtsgebiet? | Entwurf: lit. f; **keine** Beschränkung nach Rechtsgebiet | R6 |
@@ -1631,9 +1634,9 @@ Auskunft von Dritten oder eine Arbeit am Programm.
 
 **Drei Dinge, und nur drei:**
 
-1. **`[KANZLEI 9]` — die Belehrung an AWS.** Ein Schreiben, ein
-   Sendenachweis, ein Blatt zur Akte. **Das ist das Letzte, was noch Arbeit
-   ist.**
+1. **`[KANZLEI 9]` — die Belehrung an AWS.** Das Schreiben ist seit dem
+   15.10.2026 aufgesetzt (`BELEHRUNG-AWS.md`). Zu tun bleibt: absenden, den
+   Nachweis ablegen, hier das Datum eintragen.
 2. **Die Verpflichtungserklärungen auf die Verschwiegenheit.** Nicht neu, und
    wahrscheinlich längst vorhanden — aber seit der Entscheidung zu
    `[KANZLEI 13]` sind sie die tragende Maßnahme und nicht mehr die
@@ -1659,6 +1662,7 @@ gebaut, die andere entschieden.
 | `SICHERHEIT.md` | die 16 Grundsätze und das Löschkonzept |
 | `MORGEN.md` | der Befund zum Korrespondenzordner vom 05.10.2026 |
 | `infra/IAM.md` | die Zugriffsrichtlinie im Wortlaut |
+| `BELEHRUNG-AWS.md` | das Schreiben nach § 43e BRAO nebst Anleitung — `[KANZLEI 9]` |
 | Anthropic, „Usage Policy" | die Bedingung des Modellanbieters, auf die Service Terms 50.12.1 verweist. Vorgelegt am 15.10.2026 in der Fassung mit Wirkung zum **12.11.2026**; die geltende steht unter `anthropic.com/legal/aup` |
 
 **Bei Widerspruch gilt `DSFA-ANGABEN.md`** — dort steht, was gemessen wurde,
