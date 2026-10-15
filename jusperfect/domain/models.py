@@ -354,7 +354,43 @@ class Entwurfsfassung(BaseModel):
     #: Was der Bearbeiter gesagt hat. Leer bei der ersten Fassung.
     anweisung: str = ""
     abgeloest_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    #: Die Quellen und Hinweise, die zu DIESEM Text gehoeren.
+    #:
+    #: Befund R03 der Zweitpruefung vom 15.10.2026: Eine Vorfassung hielt nur
+    #: Text und Betreff. Beim Zurueckgehen wurden die Quellen aus der JETZIGEN
+    #: Fassung nach Teilzeichenketten gefiltert - und eine Quelle, die nur die
+    #: aeltere Fassung hatte, kam nicht wieder. Zurueck kam dann ein Text mit
+    #: einer Belegmarke, zu der kein Beleg mehr gehoerte: Die Belegpflicht
+    #: stand auf dem Papier und nicht mehr im Entwurf.
+    #:
+    #: Leer heisst "aus der Zeit davor". Fuer solche Entwuerfe bleibt es beim
+    #: alten Weg; neu entstehende tragen ihre Quellen mit sich.
+    quellen: list[Quelle] = Field(default_factory=list)
+    hinweise: list[str] = Field(default_factory=list)
+    #: Trennt "hatte keine Quellen" von "stammt aus der Zeit vor R03". Ohne
+    #: diese Angabe waere ein Entwurf, der zu Recht ohne Quellen dasteht,
+    #: nicht von einem alten zu unterscheiden.
+    quellen_gesichert: bool = False
 
+
+#: Die laengste Frage - und zugleich die laengste Anweisung an einen Entwurf
+#: und die laengste Frage, die im Gedaechtnis stehen bleibt.
+#:
+#: Befund R02 der Zweitpruefung vom 15.10.2026: Diese Zahl stand an VIER
+#: Stellen einzeln da - zweimal als ``max_length=4000`` in ``web.py``, zweimal
+#: als ``[:4000]`` beim Ablegen einer Runde. Zwoelf der neunundvierzig
+#: mitgelieferten Prompts sind laenger: Die Oberflaeche setzt den gemeinsamen
+#: Vorspann und das Modul zusammen, und das ergibt bis zu 4.897 Zeichen. Wer
+#: einen davon nahm, bekam HTTP 422 - ohne etwas falsch gemacht zu haben.
+#:
+#: Die Zahl ist jetzt eine, und sie rechnet sich so: ein abgelegter Prompt
+#: darf ``promptbibliothek.MAX_ZEICHEN`` lang sein (8.000); dazu kommt, was
+#: der Bearbeiter selbst dazuschreibt. Die Haelfte davon obendrauf ist Platz
+#: und keine Einladung.
+#:
+#: Wer sie aendert, aendert sie fuer alle vier Stellen. Genau das war der
+#: Fehler: Sie auseinanderlaufen zu lassen.
+MAX_FRAGE = 12000
 
 #: So viele Vorfassungen werden aufgehoben. Mehr waere ein Archiv im
 #: Sitzungsspeicher; ein Entwurf ist bis zur Freigabe etwas Fluechtiges.
@@ -405,6 +441,20 @@ class GeladenesDokument(BaseModel):
     # Fundstellen des Lebenssachverhalts zeigten dann in der Sitzung auf das
     # falsche Dokument. 0 heisst: kein Gedaechtnis, es gilt die Reihenfolge.
     nummer: int = 0
+    #: Ein Fingerabdruck des gelesenen Textes (SHA-256, gekuerzt).
+    #:
+    #: Befund R01 der Zweitpruefung vom 15.10.2026: Ein Dokument, das unter
+    #: DERSELBEN Kennung geaendert wurde, kam nie wieder herein. Beim Oeffnen
+    #: uebernimmt das Gedaechtnis den gespeicherten Text, und das Laden
+    #: ueberspringt jede Kennung, die es schon kennt - es wurde also gar nicht
+    #: erst nachgesehen. Die Antworten standen danach auf ueberholten
+    #: Tatsachen, ohne dass irgendwo etwas falsch ausgesehen haette.
+    #:
+    #: jur|nodes gibt keine verlaessliche Fassungsnummer heraus. Deshalb wird
+    #: der Text selbst verglichen - aber erst, wenn jemand ausdruecklich neu
+    #: laedt. Leer heisst: aus der Zeit davor oder aus dem Gedaechtnis
+    #: uebernommen; dann ist nicht zu sagen, ob das Original noch so aussieht.
+    inhalt_kennung: str = ""
 
 
 class DialogEintrag(BaseModel):

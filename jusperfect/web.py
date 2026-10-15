@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 
 from jusperfect import __version__
 from jusperfect.config import Einstellungen, KonfigurationsFehler
-from jusperfect.domain.models import EntwurfArt, Kosten
+from jusperfect.domain.models import MAX_FRAGE, EntwurfArt, Kosten
 from jusperfect.fehlergrenze import (
     UNBEKANNT, Fehlergrenze, ausnahmekette, protokolle_eindaemmen,
 )
@@ -208,10 +208,13 @@ class FundstelleAnfrage(BaseModel):
 
 class DokumenteLaden(BaseModel):
     dokument_ids: list[str] = Field(min_length=1)
+    #: Auch das neu einlesen, was schon in der Arbeitsakte liegt - und sagen,
+    #: ob sich etwas geaendert hat (Befund R01 vom 15.10.2026).
+    neu_laden: bool = False
 
 
 class FrageStellen(BaseModel):
-    frage: str = Field(min_length=1, max_length=4000)
+    frage: str = Field(min_length=1, max_length=MAX_FRAGE)
 
 
 class TriageAnfrage(BaseModel):
@@ -220,7 +223,7 @@ class TriageAnfrage(BaseModel):
 
 class EntwurfAnlegen(BaseModel):
     art: EntwurfArt
-    anweisung: str = Field(default="", max_length=4000)
+    anweisung: str = Field(default="", max_length=MAX_FRAGE)
     empfaenger: str = Field(default="", max_length=400)
     muster: str = Field(default="", max_length=20000)
     auftrag: str = Field(default="", max_length=300)  # Name eines eigenen Auftrags; sein Material wird Muster
@@ -230,7 +233,7 @@ class AuftragsvorschlagAnfrage(BaseModel):
     entwurf_id: str = Field(max_length=100)
     # Die Anweisung, mit der der Entwurf erstellt wurde. Sie ist das einzige,
     # was hinausgeht - der Entwurf selbst und die Akte bleiben hier.
-    anweisung: str = Field(default="", max_length=4000)
+    anweisung: str = Field(default="", max_length=MAX_FRAGE)
 
 
 class AuftragAnlegen(BaseModel):
@@ -251,7 +254,7 @@ class BlattEinstellen(BaseModel):
 
 
 class EntwurfAendern(BaseModel):
-    anweisung: str = Field(max_length=4000)
+    anweisung: str = Field(max_length=MAX_FRAGE)
 
 
 class EntwurfBearbeiten(BaseModel):
@@ -678,7 +681,7 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
 
     @app.post("/api/sitzungen/{sitzung_id}/dokumente")
     def dokumente_laden(sitzung_id: str, daten: DokumenteLaden, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
-        sitzung = d.sitzungen.dokumente_laden(ident, sitzung_id, daten.dokument_ids)
+        sitzung = d.sitzungen.dokumente_laden(ident, sitzung_id, daten.dokument_ids, neu_laden=daten.neu_laden)
         return _sitzung_antwort(d, sitzung)
 
     @app.delete("/api/sitzungen/{sitzung_id}/dokumente/{dokument_id:path}")

@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 
 from jusperfect.config import Einstellungen
 from jusperfect.domain.models import (
+    MAX_FRAGE,
     Aktenanalyse, Aktengedaechtnis, Antwort, ChronologieEintrag, Chronologieergebnis, DialogEintrag, Dokument,
     GedaechtnisAntwort, GedaechtnisDokument, GeladenesDokument, Kosten, Passage, Seite, Sitzung,
 )
@@ -246,7 +247,7 @@ class Gedaechtnisdienst:
         # bleibt der Dialog ausschließlich auf die laufende Sitzung begrenzt.
         sitzung.dialog = [
             DialogEintrag(
-                frage=runde.frage[:4000], antwort=runde.antwort[:8000],
+                frage=runde.frage[:MAX_FRAGE], antwort=runde.antwort[:8000],
                 quellen=[quelle.kennung for quelle in runde.quellen[:50]],
                 zeitpunkt=runde.zeitpunkt,
             )

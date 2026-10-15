@@ -9,7 +9,6 @@ gebunden; der jur|nodes-Adapter prüft sie, bevor er schreibt.
 from __future__ import annotations
 
 import json
-import re
 import threading
 import uuid
 
@@ -33,7 +32,7 @@ from jusperfect.services.fristen import (
 from jusperfect.services.ausgang import Ausgang, Ausgangskontext
 from jusperfect.services.json_ausgabe import AusgabeUnbrauchbar, json_extrahieren
 from jusperfect.services.passagen import budget_anwenden, relevante_passagen
-from jusperfect.services.quellen import bis_zum_letzten_beleg, index_bauen
+from jusperfect.services.quellen import ZITAT_RE, bis_zum_letzten_beleg, index_bauen
 from jusperfect.speicher.base import SitzungsSpeicher
 
 _log = protokoll("entwuerfe")
@@ -112,10 +111,83 @@ def betreff_aus_der_akte(art: EntwurfArt, akte) -> str:
     return " · ".join(teile)
 
 
-#: Wo im JSON der Entwurfstext anfaengt. Das Modell antwortet mit
-#: ``{"betreff": "...", "text": "..."}``; beim Stroemen ist davon immer nur
-#: ein Anfang da.
-_TEXT_ANFANG = re.compile(r'"text"\s*:\s*"')
+def _zeichenkette_ende(roh: str, start: int) -> int | None:
+    """Die Stelle des schliessenden Anfuehrungszeichens, oder ``None``.
+
+    ``start`` zeigt hinter das oeffnende Anfuehrungszeichen. ``None`` heisst:
+    Die Zeichenkette ist noch nicht vollstaendig angekommen.
+    """
+    stelle = start
+    while stelle < len(roh):
+        if roh[stelle] == "\\":
+            stelle += 2
+            continue
+        if roh[stelle] == '"':
+            return stelle
+        stelle += 1
+    return None
+
+
+def _textfelder(roh: str) -> list[int]:
+    """Wo die Werte der Felder ``text`` der OBERSTEN Ebene anfangen.
+
+    Befund R04 der Zweitpruefung vom 15.10.2026: Hier stand ein regulaerer
+    Ausdruck, der das erste ``"text":`` nahm, das er fand - gleich in welcher
+    Verschachtelung. Bei
+
+        {"extra":{"text":"A"},"text":"B"}
+
+    zeigte die Vorschau A, waehrend die Endfassung B wurde: zwei verschiedene
+    Texte fuer denselben Entwurf, einer davon nur fuer Augenblicke sichtbar.
+    Die Belegpruefung faengt das nicht, wenn A eine gueltige Quellenkennung
+    traegt.
+
+    Deshalb wird jetzt gezaehlt statt gesucht: geschweifte und eckige
+    Klammern heben und senken die Ebene, Zeichenketten werden uebersprungen,
+    und nur ein ``text`` unmittelbar im aeussersten Objekt zaehlt.
+
+    Gibt mehrere Stellen zurueck, wenn das Modell den Schluessel doppelt
+    setzt. ``teiltext`` zeigt dann nichts: Welcher gilt, entscheidet erst
+    ``json.loads`` am Ende, und raten waere dasselbe Uebel in neuer Form.
+    """
+    stellen: list[int] = []
+    tiefe = 0
+    stelle = 0
+    laenge = len(roh)
+    while stelle < laenge:
+        zeichen = roh[stelle]
+        if zeichen == '"':
+            ende = _zeichenkette_ende(roh, stelle + 1)
+            if ende is None:
+                break                      # noch unvollstaendig - hier endet, was da ist
+            schluessel = roh[stelle + 1:ende]
+            stelle = ende + 1
+            nach = stelle
+            while nach < laenge and roh[nach] in " \t\r\n":
+                nach += 1
+            if nach >= laenge or roh[nach] != ":":
+                continue                   # war ein Wert, kein Schluessel
+            stelle = nach + 1
+            if not (tiefe == 1 and schluessel == "text"):
+                continue
+            while stelle < laenge and roh[stelle] in " \t\r\n":
+                stelle += 1
+            if stelle >= laenge:
+                break                      # Wert noch nicht da
+            if roh[stelle] != '"':
+                return []                  # kein Text, sondern etwas anderes
+            stellen.append(stelle + 1)
+            wertende = _zeichenkette_ende(roh, stelle + 1)
+            if wertende is None:
+                break                      # der Wert laeuft noch - das ist der Normalfall
+            stelle = wertende + 1
+            continue
+        if zeichen in "{[":
+            tiefe += 1
+        elif zeichen in "}]":
+            tiefe -= 1
+        stelle += 1
+    return stellen
 
 
 def teiltext(roh: str) -> str:
@@ -139,10 +211,11 @@ def teiltext(roh: str) -> str:
     Gibt ``""`` zurueck, solange nichts Brauchbares dasteht. Nie eine
     Ausnahme: Was hier ankommt, ist die Ausgabe eines Modells, also alles.
     """
-    treffer = _TEXT_ANFANG.search(roh)
-    if treffer is None:
+    stellen = _textfelder(roh)
+    if len(stellen) != 1:
+        # Keins da - oder mehrere, und dann ist nicht zu sagen, welches gilt.
         return ""
-    rest = roh[treffer.end():]
+    rest = roh[stellen[0]:]
     stueck: list[str] = []
     stelle = 0
     while stelle < len(rest):
@@ -410,7 +483,8 @@ class Entwurfsdienst:
         stillschweigend zuruecknehmen.
         """
         vorher = Entwurfsfassung(nummer=alt.fassung, betreff=alt.betreff, text=alt.text,
-                                 anweisung=anweisung)
+                                 anweisung=anweisung, quellen=list(alt.quellen),
+                                 hinweise=list(alt.hinweise), quellen_gesichert=True)
         behalten = (list(alt.vorfassungen) + [vorher])[-MAX_VORFASSUNGEN:]
         neu = alt.model_copy(update={
             "betreff": alt.betreff or betreff,
@@ -428,13 +502,23 @@ class Entwurfsdienst:
         return neu
 
     def zuruecknehmen(self, identitaet: Identitaet, entwurf_id: str) -> Entwurf:
-        """Eine Fassung zurueck.
+        """Eine Fassung zurueck - mit ihren eigenen Quellen und Hinweisen.
 
         Ohne diesen Weg waere jede Aenderung ueber den Chat endgueltig, und
         der Bearbeiter muesste die vorige Fassung aus dem Gedaechtnis
-        nachtippen. Zurueckgenommen wird nur der Text; die Quellen werden am
-        zurueckgeholten Text neu bestimmt - sonst stuenden Belege darunter,
-        die in ihm gar nicht mehr vorkommen.
+        nachtippen.
+
+        Befund R03 der Zweitpruefung vom 15.10.2026: Hier wurde nur der Text
+        zurueckgeholt, und die Quellen wurden aus der JETZIGEN Fassung
+        gefiltert - ``[q for q in entwurf.quellen if q.kennung in vorher.text]``.
+        Eine Quelle, die allein die aeltere Fassung zitierte, war damit weg.
+        Zurueck kam ein Text mit einer Belegmarke ohne Beleg: genau das, was
+        die Belegpflicht verhindern soll, erzeugt vom Weg zurueck.
+
+        Seitdem traegt jede Vorfassung ihre Quellen und Hinweise selbst. Fuer
+        Entwuerfe aus der Zeit davor (``quellen_gesichert`` ist falsch) bleibt
+        es beim alten Weg - mehr ist aus ihnen nicht zu holen -, und der
+        Bearbeiter bekommt einen Hinweis darauf.
         """
         entwurf = self.lesen(identitaet, entwurf_id)
         if entwurf.status != EntwurfStatus.ENTWURF:
@@ -442,11 +526,26 @@ class Entwurfsdienst:
         if not entwurf.vorfassungen:
             raise EntwurfFehler("Es gibt keine frühere Fassung.")
         vorher = entwurf.vorfassungen[-1]
+        if vorher.quellen_gesichert:
+            quellen = list(vorher.quellen)
+            hinweise = list(vorher.hinweise)
+        else:
+            # Aus der Zeit vor R03. Mehr als die Quellen der jetzigen Fassung
+            # gibt es nicht; was fehlt, wird benannt statt verschwiegen.
+            quellen = [q for q in entwurf.quellen if q.kennung in vorher.text]
+            hinweise = [h for h in entwurf.hinweise if not h.startswith("Betreffvorschlag")]
+            fehlend = sorted(set(ZITAT_RE.findall(vorher.text)) - {q.kennung for q in quellen})
+            if fehlend:
+                hinweise.append(
+                    "Diese Fassung stammt aus einer älteren Programmfassung. "
+                    f"Zu {len(fehlend)} Belegmarke(n) liegt der Quellennachweis "
+                    "nicht mehr vor: " + ", ".join(fehlend) + ". "
+                    "Vor der Freigabe prüfen.")
         zurueck = entwurf.model_copy(update={
             "betreff": vorher.betreff,
             "text": vorher.text,
-            "quellen": [q for q in entwurf.quellen if q.kennung in vorher.text],
-            "hinweise": [h for h in entwurf.hinweise if not h.startswith("Betreffvorschlag")],
+            "quellen": quellen,
+            "hinweise": hinweise,
             "fassung": vorher.nummer,
             "vorfassungen": entwurf.vorfassungen[:-1],
         })

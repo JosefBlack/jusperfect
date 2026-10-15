@@ -1216,6 +1216,54 @@ function wegeSperren(sperren) {
   }
 }
 
+/**
+ * Alle Dokumente der Arbeitsakte noch einmal aus der Akte lesen.
+ *
+ * Befund R01 der Zweitpruefung vom 15.10.2026: Ein Dokument, das in
+ * jur|nodes unter DERSELBEN Kennung geaendert wurde, kam nie wieder herein.
+ * Beim Oeffnen liefert das Gedaechtnis den gespeicherten Text, und das
+ * Hinzufuegen ueberspringt, was es schon kennt - es wurde also gar nicht
+ * nachgesehen. Dass das erneute Auswaehlen in der Arbeitsakte wie ein
+ * Aktualisieren aussah, war der schlimmere Teil davon.
+ *
+ * Dieser Weg liest wirklich und sagt danach, was sich geaendert hat. Er ist
+ * ausdruecklich und bestaetigungspflichtig: Er kostet Zeit und, bei
+ * gescannten Seiten, Texterkennung.
+ */
+async function dokumenteNeuEinlesen() {
+  const geladen = (sitzung && sitzung.sitzung && sitzung.sitzung.geladen) || [];
+  if (!geladen.length) {
+    melden("In der Arbeitsakte liegt noch kein Dokument.", true);
+    return;
+  }
+  const ids = geladen.map((g) => g.dokument_id);
+  if (!confirm(
+      `${ids.length} Dokument(e) werden noch einmal aus der Akte gelesen.\n\n`
+      + "Das dauert so lange wie beim ersten Mal und kostet bei gescannten "
+      + "Seiten erneut Texterkennung. Danach steht da, was sich geändert hat.")) {
+    return;
+  }
+  laeuft(ids.length === 1 ? "Ein Dokument wird neu gelesen …"
+                          : `${ids.length} Dokumente werden neu gelesen …`);
+  try {
+    sitzung = await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/dokumente`,
+                        { dokument_ids: ids, neu_laden: true });
+  } catch (e) {
+    melden(e.message, true);
+    return;
+  }
+  // Dieselbe Nachbereitung wie beim Herausnehmen: Was sich geaendert hat,
+  // steht in den Passagen, in den Belegen, im Zeitstrahl und in der Schaetzung.
+  await passagenLaden(); zeigeBelege(); ladeStatus();
+  schaetzungZeigen(sitzung.kostenschaetzung);
+  chronologieZeigen();
+  gedaechtnisFensterZeigen();
+  // Die Hinweise des Servers sagen, was sich geaendert hat - und sie stehen
+  // ganz vorn, wenn es etwas war.
+  const hinweise = (sitzung.sitzung && sitzung.sitzung.hinweise) || [];
+  melden(hinweise[0] || "Alle Dokumente neu gelesen.", /ACHTUNG/.test(hinweise[0] || ""));
+}
+
 /** Die Dokumente in Portionen lesen und dabei zeigen, wie weit es ist. */
 async function dokumenteInPortionenLesen(dazu) {
   const gesamt = dazu.length;
@@ -5371,6 +5419,7 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (b.dataset.aktion === "gedaechtnis") mitKnopf(b, gedaechtnisAktualisieren);
     else if (b.dataset.aktion === "triage") mitKnopf(b, triageStarten);
     else if (b.dataset.aktion === "dokumente") mitKnopf(b, dokumenteVerwalten);
+    else if (b.dataset.aktion === "neu-einlesen") mitKnopf(b, dokumenteNeuEinlesen);
     else if (b.dataset.aktion === "entwurf") mitKnopf(b, entwurfDialogOeffnen);
     else if (b.dataset.aktion === "nachweis") mitKnopf(b, nachweisZeigen);
     else if (b.dataset.aktion === "referenzen") mitKnopf(b, referenzenOeffnen);
