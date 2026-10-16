@@ -23,7 +23,7 @@ from jusperfect.ocr.base import OcrDienst, OcrFehler
 from jusperfect.security.berechtigungen import Berechtigungen, ZugriffVerweigert
 from jusperfect.security.identitaet import Identitaet
 from jusperfect.security.protokoll import ereignis, protokoll
-from jusperfect.services.extraktion import NichtUnterstuetzt, text_extrahieren
+from jusperfect.services.extraktion import NichtUnterstuetzt, seiten_nennen, text_extrahieren
 from jusperfect.services.passagen import passagen_bilden
 from jusperfect.speicher.base import SitzungsSpeicher
 
@@ -203,6 +203,19 @@ class Sitzungsdienst:
             finally:
                 del daten  # Originaldatei nicht länger halten als nötig
             zeichen = sum(len(s.text) for s in seiten)
+            # Einzelne Seiten ohne Text - der haeufige Fall seit dem
+            # 16.10.2026: Schriftsatz digital, Anlage dahinter gescannt. Das
+            # Dokument hat Text und kommt herein; dass ein Teil davon fehlt,
+            # muss trotzdem dastehen. Vorher sagte das niemand, weil nur
+            # gezaehlt wurde, ob das GANZE Dokument leer ist.
+            ohne_seiten = [x.nummer for x in seiten if x.hinweis]
+            if ohne_seiten:
+                grund = next(x.hinweis for x in seiten if x.hinweis)
+                sitzung.hinweise.append(
+                    f"„{dokument.titel}“: Auf {'Seite' if len(ohne_seiten) == 1 else 'den Seiten'} "
+                    f"{seiten_nennen(ohne_seiten)} von {len(seiten)} steht kein Text. {grund}")
+                ereignis(_log, "seiten_ohne_text", sitzung=sitzung.id, dokument=dokument_id,
+                         anzahl=len(ohne_seiten), von=len(seiten))
             if zeichen == 0:
                 ohne_text += 1
                 art = PurePosixPath(dokument.dateiname).suffix.lower() or "ohne Endung"
@@ -250,7 +263,8 @@ class Sitzungsdienst:
                     gedaechtnis_fehler = gedaechtnis_fehler or str(e)
             eintrag = GeladenesDokument(dokument_id=dokument_id, titel=dokument.titel,
                                         seiten=len(seiten), zeichen=zeichen, ocr=ocr,
-                                        nummer=nummer, inhalt_kennung=inhalt_kennung)
+                                        nummer=nummer, inhalt_kennung=inhalt_kennung,
+                                        seiten_ohne_text=ohne_seiten)
             sitzung.geladen = [g for g in sitzung.geladen if g.dokument_id != dokument_id]
             sitzung.geladen.append(eintrag)
             ereignis(_log, "dokument_geladen", sitzung=sitzung.id, dokument=dokument_id, seiten=len(seiten), zeichen=zeichen, ocr=ocr)
@@ -347,6 +361,103 @@ class Sitzungsdienst:
         self._speicher.sitzung_ablegen(sitzung)
         ereignis(_log, "dokumente_entfernt", sitzung=sitzung.id, anzahl=len(entfernt))
         return sitzung
+
+    # ── Ein Dokument von Hand einfügen ──────────────────────────
+
+    #: Größer nimmt das Programm nicht an. Eine eingescannte Anlage hat ein
+    #: paar hundert Kilobyte; was darüber liegt, gehört über die E-Akte herein.
+    MAX_EINGEFUEGT_BYTES = 20 * 1024 * 1024
+    #: Und so viel Text höchstens, wenn er eingefügt statt hochgeladen wird.
+    MAX_EINGEFUEGT_ZEICHEN = 500_000
+
+    def dokument_einfuegen(self, identitaet: Identitaet, sitzung_id: str, titel: str,
+                           dateiname: str = "", daten: bytes | None = None,
+                           text: str = "") -> tuple[Sitzung, GeladenesDokument]:
+        """Ein Dokument unmittelbar in die Arbeitsakte legen – ohne jur|nodes.
+
+        Aus der Kanzlei am 16.10.2026: „Ich hätte auch gerne das Dokument
+        direkt in den Chat eingefügt, hierfür fehlt aber eine Funktion."
+
+        Es ist der Weg für das Blatt, das gerade nicht in der E-Akte liegt:
+        das soeben eingegangene Fax, der Ausdruck, der Abschnitt, den die
+        Texterkennung nicht hergab. Gelesen wird es wie jedes andere Dokument
+        – Seiten, Passagen, Kennungen –, damit die Belegpflicht auch dafür
+        trägt.
+
+        **Drei Dinge, die es ausdrücklich nicht tut.** Es schreibt nichts nach
+        jur|nodes; die führende Akte bleibt unberührt. Es geht nicht ins
+        dauerhafte Aktengedächtnis; was dort liegt, stammt aus der E-Akte, und
+        das soll man sich darauf verlassen können. Und es überdauert die
+        Sitzung nicht – der Text liegt im Sitzungsspeicher und geht mit ihr.
+
+        Die Dokumentnummer wird über alle bisherigen gesetzt. Sonst truege das
+        eingefügte Blatt die Nummer eines Dokuments aus dem Gedächtnis, und
+        „D7-S1-P2" meinte zwei verschiedene Stellen.
+        """
+        sitzung = self.laden(identitaet, sitzung_id)
+        titel = (titel or "").strip() or (PurePosixPath(dateiname).name if dateiname else "Eingefügtes Dokument")
+        dokument_id = f"eingefuegt-{uuid.uuid4().hex[:12]}"
+
+        if daten is not None:
+            if len(daten) > self.MAX_EINGEFUEGT_BYTES:
+                raise NichtUnterstuetzt(
+                    f"Die Datei ist größer als {self.MAX_EINGEFUEGT_BYTES // (1024 * 1024)} MB. "
+                    "Größere Dokumente kommen über die E-Akte herein.")
+            dokument = Dokument(id=dokument_id, akte_id=sitzung.akte_id, titel=titel,
+                                dateiname=dateiname or titel)
+            try:
+                seiten, ocr = text_extrahieren(dokument, daten, self._ocr, sitzung.id)
+            except OcrFehler as fehler:
+                # Ein durchgehender Scan ohne eingerichtete Texterkennung. Das
+                # ist eine Auskunft an den Bearbeiter und kein Serverfehler -
+                # und der naechste Schritt steht gleich dabei: Der Text laesst
+                # sich auch von Hand einfuegen.
+                raise NichtUnterstuetzt(
+                    f"{fehler} Der Text dieses Blattes lässt sich stattdessen "
+                    "von Hand einfügen.") from fehler
+        else:
+            if len(text) > self.MAX_EINGEFUEGT_ZEICHEN:
+                raise NichtUnterstuetzt(
+                    f"Der Text ist länger als {self.MAX_EINGEFUEGT_ZEICHEN:,} Zeichen."
+                    .replace(",", "."))
+            seiten, ocr = [Seite(nummer=1, text=text)], False
+
+        zeichen = sum(len(x.text) for x in seiten)
+        if zeichen == 0:
+            raise NichtUnterstuetzt(
+                "In diesem Dokument wurde kein Text gefunden. Ist es ein Scan, "
+                "braucht es die Texterkennung; sonst lässt sich der Text auch "
+                "von Hand einfügen.")
+
+        roh = json.dumps([x.model_dump() for x in seiten], ensure_ascii=False)
+        self._speicher.text_ablegen(sitzung.id, dokument_id, roh)
+        # Über alle bisherigen Nummern hinweg - die aus dem Gedächtnis
+        # eingeschlossen, und mindestens so hoch wie die Zahl der Dokumente.
+        nummer = max([g.nummer for g in sitzung.geladen] + [len(sitzung.geladen)], default=0) + 1
+        eintrag = GeladenesDokument(
+            dokument_id=dokument_id, titel=titel, seiten=len(seiten), zeichen=zeichen,
+            ocr=ocr, nummer=nummer,
+            inhalt_kennung=hashlib.sha256(roh.encode("utf-8")).hexdigest()[:32],
+            seiten_ohne_text=[x.nummer for x in seiten if x.hinweis],
+            eingefuegt=True)
+        sitzung.geladen.append(eintrag)
+        sitzung.hinweise = [
+            f"„{titel}“ wurde eingefügt und liegt nur in dieser Sitzung. Es steht "
+            "nicht in der jurnodes-Akte und nicht im Aktengedächtnis."]
+        # Auch beim eingefuegten Dokument gilt: Eine Seite ohne Text wird
+        # genannt. Gerade hier - wer ein Blatt von Hand einfuegt, tut es
+        # meistens, weil beim Einlesen etwas gefehlt hat.
+        if eintrag.seiten_ohne_text:
+            sitzung.hinweise.append(
+                f"Auf {'Seite' if len(eintrag.seiten_ohne_text) == 1 else 'den Seiten'} "
+                f"{seiten_nennen(eintrag.seiten_ohne_text)} von {len(seiten)} steht kein Text. "
+                + next(x.hinweis for x in seiten if x.hinweis))
+        self._speicher.sitzung_ablegen(sitzung)
+        # Kein Titel und kein Dateiname ins Protokoll: Beides kann den Namen
+        # der Mandantschaft tragen.
+        ereignis(_log, "dokument_eingefuegt", sitzung=sitzung.id, dokument=dokument_id,
+                 seiten=len(seiten), zeichen=zeichen, ocr=ocr)
+        return sitzung, eintrag
 
     def dokument_entfernen(self, identitaet: Identitaet, sitzung_id: str, dokument_id: str) -> Sitzung:
         """Nimmt ein Dokument aus der Arbeitsakte – der Text wird gelöscht."""

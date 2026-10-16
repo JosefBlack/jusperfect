@@ -8,6 +8,7 @@ fremde Fehlertexte erreichen die Oberfläche nicht.
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import secrets
@@ -35,6 +36,7 @@ from jusperfect.security.identitaet import Identitaet, NichtAngemeldet, aus_cogn
 from jusperfect.security.protokoll import MAX_WERT_LAENGE, ereignis, protokoll, stoerung
 from jusperfect.services.analyse import AktenZuGross, AnalyseFehler, Analysedienst
 from jusperfect.services.fundstelle import treffer_finden
+from jusperfect.services.extraktion import NichtUnterstuetzt
 from jusperfect.services.quellen import ohne_belege
 from jusperfect.services.auftraege import AuftragFehler, Auftragsdienst
 from jusperfect.services.auftragsvorschlag import Vorschlagsdienst, VorschlagFehler
@@ -233,6 +235,23 @@ class DokumenteLaden(BaseModel):
     neu_laden: bool = False
 
 
+class DokumentEinfuegen(BaseModel):
+    """Ein Dokument von Hand in die Arbeitsakte – als Datei oder als Text.
+
+    Die Datei kommt base64-kodiert und nicht als Formulardatei. Das spart ein
+    zusätzliches Paket (``python-multipart``), das auf dem Rechner der Kanzlei
+    nachinstalliert werden müsste; für ein Blatt aus einer Akte ist der
+    Mehraufwand der Kodierung ohne Bedeutung.
+    """
+
+    titel: str = Field(default="", max_length=300)
+    dateiname: str = Field(default="", max_length=300)
+    #: Die Datei, base64-kodiert. 20 MB Datei sind rund 27 MB Text.
+    inhalt_b64: str = Field(default="", max_length=30_000_000)
+    #: Oder unmittelbar Text - für das, was man aus einem PDF kopiert hat.
+    text: str = Field(default="", max_length=500_000)
+
+
 class FrageStellen(BaseModel):
     frage: str = Field(min_length=1, max_length=MAX_FRAGE)
 
@@ -375,6 +394,9 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
         # einen Aufruf. Die Oberflaeche zeigt den Text unveraendert an.
         (AktenZuGross, 422),
         (ReferenzFehler, 422), (GedaechtnisFehler, 422), (AbschlussFehler, 409),
+        # Ein eingefuegtes Dokument, das sich nicht lesen laesst oder zu gross
+        # ist: Das ist eine Auskunft an den Bearbeiter, kein Serverfehler.
+        (NichtUnterstuetzt, 422),
         (BibliothekFehler, 422), (BriefbogenFehler, 422),
         (BudgetErschoepft, 429), (GuardrailEingriff, 422), (AnalyseFehler, 422), (EntwurfFehler, 422),
         (KonfigurationsFehler, 500), (JurNodesFehler, 502), (ProviderFehler, 502), (SpeicherFehler, 503),
@@ -737,6 +759,29 @@ def app_erstellen(einstellungen: Einstellungen | None = None, dienste: Dienste |
     def dokumente_laden(sitzung_id: str, daten: DokumenteLaden, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
         sitzung = d.sitzungen.dokumente_laden(ident, sitzung_id, daten.dokument_ids, neu_laden=daten.neu_laden)
         return _sitzung_antwort(d, sitzung)
+
+    @app.post("/api/sitzungen/{sitzung_id}/dokumente/einfuegen", status_code=201)
+    def dokument_einfuegen(sitzung_id: str, daten: DokumentEinfuegen,
+                           ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:
+        """Ein Dokument unmittelbar in den Chat – ohne Umweg über jurnodes.
+
+        Aus der Kanzlei am 16.10.2026. Es wird gelesen wie jedes andere
+        Dokument und bekommt dieselben Fundstellenkennungen; geschrieben wird
+        nichts, und ins Aktengedächtnis geht es nicht.
+        """
+        roh: bytes | None = None
+        if daten.inhalt_b64:
+            try:
+                roh = base64.b64decode(daten.inhalt_b64, validate=True)
+            except Exception:
+                raise NichtUnterstuetzt("Die Datei kam beschädigt an. Bitte erneut einfügen.") from None
+        elif not daten.text.strip():
+            raise NichtUnterstuetzt("Es wurde weder eine Datei noch Text eingefügt.")
+        sitzung, eintrag = d.sitzungen.dokument_einfuegen(
+            ident, sitzung_id, daten.titel, daten.dateiname, roh, daten.text)
+        antwort = _sitzung_antwort(d, sitzung)
+        antwort["eingefuegt"] = eintrag.model_dump()
+        return antwort
 
     @app.delete("/api/sitzungen/{sitzung_id}/dokumente/{dokument_id:path}")
     def dokument_entfernen(sitzung_id: str, dokument_id: str, ident: Identitaet = Depends(identitaet)) -> dict[str, Any]:

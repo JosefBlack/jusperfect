@@ -1,7 +1,7 @@
 # Was als Nächstes zu tun ist
 
 Stand: **15.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-2562 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
+2590 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
 
 > Diese Datei wächst von unten: Jeder Tag kommt hinten dazu. Ganz oben steht
 > deshalb das, was man im Betrieb wissen muss, und nicht die Vorgeschichte.
@@ -5653,3 +5653,90 @@ Fassungen derselben Regel laufen auseinander, sobald eine geändert wird.
 Node wirklich aus und vergleicht sie Fall für Fall mit der aus dem Programm.
 
 2562 Prüfungen grün. Sperrliste und Aktenzeichenmuster sauber.
+
+---
+
+## 16.10.2026 — ganze Blöcke fehlten: der Mittelwert war der Fehler
+
+**Aus der Kanzlei:** „Das Programm hat leider beim Einlesen ganze Blöcke nicht
+mitgenommen und zwar an Stellen, die sehr wichtig waren. Ich hätte auch gerne
+das Dokument direkt in den Chat eingefügt, hierfür fehlt aber eine Funktion."
+
+### Der Befund
+
+Ob ein PDF ein Scan ist, entschied bis heute der **Mittelwert über alle
+Seiten**: Liegen im Schnitt weniger als 30 Zeichen je Seite darin, geht es an
+die Texterkennung, sonst nicht.
+
+Das geht genau bei dem Dokument schief, das in einer Akte am häufigsten
+vorkommt: der digital geschriebene Schriftsatz mit der **eingescannten Anlage
+dahinter**. Zweiundzwanzig Seiten Text und acht Seiten Scan ergeben einen
+hohen Mittelwert. Das Dokument galt als lesbar, `pypdf` gab für die acht
+Seiten nichts zurück, und **niemand erfuhr davon** — geprüft wurde nur, ob das
+*ganze* Dokument null Zeichen hat.
+
+> Dass es die wichtigen Stellen traf, ist kein Zufall. Gescannt wird, was von
+> außen kommt und unterschrieben ist: das Attest, das Urteil, die
+> Zustellungsurkunde, der handschriftliche Vermerk.
+
+Nachgestellt mit einem PDF aus zwei Textseiten und einer Bildseite: Mittelwert
+118 Zeichen je Seite, Schwelle 30 — die Texterkennung wurde nie aufgerufen,
+die dritte Seite kam mit null Zeichen zurück, das Dokument galt als gelesen.
+
+### Die Abhilfe, zweiteilig
+
+**1. Entschieden wird je Seite.** Hat ein PDF einzelne leere Seiten, gehen
+genau diese durch die Texterkennung — als Teil-PDF, damit nur sie berechnet
+werden. Drei gescannte Anlagenseiten kosten drei Seiten und nicht dreißig. Die
+erkannte Seite behält ihre Nummer im Gesamtdokument; sonst zeigte jede
+Fundstelle auf das falsche Blatt.
+
+**2. Was leer bleibt, sagt es.** Ist keine Texterkennung eingerichtet oder
+findet auch sie nichts, trägt die Seite einen Hinweis statt stillschweigend zu
+fehlen. Er steht an drei Stellen: in der Meldung nach dem Laden, dauerhaft
+über dem Dokument in der linken Spalte, und in der Arbeitsakte.
+
+Nie geworfen wird dabei: Zweiundzwanzig gelesene Seiten wegzuwerfen, weil die
+acht gescannten nicht gehen, wäre genau der Schaden, der behoben werden soll.
+
+### Für die schon gelesenen Akten
+
+**„Neu einlesen"** in der Dokumentenspalte holt die fehlenden Seiten nach. Die
+neu entstandenen Abschnitte sind danach offen, und das nächste „Akte einlesen"
+trägt sie in den Lebenssachverhalt ein. Gemessen, nicht vermutet: Vor der
+Korrektur lagen zwei Abschnitte im Gedächtnis, danach drei.
+
+### Das Dokument direkt in den Chat
+
+Die Klammer links am Eingabefeld — Datei oder Text, auch durch Fallenlassen
+auf den Chat. Gelesen wird es wie jedes andere Dokument, mit Seiten,
+Abschnitten und Kennungen; eine Antwort darf sich also darauf stützen.
+
+| Es tut | Es tut nicht |
+|---|---|
+| Text ziehen, Abschnitte bilden, Kennungen vergeben | nach jur\|nodes schreiben |
+| in der Dokumentenspalte stehen, mit Herkunftsband | ins Aktengedächtnis gehen |
+| sich wieder herausnehmen lassen | die Sitzung überdauern |
+
+Die Dokumentnummer wird über alle bisherigen gesetzt. Ohne das trüge das
+eingefügte Blatt die Nummer eines Dokuments aus dem Gedächtnis, und
+„D7-S1-P2" meinte zwei verschiedene Stellen.
+
+Die Datei geht base64-kodiert hinaus statt als Formulardatei. Das spart
+`python-multipart` — ein Paket, das auf dem Rechner der Kanzlei
+nachinstalliert werden müsste. Für ein Blatt aus einer Akte fällt die
+Kodierung nicht ins Gewicht.
+
+### Eine Prüfung, die eine Entscheidung festhielt
+
+`test_das_ziehen_ist_wirklich_weg` verbot `dragover` und `dataTransfer` in der
+ganzen Oberfläche — als die Kanzlei am 25.09.2026 sagte, Häkchen seien
+intuitiver als Ziehen. Das neue Ablegen braucht beides.
+
+Die Grenze läuft jetzt bei **`dragstart`**: Ungewohnt war das Aufheben *im
+Programm*, ein Dokument aus einer Liste in eine andere zu ziehen. Das Programm
+hebt deshalb nach wie vor nichts auf. Eine Datei aus dem Windows-Explorer
+fallen zu lassen ist ein anderer Handgriff — aufgehoben wird sie dort —, und
+er ist nie der einzige Weg.
+
+2590 Prüfungen grün. Sperrliste und Aktenzeichenmuster sauber.

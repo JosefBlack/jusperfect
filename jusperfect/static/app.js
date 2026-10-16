@@ -1753,6 +1753,69 @@ function mitHervorhebung(ziel, text, begriffe) {
   if (bis < text.length) ziel.appendChild(document.createTextNode(text.slice(bis)));
 }
 
+/** „3", „3 und 7", „3, 7 bis 9 und 14" - wie `seiten_nennen` im Programm.
+ *
+ * Dieselbe Regel zweimal, einmal hier und einmal in services/extraktion.py.
+ * Eine Aufzaehlung von vierzehn Einzelzahlen liest niemand; „7 bis 20" sagt
+ * auf einen Blick, dass der ganze hintere Teil fehlt.
+ */
+function seitenNennen(nummern) {
+  if (!nummern || !nummern.length) return "";
+  const gruppen = [[nummern[0]]];
+  for (const nr of nummern.slice(1)) {
+    const letzte = gruppen[gruppen.length - 1];
+    if (nr === letzte[letzte.length - 1] + 1) letzte.push(nr); else gruppen.push([nr]);
+  }
+  const teile = gruppen.map((g) => (g.length === 1 ? String(g[0]) : `${g[0]} bis ${g[g.length - 1]}`));
+  if (teile.length === 1) return teile[0];
+  return teile.slice(0, -1).join(", ") + " und " + teile[teile.length - 1];
+}
+
+/** Der Eintrag der Arbeitsakte zu einem Dokument - oder null. */
+function geladenesDokument(id) {
+  const geladen = (sitzung && sitzung.sitzung && sitzung.sitzung.geladen) || [];
+  return geladen.find((g) => g.dokument_id === id) || null;
+}
+
+/** Was ueber einem Dokument stehen muss, bevor man es liest.
+ *
+ * Zwei Dinge, und beide gehoeren genau hierher - an den Text selbst und nicht
+ * in eine Meldung, die nach dem naechsten Klick weg ist:
+ *
+ * 1. **Seiten ohne Text.** Aus der Kanzlei am 16.10.2026: „Das Programm hat
+ *    beim Einlesen ganze Bloecke nicht mitgenommen und zwar an Stellen, die
+ *    sehr wichtig waren." Hier stehen die Seiten, die auch nach der
+ *    Texterkennung leer blieben. Eine Luecke, die man sieht, ist etwas
+ *    anderes als eine, die man nicht sieht.
+ * 2. **Herkunft.** Ein eingefuegtes Blatt stammt nicht aus der fuehrenden
+ *    Akte. Wer spaeter liest, was darauf beruht, muss das wissen.
+ */
+function dokumentBand(id) {
+  const g = geladenesDokument(id);
+  if (!g) return null;
+  const zeilen = [];
+  if (g.eingefuegt) {
+    zeilen.push(["dok-band-herkunft",
+      "Eingef\u00fcgt \u2013 dieses Dokument stammt nicht aus der jurnodes-Akte "
+      + "und bleibt nur in dieser Sitzung."]);
+  }
+  const ohne = g.seiten_ohne_text || [];
+  if (ohne.length) {
+    zeilen.push(["dok-band-luecke",
+      `${ohne.length === 1 ? "Seite" : "Seiten"} ${seitenNennen(ohne)} von ${g.seiten}: `
+      + "kein Text gefunden. Der Abschnitt steht hier nicht und geht in keine "
+      + "Antwort ein \u2013 bitte im Original nachsehen."]);
+  }
+  if (!zeilen.length) return null;
+  const kasten = document.createElement("div");
+  kasten.className = "dok-band";
+  for (const [klasse, text] of zeilen) {
+    const d = document.createElement("div"); d.className = klasse; d.textContent = text;
+    kasten.appendChild(d);
+  }
+  return kasten;
+}
+
 /** Die Dokumentspalte zeichnen - gefiltert nach Dokument UND nach Text.
  *
  * Aus der Kanzlei am 13.10.2026: "Eine Suchfunktion in den Dokumenten waere
@@ -1779,6 +1842,8 @@ function zeigeDokument(nurDokument) {
     if (p.dokument_titel !== letzterTitel) {
       const t = document.createElement("div"); t.className = "dok-doktitel"; t.textContent = p.dokument_titel;
       ziel.appendChild(t); letzterTitel = p.dokument_titel;
+      const band = dokumentBand(p.dokument_id);
+      if (band) ziel.appendChild(band);
     }
     const abs = document.createElement("div"); abs.className = "passage"; abs.id = `p-${p.kennung}`;
     const kz = document.createElement("span"); kz.className = "kennung"; kz.textContent = `${p.kennung} · Seite ${p.seite}`;
@@ -3303,6 +3368,136 @@ function threadKarte(klasse) {
   // sich die neue Karte genau unter die schwebende Eingabe.
   thread.scrollTo({ top: thread.scrollHeight, behavior: "smooth" });
   return karte;
+}
+
+// ── Ein Dokument von Hand in die Arbeitsakte ───────────────────────
+//
+// Aus der Kanzlei am 16.10.2026: „Ich haette auch gerne das Dokument direkt
+// in den Chat eingefuegt, hierfuer fehlt aber eine Funktion."
+//
+// Es ist der Weg fuer das Blatt, das gerade nicht in der E-Akte liegt: das
+// soeben eingegangene Fax, der Ausdruck, der Abschnitt, den die Texterkennung
+// nicht hergab. Gelesen wird es wie jedes andere Dokument - Seiten, Passagen,
+// Kennungen -, damit die Belegpflicht auch dafuer traegt.
+//
+// Die Datei geht base64-kodiert hinaus und nicht als Formulardatei. Das spart
+// ein weiteres Paket auf dem Rechner der Kanzlei; fuer ein Blatt aus einer
+// Akte faellt die Kodierung nicht ins Gewicht.
+
+/** Die gewaehlte Datei als base64 - ohne den "data:"-Vorspann. */
+function dateiAlsText(datei) {
+  return new Promise((erfuellen, ablehnen) => {
+    const leser = new FileReader();
+    leser.onerror = () => ablehnen(new Error("Die Datei lie\u00df sich nicht lesen."));
+    leser.onload = () => erfuellen(String(leser.result).split(",")[1] || "");
+    leser.readAsDataURL(datei);
+  });
+}
+
+function einfuegenFehler(text) {
+  const p = $("einfuegen-fehler");
+  if (!p) return;
+  p.textContent = text || "";
+  p.hidden = !text;
+}
+
+/** Den Dialog aufmachen - leer, oder mit einer schon abgelegten Datei. */
+function einfuegenDialogOeffnen(datei) {
+  if (!sitzung) { melden("Erst eine Akte \u00f6ffnen.", true); return; }
+  const dialog = $("einfuegen-dialog");
+  if (!dialog) return;
+  einfuegenFehler("");
+  $("einfuegen-text").value = "";
+  const feld = $("einfuegen-datei");
+  feld.value = "";
+  einfuegenDatei = datei || null;
+  // Eine fallen gelassene Datei laesst sich einem <input type=file> nicht
+  // zuweisen; sie wird daneben gehalten. Dass sie da ist, muss man sehen.
+  $("einfuegen-titel").value = datei ? datei.name.replace(/\.[^.]+$/, "") : "";
+  const name = $("einfuegen-dateiname");
+  name.textContent = datei ? datei.name : "";
+  name.hidden = !datei;
+  dialog.showModal();
+}
+
+/** Die fallen gelassene Datei - sie passt in kein Dateifeld. */
+let einfuegenDatei = null;
+
+async function dokumentEinfuegen() {
+  const datei = einfuegenDatei || ($("einfuegen-datei").files || [])[0] || null;
+  const text = ($("einfuegen-text").value || "").trim();
+  const titel = ($("einfuegen-titel").value || "").trim();
+  if (!datei && !text) {
+    einfuegenFehler("Bitte eine Datei w\u00e4hlen oder Text einf\u00fcgen.");
+    $("einfuegen-dialog").showModal();
+    return;
+  }
+  laeuft(datei ? `\u201E${datei.name}\u201C wird gelesen \u2026` : "Der Text wird gelesen \u2026");
+  let antwort;
+  try {
+    antwort = await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/dokumente/einfuegen`,
+      datei
+        ? { titel, dateiname: datei.name, inhalt_b64: await dateiAlsText(datei) }
+        : { titel, text });
+  } catch (e) {
+    melden(e.message, true);
+    return;
+  } finally {
+    einfuegenDatei = null;
+  }
+  sitzung = antwort;
+  await passagenLaden();
+  schaetzungZeigen(sitzung.kostenschaetzung);
+  ladeStatus();
+  einfuegenKarte(antwort.eingefuegt, (antwort.sitzung && antwort.sitzung.hinweise) || []);
+  melden("Eingef\u00fcgt.");
+}
+
+/** Die Karte im Verlauf: was eingefuegt wurde, und wie man es wieder loswird. */
+function einfuegenKarte(eintrag, hinweise) {
+  if (!eintrag) return;
+  const karte = threadKarte("ai eingefuegt");
+  const titel = document.createElement("div"); titel.className = "titelzeile";
+  titel.textContent = `Eingef\u00fcgt: ${eintrag.titel}`;
+  karte.appendChild(titel);
+  const inhalt = document.createElement("div"); inhalt.className = "inhalt";
+  const zeile = document.createElement("p");
+  zeile.textContent = `${eintrag.seiten} Seite(n), ${(eintrag.zeichen || 0).toLocaleString("de-DE")} Zeichen`
+    + (eintrag.ocr ? ", durch die Texterkennung gegangen" : "")
+    + `. Die Fundstellen tragen D${eintrag.nummer}.`;
+  inhalt.appendChild(zeile);
+  const hb = hinweiseBlock(hinweise); if (hb) inhalt.appendChild(hb);
+  const weg = document.createElement("button");
+  weg.type = "button"; weg.className = "mini leise";
+  weg.textContent = "Wieder herausnehmen";
+  weg.addEventListener("click", () => mitKnopf(weg, () => eingefuegtesEntfernen(eintrag)));
+  inhalt.appendChild(weg);
+  karte.appendChild(inhalt);
+}
+
+async function eingefuegtesEntfernen(eintrag) {
+  if (!confirm(`\u201E${eintrag.titel}\u201C aus der Arbeitsakte nehmen? Der Text wird gel\u00f6scht.`)) return;
+  sitzung = await api("DELETE",
+    `/api/sitzungen/${sitzung.sitzung.id}/dokumente/${encodeURIComponent(eintrag.dokument_id)}`);
+  await passagenLaden();
+  schaetzungZeigen(sitzung.kostenschaetzung);
+  ladeStatus();
+  melden("Herausgenommen.");
+}
+
+/** Eine Datei auf den Verlauf fallen lassen - derselbe Weg, kuerzer. */
+function einfuegenPerAblegen() {
+  const thread = $("thread");
+  if (!thread) return;
+  const halt = (e) => { e.preventDefault(); e.stopPropagation(); };
+  thread.addEventListener("dragover", (e) => { halt(e); thread.classList.add("ablegen"); });
+  thread.addEventListener("dragleave", (e) => { halt(e); thread.classList.remove("ablegen"); });
+  thread.addEventListener("drop", (e) => {
+    halt(e);
+    thread.classList.remove("ablegen");
+    const datei = ((e.dataTransfer || {}).files || [])[0];
+    if (datei) einfuegenDialogOeffnen(datei);
+  });
 }
 
 function nutzerkarte(text) {
@@ -5980,6 +6175,16 @@ document.addEventListener("DOMContentLoaded", () => {
     ev.preventDefault();
     mitKnopf($("vorschlag-anlegen"), auftragAnlegen);
   });
+  const klammer = $("dok-einfuegen");
+  if (klammer) klammer.addEventListener("click", () => einfuegenDialogOeffnen(null));
+  const einfuegenDialog = $("einfuegen-dialog");
+  if (einfuegenDialog) {
+    einfuegenDialog.addEventListener("close", () => {
+      if (einfuegenDialog.returnValue !== "einfuegen") { einfuegenDatei = null; return; }
+      mitKnopf($("senden"), dokumentEinfuegen);
+    });
+  }
+  einfuegenPerAblegen();
   $("entwurf-dialog").addEventListener("close", () => {
     if ($("entwurf-dialog").returnValue !== "start") return;
     const auftrag = $("entwurf-auftrag").value;

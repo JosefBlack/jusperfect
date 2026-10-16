@@ -609,6 +609,29 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
 .frage-form textarea:focus { outline: none; }
 /* Der Rahmen wandert auf den ganzen Block, wenn im Feld getippt wird. */
 .frage-form:focus-within { border-color: var(--akzent); }
+/* Die Klammer: ein Dokument von Hand in die Arbeitsakte. Links im
+   Eingabeblock, weil dort etwas HINEINgelegt wird - rechts wird gesendet. */
+.klammerknopf { align-self: center; display: inline-flex; align-items: center;
+  padding: 5px 7px; }
+.klammerknopf .klammer { width: 16px; height: 16px; fill: none; stroke: currentColor;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+/* Eine Datei ueber dem Verlauf: Der Verlauf sagt, dass er sie nimmt. */
+.thread.ablegen { outline: 2px dashed var(--akzent); outline-offset: -6px;
+  background: var(--akzent-hell); }
+.dialog-hinweis.warnung { color: var(--rot); }
+.dialog-hinweis.dateiname { color: var(--tinte); font-weight: 600; }
+/* Die Karte eines eingefuegten Dokuments - andere Herkunft, andere Kante. */
+.karte-c.eingefuegt { border-left: 3px solid var(--amber); }
+/* Was ueber einem Dokument steht, bevor man es liest: fehlende Seiten und
+   die Herkunft. An den Text selbst und nicht in eine Meldung, die nach dem
+   naechsten Klick weg ist. */
+.dok-band { margin: 2px 0 8px; display: flex; flex-direction: column; gap: 4px; }
+.dok-band > div { font-size: 12px; line-height: 1.4; border-radius: 6px;
+  padding: 6px 8px; }
+.dok-band-luecke { background: var(--rot-hell); color: var(--rot);
+  border-left: 3px solid var(--rot); }
+.dok-band-herkunft { background: var(--amber-hell); color: var(--amber);
+  border-left: 3px solid var(--amber); }
 /* Dieser Abschnitt muss NACH der Grundregel stehen: Beide sprechen .eingabe
    mit derselben Spezifitaet an, es gewinnt also die spaetere. Weiter oben
    eingeordnet blieb er wirkungslos.

@@ -396,6 +396,24 @@
         <button type="button" id="entwurf-modus-aus" class="mini leise">Zurück zu Fragen</button>
       </div>
       <form id="frage-form" class="frage-form">
+        <!-- Aus der Kanzlei am 16.10.2026: „Ich haette auch gerne das Dokument
+             direkt in den Chat eingefuegt, hierfuer fehlt aber eine Funktion."
+
+             Der Weg fuer das Blatt, das gerade nicht in der E-Akte liegt: das
+             soeben eingegangene Fax, der Ausdruck, der Abschnitt, den die
+             Texterkennung nicht hergab. Es wird gelesen wie jedes andere
+             Dokument und bekommt dieselben Fundstellenkennungen - sonst truege
+             die Belegpflicht dafuer nicht.
+
+             Die Klammer steht am Eingabefeld und nicht in der Dokumentenspalte:
+             Dort holt man aus der Akte, hier legt man etwas dazu. -->
+        <button type="button" id="dok-einfuegen" class="mini leise klammerknopf"
+                title="Dokument einfügen – Datei oder Text, nur für diese Sitzung"
+                aria-label="Dokument einfügen">
+          <svg class="klammer" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M10.6 5.1 5.9 9.8a1.6 1.6 0 0 0 2.3 2.3l4.9-4.9a3 3 0 0 0-4.2-4.2L3.9 8a4.4 4.4 0 0 0 6.2 6.2l4.1-4.1"/>
+          </svg>
+        </button>
         <textarea id="frage" rows="2" placeholder="Frage an die Akte … (Eingabetaste fragt, Umschalt+Eingabe macht eine neue Zeile)"></textarea>
         <button id="senden" class="knopf" type="submit">Fragen</button>
       </form>
@@ -618,6 +636,40 @@
       <button value="abbrechen" class="knopf leise">Abbrechen</button>
       <button id="prompt-ablegen" value="ablegen" class="knopf">Ablegen</button>
     </div>
+  </form>
+</dialog>
+
+<!-- Ein Dokument von Hand in die Arbeitsakte.
+
+     Zwei Wege, weil es zwei Lagen gibt: Die Datei liegt vor (dann die obere
+     Haelfte), oder man hat den Text aus einem PDF kopiert, weil die
+     Texterkennung ihn nicht hergab (dann die untere). Beides fuehrt zu
+     demselben Ergebnis - ein Dokument mit Seiten, Passagen und Kennungen.
+
+     Der Satz unten ist kein Kleingedrucktes: Er sagt, wohin das Blatt NICHT
+     geht. In einer Mandatsakte ist das die wichtigere Haelfte der Auskunft. -->
+<dialog id="einfuegen-dialog" class="entwurf-dialog">
+  <form method="dialog" class="dialog-inhalt">
+    <h3>Dokument einfügen</h3>
+    <label>Bezeichnung <input id="einfuegen-titel" autocomplete="off" maxlength="200"
+           placeholder="z. B. Attest vom 14.03.2026"></label>
+    <label>Datei <input id="einfuegen-datei" type="file"></label>
+    <!-- Eine fallen gelassene Datei laesst sich einem Dateifeld nicht
+         zuweisen; sie wird daneben gehalten. Dass sie da ist, steht hier. -->
+    <p id="einfuegen-dateiname" class="dialog-hinweis dateiname" hidden></p>
+    <p class="dialog-hinweis">PDF, Word, Bild, Text – wie in der Akte. Ein Scan geht
+       durch die Texterkennung, falls eine eingerichtet ist.</p>
+    <label>… oder Text einfügen
+      <textarea id="einfuegen-text" rows="7"
+                placeholder="Hier den Text einfügen (Strg+V)"></textarea></label>
+    <p id="einfuegen-fehler" class="dialog-hinweis warnung" hidden></p>
+    <p class="dialog-hinweis"><strong>Es bleibt in dieser Sitzung.</strong> Das Dokument
+       wird nicht nach jurnodes geschrieben und nicht ins Aktengedächtnis
+       übernommen. Mit der Sitzung ist es wieder fort.</p>
+    <menu>
+      <button value="abbrechen" class="knopf leise">Abbrechen</button>
+      <button id="einfuegen-start" value="einfuegen" class="knopf">Einfügen</button>
+    </menu>
   </form>
 </dialog>
 

@@ -52,11 +52,39 @@ def test_jede_zeile_traegt_ein_haekchen(app_js: str) -> None:
 
 
 def test_das_ziehen_ist_wirklich_weg(app_js: str, css: str) -> None:
-    """Ein halb entfernter Handgriff ist schlimmer als der alte."""
-    for rest in ("dragstart", "dragover", "dataTransfer", "explorer-pfeil"):
-        assert rest not in app_js, rest
+    """Ein halb entfernter Handgriff ist schlimmer als der alte.
+
+    **Die Grenze läuft bei ``dragstart``, seit dem 16.10.2026.** Was der
+    Kanzlei ungewohnt war, ist das Aufheben *im Programm*: ein Dokument aus
+    einer Liste nehmen und in eine andere legen. Deshalb hebt das Programm
+    nichts auf – ``dragstart`` kommt nirgends vor.
+
+    Eine Datei aus dem Windows-Explorer auf ein Fenster fallen zu lassen ist
+    etwas anderes: Aufgehoben wird sie dort, der Handgriff ist überall
+    derselbe, und er ist nie der einzige Weg – die Klammer am Eingabefeld
+    tut dasselbe. Entgegennehmen darf deshalb genau eine Stelle: der Verlauf.
+    """
+    assert "dragstart" not in app_js, "Das Programm hebt nichts auf."
+    for rest in ("dragover", "dataTransfer", "explorer-pfeil"):
+        assert rest not in _explorer(app_js), rest
     for rest in (".explorer-pfeil", ".explorer-liste.ueber"):
         assert rest not in css, rest
+
+
+def _explorer(app_js: str) -> str:
+    """Der Teil der Oberfläche, der die Auswahl aus jur|nodes macht."""
+    return app_js[app_js.index("function explorerArtenZeichnen("):
+                  app_js.index("function explorerVerschieben(")]
+
+
+def test_entgegengenommen_wird_nur_im_verlauf(app_js: str) -> None:
+    """Eine fallen gelassene Datei landet im Chat – und sonst nirgends."""
+    block = app_js[app_js.index("function einfuegenPerAblegen("):
+                   app_js.index("function nutzerkarte(")]
+    assert 'const thread = $("thread")' in block
+    assert 'thread.addEventListener("drop"' in block
+    # Und außerhalb dieser einen Funktion nimmt nichts etwas entgegen.
+    assert app_js.count('addEventListener("drop"') == 1
 
 
 def test_stapelauswahl_nach_kategorie(app_js: str, html: str) -> None:

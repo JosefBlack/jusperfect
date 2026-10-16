@@ -65,6 +65,15 @@ class Frist(BaseModel):
 class Seite(BaseModel):
     nummer: int
     text: str
+    #: Warum auf dieser Seite kein Text steht - leer, wenn welcher dasteht.
+    #:
+    #: Aus der Kanzlei am 16.10.2026: „Das Programm hat beim Einlesen ganze
+    #: Blöcke nicht mitgenommen und zwar an Stellen, die sehr wichtig waren."
+    #: Es waren die eingescannten Seiten in einem sonst digitalen PDF - der
+    #: Schriftsatz mit der Anlage dahinter. Sie kamen leer zurück und sagten
+    #: nichts. Eine Seite ohne Text ist jetzt eine Seite MIT Hinweis; eine
+    #: Lücke, die man sieht, ist etwas anderes als eine, die man nicht sieht.
+    hinweis: str = ""
 
 
 class Passage(BaseModel):
@@ -483,6 +492,19 @@ class GeladenesDokument(BaseModel):
     #: laedt. Leer heisst: aus der Zeit davor oder aus dem Gedaechtnis
     #: uebernommen; dann ist nicht zu sagen, ob das Original noch so aussieht.
     inhalt_kennung: str = ""
+    #: Seiten, auf denen auch nach der Texterkennung kein Text steht.
+    #:
+    #: Aus der Kanzlei am 16.10.2026: „Das Programm hat beim Einlesen ganze
+    #: Blöcke nicht mitgenommen." Eine Zahl in der Dokumentenliste sagt mehr
+    #: als ein Hinweis, der nach dem nächsten Klick weg ist: Hier steht
+    #: dauerhaft, welche Seiten dieses Dokuments ungelesen sind.
+    seiten_ohne_text: list[int] = Field(default_factory=list)
+    #: Von Hand in den Chat eingefügt statt aus jur|nodes geholt.
+    #:
+    #: Es ist derselbe Text und dieselbe Belegpflicht, aber eine andere
+    #: Herkunft - und die gehört sichtbar. Wer später liest, was auf diesem
+    #: Blatt beruht, muss wissen, dass es nicht aus der führenden Akte stammt.
+    eingefuegt: bool = False
 
 
 class DialogEintrag(BaseModel):
