@@ -484,11 +484,23 @@ class DieOberflaecheZeigtSie(unittest.TestCase):
     HTML = (WURZEL / "jusperfect" / "static" / "index.html").read_text(encoding="utf-8")
     JS = (WURZEL / "jusperfect" / "static" / "app.js").read_text(encoding="utf-8")
 
-    def test_die_leiste_steht_ueber_der_eingabe_nicht_ueber_dem_verlauf(self):
-        """Der Chat steht im Vordergrund; eine Leiste ueber dem Verlauf
-        haette ihn bei jeder Nachricht ein Stueck nach unten geschoben."""
-        self.assertLess(self.HTML.index('<div class="eingabe">'), self.HTML.index('id="bibliothek"'))
-        self.assertLess(self.HTML.index('id="bibliothek"'), self.HTML.index('id="frage-form"'))
+    def test_die_leiste_steht_ganz_oben_im_chat(self):
+        """Aus der Kanzlei am 16.10.2026: „Prompt Bibliothek bitte nach oben."
+
+        Am 14.10.2026 stand sie über der Eingabe, mit dem Grund: eine Leiste
+        über dem Verlauf schiebe ihn bei jeder Nachricht nach unten. Das galt
+        der aufgeklappten Lade. Zugeklappt ist sie eine Zeile, und zugeklappt
+        fängt sie an; aufgeklappt scrollt sie in sich selbst, statt den Chat
+        wegzudrücken.
+        """
+        self.assertLess(self.HTML.index('class="aktionen"'), self.HTML.index('id="bibliothek"'))
+        self.assertLess(self.HTML.index('id="bibliothek"'), self.HTML.index('id="thread"'))
+
+    def test_aufgeklappt_verdraengt_sie_den_chat_nicht(self):
+        """Sie bekommt eine Höhengrenze und scrollt in sich selbst."""
+        css = (WURZEL / "jusperfect" / "static" / "styles.css").read_text(encoding="utf-8")
+        regel = css[css.index(".bibliothek {"):css.index(".bib-kopf {")]
+        self.assertIn("max-height", regel)
 
     def test_der_dialog_fragt_nach_ueberschrift_und_prompt(self):
         """„Neu und dann Ueberschrift und Prompt eintragen."""

@@ -521,7 +521,32 @@ class Einstellungen:
     referenz_ordner: str = ""
 
     # Verarbeitung
-    max_passagen_zeichen: int = 160_000
+    #
+    # Wie viel Aktentext höchstens in EINEN Modellaufruf geht. Die Grenze
+    # entscheidet, ob eine Aktenanalyse und ein Zeitstrahl in einem Zug
+    # möglich sind - darüber bricht das Programm ab, statt stillschweigend zu
+    # kürzen.
+    #
+    # **Von 160.000 auf 300.000 am 16.10.2026.** Aus der Kanzlei: „Ich kann
+    # verschiedene Funktionen nicht durchführen, da eine Zeichenbeschränkung
+    # gilt." Die 160.000 waren eine frühe, vorsichtige Zahl ohne Herleitung -
+    # sie ließen vom Fenster des Modells rund ein Viertel ungenutzt.
+    #
+    # Hergeleitet wird sie jetzt: Das Fenster fasst 200.000 Token. Deutscher
+    # Kanzleitext braucht mit seinen zusammengesetzten Wörtern etwa 2,8
+    # Zeichen je Token - vorsichtig gerechnet, englischer Text braucht vier.
+    # 300.000 Zeichen sind damit rund 107.000 Token. Dazu kommen der
+    # Auftragstext (unter 2.000 Token) und die Antwort (höchstens 8.000). Es
+    # bleibt also etwa ein Drittel des Fensters frei - genug, damit auch eine
+    # Akte mit ungewöhnlich langen Wörtern nicht anstößt.
+    #
+    # Die Grenze kostet Geld: Ein Aufruf mit 300.000 Zeichen ist fast doppelt
+    # so teuer wie einer mit 160.000. Was er kostet, steht vor jedem Aufruf in
+    # der Kostenschätzung, und das Monatsbudget bleibt die harte Grenze.
+    # Ändern lässt sie sich mit JUSPERFECT_MAX_PASSAGEN_ZEICHEN in der
+    # Startdatei; wer ein Modell mit kleinerem Fenster einträgt, muss sie
+    # senken.
+    max_passagen_zeichen: int = 300_000
     max_frage_passagen: int = 14
     dialog_max_runden: int = 6                 # flüchtiger Kontext für Rückfragen
 

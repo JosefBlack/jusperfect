@@ -468,19 +468,22 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
      anklickbar bleiben, auch wenn sie unter dem Ausblenden liegen. */
   pointer-events: none; }
 .eingabe > * { pointer-events: auto; }
-/* Die Fragenbibliothek - eine schmale Leiste ueber dem Eingabefeld.
+/* Die Fragenbibliothek - ganz oben im Chat, ueber dem Verlauf.
 
-   Aus der Kanzlei: "Diese kann dann ueber dem Chatfenster sein." Sie sitzt
-   ueber der EINGABE und nicht ueber dem Verlauf: Der Chat steht im
-   Vordergrund, und eine Leiste ueber dem Verlauf haette ihn bei jeder
-   Nachricht ein Stueck nach unten geschoben.
+   Aus der Kanzlei am 16.10.2026: "Prompt Bibliothek bitte nach oben."
 
-   Sie waechst nach oben, nicht in die Breite: Ein Umbruch macht die Leiste
-   hoeher, und die Eingabe bleibt, wo sie ist. */
-/* Die Bibliothek ist eine Lade. Zugeklappt eine Zeile - aus der Kanzlei am
-   14.10.2026: "Promptbibliothek unten versperrt den Chat." */
-.bibliothek { margin-bottom: 8px; border: 1px solid var(--linie); border-radius: 10px;
-  background: var(--flaeche); overflow: hidden; }
+   Vorher sass sie ueber der EINGABE, und der Grund dafuer stand hier:
+   "eine Leiste ueber dem Verlauf haette ihn bei jeder Nachricht ein Stueck
+   nach unten geschoben". Das galt der aufgeklappten Lade. Zugeklappt ist sie
+   eine Zeile, und zugeklappt faengt sie an.
+
+   Aufgeklappt waechst sie nach unten und schiebt den Verlauf; sie bekommt
+   deshalb eine Hoehengrenze und scrollt in sich selbst, statt den Chat
+   wegzudruecken. */
+.bibliothek { flex: 0 0 auto; margin: 0 14px 8px; border: 1px solid var(--linie);
+  border-radius: 10px; background: var(--flaeche); overflow: hidden;
+  max-height: 46%; display: flex; flex-direction: column; }
+.bibliothek[open] > .bib-liste { overflow: auto; }
 .bib-kopf { display: flex; align-items: baseline; gap: 10px; cursor: pointer;
   padding: 6px 12px; list-style: none; }
 .bib-kopf::-webkit-details-marker { display: none; }
@@ -745,6 +748,54 @@ table.mini-t th { color: var(--gedaempft); font-weight: 600; font-size: 12px; }
   background: var(--flaeche); cursor: grab; }
 .explorer-eintrag:hover { border-color: var(--akzent); }
 .explorer-eintrag .explorer-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Die Gegenueberstellung: rechts die Akte, links was daraus geworden ist.
+
+   Aus der Kanzlei am 16.10.2026: "Bitte wieder Fenster links und rechts.
+   Rechts jurnodes und links jusperfect." Die Haken bleiben, wo sie sind -
+   gezogen wird nichts; die linke Spalte ist eine Anzeige und kein Ablageort.
+
+   Der Dialog wird dafuer breiter: Zwei Spalten mit Dateinamen in 780 Pixeln
+   ergaeben zwei Spalten mit Auslassungspunkten. */
+.explorer-dialog:has(.explorer.gegenueber) { max-width: 1120px; }
+/* Mehr Hoehe als die Gedaechtnisspalten: Links stehen ganze Saetze (der
+   Grund, warum eine Datei nicht gelesen wurde), und eine Zeile davon ist
+   dreimal so hoch wie ein Dateiname. */
+.explorer.gegenueber { margin: 8px 0 6px; }
+.explorer.gegenueber .explorer-liste { max-height: 46vh; }
+/* Waehrend gelesen wird, waehlt niemand aus. */
+.explorer-liste.gesperrt { opacity: .6; pointer-events: none; }
+.explorer-leerzeile { color: var(--gedaempft); font-size: 12.5px; padding: 10px 8px; }
+/* Die Marke vor der Datei: Haken, Kreuz, Punkt oder Auslassung. Ein Zeichen
+   in einer festen Breite, damit die Namen darunter buendig stehen. */
+.lesemarke { flex: 0 0 auto; width: 16px; text-align: center; font-weight: 700;
+  font-size: 13px; line-height: 1; }
+.explorer-eintrag.arbeit { cursor: default; align-items: flex-start; }
+.explorer-eintrag.arbeit .meta { flex: 0 1 auto; max-width: 58%; white-space: normal;
+  line-height: 1.35; }
+.explorer-eintrag.gelesen { border-color: var(--gruen); background: var(--gruen-hell); }
+.explorer-eintrag.gelesen .lesemarke { color: var(--gruen); }
+/* Gelesen, aber nicht ganz: einzelne Seiten ohne Text. Gruen waere gelogen. */
+.explorer-eintrag.gelesen.teilweise { border-color: var(--amber); background: var(--amber-hell); }
+.explorer-eintrag.gelesen.teilweise .lesemarke { color: var(--amber); }
+.explorer-eintrag.fehler { border-color: var(--rot); background: var(--rot-hell); }
+.explorer-eintrag.fehler .lesemarke { color: var(--rot); }
+.explorer-eintrag.fehler .meta { color: var(--rot); }
+.explorer-eintrag.liest { border-color: var(--akzent); background: var(--akzent-hell); }
+.explorer-eintrag.liest .lesemarke { color: var(--akzent); }
+.explorer-eintrag.wartet { opacity: .62; }
+/* Der Leseverlauf im Dialog - dort, wo man gerade hinsieht. */
+.explorer-lesezeile { display: flex; align-items: center; gap: 10px; margin: 6px 0 0;
+  font-size: 12.5px; color: var(--gedaempft); }
+.explorer-lesezeile .mini { margin-left: auto; }
+/* Ging etwas nicht, bleibt das Fenster offen - und sagt es in seiner
+   eigenen Zeile. Eine Meldung dahinter laege hinter dem Vorhang. */
+.explorer-lesezeile.misslungen { color: var(--rot); font-weight: 600; }
+@media (max-width: 860px) {
+  /* Nebeneinander waere hier zweimal nichts. Untereinander, jusperfect oben:
+     Was geworden ist, steht vor dem, was noch werden kann. */
+  .explorer.gegenueber { grid-template-columns: 1fr; }
+}
 
 /* Eine Liste mit Haekchen statt zweier Spalten mit Ziehen. */
 .explorer-leiste { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0 6px; }

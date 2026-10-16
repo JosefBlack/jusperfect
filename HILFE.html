@@ -397,6 +397,20 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
     <div class="zahl">2</div>
     <div class="inhalt">
       <h3>Dokumente anhaken</h3>
+      <p><strong>Zwei Spalten, seit dem 16.10.2026.</strong> <em>Rechts</em> steht die Akte
+      aus jurnodes mit den Häkchen – angehakt heißt „liegt in der Arbeitsakte".
+      <em>Links</em> steht, was daraus geworden ist: ein <strong>grüner Haken</strong> mit
+      Seitenzahl und Zeichenzahl, wenn die Datei gelesen wurde, sonst ein rotes Kreuz
+      <strong>mit dem Grund</strong>. Dieselbe Datei, zwei Spalten, ein Blick.</p>
+      <p>Gezogen wird dabei nichts – die linke Spalte ist eine Anzeige und kein
+      Ablageort. Ausgewählt wird weiter mit Häkchen rechts.</p>
+      <p><strong>Beim Übernehmen bleibt das Fenster offen</strong> und hakt Datei für
+      Datei ab: „wartet", „wird gelesen", dann der Haken. Ging alles, schließt es sich
+      von selbst. Ging etwas nicht, bleibt es stehen – dafür ist es da. Die Häkchen
+      bleiben dann, wo sie sind; ein zweites „Übernehmen" versucht genau diese Dateien
+      noch einmal.</p>
+      <p><strong>Bernstein statt grün</strong> heißt: gelesen, aber nicht ganz – einzelne
+      Seiten tragen keinen Text (siehe „Gescannte Blätter" weiter unten).</p>
       <p>Es öffnet sich das Fenster <strong>„Dokumente der Akte"</strong> – eine Liste mit
       Häkchen. <strong>Angehakt heißt: liegt in der Arbeitsakte und geht bei Fragen mit.</strong></p>
       <table>
@@ -783,6 +797,24 @@ footer{border-top:1px solid var(--linie);padding:24px 0 60px;color:var(--text-le
       Gedächtnisses.</p>
     </div>
   </div>
+
+  <h3>Wie viel Akte in einen Aufruf passt<span class="marke fertig">geändert am 16.10.2026</span></h3>
+  <p>Aktenanalyse und Zeitstrahl arbeiten über die ganze Arbeitsakte auf einmal. Passt
+  sie nicht in einen Aufruf, <strong>bricht das Programm ab, statt stillschweigend zu
+  kürzen</strong> – einer Auswertung, in der die späteren Schriftsätze fehlen, sieht man
+  das nicht an.</p>
+  <p>Die Grenze lag bei 160.000 Zeichen und liegt seit dem 16.10.2026 bei
+  <strong>300.000</strong>. Hergeleitet: Das Fenster des Modells fasst 200.000 Token,
+  deutscher Kanzleitext braucht rund 2,8 Zeichen je Token – 300.000 Zeichen sind damit
+  etwa 107.000 Token, und rund ein Drittel des Fensters bleibt frei.</p>
+  <p>Höher heißt: mehr Akte in einem Zug, und entsprechend <strong>teurer je
+  Aufruf</strong>. Was ein Aufruf kostet, steht vorher in der Kostenschätzung oben rechts,
+  und das Monatsbudget bleibt die harte Grenze. Ändern lässt sich die Zahl in der
+  Startdatei, Zeile <code>JUSPERFECT_MAX_PASSAGEN_ZEICHEN</code>.</p>
+  <p>Für eine Akte, die auch dafür zu groß ist, gibt es den besseren Weg: Sie wird mit
+  <strong>„Akte einlesen"</strong> in Portionen ins Gedächtnis gelesen, und danach wird
+  auf dem Gelesenen gearbeitet. <strong>Fragen sind von der Grenze ohnehin kaum
+  betroffen</strong> – sie suchen sich die passenden Stellen aus der ganzen Akte.</p>
 
   <p>Zwei Posten, die kaum ins Gewicht fallen und trotzdem genannt gehören: Die
   <strong>Texterkennung</strong> für gescannte Blätter kostet rund 1,50 € je 1000 Seiten –

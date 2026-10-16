@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import uuid
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
@@ -17,6 +18,7 @@ from typing import TYPE_CHECKING
 from jusperfect.domain.models import (
     MAX_FRAGE,
     Akte, Antwort, Beteiligter, DialogEintrag, Dokument, Frist, GeladenesDokument, Passage, Seite, Sitzung,
+    UngelesenesDokument,
 )
 from jusperfect.jurnodes.base import JurNodesAdapter, JurNodesFehler
 from jusperfect.ocr.base import OcrDienst, OcrFehler
@@ -35,6 +37,17 @@ _log = protokoll("sitzung")
 
 class SitzungNichtGefunden(LookupError):
     pass
+
+
+#: Woran die Bilanzzeile wiederzuerkennen ist. Sie wird bei jedem Lesevorgang
+#: neu gebildet und muss die vorige ERSETZEN - sonst staenden nach vier
+#: Portionen vier Bilanzen untereinander, von denen die Oberflaeche die
+#: oberste zeigt, und das waere wieder die einer einzelnen Portion.
+#:
+#: Erkannt wird sie an ihrer Form und nicht an einer unsichtbaren Marke: Was
+#: im Text steht, steht im Text, und ein Zeichen, das niemand sieht, geht beim
+#: naechsten Umformulieren verloren, ohne dass es auffiele.
+BILANZ_RE = re.compile(r"^\d+ von \d+ Dokumenten gelesen, ")
 
 
 class Sitzungsdienst:
@@ -153,19 +166,31 @@ class Sitzungsdienst:
                     "wurden NICHT neu eingelesen. Hat sich das Original seitdem "
                     "geändert, steht hier weiterhin der alte Stand. Zum Neulesen "
                     "den Weg „Neu einlesen“ benutzen.")
+        # Die Gegenueberstellung faengt bei den angeforderten Dokumenten neu an:
+        # Was jetzt noch einmal versucht wird, darf nicht mit dem Befund von
+        # vorhin dastehen. Alles andere bleibt, wie es war.
+        angefragt = set(dokument_ids)
+        sitzung.nicht_gelesen = [x for x in sitzung.nicht_gelesen if x.dokument_id not in angefragt]
+
+        def nicht_gelesen(dokument_id: str, titel: str, grund: str, art: str,
+                          endung: str = "") -> None:
+            sitzung.nicht_gelesen.append(UngelesenesDokument(
+                dokument_id=dokument_id, titel=titel, grund=grund, art=art,
+                endung=endung))
+
         nicht_geladen: list[JurNodesFehler] = []
-        # Getrennt gezaehlt, weil die Abhilfe eine andere ist: Ein Scan
-        # braucht Texterkennung, ein nicht ladbares Dokument den Hersteller.
-        ohne_text = 0
-        nicht_lesbar = 0
         gedaechtnis_fehler = ""
-        # Welche Dateiarten fielen heraus? Ohne diese Zahl bleibt die Bilanz
-        # eine Feststellung ohne Folge: "14 in einem Format, das nicht gelesen
+        # Getrennt gezaehlt wird weiterhin, nur nicht mehr hier: Jeder
+        # Fehlschlag traegt seine Art und seine Dateiendung in
+        # ``sitzung.nicht_gelesen``, und die Bilanz unten rechnet daraus.
+        # Vorher standen die Zaehler in dieser Funktion und galten damit nur
+        # fuer EINE Portion - bei 55 Dokumenten zeigte die Oberflaeche die
+        # Bilanz der letzten fuenf.
+        #
+        # Die Dateiendung gehoert dazu: "14 in einem Format, das nicht gelesen
         # werden kann" sagt nicht, WELCHES - und ohne das laesst sich nichts
         # daran aendern. Am 25.09.2026 ging deshalb eine Frage dreimal hin und
         # her, die das Programm selbst haette beantworten koennen.
-        arten: dict[str, int] = {}
-        angefordert = len(dokument_ids) if neu_laden else len([d for d in dokument_ids if d not in bereits])
         geaendert: list[str] = []
         unveraendert = 0
         for dokument_id in dokument_ids:
@@ -188,16 +213,20 @@ class Sitzungsdienst:
             except JurNodesFehler as e:
                 nicht_geladen.append(e)
                 sitzung.hinweise.append(f"Ein Dokument ließ sich nicht laden: {e}")
+                # Der Titel steht erst im geladenen Dokument - hier gibt es ihn
+                # noch nicht. Die Kennung ist das, was sicher da ist; die
+                # Oberflaeche setzt den Titel aus der Dokumentliste davor.
+                nicht_gelesen(dokument_id, "", str(e), "jurnodes")
                 ereignis(_log, "dokument_nicht_geladen", sitzung=sitzung.id,
                          dokument=dokument_id, grund=type(e).__name__)
                 continue
             try:
                 seiten, ocr = text_extrahieren(dokument, daten, self._ocr, sitzung.id)
             except (NichtUnterstuetzt, OcrFehler) as e:
-                nicht_lesbar += 1
                 art = PurePosixPath(dokument.dateiname).suffix.lower() or "ohne Endung"
-                arten[art] = arten.get(art, 0) + 1
                 sitzung.hinweise.append(f"„{dokument.titel}“ nicht geladen: {e}")
+                nicht_gelesen(dokument_id, dokument.titel, str(e),
+                              "scan" if isinstance(e, OcrFehler) else "format", art)
                 ereignis(_log, "dokument_uebersprungen", sitzung=sitzung.id, dokument=dokument_id, grund=type(e).__name__)
                 continue
             finally:
@@ -217,10 +246,12 @@ class Sitzungsdienst:
                 ereignis(_log, "seiten_ohne_text", sitzung=sitzung.id, dokument=dokument_id,
                          anzahl=len(ohne_seiten), von=len(seiten))
             if zeichen == 0:
-                ohne_text += 1
                 art = PurePosixPath(dokument.dateiname).suffix.lower() or "ohne Endung"
-                arten[art] = arten.get(art, 0) + 1
                 sitzung.hinweise.append(f"„{dokument.titel}“ enthält keinen erkennbaren Text.")
+                nicht_gelesen(dokument_id, dokument.titel,
+                              "Es wurde kein erkennbarer Text gefunden. Ist es ein Scan, "
+                              "braucht es die Texterkennung; sonst lässt sich der Text mit "
+                              "der Klammer am Eingabefeld von Hand einfügen.", "leer", art)
                 continue
             roh = json.dumps([s.model_dump() for s in seiten], ensure_ascii=False)
             self._speicher.text_ablegen(sitzung.id, dokument_id, roh)
@@ -299,29 +330,53 @@ class Sitzungsdienst:
         # von denen die Oberflaeche den ersten zeigte. Wer eine Meldung ueber
         # EIN Dokument liest, haelt es fuer einen Einzelfall und zaehlt nicht
         # nach. Was nicht da ist, faellt nicht auf.
-        uebersprungen = ohne_text + nicht_lesbar + len(nicht_geladen)
-        if uebersprungen:
+        #
+        # **Ueber die ganze Sitzung, nicht ueber diese Portion** - seit dem
+        # 16.10.2026. Aus der Kanzlei: "Es gibt beim Einlesen Fehlermeldungen,
+        # diese sind aber nicht nachvollziehbar."
+        #
+        # Die Oberflaeche liest in Portionen zu fuenf. Gerechnet wurde je
+        # Aufruf, und die Oberflaeche zeigt die erste Zeile: Nach 55
+        # Dokumenten stand dort die Bilanz der LETZTEN Portion - "1 von 2
+        # gelesen, 1 nicht", waehrend in Wahrheit 41 fehlten. Eine Zahl, die
+        # kleiner ist als der Schaden, ist schlimmer als keine.
+        #
+        # Gezaehlt wird deshalb, was in der Arbeitsakte liegt, gegen das, was
+        # dieser Sitzung je vorgelegt wurde.
+        sitzung.hinweise = [h for h in sitzung.hinweise if not BILANZ_RE.match(h)]
+        if sitzung.nicht_gelesen:
             gruende = []
-            if ohne_text:
+            nach_art: dict[str, int] = {}
+            endungen: dict[str, int] = {}
+            for x in sitzung.nicht_gelesen:
+                nach_art[x.art] = nach_art.get(x.art, 0) + 1
+                if x.endung:
+                    endungen[x.endung] = endungen.get(x.endung, 0) + 1
+            if nach_art.get("leer"):
                 gruende.append(
-                    f"{ohne_text} ohne erkennbaren Text (meist eingescannte "
+                    f"{nach_art['leer']} ohne erkennbaren Text (meist eingescannte "
                     "Seiten – dafür ist die Texterkennung nötig)")
-            if nicht_lesbar:
-                gruende.append(f"{nicht_lesbar} in einem Format, das nicht "
+            if nach_art.get("format"):
+                gruende.append(f"{nach_art['format']} in einem Format, das nicht "
                                "gelesen werden kann")
-            if nicht_geladen:
-                gruende.append(f"{len(nicht_geladen)} von jurnodes nicht "
+            if nach_art.get("scan"):
+                gruende.append(f"{nach_art['scan']}, bei denen die Texterkennung "
+                               "nicht zur Verfügung stand")
+            if nach_art.get("jurnodes"):
+                gruende.append(f"{nach_art['jurnodes']} von jurnodes nicht "
                                "geliefert")
-            if arten:
+            if endungen:
                 # Die Dateiarten mit Anzahl - das ist die Auskunft, mit der
                 # sich etwas anfangen laesst.
-                geordnet = sorted(arten.items(), key=lambda x: -x[1])
+                geordnet = sorted(endungen.items(), key=lambda x: -x[1])
                 gruende.append("Dateiarten: " + ", ".join(
-                    f"{art} {anzahl}" for art, anzahl in geordnet))
+                    f"{endung} {anzahl}" for endung, anzahl in geordnet))
+            versucht = len(sitzung.geladen) + len(sitzung.nicht_gelesen)
             sitzung.hinweise.insert(
-                0, f"{angefordert - uebersprungen} von {angefordert} Dokumenten "
-                   f"gelesen, {uebersprungen} nicht: " + ", ".join(gruende) +
-                   ". Die Einzelheiten stehen darunter.")
+                0, f"{len(sitzung.geladen)} von {versucht} Dokumenten "
+                   f"gelesen, {len(sitzung.nicht_gelesen)} nicht: " + ", ".join(gruende) +
+                   ". Welche das sind, steht im Fenster „Dokumente“ links neben der "
+                   "Akte – Datei für Datei mit dem Grund.")
         self._speicher.sitzung_ablegen(sitzung)
         return sitzung
 

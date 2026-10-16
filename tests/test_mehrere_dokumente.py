@@ -217,9 +217,17 @@ class DieOberflaecheZeigtAlleHinweise(unittest.TestCase):
         self.assertIn('id="uebernahme-zu"', html)
 
     def test_auch_nach_dem_aktualisieren_der_arbeitsakte(self):
+        """Die Nachbereitung steht seit dem 16.10.2026 in einer eigenen
+        Funktion: Sie wird zweimal gebraucht – beim glatten Durchlauf und
+        beim Schließen, nachdem die Gegenüberstellung stehen geblieben ist.
+        """
         js = self.app_js
-        stelle = js[js.index("async function explorerUebernehmen("):]
+        stelle = js[js.index("async function explorerNachbereiten("):]
         self.assertIn("hinweiseZeigen(", stelle[:3000])
+        # Und sie wird aus dem Übernehmen heraus wirklich gerufen.
+        uebernehmen = js[js.index("async function explorerUebernehmen("):
+                         js.index("async function explorerNachbereiten(")]
+        self.assertIn("explorerNachbereiten(", uebernehmen)
 
 
 class DasOeffnenFragtNichtDreimalDasselbe(unittest.TestCase):

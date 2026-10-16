@@ -516,6 +516,35 @@ class DialogEintrag(BaseModel):
     zeitpunkt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class UngelesenesDokument(BaseModel):
+    """Ein Dokument, das angefordert wurde und nicht in die Arbeitsakte kam.
+
+    Aus der Kanzlei am 16.10.2026: „Es gibt beim Einlesen Fehlermeldungen,
+    diese sind aber nicht nachvollziehbar. Eine Gegenüberstellung wäre
+    wichtig."
+
+    Gemeldet wurde bisher eine Bilanz in Worten: „14 von 55 Dokumenten
+    gelesen, 41 nicht: 38 ohne erkennbaren Text, 3 in einem Format …" Das sagt
+    die Zahl, aber nicht, **welche** Datei und warum. Wer in der Akte nach den
+    41 sucht, sucht von Hand.
+
+    Hier steht es je Datei: der Titel, der Satz für den Bearbeiter und eine
+    grobe Art, damit die Oberfläche gleiche Gründe gleich zeichnen kann. Es
+    steht in der Sitzung und bleibt damit stehen, bis dasselbe Dokument erneut
+    angefordert wird – anders als eine Meldung, die nach drei Sekunden weg ist.
+    """
+
+    dokument_id: str
+    titel: str
+    grund: str
+    #: „format", „scan", „jurnodes" oder „leer" – die Abhilfe ist jeweils eine andere.
+    art: str = "format"
+    #: Die Dateiendung, klein geschrieben („.msg"). Sie steht in der Bilanz:
+    #: „14 in einem Format, das nicht gelesen werden kann" sagt nicht, WELCHES
+    #: - und ohne das lässt sich nichts daran ändern.
+    endung: str = ""
+
+
 class Sitzung(BaseModel):
     """Eine Aktensitzung: ein Nutzer, eine Akte, einige geladene Dokumente.
 
@@ -532,6 +561,8 @@ class Sitzung(BaseModel):
     # Nur fail-closed geprüfte Antworten. Der Verlauf läuft mit der Sitzung ab.
     dialog: list[DialogEintrag] = Field(default_factory=list)
     hinweise: list[str] = Field(default_factory=list)
+    #: Was angefordert wurde und nicht hereinkam - je Datei, mit Grund.
+    nicht_gelesen: list[UngelesenesDokument] = Field(default_factory=list)
     erstellt_am: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

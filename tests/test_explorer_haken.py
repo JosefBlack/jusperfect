@@ -39,10 +39,40 @@ def css() -> str:
     return (STATISCH / "styles.css").read_text(encoding="utf-8")
 
 
-def test_es_gibt_nur_noch_eine_liste(html: str) -> None:
+def test_zwei_spalten_rechts_die_akte_links_was_daraus_wurde(html: str) -> None:
+    """Die Gegenüberstellung, seit dem 16.10.2026.
+
+    Die zweite Spalte gab es schon einmal und sie war weg, weil man
+    Dokumente mit der Maus hinüberzog – aus der Kanzlei: „Ich finde so etwas
+    wie Häkchen intuitiver."
+
+    Am 16.10.2026 kam sie zurück, mit einer anderen Aufgabe: „Es gibt beim
+    Einlesen Fehlermeldungen, diese sind aber nicht nachvollziehbar. Eine
+    Gegenüberstellung wäre wichtig. Bitte wieder Fenster links und rechts.
+    Rechts jurnodes und links jusperfect."
+
+    Der Unterschied ist der Handgriff: **Die linke Spalte ist eine Anzeige
+    und kein Ablageort.** Ausgewählt wird weiter mit Häkchen rechts; links
+    steht nur, was daraus geworden ist. Deshalb steht sie hier neben den
+    Häkchen und nicht an ihrer Stelle.
+    """
     explorer = html[html.index('<dialog id="explorer-dialog"'):html.index('<dialog id="ged-dialog"')]
     assert 'id="quelle-liste"' in explorer
-    assert 'id="arbeit-liste"' not in explorer, "Die zweite Spalte ist der halbe Handgriff."
+    assert 'id="arbeit-liste"' in explorer
+    # Links jusperfect, rechts jurnodes - in dieser Reihenfolge im Quelltext,
+    # denn das Gitter setzt die erste Spalte nach links.
+    assert explorer.index("jusperfect · Arbeitsakte") < explorer.index("jurnodes · Akte")
+    assert explorer.index('id="arbeit-liste"') < explorer.index('id="quelle-liste"')
+    # Und die Häkchen sind nicht ersetzt worden.
+    assert 'id="alle-rein"' in explorer
+
+
+def test_die_linke_spalte_ist_eine_anzeige_und_kein_ablageort(app_js: str) -> None:
+    """Sonst wäre das Ziehen durch die Hintertür zurück."""
+    block = app_js[app_js.index("function arbeitsZeile("):
+                   app_js.index("/** Die Ueberschrift eines Ordners")]
+    for rest in ("checkbox", "addEventListener", "drop", "dataTransfer"):
+        assert rest not in block, rest
 
 
 def test_jede_zeile_traegt_ein_haekchen(app_js: str) -> None:

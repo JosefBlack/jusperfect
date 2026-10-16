@@ -839,6 +839,17 @@ async function aktenSuchen() {
 
 let explorer = null;  // { karte: Map(id->dok), gewaehlt: Set, geladen: Set, initial: bool }
 
+/** Welche Datei gerade worauf wartet: id -> "wartet" | "liest".
+ *
+ * Aus der Kanzlei am 16.10.2026: „Auch den Leseprozess nachvollziehbar
+ * darstellen. Datei fuer Datei abhaken." Vorher gab es einen Balken mit einer
+ * Prozentzahl - der sagt, WIE WEIT es ist, aber nicht, WAS gerade geschieht
+ * und was schon durch ist. Hier steht jede Datei einzeln.
+ */
+let leseStand = new Map();
+/** Laeuft der Lesevorgang gerade im Explorer? Dann bleibt der Dialog offen. */
+let explorerLiest = false;
+
 async function akteOeffnen(akteId) {
   // Die Meldung der zuletzt geschlossenen Akte hat hier nichts mehr zu suchen.
   schlussHinweisZeigen("");
@@ -935,7 +946,16 @@ function explorerStarten(initial) {
   const geladen = new Set((sitzung.sitzung.geladen || []).map((g) => g.dokument_id));
   for (const g of (sitzung.sitzung.geladen || []))
     if (!karte.has(g.dokument_id)) karte.set(g.dokument_id, { id: g.dokument_id, titel: g.titel, kategorie: "", datum: "", ordner: "" });
-  explorer = { karte, gewaehlt: new Set(geladen), geladen, initial };
+  explorer = { karte, gewaehlt: new Set(geladen), geladen, initial, fertig: false, weg: [] };
+  leseStand.clear();
+  // Die Beschriftung des Knopfes setzt explorerZeigen weiter unten - sie
+  // haengt daran, ob die Akte gerade erst geoeffnet wird.
+  explorerLesenZeigen("");
+  explorerSperren(false);
+  const zeile = $("explorer-lesezeile");
+  if (zeile) zeile.classList.remove("misslungen");
+  const anhalten = $("explorer-anhalten");
+  if (anhalten) { anhalten.disabled = false; anhalten.hidden = false; }
   const a = sitzung.sitzung.akte;
   $("explorer-titel").textContent = `${a.aktenzeichen} · ${a.bezeichnung}`;
   // Was in der E-Akte liegt und noch keinen Inhalt hat. Eine unvollstaendige
@@ -1107,9 +1127,101 @@ function explorerRendern() {
   }
 
   zahlZeigen("quelle-zahl", sichtbar.length, explorer.karte.size);
-  zahlZeigen("arbeit-zahl", angehakt, explorer.gewaehlt.size);
+  arbeitsspalteZeichnen(sichtbar);
   explorerArtenZeichnen(sichtbar);
   explorerUmfangZeigen();
+}
+
+// ── Die linke Spalte: was aus jeder Datei geworden ist ──────────────
+//
+// Aus der Kanzlei am 16.10.2026: „Es gibt beim Einlesen Fehlermeldungen, diese
+// sind aber nicht nachvollziehbar. Eine Gegenueberstellung waere wichtig. …
+// Veranschaulichen, welche Datei erfolgreich eingelesen wurde durch gruenen
+// Haken hinter der Datei bei jusperfect."
+//
+// Gemeldet wurde bisher eine Bilanz: „14 von 55 Dokumenten gelesen, 41 nicht:
+// 38 ohne erkennbaren Text …" Das sagt die Zahl, nicht die Datei. Wer wissen
+// wollte, WELCHE 41, musste sie von Hand zusammensuchen.
+//
+// Hier steht jede Datei mit ihrem Ausgang: gruener Haken und Seitenzahl, oder
+// der Grund. Dieselbe Reihenfolge wie rechts, damit die Zeilen einander
+// gegenueberstehen.
+
+/** Die vier Zustaende, die eine Datei in der linken Spalte haben kann. */
+const LESEZEICHEN = {
+  gelesen: { marke: "\u2713", klasse: "gelesen", wort: "gelesen" },
+  liest:   { marke: "\u2026", klasse: "liest", wort: "wird gelesen" },
+  wartet:  { marke: "\u00b7", klasse: "wartet", wort: "wartet" },
+  fehler:  { marke: "\u2717", klasse: "fehler", wort: "nicht gelesen" },
+};
+
+/** Was mit dieser Datei geschehen ist - oder gerade geschieht. */
+function lesebefund(id) {
+  const laufend = leseStand.get(id);
+  if (laufend) return { zustand: laufend };
+  const g = (sitzung.sitzung.geladen || []).find((x) => x.dokument_id === id);
+  if (g) return { zustand: "gelesen", eintrag: g };
+  const n = (sitzung.sitzung.nicht_gelesen || []).find((x) => x.dokument_id === id);
+  if (n) return { zustand: "fehler", eintrag: n };
+  return null;
+}
+
+function arbeitsspalteZeichnen(sichtbar) {
+  const liste = $("arbeit-liste");
+  if (!liste) return;
+  liste.replaceChildren();
+  let gelesen = 0, gesamt = 0;
+  for (const d of sichtbar) {
+    const befund = lesebefund(d.id);
+    // Was weder angehakt noch jemals versucht wurde, steht hier nicht: Die
+    // linke Spalte zeigt die Arbeitsakte, nicht noch einmal die ganze Akte.
+    if (!befund && !explorer.gewaehlt.has(d.id)) continue;
+    gesamt++;
+    if (befund && befund.zustand === "gelesen") gelesen++;
+    liste.appendChild(arbeitsZeile(d, befund));
+  }
+  if (!gesamt) {
+    const leer = document.createElement("li");
+    leer.className = "explorer-leerzeile";
+    leer.textContent = "Noch nichts in der Arbeitsakte. Rechts anhaken und \u00fcbernehmen.";
+    liste.appendChild(leer);
+  }
+  zahlZeigen("arbeit-zahl", gelesen, gesamt);
+}
+
+function arbeitsZeile(d, befund) {
+  const zustand = befund ? befund.zustand : "wartet";
+  const z = LESEZEICHEN[zustand] || LESEZEICHEN.wartet;
+  const li = document.createElement("li");
+  li.className = `explorer-eintrag arbeit ${z.klasse}`;
+  const marke = document.createElement("span");
+  marke.className = "lesemarke";
+  marke.textContent = z.marke;
+  marke.title = z.wort;
+  marke.setAttribute("aria-label", z.wort);
+  const name = document.createElement("span");
+  name.className = "explorer-name";
+  name.textContent = d.titel;
+  const meta = document.createElement("span");
+  meta.className = "meta";
+  const e = befund && befund.eintrag;
+  if (zustand === "gelesen" && e) {
+    const teile = [`${e.seiten} Seite(n)`, `${(e.zeichen || 0).toLocaleString("de-DE")} Zeichen`];
+    if (e.ocr) teile.push("Texterkennung");
+    if ((e.seiten_ohne_text || []).length)
+      teile.push(`ohne Text: Seite ${seitenNennen(e.seiten_ohne_text)}`);
+    if (e.nummer) teile.push(`D${e.nummer}`);
+    meta.textContent = teile.join(" \u00b7 ");
+    if ((e.seiten_ohne_text || []).length) li.classList.add("teilweise");
+  } else if (zustand === "fehler" && e) {
+    // Der ganze Satz, nicht die Bilanz: Er sagt, was zu tun ist.
+    meta.textContent = e.grund;
+    meta.title = e.grund;
+  } else {
+    meta.textContent = z.wort;
+  }
+  li.append(marke, name, meta);
+  return li;
 }
 
 /** Die Ueberschrift eines Ordners - mit Zahl und einem Griff fuer den Stapel.
@@ -1251,13 +1363,103 @@ function explorerVerschieben(id, hinein) {
   explorerRendern();
 }
 
+/** Der Dialog bleibt waehrend des Lesens offen.
+ *
+ * Aus der Kanzlei am 16.10.2026: \u201EAuch den Leseprozess nachvollziehbar
+ * darstellen. Datei fuer Datei abhaken."
+ *
+ * Vorher schloss der Dialog mit dem Klick, und das Lesen lief dahinter mit
+ * einem Balken. Ein Balken sagt, wie weit es ist - nicht, was gerade
+ * geschieht und was schon durch ist. Jetzt bleibt die Gegenueberstellung
+ * stehen und fuellt sich.
+ *
+ * Geschlossen wird am Ende nur, wenn ALLES gelesen wurde. Ging etwas nicht,
+ * bleibt das Fenster offen: Genau dafuer ist es da.
+ */
+function explorerLesenZeigen(text) {
+  const zeile = $("explorer-lesezeile");
+  if (!zeile) return;
+  zeile.hidden = !text;
+  $("explorer-lesetext").textContent = text || "";
+}
+
+/** Waehrend gelesen wird, waehlt niemand aus. */
+function explorerSperren(sperren) {
+  explorerLiest = sperren;
+  for (const id of ["alle-rein", "alle-raus", "explorer-uebernehmen",
+                    "explorer-abbrechen", "explorer-suche"]) {
+    const el = $(id);
+    if (el) el.disabled = sperren;
+  }
+  const liste = $("quelle-liste");
+  if (liste) liste.classList.toggle("gesperrt", sperren);
+}
+
 async function explorerUebernehmen() {
+  if (explorerLiest) return;
+  // Zweiter Klick nach einem Fehlschlag: Die Gegenueberstellung stand, jetzt
+  // geht es weiter. Gelesen wird dabei nichts noch einmal.
+  if (explorer.fertig) {
+    explorer.fertig = false;
+    $("explorer-dialog").close();
+    await explorerNachbereiten(explorer.weg || []);
+    return;
+  }
   if (!explorer.gewaehlt.size) { melden("Bitte mindestens ein Dokument in die Arbeitsakte legen.", true); return; }
   const dazu = [...explorer.gewaehlt].filter((id) => !explorer.geladen.has(id));
   const weg = [...explorer.geladen].filter((id) => !explorer.gewaehlt.has(id));
-  if (dazu.length) await dokumenteInPortionenLesen(dazu);
-  for (const id of weg)
-    sitzung = await api("DELETE", `/api/sitzungen/${sitzung.sitzung.id}/dokumente/${id.split("/").map(encodeURIComponent).join("/")}`);
+  // Alles, was gleich gelesen wird, steht sofort links - als "wartet". Wer
+  // zehn Dateien anhakt, soll zehn Zeilen sehen und nicht eine nach der
+  // anderen auftauchen; abgehakt wird dann der Reihe nach.
+  leseStand = new Map(dazu.map((id) => [id, "wartet"]));
+  explorer.weg = weg;
+  explorerSperren(true);
+  explorerRendern();
+  try {
+    if (dazu.length) {
+      await dokumenteInPortionenLesen(dazu, () => {
+        const fertig = dazu.filter((id) => !leseStand.has(id)).length;
+        explorerLesenZeigen(`${fertig} von ${dazu.length} Dateien gelesen \u2026`);
+        explorerRendern();
+      });
+    }
+    for (const id of weg)
+      sitzung = await api("DELETE", `/api/sitzungen/${sitzung.sitzung.id}/dokumente/${id.split("/").map(encodeURIComponent).join("/")}`);
+  } finally {
+    leseStand.clear();
+    explorerSperren(false);
+    explorerLesenZeigen("");
+  }
+  // Der Stand nach dem Lesen. Die HAKEN bleiben, wie sie waren: Was nicht
+  // gelesen wurde - weil es nicht ging oder weil angehalten wurde -, bleibt
+  // angehakt, und ein zweites "\u00dcbernehmen" holt genau diese noch einmal.
+  explorer.geladen = new Set((sitzung.sitzung.geladen || []).map((g) => g.dokument_id));
+  explorerRendern();
+  const misslungen = (sitzung.sitzung.nicht_gelesen || [])
+    .filter((x) => dazu.includes(x.dokument_id));
+  if (misslungen.length) {
+    // Offen lassen und sagen, warum - und zwar IM Dialog: Eine Meldung
+    // dahinter laege hinter dem Vorhang und waere nicht zu sehen. Die
+    // Einzelheiten stehen links an der Datei; hier steht nur die Zahl.
+    explorerLesenZeigen(misslungen.length === 1
+      ? "Eine Datei wurde nicht gelesen \u2013 links steht, warum."
+      : `${misslungen.length} von ${dazu.length} Dateien wurden nicht gelesen \u2013 links steht, warum.`);
+    const zeile = $("explorer-lesezeile");
+    if (zeile) zeile.classList.add("misslungen");
+    const anhalten = $("explorer-anhalten");
+    if (anhalten) anhalten.hidden = true;
+    const knopf = $("explorer-uebernehmen");
+    if (knopf) knopf.textContent = explorer.initial ? "Weiter zur Arbeitsakte" : "Fertig";
+    explorer.fertig = true;
+    return;
+  }
+  $("explorer-dialog").close();
+  await explorerNachbereiten(weg);
+}
+
+/** Was nach dem Uebernehmen geschieht - getrennt, weil es zweimal gebraucht
+ *  wird: beim glatten Durchlauf und beim Schliessen nach einem Fehlschlag. */
+async function explorerNachbereiten(weg) {
   // Herausgenommene Dokumente lassen sich zurücklegen. Das ist kein
   // Schönheitsdienst: Der Auszug wird beim Zurücklegen neu gebildet, bei einem
   // Scan samt Texterkennung - das kostet Zeit und, mit Textract, Geld. Wer den
@@ -1362,6 +1564,10 @@ let liestGerade = "";
 
 function lesefortschritt(gelesen, gesamt, sekundenJeDokument, offen) {
   const block = $("lesefortschritt");
+  // Steht der Explorer offen, sagt er es selbst - Datei fuer Datei. Der
+  // Balken daneben laege halb hinter dem Vorhang und sagte dasselbe noch
+  // einmal, nur ungenauer.
+  if (explorerLiest) { block.hidden = true; return; }
   block.hidden = false;
   const anteil = gesamt ? Math.round((gelesen / gesamt) * 100) : 0;
   $("lese-balken").style.width = `${anteil}%`;
@@ -1442,13 +1648,29 @@ async function dokumenteNeuEinlesen() {
   melden(hinweise[0] || "Alle Dokumente neu gelesen.", /ACHTUNG/.test(hinweise[0] || ""));
 }
 
-/** Die Dokumente in Portionen lesen und dabei zeigen, wie weit es ist. */
-async function dokumenteInPortionenLesen(dazu) {
+/** Die Dokumente in Portionen lesen und dabei zeigen, wie weit es ist.
+ *
+ * ``beiPortion`` wird vor und nach jeder Portion gerufen. Darueber haekelt die
+ * linke Spalte des Explorers Datei fuer Datei ab - aus der Kanzlei am
+ * 16.10.2026: „Auch den Leseprozess nachvollziehbar darstellen."
+ */
+async function dokumenteInPortionenLesen(dazu, beiPortion) {
   const gesamt = dazu.length;
+  const melde = (ids, zustand) => {
+    for (const id of ids) {
+      if (zustand) leseStand.set(id, zustand); else leseStand.delete(id);
+    }
+    if (beiPortion) beiPortion();
+  };
   // Fuer ein, zwei Dokumente lohnt der Aufbau nicht - da blitzt er nur auf.
   if (gesamt <= 2) {
     laeuft(gesamt === 1 ? "Ein Dokument wird gelesen …" : "Zwei Dokumente werden gelesen …");
-    sitzung = await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/dokumente`, { dokument_ids: dazu });
+    melde(dazu, "liest");
+    try {
+      sitzung = await api("POST", `/api/sitzungen/${sitzung.sitzung.id}/dokumente`, { dokument_ids: dazu });
+    } finally {
+      melde(dazu, "");
+    }
     return;
   }
 
@@ -1468,8 +1690,15 @@ async function dokumenteInPortionenLesen(dazu) {
     for (let i = 0; i < gesamt && !lesenAbbrechen; i += LESEPORTION) {
       const teil = dazu.slice(i, i + LESEPORTION);
       const begonnen = Date.now();
-      const antwort = await api("POST", `/api/sitzungen/${meine}/dokumente`,
-                                { dokument_ids: teil });
+      melde(teil, "liest");
+      let antwort;
+      try {
+        antwort = await api("POST", `/api/sitzungen/${meine}/dokumente`,
+                            { dokument_ids: teil });
+      } finally {
+        // Auch wenn der Aufruf platzt: Keine Zeile bleibt auf "wird gelesen".
+        melde(teil, "");
+      }
       // Zwischen Absenden und Antwort liegen Sekunden. Wurde in dieser Zeit
       // die Akte gewechselt, gehoert diese Antwort nicht mehr hierher - sie
       // wird verworfen, nicht eingetragen.
@@ -1486,8 +1715,11 @@ async function dokumenteInPortionenLesen(dazu) {
       // Verbindungsaufbau mit und ist regelmaessig die langsamste.
       const jeDokument = portionen > 1 ? verstrichen / gelesen : 0;
       lesefortschritt(gelesen, gesamt, jeDokument, gesamt - gelesen);
+      if (beiPortion) beiPortion();
     }
   } finally {
+    leseStand.clear();
+    if (beiPortion) beiPortion();
     liestGerade = "";
     wegeSperren(false);
     $("lesefortschritt").hidden = true;
@@ -6011,8 +6243,18 @@ document.addEventListener("DOMContentLoaded", () => {
   $("alle-raus").addEventListener("click", () => { for (const d of explorerSichtbar()) explorer.gewaehlt.delete(d.id); explorerRendern(); });
   $("explorer-suche").addEventListener("input", explorerRendern);
   $("ged-suche").addEventListener("input", gedExplorerZeichnen);
-  $("explorer-dialog").addEventListener("close", () => {
-    if ($("explorer-dialog").returnValue === "uebernehmen") mitKnopf(null, explorerUebernehmen);
+  // Der Knopf schliesst den Dialog NICHT mehr: Waehrend gelesen wird, bleibt
+  // die Gegenueberstellung stehen und haekelt Datei fuer Datei ab. Geschlossen
+  // wird erst, wenn alles gelesen ist - oder auf einen zweiten Klick, wenn
+  // etwas nicht ging.
+  $("explorer-uebernehmen").addEventListener("click", (ev) => {
+    ev.preventDefault();
+    mitKnopf(null, explorerUebernehmen);
+  });
+  $("explorer-anhalten").addEventListener("click", () => {
+    lesenAbbrechen = true;
+    $("explorer-anhalten").disabled = true;
+    explorerLesenZeigen("Wird angehalten \u2026 die laufende Portion l\u00e4uft noch zu Ende.");
   });
   $("frage-form").addEventListener("submit", (ev) => { ev.preventDefault(); mitKnopf($("senden"), frageStellen); });
   bibLadeHerstellen();

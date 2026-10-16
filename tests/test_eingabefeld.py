@@ -85,15 +85,19 @@ class Eingabefeld(unittest.TestCase):
     def test_die_eingabe_ist_ein_eigener_block_im_html(self):
         self.assertIn('<div class="eingabe">', HTML)
         # Frageform und Kostenschätzung gehören mit hinein, sonst schwebt nur
-        # die Hälfte.
+        # die Hälfte. Die Klammer zum Einfügen eines Dokuments ebenso: Sie
+        # legt etwas in die Arbeitsakte und gehört an die Eingabe.
         #
-        # Bis zum ersten `</div>` zu schneiden genügt seit dem 13.10.2026
-        # nicht mehr: In der Eingabe steht die Promptbibliothek, und die ist
-        # selbst ein `div`. Der Schnitt zählt deshalb mit.
+        # Bis zum ersten `</div>` zu schneiden genügt nicht: In der Eingabe
+        # steht der Umschalter für den Entwurf, und der ist selbst ein `div`.
+        # Der Schnitt zählt deshalb mit.
         block = _block(HTML, '<div class="eingabe">')
         self.assertIn('id="frage-form"', block)
         self.assertIn('id="schaetzung"', block)
-        self.assertIn('id="bibliothek"', block)
+        self.assertIn('id="dok-einfuegen"', block)
+        # Die Promptbibliothek steht seit dem 16.10.2026 NICHT mehr hier,
+        # sondern ganz oben im Chat - aus der Kanzlei: „bitte nach oben".
+        self.assertNotIn('id="bibliothek"', block)
 
 
 if __name__ == "__main__":

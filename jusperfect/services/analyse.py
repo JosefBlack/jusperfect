@@ -552,7 +552,8 @@ def _ausweg(was: str, zeichen: int, grenze: int, gedaechtnis_aktiv: bool) -> str
             "dieser Grenze kaum betroffen.\n\n"
             "Der bequemere Weg wäre das Gedächtnis: Damit liest jusperfect die Akte "
             "in Portionen ein und arbeitet danach auf dem Gelesenen. Es ist derzeit nicht "
-            "eingeschaltet."
+            "eingeschaltet.\n\n"
+            + _grenze_aendern(grenze)
         )
     portionen = max(2, -(-zeichen // max(1, grenze)))
     return (
@@ -562,7 +563,30 @@ def _ausweg(was: str, zeichen: int, grenze: int, gedaechtnis_aktiv: bool) -> str
         f"Lebenssachverhalt der ganzen Akte. Das dauert und kostet entsprechend viele "
         f"Modellaufrufe – dafür muss es nur einmal geschehen.\n\n"
         f"Sofort und ohne Kosten geht stattdessen eine Frage: Fragen suchen sich die "
-        f"passenden Stellen aus der ganzen Akte und sind von dieser Grenze kaum betroffen."
+        f"passenden Stellen aus der ganzen Akte und sind von dieser Grenze kaum betroffen.\n\n"
+        + _grenze_aendern(grenze)
+    )
+
+
+def _grenze_aendern(grenze: int) -> str:
+    """Wo die Grenze steht und wie sie sich verschieben lässt.
+
+    Aus der Kanzlei am 16.10.2026: „Ich kann verschiedene Funktionen nicht
+    durchführen, da eine Zeichenbeschränkung gilt." Die Meldung nannte die
+    Zahl, aber nicht die Stellschraube - und eine Grenze, von der man nicht
+    weiß, dass sie eine Einstellung ist, sieht aus wie eine Eigenschaft des
+    Programms.
+
+    Gesagt wird beides: wo sie steht und was ein höherer Wert kostet. Ein Rat,
+    der die Rechnung verschweigt, ist kein Rat.
+    """
+    return (
+        f"Die Grenze ist eine Einstellung und steht derzeit auf {_tausender(grenze)} "
+        "Zeichen. Sie lässt sich in der Startdatei ändern – die Zeile "
+        "JUSPERFECT_MAX_PASSAGEN_ZEICHEN. Höher heißt: mehr Akte in einem Zug, "
+        "und entsprechend teurer je Aufruf; was ein Aufruf kostet, steht vorher in "
+        "der Kostenschätzung. Das verwendete Modell trägt rund 500.000 Zeichen, "
+        "bevor sein Fenster voll ist."
     )
 
 

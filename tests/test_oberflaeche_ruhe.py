@@ -107,7 +107,9 @@ def test_die_leiste_trennt_arbeiten_von_ansehen(html: str) -> None:
     Falle.
     """
     # In der Kopfzeile des Chats steht keine Arbeit mehr.
-    aktionen = re.search(r'<div class="aktionen">(.*?)</div>\s*</div>\s*<div id="thread"',
+    # Bis zur Suchzeile, die unter der Kopfzeile aufklappt - nicht bis zum
+    # Verlauf: Seit dem 16.10.2026 steht die Promptbibliothek dazwischen.
+    aktionen = re.search(r'<div class="aktionen">(.*?)<div id="chat-suche-zeile"',
                          html, re.S).group(1)
     assert "arbeitsknoepfe" not in aktionen
     for aktion in ("analyse", "entwurf", "gedaechtnis", "triage"):

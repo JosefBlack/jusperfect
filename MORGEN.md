@@ -1,7 +1,7 @@
 # Was als Nächstes zu tun ist
 
 Stand: **15.10.2026.** Zweig `2.0`, Fassung `2.0.0.dev`.
-2590 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
+2615 Prüfungen grün (`.venv\Scripts\python -m pytest -q`).
 
 > Diese Datei wächst von unten: Jeder Tag kommt hinten dazu. Ganz oben steht
 > deshalb das, was man im Betrieb wissen muss, und nicht die Vorgeschichte.
@@ -5740,3 +5740,117 @@ fallen zu lassen ist ein anderer Handgriff — aufgehoben wird sie dort —, und
 er ist nie der einzige Weg.
 
 2590 Prüfungen grün. Sperrliste und Aktenzeichenmuster sauber.
+
+---
+
+## 16.10.2026, nachmittags — die Gegenüberstellung, und eine Grenze ohne Herleitung
+
+**Aus der Kanzlei**, vier Dinge in einer Nachricht:
+
+> Ich kann verschiedene Funktionen nicht durchführen, da eine
+> Zeichenbeschränkung gilt. Prompt Bibliothek bitte nach oben. Es gibt beim
+> Einlesen Fehlermeldungen, diese sind aber nicht nachvollziehbar. Eine
+> Gegenüberstellung wäre wichtig. Bitte wieder Fenster links und rechts.
+> Rechts jurnodes und links jusperfect. Veranschaulichen, welche Datei
+> erfolgreich eingelesen würde durch grünen Haken hinter der Datei bei
+> jusperfect. Auch den Leseprozess nachvollziehbar darstellen. Datei für Datei
+> abhaken.
+
+### 1. Die Zeichenbeschränkung
+
+Betroffen sind **Aktenanalyse und Zeitstrahl**: Beide brechen ab, wenn die
+Arbeitsakte nicht in einen Aufruf passt, statt stillschweigend zu kürzen. Das
+Abbrechen bleibt richtig — einer Auswertung, in der die späteren Schriftsätze
+fehlen, sieht man das nicht an.
+
+Die Grenze selbst war eine frühe, vorsichtige Zahl **ohne Herleitung**: 160.000
+Zeichen, also rund ein Viertel dessen, was das Modell trägt. Sie liegt jetzt
+bei **300.000** und ist hergeleitet:
+
+| | |
+|---|---|
+| Fenster des Modells | 200.000 Token |
+| Deutscher Kanzleitext | rund 2,8 Zeichen je Token (vorsichtig; englischer braucht vier) |
+| 300.000 Zeichen | rund 107.000 Token |
+| Dazu | Auftragstext unter 2.000, Antwort höchstens 8.000 Token |
+| Bleibt frei | etwa ein Drittel des Fensters |
+
+Zwei Dinge gehören dazu, und das zweite ist das wichtigere:
+
+1. **Die Meldung nennt jetzt die Stellschraube** — `JUSPERFECT_MAX_PASSAGEN_ZEICHEN`
+   in der Startdatei — *und* was ein höherer Wert kostet. Eine Grenze, von der
+   man nicht weiß, dass sie eine Einstellung ist, sieht aus wie eine
+   Eigenschaft des Programms; ein Rat, der die Rechnung verschweigt, ist kein
+   Rat.
+2. **Das Fangnetz:** Wer ein Modell mit kleinerem Fenster einträgt, bekam
+   bisher „Bedrock hat die Anfrage abgelehnt (ValidationException)" und hätte
+   bei den Berechtigungen gesucht. Jetzt steht dort, was zu tun ist.
+   Die Wendung ist eng gefasst — `is too long`, nicht `too long`: AWS schreibt
+   bei einer ganz anderen Sache „Too many tokens per day", und das heißt
+   warten, nicht umstellen. Eine eigene Prüfung hält beides auseinander.
+
+### 2. Promptbibliothek nach oben
+
+Sie stand über der Eingabe. Der Grund dafür stand am 14.10.2026 hier: „eine
+Leiste über dem Verlauf hätte ihn bei jeder Nachricht ein Stück nach unten
+geschoben." Das galt der **aufgeklappten** Lade. Zugeklappt ist sie eine Zeile,
+und zugeklappt fängt sie an; aufgeklappt scrollt sie jetzt in sich selbst,
+statt den Chat wegzudrücken.
+
+### 3. Warum die Fehlermeldungen nicht nachvollziehbar waren
+
+**Zwei Gründe, und der zweite war der schlimmere.**
+
+*Erstens:* Gemeldet wurde eine Bilanz in Worten. „14 von 55 Dokumenten gelesen,
+41 nicht: 38 ohne erkennbaren Text …" sagt die Zahl, aber nicht, **welche**
+Datei und warum. Wer die 41 sucht, sucht von Hand.
+
+*Zweitens:* Die Oberfläche liest in **Portionen zu fünf**, und gerechnet wurde
+je Aufruf. Nach 55 Dokumenten stand oben die Bilanz der **letzten Portion** —
+„1 von 2 gelesen, 1 nicht", während in Wahrheit 41 fehlten.
+
+> Eine Zahl, die kleiner ist als der Schaden, ist schlimmer als gar keine.
+
+Gezählt wird jetzt über die ganze Sitzung: was in der Arbeitsakte liegt, gegen
+alles, was dieser Sitzung je vorgelegt wurde. Und es steht **eine** Bilanz da,
+nicht eine je Portion.
+
+Jeder Fehlschlag trägt dafür seinen eigenen Eintrag — Datei, Grund, Art und
+Dateiendung. Daraus rechnet die Bilanz, und daraus lebt die Gegenüberstellung.
+
+### 4. Die Gegenüberstellung
+
+**Rechts** die Akte aus jur|nodes mit den Häkchen. **Links** jusperfect: was
+daraus geworden ist.
+
+| Zeichen | Heißt | Dabei steht |
+|---|---|---|
+| **✓ grün** | gelesen | Seiten, Zeichen, Texterkennung, Dokumentnummer |
+| **✓ bernstein** | gelesen, aber nicht ganz | welche Seiten keinen Text tragen |
+| **✗ rot** | nicht gelesen | der ganze Grund, und was jetzt hilft |
+| **… blau** | wird gerade gelesen | |
+| **· blass** | wartet | |
+
+Die zweite Spalte gab es schon einmal, und sie war weg, weil man Dokumente mit
+der Maus hinüberzog — aus der Kanzlei am 25.09.2026: „Ich finde so etwas wie
+Häkchen intuitiver." Die Häkchen bleiben. **Die linke Spalte ist eine Anzeige
+und kein Ablageort**; eine eigene Prüfung hält das fest.
+
+### 5. Der Leseprozess, Datei für Datei
+
+Der Dialog **bleibt beim Übernehmen offen** und hakt ab: „wartet", „wird
+gelesen", dann der Haken. Ein Balken hinter dem Vorhang sagt niemandem etwas —
+der äußere Fortschrittsbalken tritt deshalb zurück, solange der Dialog steht,
+und Anhalten steht im Dialog.
+
+- Ging **alles**, schließt sich das Fenster von selbst.
+- Ging **etwas nicht**, bleibt es stehen. Genau dafür ist es da.
+- Die **Häkchen bleiben**, wo sie sind: Ein zweites „Übernehmen" versucht genau
+  die Dateien noch einmal, die fehlen. Das gilt auch nach „Anhalten".
+
+In der Probe mit sieben Dateien (vier gute, ein `.doc`, ein gemischtes PDF mit
+Scan-Anlage, ein leeres Blatt): fünf Haken, davon einer in Bernstein („ohne
+Text: Seite 3"), zwei Kreuze mit dem jeweiligen Grund, und das Fenster blieb
+stehen.
+
+2615 Prüfungen grün. Sperrliste und Aktenzeichenmuster sauber.

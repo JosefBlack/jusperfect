@@ -42,7 +42,9 @@ def css() -> str:
 
 @pytest.fixture(scope="module")
 def lesen(app: str) -> str:
-    treffer = re.search(r"async function dokumenteInPortionenLesen\(dazu\) \{(.*?)\n\}\n",
+    # Seit dem 16.10.2026 mit einem zweiten Argument: `beiPortion` haekelt
+    # die linke Spalte des Explorers Datei fuer Datei ab.
+    treffer = re.search(r"async function dokumenteInPortionenLesen\(dazu, beiPortion\) \{(.*?)\n\}\n",
                         app, re.S)
     assert treffer, "Die Funktion gibt es nicht mehr."
     return treffer.group(1)

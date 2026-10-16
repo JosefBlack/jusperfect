@@ -351,42 +351,42 @@
                 aria-label="Suche schließen">×</button>
       </div>
     </div>
+    <!-- Die Fragenbibliothek - ganz oben im Chat.
+
+         Aus der Kanzlei am 16.10.2026: „Prompt Bibliothek bitte nach
+         oben." Sie stand unter dem Verlauf, dicht am Eingabefeld.
+
+         Am 14.10.2026 stand hier noch der Grund dagegen: „Eine Leiste
+         ueber dem Verlauf haette ihn jedes Mal ein Stueck nach unten
+         geschoben." Das galt der aufgeklappten Lade. Zugeklappt ist sie
+         eine einzige Zeile, und zugeklappt faengt sie an - der Verlauf
+         verliert also eine Zeile und nicht ein Viertel.
+
+         Sie faengt leer an. Aus der Kanzlei: „Kann ich die
+         Promptbibliothek nicht waehrend der Arbeit fuellen?" - Ja, und das
+         ist der bessere Weg: Gemerkt wird eine Frage in dem Augenblick, in
+         dem ihre Antwort getaugt hat.
+
+         Die Ueberschrift ist der Griff - und sie sagt zugleich, wie viel
+         dahinter steckt. Rechtsgebiet und „+ Neu" stehen INNEN: In einer
+         summary wuerde ein Klick auf das Auswahlfeld die Lade zuwerfen. -->
+    <details id="bibliothek" class="bibliothek" hidden>
+      <summary class="bib-kopf">
+        <h2 class="bib-titel">Promptbibliothek</h2>
+        <span id="bib-anzahl" class="bib-anzahl"></span>
+      </summary>
+      <div class="bib-leiste">
+        <label class="bib-wahl">Rechtsgebiet
+          <select id="bib-gebietswahl"></select>
+        </label>
+        <span id="bib-gebiet" class="bib-gebiet"></span>
+        <button type="button" id="bib-neu" class="mini leise">+ Neu</button>
+      </div>
+      <div id="bib-liste" class="bib-liste"></div>
+      <p id="bib-hinweis" class="bib-hinweis" hidden></p>
+    </details>
     <div id="thread" class="thread"></div>
     <div class="eingabe">
-      <!-- Die Fragenbibliothek - ueber dem Chatfenster, wie aus der Kanzlei
-           gewuenscht, aber dicht am Eingabefeld und nicht ueber dem Verlauf:
-           Der Chat steht im Vordergrund, und eine Leiste ueber dem Verlauf
-           haette ihn jedes Mal ein Stueck nach unten geschoben.
-
-           Sie faengt leer an. Aus der Kanzlei: "Kann ich die
-           Promptbibliothek nicht waehrend der Arbeit fuellen?" - Ja, und das
-           ist der bessere Weg: Gemerkt wird eine Frage in dem Augenblick, in
-           dem ihre Antwort getaugt hat. -->
-      <!-- Die Bibliothek klappt ganz zu.
-
-           Aus der Kanzlei am 14.10.2026: "Promptbibliothek unten versperrt
-           den Chat." Stimmt: Vier Gruppen und neununddreissig Prompts
-           standen dauerhaft ueber dem Eingabefeld, auch wenn gerade nur
-           gefragt wurde. Zugeklappt ist sie eine Zeile.
-
-           Die Ueberschrift ist der Griff - und sie sagt zugleich, wie viel
-           dahinter steckt. Rechtsgebiet und "+ Neu" stehen INNEN: In einer
-           summary wuerde ein Klick auf das Auswahlfeld die Lade zuwerfen. -->
-      <details id="bibliothek" class="bibliothek" hidden>
-        <summary class="bib-kopf">
-          <h2 class="bib-titel">Promptbibliothek</h2>
-          <span id="bib-anzahl" class="bib-anzahl"></span>
-        </summary>
-        <div class="bib-leiste">
-          <label class="bib-wahl">Rechtsgebiet
-            <select id="bib-gebietswahl"></select>
-          </label>
-          <span id="bib-gebiet" class="bib-gebiet"></span>
-          <button type="button" id="bib-neu" class="mini leise">+ Neu</button>
-        </div>
-        <div id="bib-liste" class="bib-liste"></div>
-        <p id="bib-hinweis" class="bib-hinweis" hidden></p>
-      </details>
       <!-- Der Umschalter: Was unten getippt wird, aendert den Entwurf statt
            die Akte zu befragen. Er steht hier und nicht nur im
            Vorschaufenster, weil er hier wirkt - und weil ein Modus, den man
@@ -791,14 +791,45 @@
       <button type="button" id="alle-rein" class="mini leise" title="Alle sichtbaren anhaken">alle anhaken</button>
       <button type="button" id="alle-raus" class="mini leise" title="Haken bei allen sichtbaren entfernen">Haken entfernen</button>
       <span id="explorer-arten" class="explorer-arten"></span>
-      <span id="quelle-zahl" class="zahl" title="sichtbar von insgesamt"></span>
-      <span id="arbeit-zahl" class="zahl" hidden></span>
     </div>
-    <ul id="quelle-liste" class="explorer-liste"></ul>
+    <!-- Die Gegenüberstellung.
+
+         Aus der Kanzlei am 16.10.2026: „Es gibt beim Einlesen
+         Fehlermeldungen, diese sind aber nicht nachvollziehbar. Eine
+         Gegenueberstellung waere wichtig. Bitte wieder Fenster links und
+         rechts. Rechts jurnodes und links jusperfect."
+
+         RECHTS steht, was die Akte hergibt, mit den Haken. LINKS steht, was
+         daraus wirklich geworden ist: gruener Haken und Seitenzahl, oder der
+         Grund, warum nicht. Dieselbe Datei, zwei Spalten, ein Blick.
+
+         Die zweite Spalte gab es schon einmal, und sie war weg, weil man
+         Dokumente mit der Maus hinueberzog - aus der Kanzlei: „Ich finde so
+         etwas wie Haekchen intuitiver." Die Haken bleiben; gezogen wird hier
+         nichts. Die linke Spalte ist eine ANZEIGE und kein Ablageort. -->
+    <div class="explorer gegenueber">
+      <section class="explorer-spalte">
+        <div class="explorer-kopf">jusperfect · Arbeitsakte
+          <span id="arbeit-zahl" class="zahl" title="gelesen von angefordert"></span></div>
+        <ul id="arbeit-liste" class="explorer-liste"></ul>
+      </section>
+      <section class="explorer-spalte">
+        <div class="explorer-kopf">jurnodes · Akte
+          <span id="quelle-zahl" class="zahl" title="sichtbar von insgesamt"></span></div>
+        <ul id="quelle-liste" class="explorer-liste"></ul>
+      </section>
+    </div>
     <p id="explorer-umfang" class="explorer-umfang"></p>
+    <!-- Der Leseverlauf – im Dialog und nicht dahinter: Solange gelesen wird,
+         bleibt dieses Fenster offen, und ein Balken hinter dem Vorhang sagt
+         niemandem etwas. -->
+    <p id="explorer-lesezeile" class="explorer-lesezeile" hidden>
+      <span id="explorer-lesetext"></span>
+      <button type="button" id="explorer-anhalten" class="mini leise">Anhalten</button>
+    </p>
     <div class="dialog-knoepfe">
-      <button value="abbrechen" class="knopf leise">Abbrechen</button>
-      <button id="explorer-uebernehmen" value="uebernehmen" class="knopf">Übernehmen</button>
+      <button value="abbrechen" class="knopf leise" id="explorer-abbrechen">Abbrechen</button>
+      <button type="button" id="explorer-uebernehmen" class="knopf">Übernehmen</button>
     </div>
   </form>
 </dialog>

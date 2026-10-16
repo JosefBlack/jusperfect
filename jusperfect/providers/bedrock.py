@@ -102,6 +102,22 @@ _ABLEHNUNGEN: tuple[tuple[str, str], ...] = (
     # mal "Invalid model identifier". Gemeinsam ist beiden nur diese Wendung -
     # und sie traegt selbst keinen Inhalt aus der Anfrage.
     ("model identifier", _KENNUNG_UNBEKANNT),
+    # Das Fenster des Modells ist voll. Seit dem 16.10.2026 geht mehr Akte in
+    # einen Zug (300.000 Zeichen statt 160.000); wer ein Modell mit kleinerem
+    # Fenster eintraegt, stoesst hier an. Ohne diesen Satz kaeme nur
+    # "Bedrock hat die Anfrage abgelehnt (ValidationException)" - und die
+    # Suche ginge zu den Berechtigungen, wo nichts zu finden ist.
+    #
+    # Die Wendung muss das LANGE EINGEHENDE meinen und nicht die Menge je Tag:
+    # „Too many tokens per day" ist eine Mengengrenze und schickt den
+    # Bearbeiter sonst in die Startdatei statt ans Warten (eigener Test in
+    # tests/test_bedrock.py). Deshalb „is too long", nicht „too long" oder
+    # „too many tokens". Die Wendung trägt selbst keinen Inhalt der Anfrage.
+    ("is too long",
+     "Der Aufruf ist länger, als das Modell „{modell}“ auf einmal "
+     "aufnimmt. In der Startdatei JUSPERFECT_MAX_PASSAGEN_ZEICHEN "
+     "herabsetzen – oder weniger Dokumente in die Arbeitsakte legen und "
+     "abschnittsweise vorgehen."),
 )
 
 

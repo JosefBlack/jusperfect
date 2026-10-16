@@ -41,7 +41,7 @@ class BeideFensterNehmenDenselbenWeg(unittest.TestCase):
                       self._funktion("gedaechtnisAufnehmen"))
 
     def test_das_dokumentfenster_auch_weiterhin(self):
-        self.assertIn("dokumenteInPortionenLesen(dazu)",
+        self.assertIn("dokumenteInPortionenLesen(dazu,",
                       self._funktion("explorerUebernehmen"))
 
     def test_keines_der_beiden_schickt_noch_alles_in_einem_zug(self):

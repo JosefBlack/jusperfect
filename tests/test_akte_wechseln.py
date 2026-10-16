@@ -160,8 +160,10 @@ class FehlerOhneKnopf(unittest.TestCase):
         """
         self.assertIn("function laeuft(", JS)
         block = re.search(r"async function explorerUebernehmen\(\) \{(.*?)\n\}", JS, re.S)
-        self.assertIn("dokumenteInPortionenLesen(dazu)", block.group(1))
-        lesen = re.search(r"async function dokumenteInPortionenLesen\(dazu\) \{(.*?)\n\}",
+        # Seit dem 16.10.2026 mit einem zweiten Argument: Damit häkelt die
+        # linke Spalte des Explorers Datei für Datei ab.
+        self.assertIn("dokumenteInPortionenLesen(dazu,", block.group(1))
+        lesen = re.search(r"async function dokumenteInPortionenLesen\(dazu, beiPortion\) \{(.*?)\n\}",
                           JS, re.S).group(1)
         # Beides: die kurze Meldung fuer ein, zwei Dokumente - und der Balken,
         # sobald es sich lohnt.
